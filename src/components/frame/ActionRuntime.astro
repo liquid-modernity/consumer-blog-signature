@@ -1,0 +1,16 @@
+---
+const actions = [
+  ['Smart Back','history-back'],
+  ['Smart Share','share'],
+  ['Focus Mode','focus'],
+  ['Speak','speak'],
+  ['Highlight','highlight']
+];
+---
+<nav class="gaga-action-runtime" aria-label="Page actions" data-gaga-action-runtime>
+{actions.map(([label, action]) => (
+<button type="button" data-gaga-action={action} data-gaga-tooltip={label} aria-label={label}>
+{label}
+</button>
+))}
+</nav>

@@ -1,4 +1,5 @@
 export const capabilityRegistry = {
+  actionRuntime: { smartBack: true, smartShare: true, focusMode: true, highlight: true, speak: true },
   shell: { globalNavigation: true, leftContextRail: true, rightContextRail: true, adaptiveLayout: true },
   reading: { focusMode: true, outlinePeek: true, readingContinuity: true, highlight: true, annotation: true, speak: true, immersiveMedia: true },
   navigation: { smartBack: true, breadcrumbs: true, contextualNavigation: true },

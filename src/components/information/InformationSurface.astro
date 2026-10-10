@@ -1,0 +1,18 @@
+---
+const links = [
+  ['About','/about'],
+  ['Support','/support'],
+  ['Authors','/authors'],
+  ['Legal','/legal'],
+  ['Privacy','/privacy'],
+  ['Terms','/terms'],
+  ['Sitemap','/sitemap-index.xml'],
+  ['RSS','/rss.xml']
+];
+---
+<details class="gaga-information-surface">
+  <summary data-gaga-tooltip="Information">Information</summary>
+  <div class="gaga-information-surface__panel">
+    {links.map(([label, href]) => <a href={href}>{label}</a>)}
+  </div>
+</details>

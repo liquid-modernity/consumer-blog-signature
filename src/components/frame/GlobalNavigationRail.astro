@@ -1,5 +1,6 @@
 ---
 import Icon from '../ui/Icon.astro';
+import InformationSurface from '../information/InformationSurface.astro';
 import { normalizeSitePath } from '../../lib/url-semantics';
 const currentPath = normalizeSitePath(Astro.url.pathname);
 const items = [
@@ -20,6 +21,7 @@ const isCurrent = (href: string) => href === '/' ? currentPath === '/' : current
       </a>
     ))}
   </div>
+  <InformationSurface />
   <button class="gaga-global-nav__item gaga-global-nav__settings" type="button" aria-label="Personalize" data-gaga-action="toggle-reader-preferences" data-gaga-tooltip="Personalize">
     <Icon name="settings" />
   </button>

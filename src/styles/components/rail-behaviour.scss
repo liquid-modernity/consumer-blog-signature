@@ -1,0 +1,20 @@
+.gaga-left-rail,
+.gaga-right-rail {
+  transition:
+    width .2s ease,
+    opacity .2s ease,
+    transform .2s ease;
+}
+
+@media (min-width:1200px) {
+  .gaga-left-rail,
+  .gaga-right-rail {
+    width:56px;
+    overflow:hidden;
+  }
+
+  .gaga-left-rail:hover,
+  .gaga-right-rail:hover {
+    width:280px;
+  }
+}
