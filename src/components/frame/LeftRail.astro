@@ -1,0 +1,29 @@
+---
+import NavItem from '../navigation/NavItem.astro';
+import NavGroup from '../navigation/NavGroup.astro';
+import RailToggle from '../navigation/RailToggle.astro';
+import SearchBox from '../navigation/SearchBox.astro';
+import type { LeftRailInput } from './component-inputs';
+
+interface Props {
+  rail: LeftRailInput;
+}
+
+const { rail } = Astro.props;
+---
+<aside id="gaga-left-rail" class="gaga-left-rail" data-gaga-left-rail data-gaga-state="expanded" aria-label={rail.ariaLabel.id} data-gaga-i18n-key={rail.ariaLabel.key} data-gaga-i18n-id={rail.ariaLabel.id} data-gaga-i18n-en={rail.ariaLabel.en} data-gaga-i18n-target="aria">
+  <div class="gaga-left-rail__brand">
+    <a href={rail.brand.href} class="gaga-brand"><span class="gaga-brand__dot" aria-hidden="true"></span>{rail.brand.label}</a>
+    <RailToggle action={rail.railToggle} />
+  </div>
+  <SearchBox action={rail.search} currentPath={rail.currentPath} />
+  <nav id="gaga-left-rail-nav" class="gaga-left-rail__nav" aria-label={rail.primaryNavLabel.id} data-gaga-i18n-key={rail.primaryNavLabel.key} data-gaga-i18n-id={rail.primaryNavLabel.id} data-gaga-i18n-en={rail.primaryNavLabel.en} data-gaga-i18n-target="aria">
+    <div class="gaga-nav-primary">
+      {rail.primaryNav.map((item) => <NavItem {...item} currentPath={rail.currentPath} />)}
+    </div>
+    <div class="gaga-nav-groups">
+      {rail.navGroups.map((group) => <NavGroup {...group} currentPath={rail.currentPath} />)}
+    </div>
+  </nav>
+</aside>
+<div class="gaga-rail-scrim" data-gaga-left-rail-scrim data-gaga-action="toggle-left-rail"></div>

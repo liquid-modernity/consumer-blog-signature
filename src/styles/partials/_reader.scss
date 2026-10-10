@@ -1,0 +1,228 @@
+@use 'breakpoints' as bp;
+
+.gaga-reader-panel {
+  position: fixed;
+  inset: 50% auto auto 50%;
+  z-index: var(--gaga-z-panel);
+  width: min(calc(100vw - var(--gaga-safe-area-left) - var(--gaga-safe-area-right) - 2rem), 31rem);
+  max-height: min(82svh, 42rem);
+  max-height: min(calc(82dvh - var(--gaga-safe-area-top) - var(--gaga-safe-area-bottom)), 42rem);
+  overflow: auto;
+  scrollbar-gutter: stable;
+  border: 1px solid var(--gaga-line);
+  background: var(--gaga-surface-elevated, var(--gaga-surface));
+  box-shadow: var(--gaga-shadow);
+  transform: translate(-50%, calc(-50% + 1rem));
+  opacity: 0;
+  pointer-events: none;
+  transition: transform .2s ease, opacity .2s ease;
+}
+
+.gaga-reader-panel[data-gaga-state='open'] {
+  transform: translate(-50%, -50%);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.gaga-reader-panel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border-block-end: 1px solid var(--gaga-line);
+}
+
+.gaga-reader-panel__head h2 {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  margin: 0;
+  font-size: var(--gaga-type-subheading-size);
+  line-height: var(--gaga-type-subheading-line-height);
+}
+
+.gaga-reader-panel__grid {
+  display: grid;
+  gap: .75rem;
+  padding: 1rem;
+}
+
+.gaga-reader-panel fieldset {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin: 0;
+  padding: .75rem;
+  border: 1px solid var(--gaga-line);
+  background: var(--gaga-surface);
+}
+
+.gaga-reader-panel fieldset.gaga-reader-panel__presets {
+  display: grid;
+  gap: .6rem;
+}
+
+.gaga-reader-panel__preset-actions,
+.gaga-reader-panel__preset-meta,
+.gaga-reader-panel__advanced-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+
+.gaga-reader-panel__preset-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.gaga-reader-panel__preset-actions button,
+.gaga-reader-panel__preset-meta button,
+.gaga-reader-panel__advanced summary {
+  min-width: 0;
+}
+
+.gaga-reader-panel__preset-meta {
+  align-items: center;
+}
+
+.gaga-reader-panel__advanced {
+  border: 1px solid var(--gaga-line);
+  background: var(--gaga-surface-subtle, var(--gaga-surface-2));
+}
+
+.gaga-reader-panel__advanced summary {
+  min-height: 2.75rem;
+  padding: .7rem .8rem;
+  cursor: pointer;
+  color: var(--gaga-blue);
+  font-size: var(--gaga-type-label-size);
+  font-weight: var(--gaga-type-label-weight);
+  line-height: var(--gaga-type-label-line-height);
+  text-transform: uppercase;
+}
+
+.gaga-reader-panel__advanced-grid {
+  display: grid;
+  padding: .75rem;
+}
+
+.gaga-reader-panel__advanced-grid fieldset {
+  background: var(--gaga-surface);
+}
+
+.gaga-reader-panel legend {
+  color: var(--gaga-blue);
+  font-family: var(--gaga-font-mono);
+  font-size: var(--gaga-type-label-size);
+  font-weight: var(--gaga-type-label-weight);
+  line-height: var(--gaga-type-label-line-height);
+  text-transform: uppercase;
+}
+
+.gaga-reader-panel button,
+.gaga-reader-panel label {
+  padding: .45rem .65rem;
+  font-size: var(--gaga-type-control-size);
+  line-height: var(--gaga-type-control-line-height);
+}
+
+.gaga-reader-panel button {
+  min-height: 2.25rem;
+}
+
+.gaga-reader-panel__preset-actions button {
+  justify-content: center;
+}
+
+.gaga-reader-panel button[data-gaga-active='true'] {
+  border-color: var(--gaga-blue);
+  color: var(--gaga-blue);
+  background: var(--gaga-blue-soft);
+}
+
+.gaga-reader-panel__preset-status {
+  align-self: center;
+  color: var(--gaga-muted);
+  font-family: var(--gaga-font-mono);
+  font-size: var(--gaga-type-meta-size);
+  line-height: var(--gaga-type-meta-line-height);
+  font-weight: 700;
+}
+
+.gaga-reader-panel__reset {
+  margin-inline-start: auto;
+}
+
+@media (max-width: bp.$compact-max) {
+  .gaga-reader-panel {
+    inset: auto var(--gaga-safe-area-right) var(--gaga-safe-area-bottom) var(--gaga-safe-area-left);
+    width: auto;
+    max-height: min(78svh, 40rem);
+    max-height: min(calc(78dvh - var(--gaga-safe-area-top) - var(--gaga-safe-area-bottom)), 40rem);
+    border-inline: 1px solid var(--gaga-line);
+    border-block-end: 0;
+    transform: translateY(calc(100% + var(--gaga-safe-area-bottom) + 1rem));
+  }
+
+  .gaga-reader-panel[data-gaga-state='open'] {
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 28rem) {
+  .gaga-reader-panel__preset-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .gaga-reader-panel__reset {
+    margin-inline-start: 0;
+  }
+}
+
+body {
+  --gaga-article-font-size: clamp(1rem, calc(.96rem + .2vw), var(--gaga-type-body-size));
+  --gaga-article-line-height: var(--gaga-type-body-line-height);
+  --gaga-article-measure: 40.5rem;
+}
+
+body[data-gaga-reader-font='sm'] { --gaga-article-font-size: clamp(.94rem, calc(.90rem + .2vw), .98rem); }
+body[data-gaga-reader-font='md'] { --gaga-article-font-size: clamp(1rem, calc(.96rem + .2vw), var(--gaga-type-body-size)); }
+body[data-gaga-reader-font='lg'] { --gaga-article-font-size: clamp(1.06rem, calc(1rem + .45vw), 1.16rem); }
+body[data-gaga-reader-density='compact'] { --gaga-article-line-height: 1.54; }
+body[data-gaga-reader-density='comfort'] { --gaga-article-line-height: 1.72; }
+body[data-gaga-reader-density='wide'] {
+  --gaga-article-line-height: 1.86;
+  --gaga-article-measure: 44rem;
+}
+
+/* Icon-only close control: accessible name is the source for the visual tooltip. */
+.gaga-reader-panel__head [data-gaga-tooltip] {
+  position: relative;
+}
+
+.gaga-reader-panel__head [data-gaga-tooltip]::after {
+  position: absolute;
+  inset-block-start: calc(100% + .4rem);
+  inset-inline-end: 0;
+  z-index: var(--gaga-z-panel);
+  width: max-content;
+  max-width: 14rem;
+  padding: .38rem .5rem;
+  border: 1px solid var(--gaga-line);
+  background: var(--gaga-tooltip-bg);
+  color: var(--gaga-tooltip-ink);
+  content: attr(aria-label);
+  font-family: var(--gaga-font-mono);
+  font-size: var(--gaga-type-label-size);
+  font-weight: var(--gaga-type-label-weight);
+  line-height: var(--gaga-type-label-line-height);
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  white-space: normal;
+}
+
+.gaga-reader-panel__head [data-gaga-tooltip]:is(:hover, :focus-visible)::after {
+  opacity: 1;
+  visibility: visible;
+}

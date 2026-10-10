@@ -1,0 +1,24 @@
+---
+import '../styles/tokens.css';
+import '../styles/signature.scss';
+import SeoHead from '../components/seo/SeoHead.astro';
+import { normalizeContentMetadata } from '@gaga/engine/content';
+import { siteConfig } from '../config/site';
+const description = siteConfig.description;
+const title = `${siteConfig.name} • Landing`;
+const metadata = normalizeContentMetadata({ title, seoTitle: title, description, summary: description, language: siteConfig.defaultLanguage, author: siteConfig.author, canonical: '/landing' });
+---
+<html lang="id-ID">
+  <head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><SeoHead metadata={metadata} pathname="/landing" title={title} socialTitle={title} /></head>
+  <body>
+    <main class="gaga-landing">
+      <section class="gaga-landing-section"><div class="gaga-landing-section__inner" data-gaga-motion>
+        <p style="font-family:ui-monospace,monospace;color:var(--gaga-blue);font-weight:800;text-transform:uppercase;">{siteConfig.name}</p>
+        <h1>Build the publication, not the fork.</h1>
+        <p>{siteConfig.description}</p>
+        <p><a class="gaga-button" href="/">Enter publication</a></p>
+      </div></section>
+    </main>
+    <script>import '../scripts/landing';</script>
+  </body>
+</html>

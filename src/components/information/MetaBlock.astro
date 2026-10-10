@@ -1,0 +1,28 @@
+---
+import Icon from '../ui/Icon.astro';
+import type { InformationDateInput } from '../frame/component-inputs';
+
+type MetaValue = string | string[] | InformationDateInput;
+
+interface Props { icon: string; title: string; titleEn?: string; value?: MetaValue; field?: string; }
+const { icon, title, titleEn, value, field } = Astro.props;
+const isDateValue = (item: MetaValue): item is InformationDateInput =>
+  typeof item === 'object' && !Array.isArray(item) && typeof item.datetime === 'string' && typeof item.text === 'string';
+const values = Array.isArray(value) ? value : value ? [value] : [];
+---
+{values.length ? (
+  <section class="gaga-info-block gaga-info-block--meta" data-gaga-info-block={field}>
+    <h2>
+      <Icon name={icon} />
+      <span data-gaga-i18n-id={title} data-gaga-i18n-en={titleEn}>{title}</span>
+    </h2>
+    <p data-gaga-info-field={field}>
+      {values.map((item, index) => (
+        <>
+          {index > 0 ? ' · ' : null}
+          {isDateValue(item) ? <time datetime={item.datetime}>{item.text}</time> : item}
+        </>
+      ))}
+    </p>
+  </section>
+) : null}

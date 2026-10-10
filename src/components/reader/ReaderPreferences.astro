@@ -1,0 +1,103 @@
+---
+import Icon from '../ui/Icon.astro';
+import type { ReaderPreferencesInput } from '../frame/component-inputs';
+
+interface Props {
+  preferences: ReaderPreferencesInput;
+}
+
+const { preferences } = Astro.props;
+---
+<section class="gaga-reader-panel" data-gaga-reader-panel data-gaga-state="closed" role="dialog" aria-modal="true" aria-labelledby="gaga-reader-panel-title" aria-hidden="true" inert>
+  <div class="gaga-reader-panel__head">
+    <h2 id="gaga-reader-panel-title"><Icon name={preferences.titleIcon} /> <span data-gaga-i18n-key={preferences.title.key} data-gaga-i18n-id={preferences.title.id} data-gaga-i18n-en={preferences.title.en}>{preferences.title.id}</span></h2>
+    <button type="button" data-gaga-action={preferences.closeAction.command} aria-label={preferences.closeAction.label.id} data-gaga-tooltip data-gaga-i18n-key={preferences.closeAction.label.key} data-gaga-i18n-id={preferences.closeAction.label.id} data-gaga-i18n-en={preferences.closeAction.label.en} data-gaga-i18n-target="aria">×</button>
+  </div>
+  <div class="gaga-reader-panel__grid">
+    <fieldset class="gaga-reader-panel__presets" data-gaga-reader-presets-primary>
+      <legend data-gaga-i18n-key={preferences.presets.legend.key} data-gaga-i18n-id={preferences.presets.legend.id} data-gaga-i18n-en={preferences.presets.legend.en}>{preferences.presets.legend.id}</legend>
+      <div class="gaga-reader-panel__preset-actions">
+        {preferences.presets.options.map((preset) => (
+          <button
+            type="button"
+            data-gaga-reader-preset={preset.value}
+            data-gaga-reader-theme={preset.theme}
+            data-gaga-reader-density={preset.density}
+            data-gaga-reader-font={preset.font}
+            data-gaga-reader-sfx={preset.sfx}
+            data-gaga-i18n-key={preset.labelKey}
+            data-gaga-i18n-id={preset.label}
+            data-gaga-i18n-en={preset.labelEn}
+            aria-pressed={preset.checked ? 'true' : 'false'}
+            data-gaga-active={String(preset.checked)}
+          >
+            {preset.label}
+          </button>
+        ))}
+      </div>
+      <div class="gaga-reader-panel__preset-meta">
+        <span
+          class="gaga-reader-panel__preset-status"
+          data-gaga-reader-preset-status
+          data-gaga-reader-custom-id={preferences.presets.custom.id}
+          data-gaga-reader-custom-en={preferences.presets.custom.en}
+          data-gaga-i18n-key={preferences.presets.custom.key}
+          data-gaga-i18n-id={preferences.presets.custom.id}
+          data-gaga-i18n-en={preferences.presets.custom.en}
+        >
+          {preferences.presets.custom.id}
+        </span>
+        <button
+          class="gaga-reader-panel__reset"
+          type="button"
+          data-gaga-reader-reset
+          data-gaga-reader-preset={preferences.presets.resetPreset}
+          data-gaga-reader-theme={preferences.presets.resetTheme}
+          data-gaga-reader-density={preferences.presets.resetDensity}
+          data-gaga-reader-font={preferences.presets.resetFont}
+          data-gaga-reader-sfx={preferences.presets.resetSfx}
+          data-gaga-i18n-key={preferences.presets.reset.key}
+          data-gaga-i18n-id={preferences.presets.reset.id}
+          data-gaga-i18n-en={preferences.presets.reset.en}
+        >
+          {preferences.presets.reset.id}
+        </button>
+      </div>
+    </fieldset>
+    <details class="gaga-reader-panel__advanced" data-gaga-reader-advanced>
+      <summary data-gaga-i18n-key={preferences.advanced.summary.key} data-gaga-i18n-id={preferences.advanced.summary.id} data-gaga-i18n-en={preferences.advanced.summary.en}>{preferences.advanced.summary.id}</summary>
+      <div class="gaga-reader-panel__advanced-grid">
+        <fieldset>
+          <legend data-gaga-i18n-key={preferences.language.legend.key} data-gaga-i18n-id={preferences.language.legend.id} data-gaga-i18n-en={preferences.language.legend.en}>{preferences.language.legend.id}</legend>
+          {preferences.language.options.map((option) => (
+            <label><input type="radio" name="gaga-language" value={option.value} data-gaga-language-option checked={option.checked} /> {option.label}</label>
+          ))}
+        </fieldset>
+        <fieldset>
+          <legend data-gaga-i18n-key={preferences.theme.legend.key} data-gaga-i18n-id={preferences.theme.legend.id} data-gaga-i18n-en={preferences.theme.legend.en}>{preferences.theme.legend.id}</legend>
+          {preferences.theme.options.map((theme) => (
+            <button type="button" data-gaga-reader-pref="theme" data-gaga-reader-value={theme.value} data-gaga-i18n-key={theme.labelKey} data-gaga-i18n-id={theme.label} data-gaga-i18n-en={theme.labelEn}>{theme.label}</button>
+          ))}
+        </fieldset>
+        <fieldset>
+          <legend data-gaga-i18n-key={preferences.density.legend.key} data-gaga-i18n-id={preferences.density.legend.id} data-gaga-i18n-en={preferences.density.legend.en}>{preferences.density.legend.id}</legend>
+          {preferences.density.options.map((option) => (
+            <button type="button" data-gaga-reader-pref="density" data-gaga-reader-value={option.value} data-gaga-i18n-key={option.labelKey} data-gaga-i18n-id={option.label} data-gaga-i18n-en={option.labelEn}>{option.label}</button>
+          ))}
+        </fieldset>
+        <fieldset>
+          <legend data-gaga-i18n-key={preferences.font.legend.key} data-gaga-i18n-id={preferences.font.legend.id} data-gaga-i18n-en={preferences.font.legend.en}>{preferences.font.legend.id}</legend>
+          {preferences.font.options.map((option) => (
+            <button type="button" data-gaga-reader-pref="font" data-gaga-reader-value={option.value}>{option.label}</button>
+          ))}
+        </fieldset>
+        <fieldset class="gaga-reader-panel__sfx" data-gaga-reader-sfx-control>
+          <legend data-gaga-i18n-key={preferences.sfx.legend.key} data-gaga-i18n-id={preferences.sfx.legend.id} data-gaga-i18n-en={preferences.sfx.legend.en}>{preferences.sfx.legend.id}</legend>
+          {preferences.sfx.options.map((option) => (
+            <button type="button" data-gaga-reader-pref="sfx" data-gaga-reader-value={option.value} data-gaga-i18n-key={option.labelKey} data-gaga-i18n-id={option.label} data-gaga-i18n-en={option.labelEn}>{option.icon ? <Icon name={option.icon} /> : null} {option.label}</button>
+          ))}
+        </fieldset>
+      </div>
+    </details>
+  </div>
+</section>

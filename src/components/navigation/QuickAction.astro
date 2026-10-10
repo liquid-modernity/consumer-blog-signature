@@ -1,0 +1,55 @@
+---
+import Icon from '../ui/Icon.astro';
+import { siteConfig } from '../../config/site';
+import { isSameSitePath } from '../../lib/url-semantics';
+import type { QuickActionInput } from '../frame/component-inputs';
+
+interface Props {
+  action: QuickActionInput;
+  currentPath?: string;
+}
+
+const { action, currentPath = '/' } = Astro.props;
+const href = action.href;
+const command = action.command;
+const active = href ? isSameSitePath(currentPath, href, siteConfig.url) : false;
+---
+{href ? (
+  <a
+    href={href}
+    aria-label={action.ariaLabel.id}
+    aria-current={active ? 'page' : undefined}
+    aria-expanded={action.ariaExpanded ? 'false' : undefined}
+    aria-controls={action.ariaControls}
+    data-gaga-action={command}
+    data-gaga-active={active ? 'true' : 'false'}
+    data-gaga-quick-action={action.id}
+    data-gaga-tooltip={action.tooltip.id}
+    data-gaga-i18n-key={action.ariaLabel.key}
+    data-gaga-i18n-id={action.ariaLabel.id}
+    data-gaga-i18n-en={action.ariaLabel.en}
+    data-gaga-i18n-target="aria"
+  >
+    {action.icon ? <Icon name={action.icon} /> : null}
+    <span class="gaga-quick-action__label" data-gaga-i18n-key={action.label.key} data-gaga-i18n-id={action.label.id} data-gaga-i18n-en={action.label.en}>{action.label.id}</span>
+  </a>
+) : command ? (
+  <button
+    type="button"
+    data-gaga-action={command}
+    data-gaga-quick-action={action.id}
+    data-gaga-tooltip={action.tooltip.id}
+    aria-pressed={action.ariaPressed ? 'false' : undefined}
+    aria-expanded={action.ariaExpanded ? 'false' : undefined}
+    aria-controls={action.ariaControls}
+    data-gaga-active="false"
+    aria-label={action.ariaLabel.id}
+    data-gaga-i18n-key={action.ariaLabel.key}
+    data-gaga-i18n-id={action.ariaLabel.id}
+    data-gaga-i18n-en={action.ariaLabel.en}
+    data-gaga-i18n-target="aria"
+  >
+    {action.icon ? <Icon name={action.icon} /> : null}
+    <span class="gaga-quick-action__label" data-gaga-i18n-key={action.label.key} data-gaga-i18n-id={action.label.id} data-gaga-i18n-en={action.label.en}>{action.label.id}</span>
+  </button>
+) : null}

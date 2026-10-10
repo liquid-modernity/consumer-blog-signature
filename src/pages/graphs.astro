@@ -1,0 +1,51 @@
+---
+import '../styles/tokens.css';
+import '../styles/signature.scss';
+import StandaloneAppFrame from '../components/frame/StandaloneAppFrame.astro';
+import KnowledgeGraph from '../components/graph/KnowledgeGraph.astro';
+import SeoHead from '../components/seo/SeoHead.astro';
+import { normalizeContentMetadata } from '@gaga/engine/content';
+import { getPublicKnowledgeGraph } from '../lib/knowledge-graph';
+import type { ScreenInfo } from '../lib/screen-info';
+
+const title = 'Knowledge Graph • Consumer Signature';
+const description = 'Jelajahi hubungan publik antara artikel, topik, dan penulis Consumer Signature dalam graph interaktif.';
+const graph = await getPublicKnowledgeGraph();
+const metadata = normalizeContentMetadata({
+  title,
+  seoTitle: title,
+  description,
+  summary: description,
+  language: 'id',
+  author: 'Editorial Team',
+  canonical: '/graphs',
+  contentKind: 'system',
+  contentClass: 'knowledge-graph'
+});
+const info: ScreenInfo = {
+  kind: 'system',
+  outlineItems: [{ slug: 'gaga-graph-title', text: 'Knowledge Graph' }],
+  snippet: 'Graph publik Consumer Signature memproyeksikan hubungan yang memang tercatat pada konten publik. Graph bukan ranking kualitas atau jendela ke seluruh vault.',
+  topics: ['Knowledge Graph', 'Discovery'],
+  tags: ['graph', 'relationships', 'obsidian'],
+  author: 'Editorial Team'
+};
+---
+<html lang="id-ID">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <SeoHead metadata={metadata} pathname="/graphs" title={title} includeWebSiteSchema={false} />
+  </head>
+  <body>
+    <StandaloneAppFrame
+      pageId="graphs"
+      pageTitle="Knowledge Graph"
+      contentKind="system"
+      contentClass="knowledge-graph"
+      info={info}
+    >
+      <KnowledgeGraph graph={graph} />
+    </StandaloneAppFrame>
+  </body>
+</html>

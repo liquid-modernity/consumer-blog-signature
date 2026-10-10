@@ -1,0 +1,95 @@
+@use 'breakpoints' as bp;
+
+.gaga-mobile-dock {
+  display: none;
+}
+
+@media (max-width: bp.$compact-max) {
+  .gaga-mobile-dock {
+    position: fixed;
+    inset-inline-start: var(--gaga-safe-area-left);
+    inset-inline-end: var(--gaga-safe-area-right);
+    inset-block-end: calc(var(--gaga-dock-edge) + var(--gaga-safe-area-bottom));
+    z-index: var(--gaga-z-dock);
+    display: grid;
+    box-sizing: border-box;
+    block-size: var(--gaga-bottom-dock-height);
+    grid-template-columns: repeat(var(--gaga-mobile-dock-action-capacity), minmax(0, 1fr));
+    gap: .25rem;
+    padding: .35rem;
+    border: 0;
+    border-radius: 0px;
+    background: var(--gaga-surface-elevated, var(--gaga-surface));
+    transform: translateY(0);
+    visibility: visible;
+    transition: transform .16s ease-out, visibility 0s linear 0s;
+  }
+
+  .gaga-mobile-dock[data-gaga-state='hidden'] {
+    transform: translateY(calc(100% + var(--gaga-safe-area-bottom)));
+    visibility: hidden;
+    pointer-events: none;
+    transition: transform .16s ease-out, visibility 0s linear .16s;
+  }
+
+  .gaga-mobile-dock a,
+  .gaga-mobile-dock button {
+    display: grid;
+    grid-template-rows: auto auto;
+    gap: .12rem;
+    place-items: center;
+    min-height: 2.8rem;
+    border: 0;
+    color: var(--gaga-muted);
+    background: transparent;
+    text-decoration: none;
+  }
+
+  .gaga-mobile-dock .gaga-quick-action__label {
+    display: block;
+    max-width: 100%;
+    overflow-wrap: normal;
+    color: currentColor;
+    font-family: var(--gaga-font-mono);
+    font-size: var(--gaga-type-label-size);
+    font-weight: var(--gaga-type-label-weight);
+    letter-spacing: 0;
+    line-height: var(--gaga-type-label-line-height);
+    text-align: center;
+    text-transform: none;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 22rem) {
+  .gaga-mobile-dock a,
+  .gaga-mobile-dock button {
+    grid-template-rows: auto;
+  }
+
+  .gaga-mobile-dock .gaga-quick-action__label {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: bp.$compact-max) {
+  .gaga-mobile-dock [data-gaga-quick-action][data-gaga-active='true'],
+  .gaga-mobile-dock [data-gaga-quick-action][aria-current='page'],
+  .gaga-mobile-dock [data-gaga-quick-action][aria-pressed='true'] {
+    border-color: var(--gaga-line);
+    color: var(--gaga-blue);
+    background: var(--gaga-blue-soft);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gaga-mobile-dock { transition: none; }
+}

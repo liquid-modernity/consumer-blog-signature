@@ -1,0 +1,26 @@
+---
+import SeoHead from '../seo/SeoHead.astro';
+import { resolveAuthorRefs } from '../../lib/content';
+import { normalizeContentMetadata } from '@gaga/engine/content';
+import { extractStarlightHeadTitle, filterStarlightHeadEntries, normalizeStarlightRouteContext } from '@gaga/engine-starlight';
+
+const route = normalizeStarlightRouteContext(Astro.locals.starlightRoute);
+const rawData = route.entryData as Record<string, unknown>;
+const authorRefs = Array.isArray(rawData.authorRefs)
+  ? rawData.authorRefs.filter((ref): ref is string => typeof ref === 'string')
+  : [];
+const resolvedAuthors = await resolveAuthorRefs(authorRefs);
+const data = normalizeContentMetadata({
+  ...rawData,
+  ...(resolvedAuthors[0] ? { author: resolvedAuthors[0].title } : {})
+});
+const { title, socialTitle } = extractStarlightHeadTitle(route.head);
+const shouldNoindex = data.noindex === true || Astro.url.pathname === '/404' || Astro.url.pathname === '/offline.html';
+
+const renderedHead = filterStarlightHeadEntries(route.head, {
+  replacedMetaNames: ['gaga:summary', 'gaga:search-index', 'gaga:llms']
+});
+---
+
+{renderedHead.map(({ tag: Tag, attrs, content }) => <Tag {...attrs} set:html={content} />)}
+<SeoHead metadata={data} title={title} socialTitle={socialTitle} noindex={shouldNoindex} />

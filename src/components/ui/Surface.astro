@@ -1,0 +1,13 @@
+---
+import { Surface as EngineSurface } from '@gaga/engine-astro';
+
+interface Props {
+  label?: string;
+  class?: string;
+}
+
+const { label, class: className = '' } = Astro.props;
+---
+<EngineSurface as="section" label={label} class={className}>
+  <slot />
+</EngineSurface>

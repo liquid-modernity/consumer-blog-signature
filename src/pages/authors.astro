@@ -1,0 +1,56 @@
+---
+import '../styles/tokens.css';
+import '../styles/signature.scss';
+import StandaloneAppFrame from '../components/frame/StandaloneAppFrame.astro';
+import AuthorIndex from '../components/reader/AuthorIndex.astro';
+import SeoHead from '../components/seo/SeoHead.astro';
+import { contentDefaults } from '../config/content';
+import { getArticles, getAuthors, getTopicGroups } from '../lib/content';
+import { getScreenInfo } from '../lib/screen-info';
+import { normalizeContentMetadata } from '@gaga/engine/content';
+
+const title = 'Authors • Consumer Signature';
+const description = 'Direktori identitas penulis dan kontributor publik Consumer Signature.';
+const metadata = normalizeContentMetadata({
+  title,
+  seoTitle: title,
+  description,
+  summary: description,
+  language: 'id',
+  canonical: '/authors',
+  contentKind: 'page',
+  contentClass: 'authors-index'
+});
+const [articles, authors, topicGroups] = await Promise.all([
+  getArticles(),
+  getAuthors(),
+  getTopicGroups()
+]);
+const info = getScreenInfo({
+  pathname: '/authors',
+  data: metadata,
+  language: 'id',
+  defaults: contentDefaults,
+  articles,
+  authors,
+  topicGroups
+});
+---
+<html lang="id-ID">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <SeoHead metadata={metadata} pathname="/authors" title={title} includeWebSiteSchema={false} />
+  </head>
+  <body>
+    <StandaloneAppFrame
+      pageId="authors"
+      pageTitle="Authors"
+      contentKind="page"
+      contentClass="authors-index"
+      info={info}
+    >
+      <AuthorIndex />
+    </StandaloneAppFrame>
+  </body>
+</html>

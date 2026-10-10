@@ -1,0 +1,44 @@
+---
+import { toArticlePreview, type TopicGroup } from '../../lib/content';
+import { contentDefaults } from '../../config/content';
+import { i18nCount } from '../../config/i18n';
+
+interface Props {
+  group: TopicGroup;
+  dateLocale: Intl.LocalesArgument;
+}
+
+const { group, dateLocale } = Astro.props;
+---
+<section class="gaga-index-screen gaga-topic-screen" aria-labelledby="topic-title">
+  <div class="gaga-screen-section-head">
+    <h2 id="topic-title">{group.topic}</h2>
+    <p>{i18nCount('article', group.count)}</p>
+  </div>
+  <ol class="gaga-mission-list" aria-label={`Artikel dalam topik ${group.topic}`} data-gaga-preview-scope>
+    {group.articles.map((article, index) => {
+      const preview = toArticlePreview(article, dateLocale, contentDefaults.preview);
+      return (
+        <li class="gaga-mission-item" data-gaga-motion>
+          <a
+            href={preview.href}
+            class="gaga-mission-link"
+            data-gaga-preview
+            data-gaga-preview-title={preview.title}
+            data-gaga-preview-href={preview.href}
+            data-gaga-preview-snippet={preview.snippet}
+            data-gaga-preview-topics={preview.topics}
+            data-gaga-preview-tags={preview.tags}
+            data-gaga-preview-read-time={preview.readTime}
+            data-gaga-preview-date={preview.date}
+            data-gaga-preview-updated={preview.updated}
+            data-gaga-preview-author={preview.author}
+          >
+            <span class="gaga-mission-index">{String(index + 1).padStart(2, '0')}</span>
+            <span class="gaga-mission-title">{preview.title}</span>
+          </a>
+        </li>
+      );
+    })}
+  </ol>
+</section>

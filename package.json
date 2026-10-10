@@ -1,0 +1,34 @@
+{
+  "name": "consumer-blog-signature",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Universal, configurable high-end enterprise blog/knowledge publishing bootstrap powered by Astro and Gaga Engine.",
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "verify": "npm run validate:signature && npm run check && npm run build",
+    "review": "./run_local.command",
+    "validate:signature": "node tools/validate-signature.mjs"
+  },
+  "dependencies": {
+    "@astrojs/starlight": "0.41.10",
+    "astro": "7.2.9",
+    "sass": "1.89.2",
+    "typescript": "5.8.3",
+    "@gaga/engine": "0.1.6",
+    "@gaga/engine-astro": "0.1.6",
+    "@gaga/engine-obsidian": "0.1.6",
+    "@gaga/engine-starlight": "0.1.6",
+    "@gaga/engine-web": "0.1.6"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.10",
+    "wrangler": "4.45.0"
+  }
+}

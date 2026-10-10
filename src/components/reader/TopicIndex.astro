@@ -1,0 +1,25 @@
+---
+import { getTopicGroups } from '../../lib/content';
+import { i18nCount } from '../../config/i18n';
+
+const topics = await getTopicGroups();
+---
+<section class="gaga-topic-index" data-gaga-preview-scope>
+  {topics.map((group) => (
+    <a
+      href={group.href}
+      data-gaga-preview
+      data-gaga-preview-title={group.topic}
+      data-gaga-preview-href={group.href}
+      data-gaga-preview-snippet={group.summary ?? `${i18nCount('article', group.count)} dalam topik ${group.topic}.`}
+      data-gaga-preview-topics={group.topic}
+      data-gaga-preview-tags="topic · taxonomy · notes"
+      data-gaga-preview-read-time={i18nCount('article', group.count)}
+      data-gaga-preview-author="Consumer Signature"
+    >
+      <span>{group.topic}</span>
+      {group.summary ? <small>{group.summary}</small> : null}
+      <em>{i18nCount('article', group.count)}</em>
+    </a>
+  ))}
+</section>

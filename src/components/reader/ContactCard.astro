@@ -1,0 +1,8 @@
+---
+import { siteConfig } from '../../config/site';
+---
+<section class="gaga-contact-card">
+  <h2>Contact</h2>
+  <p><a href={`mailto:${siteConfig.contact.email}`}>{siteConfig.contact.email}</a></p>
+  {siteConfig.contact.whatsapp ? <p><a href={`https://wa.me/${siteConfig.contact.whatsapp}`}>WhatsApp</a></p> : null}
+</section>

@@ -1,0 +1,172 @@
+@use 'breakpoints' as bp;
+
+.gaga-app-frame {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  inline-size: 100%;
+  max-inline-size: 100%;
+  min-height: 100svh;
+  min-height: 100dvh;
+  block-size: 100svh;
+  block-size: 100dvh;
+  min-width: 0;
+}
+
+html:has(.gaga-app-frame),
+body:has(.gaga-app-frame) {
+  block-size: 100%;
+  max-inline-size: 100%;
+  overflow: hidden;
+}
+
+.gaga-main-region {
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  min-width: 0;
+  min-height: 0;
+  min-height: 100svh;
+  min-height: 100dvh;
+  padding-inline: var(--gaga-left-rail-width) var(--gaga-right-rail-width);
+  transition: padding-inline .22s ease;
+}
+
+[data-gaga-left-rail][data-gaga-state='collapsed'] ~ .gaga-main-region {
+  padding-inline-start: var(--gaga-left-rail-collapsed);
+}
+
+.gaga-app-frame:has([data-gaga-right-rail][data-gaga-state='collapsed']) .gaga-main-region {
+  padding-inline-end: var(--gaga-right-rail-collapsed);
+}
+
+.gaga-app-frame[data-gaga-page-id='search'] .gaga-main-region {
+  padding-inline-end: 0;
+}
+
+.sl-container,
+.gaga-main-region .main-pane,
+.content-panel,
+.sl-markdown-content {
+  min-width: 0;
+  max-width: var(--gaga-content-width);
+}
+
+.gaga-main-region .main-pane,
+.sl-container,
+.content-panel,
+.sl-markdown-content {
+  margin-inline: auto;
+}
+
+.main-pane {
+  box-sizing: border-box;
+  width: min(100%, var(--gaga-content-width));
+  min-width: 0;
+  min-height: 0;
+}
+
+.sl-markdown-content :where(pre, table, .gaga-rich-media, .gaga-media-embed, .expressive-code) {
+  max-inline-size: 100%;
+}
+
+.sl-markdown-content :where(pre, .gaga-rich-media, .gaga-media-embed, .expressive-code) {
+  overflow-x: auto;
+}
+
+.sl-markdown-content :where(table) {
+  display: block;
+  overflow-x: auto;
+}
+
+.gaga-main-region :target {
+  scroll-margin-block-start: 1rem;
+}
+
+@media (max-width: bp.$tablet-large-max) {
+  .gaga-main-region {
+    padding-inline: var(--gaga-left-rail-collapsed) var(--gaga-right-rail-collapsed);
+  }
+}
+
+@media (min-width: bp.$tablet-large-min) and (max-width: bp.$tablet-large-max) {
+  .gaga-main-region {
+    padding-inline: var(--gaga-left-rail-collapsed) 0;
+  }
+
+  .gaga-app-frame:has([data-gaga-right-rail][data-gaga-state='collapsed']) .gaga-main-region {
+    padding-inline-end: 0;
+  }
+
+  .main-pane {
+    width: min(100%, 46rem);
+  }
+}
+
+@media (max-width: bp.$compact-max) {
+  .gaga-main-region {
+    padding-inline: 0;
+    min-height: 0;
+    block-size: 100svh;
+    block-size: 100dvh;
+    padding-block-end: var(--gaga-compact-reading-clearance);
+    scroll-padding-block-end: var(--gaga-compact-reading-clearance);
+  }
+
+  .gaga-app-frame[data-gaga-content-kind='article'] .gaga-main-region {
+    padding-block-end: 0;
+    scroll-padding-block-start: var(--gaga-compact-reading-top-clearance);
+    scroll-padding-block-end: var(--gaga-compact-reading-clearance);
+  }
+
+  .gaga-app-frame[data-gaga-content-kind='article'] .gaga-main-region::after {
+    display: block;
+    block-size: var(--gaga-compact-reading-clearance);
+    content: '';
+    pointer-events: none;
+  }
+
+  .gaga-app-frame[data-gaga-content-kind='article'] .gaga-main-region :target,
+  .gaga-app-frame[data-gaga-content-kind='article'] .gaga-main-region :where(a, button, summary, [tabindex]):focus {
+    scroll-margin-block-start: var(--gaga-compact-reading-top-clearance);
+  }
+
+  .gaga-main-region :where(:target, a, button, summary, [tabindex]):focus {
+    scroll-margin-block-end: var(--gaga-compact-reading-clearance);
+  }
+
+  .main-pane {
+    padding-inline-start: max(var(--gaga-space-4), var(--gaga-safe-area-left));
+    padding-inline-end: max(var(--gaga-space-4), var(--gaga-safe-area-right));
+  }
+}
+
+@media (min-width: bp.$tablet-large-min) {
+  body[data-gaga-focus-mode='on'] .gaga-app-frame {
+    --gaga-content-width: min(52rem, calc(100vw - var(--gaga-left-rail-collapsed) - var(--gaga-right-rail-collapsed) - 3rem));
+    --gaga-article-measure: min(46rem, var(--gaga-content-width));
+  }
+
+  body[data-gaga-focus-mode='on'] .gaga-main-region {
+    padding-inline: var(--gaga-left-rail-collapsed) var(--gaga-right-rail-collapsed);
+  }
+}
+/* Stable Starlight wrapper overrides. Avoid .astro-* hashes; these classes are emitted by Starlight. */
+.gaga-main-region .lg\:sl-flex {
+  display: block !important;
+}
+
+.gaga-main-region .content-panel {
+  padding: 0.5rem 0;
+}
+
+.gaga-app-frame[data-gaga-content-kind='index'] .main-pane > .content-panel:first-child {
+  display: none;
+}
+
+.gaga-main-region :where(main) {
+  padding: 0;
+}

@@ -1,0 +1,14 @@
+---
+import Icon from '../ui/Icon.astro';
+import type { RailToggleInput } from '../frame/component-inputs';
+
+interface Props {
+  action: RailToggleInput;
+}
+
+const { action } = Astro.props;
+const command = action.command;
+---
+<button class="gaga-rail-toggle" type="button" data-gaga-action={command} aria-label={action.label.id} aria-controls={action.controls} aria-expanded="false" data-gaga-tooltip={action.tooltip.id} data-gaga-i18n-key={action.label.key} data-gaga-i18n-id={action.label.id} data-gaga-i18n-en={action.label.en} data-gaga-i18n-target="aria">
+  {action.icon ? <Icon name={action.icon} /> : null}
+</button>

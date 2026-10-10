@@ -1,0 +1,26 @@
+---
+import Icon from '../ui/Icon.astro';
+interface TocItem { slug: string; text: string; children?: TocItem[]; }
+interface Props { items?: TocItem[]; title?: string; titleEn?: string; showTitle?: boolean; wrapper?: 'section' | 'nav'; ariaLabelledby?: string; }
+const { items = [], title, titleEn, showTitle = true, wrapper = 'section', ariaLabelledby } = Astro.props;
+const Wrapper = wrapper;
+---
+<Wrapper class="gaga-info-block gaga-info-block--toc" data-gaga-toc-block aria-labelledby={ariaLabelledby}>
+  {showTitle && title ? <h2><Icon name="outline" /> <span data-gaga-i18n-id={title} data-gaga-i18n-en={titleEn}>{title}</span></h2> : null}
+  {items.length ? (
+    <ol class="gaga-toc-list" data-gaga-info-field="outline">
+      {items.map((item) => (
+        <li>
+          <a href={`#${item.slug}`}>{item.text}</a>
+          {item.children?.length ? (
+            <ol>
+              {item.children.map((child) => <li><a href={`#${child.slug}`}>{child.text}</a></li>)}
+            </ol>
+          ) : null}
+        </li>
+      ))}
+    </ol>
+  ) : (
+    <p class="gaga-muted">No outline available.</p>
+  )}
+</Wrapper>

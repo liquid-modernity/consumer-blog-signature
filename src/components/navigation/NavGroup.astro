@@ -1,0 +1,71 @@
+---
+import Icon from '../ui/Icon.astro';
+import NavItem from './NavItem.astro';
+import type { I18nMessageKey } from '../../config/i18n';
+interface Item { id?: string; label: string; labelEn?: string; labelKey?: I18nMessageKey; href: string; icon: string; external?: boolean; }
+interface Props {
+  id: string;
+  label: string;
+  labelEn?: string;
+  labelKey?: I18nMessageKey;
+  icon: string;
+  items: Item[];
+  currentPath?: string;
+}
+const { id, label, labelEn, labelKey, icon, items, currentPath = '/' } = Astro.props;
+const triggerId = `gaga-nav-group-${id}-trigger`;
+const panelId = `gaga-nav-group-${id}-panel`;
+
+function normalizePath(path: string) {
+  if (!path || path === '/') return '/';
+  try {
+    const url = new URL(path, 'https://example.com');
+    return `/${url.pathname.replace(/^\/+|\/+$/g, '')}`;
+  } catch {
+    return `/${path.replace(/^\/+|\/+$/g, '')}`;
+  }
+}
+
+const normalizedCurrentPath = normalizePath(currentPath);
+const hasActiveChild = items.some((item) => !item.external && normalizePath(item.href) === normalizedCurrentPath);
+---
+<div class:list={['gaga-nav-group', hasActiveChild && 'gaga-is-current']} data-gaga-nav-group={id} data-gaga-current={hasActiveChild ? 'true' : undefined}>
+  <details class="gaga-nav-group__details" open={hasActiveChild ? true : undefined}>
+    <summary class:list={['gaga-nav-group__summary', hasActiveChild && 'gaga-is-current']} aria-label={label} data-gaga-i18n-key={labelKey} data-gaga-i18n-id={label} data-gaga-i18n-en={labelEn ?? label} data-gaga-i18n-target="aria">
+      <Icon name={icon} />
+      <span class="gaga-nav-label" data-gaga-i18n-key={labelKey} data-gaga-i18n-id={label} data-gaga-i18n-en={labelEn ?? label}>{label}</span>
+      <span class="gaga-nav-disclosure" aria-hidden="true">+</span>
+    </summary>
+    <div class="gaga-nav-group__items">
+      {items.map((item) => <NavItem {...item} currentPath={currentPath} externalDescriptionScope={`${id}-expanded`} />)}
+    </div>
+  </details>
+  <button
+    id={triggerId}
+    class:list={['gaga-nav-group__collapsed-trigger', hasActiveChild && 'gaga-is-current']}
+    type="button"
+    aria-label={label}
+    aria-controls={panelId}
+    aria-expanded="false"
+    data-gaga-nav-group-trigger
+    data-gaga-tooltip={label}
+    data-gaga-i18n-key={labelKey} data-gaga-i18n-id={label}
+    data-gaga-i18n-en={labelEn ?? label}
+    data-gaga-i18n-target="aria"
+  >
+    <Icon name={icon} />
+  </button>
+  <div
+    id={panelId}
+    class="gaga-nav-group__panel"
+    data-gaga-nav-child-panel
+    aria-labelledby={triggerId}
+    hidden
+    inert
+  >
+    <p class="gaga-nav-group__panel-title" data-gaga-i18n-key={labelKey} data-gaga-i18n-id={label} data-gaga-i18n-en={labelEn ?? label}>{label}</p>
+    <div class="gaga-nav-group__panel-items">
+      {items.map((item) => <NavItem {...item} currentPath={currentPath} externalDescriptionScope={`${id}-collapsed`} />)}
+    </div>
+  </div>
+</div>

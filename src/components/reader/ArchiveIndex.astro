@@ -1,0 +1,42 @@
+---
+import { getArticles, groupArticlesByMonth, toArticlePreview } from '../../lib/content';
+import { contentDefaults } from '../../config/content';
+import { normalizeContentMetadata, resolveContentDateLocale } from '@gaga/engine/content';
+const articles = await getArticles();
+const route = Astro.locals.starlightRoute;
+const metadata = normalizeContentMetadata(route?.entry?.data ?? {});
+const surfaceLocale = resolveContentDateLocale(metadata.language ?? route?.lang ?? contentDefaults.defaultLanguage, contentDefaults.dateLocale);
+const groups = groupArticlesByMonth(articles, surfaceLocale);
+---
+<section class="gaga-archive-screen" aria-labelledby="archive-title">
+  <h2 id="archive-title" class="gaga-screen-subtitle">Archives</h2>
+  <div class="gaga-archive-log" aria-label="Chronological archive" data-gaga-preview-scope>
+    {groups.map((group) => (
+      <section class="gaga-archive-month" data-gaga-motion>
+        <h3 id={`archive-${group.slug}`}>{group.month}</h3>
+        <ol>
+          {group.articles.map((article) => {
+            const preview = toArticlePreview(article, surfaceLocale, contentDefaults.preview);
+            return (
+              <li>
+                <a
+                  href={preview.href}
+                  data-gaga-preview
+                  data-gaga-preview-title={preview.title}
+                  data-gaga-preview-href={preview.href}
+                  data-gaga-preview-snippet={preview.snippet}
+                  data-gaga-preview-topics={preview.topics}
+                  data-gaga-preview-tags={preview.tags}
+                  data-gaga-preview-read-time={preview.readTime}
+                  data-gaga-preview-date={preview.date}
+                  data-gaga-preview-updated={preview.updated}
+                  data-gaga-preview-author={preview.author}
+                >{preview.title}</a>
+              </li>
+            );
+          })}
+        </ol>
+      </section>
+    ))}
+  </div>
+</section>

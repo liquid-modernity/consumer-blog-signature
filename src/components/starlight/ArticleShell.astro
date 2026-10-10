@@ -1,0 +1,238 @@
+---
+import type { CanonicalContentMetadata } from '@gaga/engine/content';
+import SavedButton from '../reader/SavedButton.astro';
+import Icon from '../ui/Icon.astro';
+import type { ArticleWorkspaceActionsInput, SavedButtonInput } from '../frame/component-inputs';
+import type { BreadcrumbItem } from '../../lib/page-context';
+
+interface Props {
+  identity: CanonicalContentMetadata;
+  language?: string;
+  savedAction: SavedButtonInput;
+  actions: ArticleWorkspaceActionsInput;
+  routeIdentity: string;
+  missingTitleSource: string;
+  breadcrumbs?: BreadcrumbItem[];
+}
+
+const {
+  identity,
+  language,
+  savedAction,
+  actions,
+  routeIdentity,
+  missingTitleSource,
+  breadcrumbs = []
+} = Astro.props;
+const title = identity.title;
+if (!title) throw new Error(`Article title is required for ${missingTitleSource}.`);
+const articleTitleId = '_top';
+---
+<article
+  class="gaga-article-shell"
+  data-gaga-article-shell
+  data-gaga-article-route={routeIdentity}
+  aria-labelledby={articleTitleId}
+  lang={language}
+>
+  <div class="gaga-article-chrome gaga-article-utility" data-gaga-article-utility>
+    <div class="gaga-article-chrome__start">
+      <a
+        class="gaga-article-utility__action gaga-article-utility__back"
+        href="/"
+        data-gaga-return-navigation
+        data-gaga-smart-back="fallback"
+        data-gaga-smart-back-context-label={actions.back.id}
+        aria-label={actions.back.id}
+        data-gaga-tooltip={actions.back.id}
+      >
+        <Icon name="arrow_back" />
+        <span class="gaga-article-utility__label" data-gaga-smart-back-text data-gaga-i18n-key={actions.back.key}
+          data-gaga-i18n-id={actions.back.id} data-gaga-i18n-en={actions.back.en}>{actions.back.id}</span>
+      </a>
+    </div>
+    <div
+      class="gaga-article-chrome__end gaga-article-utility__actions"
+      role="group"
+      aria-label={actions.actionsLabel.id}
+      data-gaga-i18n-key={actions.actionsLabel.key}
+      data-gaga-i18n-id={actions.actionsLabel.id}
+      data-gaga-i18n-en={actions.actionsLabel.en}
+      data-gaga-i18n-target="aria"
+    >
+      <button
+        class="gaga-article-utility__action gaga-article-utility__share"
+        type="button"
+        data-gaga-action={actions.share.command}
+        data-gaga-article-share
+        data-gaga-tooltip={actions.share.ariaLabel.id}
+        aria-label={actions.share.ariaLabel.id}
+        data-gaga-i18n-key={actions.share.ariaLabel.key}
+        data-gaga-i18n-id={actions.share.ariaLabel.id}
+        data-gaga-i18n-en={actions.share.ariaLabel.en}
+        data-gaga-i18n-target="aria"
+      >
+        {actions.share.icon ? <Icon name={actions.share.icon} /> : null}
+        <span class="gaga-article-utility__label" data-gaga-i18n-key={actions.share.label.key} data-gaga-i18n-id={actions.share.label.id} data-gaga-i18n-en={actions.share.label.en}>{actions.share.label.id}</span>
+      </button>
+      <button
+        class="gaga-article-utility__action"
+        type="button"
+        data-gaga-highlight-selection
+        data-gaga-tooltip="Highlight selection"
+        aria-label="Highlight selection"
+      >
+        <Icon name="edit" />
+        <span class="gaga-article-utility__label">Highlight</span>
+      </button>
+      <button
+        class="gaga-article-utility__action"
+        type="button"
+        data-gaga-speak-article
+        data-gaga-tooltip="Speak article"
+        aria-label="Speak article"
+        aria-pressed="false"
+      >
+        <Icon name="volume" />
+        <span class="gaga-article-utility__label">Speak</span>
+      </button>
+      <SavedButton action={savedAction} />
+      <button
+        class="gaga-article-utility__action gaga-article-context"
+        type="button"
+        data-gaga-action={actions.context.command}
+        data-gaga-quick-action={actions.context.id}
+        data-gaga-active="false"
+        data-gaga-tooltip={actions.context.ariaLabel.id}
+        aria-expanded={actions.context.ariaExpanded ? 'false' : undefined}
+        aria-controls={actions.context.ariaControls}
+        aria-label={actions.context.ariaLabel.id}
+        data-gaga-i18n-key={actions.context.ariaLabel.key}
+        data-gaga-i18n-id={actions.context.ariaLabel.id}
+        data-gaga-i18n-en={actions.context.ariaLabel.en}
+        data-gaga-i18n-target="aria"
+      >
+        {actions.context.icon ? <Icon name={actions.context.icon} /> : null}
+        <span class="gaga-article-utility__label" data-gaga-i18n-key={actions.context.label.key} data-gaga-i18n-id={actions.context.label.id} data-gaga-i18n-en={actions.context.label.en}>{actions.context.label.id}</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="gaga-article-scroll" data-gaga-article-scroll>
+    <div class="gaga-article-scroll__inner">
+      <header class="gaga-article-header" data-gaga-article-header>
+        <nav
+          class="gaga-breadcrumb"
+          aria-label={actions.breadcrumbLabel.id}
+          data-gaga-breadcrumb
+          data-gaga-i18n-key={actions.breadcrumbLabel.key}
+          data-gaga-i18n-id={actions.breadcrumbLabel.id}
+          data-gaga-i18n-en={actions.breadcrumbLabel.en}
+          data-gaga-i18n-target="aria"
+        >
+          <ol>
+            {breadcrumbs.length ? breadcrumbs.map((item) => (
+              <li>
+                {item.href === '/' ? (
+                  <a
+                    href="/"
+                    data-gaga-i18n-key={actions.blogLabel.key}
+                    data-gaga-i18n-id={actions.blogLabel.id}
+                    data-gaga-i18n-en={actions.blogLabel.en}
+                  >{item.label}</a>
+                ) : item.href ? (
+                  <a href={item.href}>{item.label}</a>
+                ) : (
+                  <span aria-current={item.current ? 'page' : undefined}>{item.label}</span>
+                )}
+              </li>
+            )) : (
+              <li><a href="/" data-gaga-i18n-key={actions.blogLabel.key} data-gaga-i18n-id={actions.blogLabel.id} data-gaga-i18n-en={actions.blogLabel.en}>{actions.blogLabel.id}</a></li>
+            )}
+          </ol>
+        </nav>
+        <h1 id={articleTitleId} class="gaga-article-header__title">{title}</h1>
+        {identity.subtitle ? (
+          <p class="gaga-article-header__dek" data-gaga-article-dek>{identity.subtitle}</p>
+        ) : null}
+      </header>
+      <section class="gaga-continuity-resume" data-gaga-continuity-resume hidden aria-labelledby="gaga-continuity-resume-title">
+        <p id="gaga-continuity-resume-title" data-gaga-i18n-key={actions.continuityResumeTitle.key} data-gaga-i18n-id={actions.continuityResumeTitle.id} data-gaga-i18n-en={actions.continuityResumeTitle.en}>{actions.continuityResumeTitle.id}</p>
+        <a href="#_top" data-gaga-continuity-resume-link>
+          <span data-gaga-continuity-resume-title></span>
+          <small><span data-gaga-i18n-key={actions.continuityResumeAt.key} data-gaga-i18n-id={actions.continuityResumeAt.id} data-gaga-i18n-en={actions.continuityResumeAt.en}>{actions.continuityResumeAt.id}</span> <span data-gaga-continuity-resume-heading></span></small>
+        </a>
+        <button type="button" data-gaga-continuity-resume-dismiss data-gaga-i18n-key={actions.continuityDismiss.key} data-gaga-i18n-id={actions.continuityDismiss.id} data-gaga-i18n-en={actions.continuityDismiss.en}>{actions.continuityDismiss.id}</button>
+      </section>
+      <slot />
+    </div>
+  </div>
+
+  <div
+    class="gaga-article-chrome gaga-article-reading-utilities"
+    data-gaga-article-reading-utilities
+    role="group"
+    aria-label={actions.readingUtilitiesLabel.id}
+    data-gaga-i18n-key={actions.readingUtilitiesLabel.key}
+    data-gaga-i18n-id={actions.readingUtilitiesLabel.id}
+    data-gaga-i18n-en={actions.readingUtilitiesLabel.en}
+    data-gaga-i18n-target="aria"
+  >
+    <div class="gaga-article-chrome__start">
+      <section class="gaga-continuity-current" data-gaga-continuity-current hidden aria-labelledby="gaga-continuity-current-title">
+        <Icon name="article" />
+        <span class="gaga-continuity-current__label">
+        <span id="gaga-continuity-current-title" data-gaga-i18n-key={actions.readingStatusLabel.key} data-gaga-i18n-id={actions.readingStatusLabel.id} data-gaga-i18n-en={actions.readingStatusLabel.en}>{actions.readingStatusLabel.id}</span>
+        <span class="gaga-continuity-current__summary-separator" aria-hidden="true">·</span>
+        <span data-gaga-continuity-current-summary>
+          <span data-gaga-continuity-current-summary-status="unset" data-gaga-i18n-key={actions.readingStatusUnset.key} data-gaga-i18n-id={actions.readingStatusUnset.id} data-gaga-i18n-en={actions.readingStatusUnset.en}>{actions.readingStatusUnset.id}</span>
+          <span data-gaga-continuity-current-summary-status="read-next" data-gaga-i18n-key={actions.readingStatusReadNext.key} data-gaga-i18n-id={actions.readingStatusReadNext.id} data-gaga-i18n-en={actions.readingStatusReadNext.en} hidden>{actions.readingStatusReadNext.id}</span>
+          <span data-gaga-continuity-current-summary-status="in-progress" data-gaga-i18n-key={actions.readingStatusInProgress.key} data-gaga-i18n-id={actions.readingStatusInProgress.id} data-gaga-i18n-en={actions.readingStatusInProgress.en} hidden>{actions.readingStatusInProgress.id}</span>
+          <span data-gaga-continuity-current-summary-status="reference" data-gaga-i18n-key={actions.readingStatusReference.key} data-gaga-i18n-id={actions.readingStatusReference.id} data-gaga-i18n-en={actions.readingStatusReference.en} hidden>{actions.readingStatusReference.id}</span>
+          <span data-gaga-continuity-current-summary-status="completed" data-gaga-i18n-key={actions.readingStatusCompleted.key} data-gaga-i18n-id={actions.readingStatusCompleted.id} data-gaga-i18n-en={actions.readingStatusCompleted.en} hidden>{actions.readingStatusCompleted.id}</span>
+        </span>
+        </span>
+      </section>
+    </div>
+    <div class="gaga-article-chrome__end gaga-article-reading-utilities__actions">
+      <button
+        class="gaga-article-utility__action gaga-article-reader"
+        type="button"
+        data-gaga-action={actions.reader.command}
+        data-gaga-quick-action={actions.reader.id}
+        data-gaga-active="false"
+        data-gaga-tooltip={actions.reader.ariaLabel.id}
+        aria-pressed={actions.reader.ariaPressed ? 'false' : undefined}
+        aria-label={actions.reader.ariaLabel.id}
+        aria-controls={actions.reader.ariaControls}
+        aria-expanded={actions.reader.ariaExpanded}
+        data-gaga-i18n-key={actions.reader.ariaLabel.key}
+        data-gaga-i18n-id={actions.reader.ariaLabel.id}
+        data-gaga-i18n-en={actions.reader.ariaLabel.en}
+        data-gaga-i18n-target="aria"
+      >
+        {actions.reader.icon ? <Icon name={actions.reader.icon} /> : null}
+        <span class="gaga-article-utility__label" data-gaga-i18n-key={actions.reader.label.key} data-gaga-i18n-id={actions.reader.label.id} data-gaga-i18n-en={actions.reader.label.en}>{actions.reader.label.id}</span>
+      </button>
+      <button
+        class="gaga-article-utility__action gaga-article-focus"
+        type="button"
+        data-gaga-action={actions.focus.command}
+        data-gaga-quick-action={actions.focus.id}
+        data-gaga-active="false"
+        data-gaga-tooltip={actions.focus.ariaLabel.id}
+        aria-pressed={actions.focus.ariaPressed ? 'false' : undefined}
+        aria-label={actions.focus.ariaLabel.id}
+        aria-controls={actions.focus.ariaControls}
+        aria-expanded={actions.focus.ariaExpanded}
+        data-gaga-i18n-key={actions.focus.ariaLabel.key}
+        data-gaga-i18n-id={actions.focus.ariaLabel.id}
+        data-gaga-i18n-en={actions.focus.ariaLabel.en}
+        data-gaga-i18n-target="aria"
+      >
+        {actions.focus.icon ? <Icon name={actions.focus.icon} /> : null}
+        <span class="gaga-article-utility__label" data-gaga-i18n-key={actions.focus.label.key} data-gaga-i18n-id={actions.focus.label.id} data-gaga-i18n-en={actions.focus.label.en}>{actions.focus.label.id}</span>
+      </button>
+    </div>
+  </div>
+</article>

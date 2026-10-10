@@ -1,0 +1,32 @@
+@use 'breakpoints' as bp;
+.gaga-global-nav { display:none; }
+@media (min-width: bp.$tablet-large-min) {
+  :root { --gaga-global-nav-width: 3.5rem; }
+  .gaga-global-nav {
+    position: fixed; inset-block:0; inset-inline-start:0; z-index: calc(var(--gaga-z-rail) + 2);
+    width: var(--gaga-global-nav-width); display:flex; flex-direction:column; align-items:center;
+    padding: max(.6rem,var(--gaga-safe-area-top)) .35rem .6rem; box-sizing:border-box;
+    border-inline-end:1px solid var(--gaga-line); background:var(--gaga-surface-elevated,var(--gaga-surface));
+  }
+  .gaga-global-nav__brand, .gaga-global-nav__item {
+    width:2.75rem; height:2.75rem; display:grid; place-items:center; border:0; background:transparent;
+    color:var(--gaga-muted); text-decoration:none; cursor:pointer; position:relative; border-radius:var(--gaga-radius-sm);
+  }
+  .gaga-global-nav__brand { font-family:var(--gaga-font-mono); font-weight:900; color:var(--gaga-ink); margin-block-end:.8rem; }
+  .gaga-global-nav__items { display:flex; flex-direction:column; gap:.2rem; }
+  .gaga-global-nav__settings { margin-block-start:auto; }
+  .gaga-global-nav__item:is(:hover,:focus-visible,[aria-current='page']), .gaga-global-nav__brand:is(:hover,:focus-visible) { color:var(--gaga-blue); background:var(--gaga-blue-soft); }
+  .gaga-global-nav [data-gaga-tooltip]::after { position:absolute; inset-inline-start:calc(100% + .5rem); inset-block-start:50%; transform:translateY(-50%); z-index:var(--gaga-z-panel); width:max-content; padding:.38rem .5rem; background:var(--gaga-tooltip-bg); color:var(--gaga-tooltip-ink); content:attr(data-gaga-tooltip); opacity:0; visibility:hidden; pointer-events:none; font:700 var(--gaga-type-label-size)/1.25 var(--gaga-font-mono); }
+  .gaga-global-nav [data-gaga-tooltip]:is(:hover,:focus-visible)::after { opacity:1; visibility:visible; }
+  .gaga-left-rail { inset-inline-start: var(--gaga-global-nav-width); }
+  .gaga-main-region { padding-inline-start: calc(var(--gaga-global-nav-width) + var(--gaga-left-rail-width)); }
+  [data-gaga-left-rail][data-gaga-state='collapsed'] ~ .gaga-main-region { padding-inline-start: calc(var(--gaga-global-nav-width) + var(--gaga-left-rail-collapsed)); }
+}
+
+@media (min-width: bp.$tablet-large-min) {
+  body[data-gaga-focus-mode='on'] .gaga-global-nav {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-100%);
+  }
+}

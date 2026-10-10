@@ -1,0 +1,37 @@
+.gaga-landing {
+  min-height: 100svh;
+  color: var(--gaga-ink);
+  background: var(--gaga-bg);
+}
+
+.gaga-landing-section {
+  display: grid;
+  place-items: center;
+  min-height: 100svh;
+}
+
+.gaga-landing-section__inner {
+  max-width: 69rem;
+  padding-inline: clamp(1rem, 4vw, 3rem);
+}
+
+.gaga-landing h1,
+.gaga-landing h2 {
+  margin: 0;
+  font-family: var(--gaga-font-display);
+  font-size: var(--gaga-type-display-size);
+  line-height: var(--gaga-type-display-line-height);
+  letter-spacing: var(--gaga-type-display-tracking);
+}
+
+.gaga-landing p {
+  max-width: 51rem;
+  color: var(--gaga-muted);
+  font-size: var(--gaga-type-lead-size);
+  line-height: var(--gaga-type-lead-line-height);
+}
+
+.gaga-landing a {
+  color: var(--gaga-ink);
+  text-decoration-color: var(--gaga-line-strong);
+}

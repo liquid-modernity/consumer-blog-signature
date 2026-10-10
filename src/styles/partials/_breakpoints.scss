@@ -1,0 +1,18 @@
+@forward 'breakpoints.generated';
+
+:root {
+  --gaga-safe-area-top: env(safe-area-inset-top, 0px);
+  --gaga-safe-area-right: env(safe-area-inset-right, 0px);
+  --gaga-safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --gaga-safe-area-left: env(safe-area-inset-left, 0px);
+  --gaga-dock-edge: 0px;
+  --gaga-bottom-dock-height: 3.65rem;
+  --gaga-bottom-dock-occupied-block-size: calc(var(--gaga-safe-area-bottom) + var(--gaga-dock-edge) + var(--gaga-bottom-dock-height));
+  --gaga-article-chrome-min-block-size: 3.25rem;
+  --gaga-outline-peek-control-size: 2.75rem;
+  --gaga-outline-peek-preview-min-block-size: var(--gaga-outline-peek-control-size);
+  --gaga-outline-peek-progress-size: .08rem;
+  --gaga-outline-peek-offset: var(--gaga-bottom-dock-occupied-block-size);
+  --gaga-compact-reading-top-clearance: calc(var(--gaga-safe-area-top) + var(--gaga-article-chrome-min-block-size));
+  --gaga-compact-reading-clearance: calc(var(--gaga-bottom-dock-occupied-block-size) + var(--gaga-outline-peek-preview-min-block-size) + var(--gaga-outline-peek-progress-size));
+}

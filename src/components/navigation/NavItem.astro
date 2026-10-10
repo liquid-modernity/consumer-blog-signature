@@ -1,0 +1,55 @@
+---
+import Icon from '../ui/Icon.astro';
+import { i18nLabel, type I18nMessageKey } from '../../config/i18n';
+import { siteConfig } from '../../config/site';
+import { classifySiteUrl, isCurrentSiteSection, shouldOpenExternalNavigation } from '../../lib/url-semantics';
+
+interface Props {
+  id?: string;
+  label: string;
+  labelEn?: string;
+  labelKey?: I18nMessageKey;
+  href: string;
+  icon: string;
+  external?: boolean;
+  externalDescriptionScope?: string;
+  currentPath?: string;
+}
+
+const { id, label, labelEn, labelKey, href, icon, external = false, externalDescriptionScope, currentPath = '/' } = Astro.props;
+const url = classifySiteUrl(href, siteConfig.url);
+const opensExternal = shouldOpenExternalNavigation(url, external);
+const isCurrent = isCurrentSiteSection(currentPath, href, siteConfig.url);
+const externalLabel = i18nLabel('navigation.externalLink');
+const externalDescriptionId = opensExternal && id
+  ? `gaga-nav-${id}${externalDescriptionScope ? `-${externalDescriptionScope}` : ''}-external`
+  : undefined;
+---
+<a
+  class:list={['gaga-nav-item', isCurrent && 'gaga-is-current']}
+  href={href}
+  target={opensExternal ? '_blank' : undefined}
+  rel={opensExternal ? 'noopener noreferrer' : undefined}
+  aria-current={isCurrent ? 'page' : undefined}
+  aria-label={label}
+  aria-describedby={externalDescriptionId}
+  data-gaga-tooltip={label}
+  data-gaga-i18n-key={labelKey}
+  data-gaga-i18n-id={label}
+  data-gaga-i18n-en={labelEn ?? label}
+  data-gaga-i18n-target="aria"
+  data-gaga-url-kind={url.kind}
+  data-gaga-external-link={opensExternal ? 'true' : undefined}
+>
+  <Icon name={icon} />
+  <span class="gaga-nav-label" data-gaga-i18n-key={labelKey} data-gaga-i18n-id={label} data-gaga-i18n-en={labelEn ?? label}>{label}</span>
+  {opensExternal && externalDescriptionId ? (
+    <span
+      id={externalDescriptionId}
+      class="gaga-visually-hidden"
+      data-gaga-i18n-key={externalLabel.key}
+      data-gaga-i18n-id={externalLabel.id}
+      data-gaga-i18n-en={externalLabel.en}
+    >{externalLabel.id}</span>
+  ) : null}
+</a>

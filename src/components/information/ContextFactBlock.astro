@@ -1,0 +1,30 @@
+---
+import Icon from '../ui/Icon.astro';
+import type { PageContextFact } from '../../lib/page-context';
+
+interface Props {
+  fact: PageContextFact;
+}
+
+const { fact } = Astro.props;
+---
+{fact.values.length ? (
+  <section class="gaga-info-block gaga-info-block--meta" data-gaga-info-block={fact.id}>
+    <h2>
+      <Icon name={fact.icon} />
+      <span data-gaga-i18n-id={fact.label.id} data-gaga-i18n-en={fact.label.en}>{fact.label.id}</span>
+    </h2>
+    <p data-gaga-info-field={fact.id}>
+      {fact.values.map((item, index) => (
+        <>
+          {index > 0 ? ' · ' : null}
+          {item.href ? (
+            <a href={item.href}>{item.text}</a>
+          ) : item.datetime ? (
+            <time datetime={item.datetime}>{item.text}</time>
+          ) : item.text}
+        </>
+      ))}
+    </p>
+  </section>
+) : null}

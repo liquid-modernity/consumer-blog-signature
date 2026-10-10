@@ -1,0 +1,134 @@
+---
+import '../../styles/tokens.css';
+import '../../styles/signature.scss';
+import StandaloneAppFrame from '../../components/frame/StandaloneAppFrame.astro';
+import SeoHead from '../../components/seo/SeoHead.astro';
+import Icon from '../../components/ui/Icon.astro';
+import { contentDefaults } from '../../config/content';
+import { i18nCount, i18nLabel } from '../../config/i18n';
+import { getArticles, getAuthors, getTagGroup, getTagGroups, getTopicGroups, toArticlePreview } from '../../lib/content';
+import { getScreenInfo } from '../../lib/screen-info';
+import { normalizeContentMetadata, resolveContentDateLocale } from '@gaga/engine/content';
+
+export async function getStaticPaths() {
+  const tagGroups = await getTagGroups();
+  return tagGroups.map((group) => ({
+    params: { slug: group.slug },
+    props: { group }
+  }));
+}
+
+const { group } = Astro.props;
+const resolvedGroup = group ?? await getTagGroup(Astro.params.slug ?? '');
+if (!resolvedGroup) throw new Error(`Missing tag group for ${Astro.params.slug ?? '(unknown tag)'}.`);
+
+const title = `${resolvedGroup.tag} • Tags • Consumer Signature`;
+const description = `Artikel Consumer Signature dengan tag ${resolvedGroup.tag}.`;
+const metadata = normalizeContentMetadata({
+  title,
+  seoTitle: title,
+  description,
+  summary: description,
+  language: 'id',
+  canonical: resolvedGroup.href,
+  contentKind: 'page',
+  contentClass: 'tag-detail',
+  tags: [resolvedGroup.tag]
+});
+const [articles, authors, topicGroups, tagGroups] = await Promise.all([
+  getArticles(),
+  getAuthors(),
+  getTopicGroups(),
+  getTagGroups()
+]);
+const dateLocale = resolveContentDateLocale(contentDefaults.defaultLanguage, contentDefaults.dateLocale);
+const backLabel = i18nLabel('article.back');
+const tagEyebrow = i18nLabel('entity.tagEyebrow');
+const info = getScreenInfo({
+  pathname: resolvedGroup.href,
+  data: metadata,
+  language: 'id',
+  defaults: contentDefaults,
+  articles,
+  authors,
+  topicGroups,
+  tagGroups
+});
+---
+<html lang="id-ID">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <SeoHead metadata={metadata} pathname={resolvedGroup.href} title={title} includeWebSiteSchema={false} />
+  </head>
+  <body>
+    <StandaloneAppFrame
+      pageId={`tag-${resolvedGroup.slug}`}
+      pageTitle={resolvedGroup.tag}
+      contentKind="page"
+      contentClass="tag-detail"
+      info={info}
+    >
+      <section class="gaga-entity-surface gaga-tag-detail" aria-labelledby="_top" data-gaga-entity-kind="tag">
+        <header class="gaga-entity-header">
+          <div class="gaga-entity-header__bar">
+            <a
+              class="gaga-entity-back gaga-article-utility__action gaga-article-utility__back"
+              href="/tags/"
+              data-gaga-return-navigation
+              data-gaga-smart-back="fallback"
+              data-gaga-smart-back-context-label={backLabel.id}
+              aria-label={backLabel.id}
+              data-gaga-tooltip={backLabel.id}
+            >
+              <Icon name="arrow_back" />
+              <span
+                class="gaga-article-utility__label"
+                data-gaga-smart-back-text
+                data-gaga-i18n-key={backLabel.key}
+                data-gaga-i18n-id={backLabel.id}
+                data-gaga-i18n-en={backLabel.en}
+              >{backLabel.id}</span>
+            </a>
+          </div>
+          <p
+            class="gaga-system-kicker"
+            data-gaga-i18n-key={tagEyebrow.key}
+            data-gaga-i18n-id={tagEyebrow.id}
+            data-gaga-i18n-en={tagEyebrow.en}
+          >{tagEyebrow.id}</p>
+          <h1 id="_top">{resolvedGroup.tag}</h1>
+          <p>{i18nCount('article', resolvedGroup.count)}</p>
+        </header>
+        <ol class="gaga-mission-list" data-gaga-preview-scope>
+          {resolvedGroup.articles.map((article, index) => {
+            const preview = toArticlePreview(article, dateLocale, contentDefaults.preview);
+            return (
+              <li class="gaga-mission-item" data-gaga-motion>
+                <a
+                  href={preview.href}
+                  class="gaga-mission-link"
+                  data-gaga-preview
+                  data-gaga-preview-title={preview.title}
+                  data-gaga-preview-href={preview.href}
+                  data-gaga-preview-snippet={preview.snippet}
+                  data-gaga-preview-topics={preview.topics}
+                  data-gaga-preview-tags={preview.tags}
+                  data-gaga-preview-read-time={preview.readTime}
+                  data-gaga-preview-date={preview.date}
+                  data-gaga-preview-updated={preview.updated}
+                  data-gaga-preview-author={preview.author}
+                >
+                  <span class="gaga-mission-index" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+                  <span class="gaga-mission-copy">
+                    <span class="gaga-mission-title">{preview.title}</span>
+                  </span>
+                </a>
+              </li>
+            );
+          })}
+        </ol>
+      </section>
+    </StandaloneAppFrame>
+  </body>
+</html>

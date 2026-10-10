@@ -1,0 +1,26 @@
+---
+import Icon from '../ui/Icon.astro';
+import { normalizeSitePath } from '../../lib/url-semantics';
+const currentPath = normalizeSitePath(Astro.url.pathname);
+const items = [
+  { id: 'home', label: 'Home', href: '/', icon: 'home' },
+  { id: 'search', label: 'Search', href: '/search', icon: 'search' },
+  { id: 'topics', label: 'Topics', href: '/topics', icon: 'grid_view' },
+  { id: 'library', label: 'Library', href: '/library', icon: 'bookmark' },
+  { id: 'archive', label: 'Archive', href: '/archive', icon: 'inventory_2' }
+];
+const isCurrent = (href: string) => href === '/' ? currentPath === '/' : currentPath === href || currentPath.startsWith(`${href}/`);
+---
+<nav class="gaga-global-nav" data-gaga-global-nav aria-label="Global navigation">
+  <a class="gaga-global-nav__brand" href="/landing" aria-label="Consumer Blog Signature" data-gaga-tooltip="Signature">G</a>
+  <div class="gaga-global-nav__items">
+    {items.map((item) => (
+      <a class="gaga-global-nav__item" href={item.href} aria-label={item.label} aria-current={isCurrent(item.href) ? 'page' : undefined} data-gaga-tooltip={item.label}>
+        <Icon name={item.icon} />
+      </a>
+    ))}
+  </div>
+  <button class="gaga-global-nav__item gaga-global-nav__settings" type="button" aria-label="Personalize" data-gaga-action="toggle-reader-preferences" data-gaga-tooltip="Personalize">
+    <Icon name="settings" />
+  </button>
+</nav>

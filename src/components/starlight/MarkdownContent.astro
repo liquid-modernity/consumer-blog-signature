@@ -1,0 +1,166 @@
+---
+import '@astrojs/starlight/style/markdown.css';
+import ArticleShell from './ArticleShell.astro';
+import AuthorArticleIndex from '../reader/AuthorArticleIndex.astro';
+import TopicArticleIndex from '../reader/TopicArticleIndex.astro';
+import Icon from '../ui/Icon.astro';
+import { createArticleWorkspaceActionsInput, createSavedButtonInput } from '../frame/site-composition';
+import { contentDefaults } from '../../config/content';
+import { i18nLabel } from '../../config/i18n';
+import { getArticles, getAuthorBySlug, getAuthors, getTagGroups, getTopicGroups } from '../../lib/content';
+import { getScreenInfo } from '../../lib/screen-info';
+import type { BreadcrumbItem } from '../../lib/page-context';
+import { normalizeContentMetadata } from '@gaga/engine/content';
+
+const route = Astro.locals.starlightRoute;
+const metadata = normalizeContentMetadata((route?.entry?.data ?? {}) as Record<string, unknown>);
+const isArticle = metadata.contentKind === 'article';
+const isAuthor = metadata.contentKind === 'author';
+const isTopic = metadata.contentKind === 'topic';
+const language = metadata.language ?? route?.lang;
+const routeIdentity = metadata.canonical ?? route?.id ?? Astro.url.pathname;
+const missingTitleSource = route?.id ?? Astro.url.pathname;
+const savedAction = createSavedButtonInput();
+const articleActions = createArticleWorkspaceActionsInput();
+let breadcrumbs: BreadcrumbItem[] = [];
+
+if (isArticle) {
+  const [articles, authors, topicGroups, tagGroups] = await Promise.all([
+    getArticles(),
+    getAuthors(),
+    getTopicGroups(),
+    getTagGroups()
+  ]);
+  const context = getScreenInfo({
+    pathname: Astro.url.pathname,
+    data: metadata,
+    language,
+    defaults: contentDefaults,
+    tocItems: route?.toc?.items ?? [],
+    articles,
+    authors,
+    topicGroups,
+    tagGroups
+  });
+  breadcrumbs = context.breadcrumbs ?? [];
+}
+
+const authorSlug = isAuthor ? Astro.url.pathname.split('/').filter(Boolean).at(-1) : undefined;
+const authorRef = authorSlug ? (await getAuthorBySlug(authorSlug))?.contentId : undefined;
+const topicGroups = isTopic ? await getTopicGroups() : [];
+const cleanPath = Astro.url.pathname.replace(/\/$/, '') || '/';
+const topicGroup = topicGroups.find((group) => group.href === cleanPath);
+const isEntity = isAuthor || isTopic;
+const entityTitle = isAuthor ? metadata.title : topicGroup?.topic ?? metadata.title;
+const entityKicker = i18nLabel(isAuthor ? 'entity.authorEyebrow' : 'entity.topicEyebrow');
+const entityProfileLabel = i18nLabel(isAuthor ? 'entity.profile' : 'entity.topicAbout');
+const entityWritingsLabel = i18nLabel('entity.writings');
+const entityNavigationLabel = i18nLabel(isAuthor ? 'entity.authorNavigation' : 'entity.topicNavigation');
+const entityBackLabel = i18nLabel('article.back');
+const entityParentHref = isAuthor ? '/authors/' : '/topics/';
+---
+{isArticle ? (
+  <ArticleShell
+    identity={metadata}
+    language={language}
+    savedAction={savedAction}
+    actions={articleActions}
+    routeIdentity={routeIdentity}
+    missingTitleSource={missingTitleSource}
+    breadcrumbs={breadcrumbs}
+  >
+    <div class="gaga-article-body sl-markdown-content" data-gaga-article-body><slot /></div>
+  </ArticleShell>
+) : (
+  isEntity ? (
+    <section class="gaga-entity-surface" data-gaga-entity-tabs data-gaga-entity-kind={isAuthor ? 'author' : 'topic'}>
+      <header class="gaga-entity-header">
+        <div class="gaga-entity-header__bar">
+          <a
+            class="gaga-entity-back gaga-article-utility__action gaga-article-utility__back"
+            href={entityParentHref}
+            data-gaga-return-navigation
+            data-gaga-smart-back="fallback"
+            data-gaga-smart-back-context-label={entityBackLabel.id}
+            aria-label={entityBackLabel.id}
+            data-gaga-tooltip={entityBackLabel.id}
+          >
+            <Icon name="arrow_back" />
+            <span
+              class="gaga-article-utility__label"
+              data-gaga-smart-back-text
+              data-gaga-i18n-key={entityBackLabel.key}
+              data-gaga-i18n-id={entityBackLabel.id}
+              data-gaga-i18n-en={entityBackLabel.en}
+            >{entityBackLabel.id}</span>
+          </a>
+        </div>
+        <p
+          class="gaga-system-kicker"
+          data-gaga-i18n-key={entityKicker.key}
+          data-gaga-i18n-id={entityKicker.id}
+          data-gaga-i18n-en={entityKicker.en}
+        >{entityKicker.id}</p>
+        <h1 id="_top">{entityTitle}</h1>
+      </header>
+
+      <nav
+        class="gaga-entity-tabs__list"
+        aria-label={entityNavigationLabel.id}
+        data-gaga-i18n-key={entityNavigationLabel.key}
+        data-gaga-i18n-id={entityNavigationLabel.id}
+        data-gaga-i18n-en={entityNavigationLabel.en}
+        data-gaga-i18n-target="aria"
+      >
+        <a
+          href="#profile"
+          data-gaga-entity-tab="profile"
+          aria-controls="profile"
+          aria-current="location"
+          data-gaga-i18n-key={entityProfileLabel.key}
+          data-gaga-i18n-id={entityProfileLabel.id}
+          data-gaga-i18n-en={entityProfileLabel.en}
+        >{entityProfileLabel.id}</a>
+        <a
+          href="#writings"
+          data-gaga-entity-tab="writings"
+          aria-controls="writings"
+          data-gaga-i18n-key={entityWritingsLabel.key}
+          data-gaga-i18n-id={entityWritingsLabel.id}
+          data-gaga-i18n-en={entityWritingsLabel.en}
+        >{entityWritingsLabel.id}</a>
+      </nav>
+
+      <div class="gaga-entity-tabs__panels">
+        <section
+          id="profile"
+          class="gaga-entity-panel gaga-entity-panel--profile"
+          data-gaga-entity-panel="profile"
+          data-gaga-legacy-fragment="gaga-entity-profile"
+        >
+          <div
+            class:list={['sl-markdown-content', isAuthor && 'gaga-author-profile']}
+            data-gaga-author-profile={isAuthor ? '' : undefined}
+            data-gaga-entity-profile-content
+          >
+            <slot />
+          </div>
+        </section>
+
+        <section
+          id="writings"
+          class="gaga-entity-panel gaga-entity-panel--writings"
+          data-gaga-entity-panel="writings"
+          data-gaga-legacy-fragment="gaga-entity-writings"
+        >
+          {authorRef ? <AuthorArticleIndex authorRef={authorRef} /> : null}
+          {topicGroup ? <TopicArticleIndex group={topicGroup} language={metadata.language ?? route?.lang} /> : null}
+        </section>
+      </div>
+    </section>
+  ) : (
+    <div class="sl-markdown-content">
+      <slot />
+    </div>
+  )
+)}

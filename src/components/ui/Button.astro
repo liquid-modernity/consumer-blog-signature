@@ -1,0 +1,15 @@
+---
+import { Button as EngineButton } from '@gaga/engine-astro';
+
+interface Props {
+  href?: string;
+  action?: string;
+  label: string;
+  class?: string;
+}
+
+const { href, action, label, class: className = '' } = Astro.props;
+---
+<EngineButton href={href} action={action} label={label} class={className}>
+  <slot />
+</EngineButton>

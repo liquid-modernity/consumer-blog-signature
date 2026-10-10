@@ -1,0 +1,82 @@
+---
+import '../../styles/tokens.css';
+import '../../styles/signature.scss';
+import StandaloneAppFrame from '../../components/frame/StandaloneAppFrame.astro';
+import SeoHead from '../../components/seo/SeoHead.astro';
+import { contentDefaults } from '../../config/content';
+import { i18nCount } from '../../config/i18n';
+import { getArticles, getAuthors, getTagGroups, getTopicGroups } from '../../lib/content';
+import { getScreenInfo } from '../../lib/screen-info';
+import { normalizeContentMetadata } from '@gaga/engine/content';
+
+const title = 'Tag • Consumer Signature';
+const description = 'Indeks label ringan dari metadata publik Consumer Signature.';
+const metadata = normalizeContentMetadata({
+  title,
+  seoTitle: title,
+  description,
+  summary: description,
+  language: 'id',
+  canonical: '/tags',
+  contentKind: 'page',
+  contentClass: 'tags-index'
+});
+const [articles, authors, topicGroups, tagGroups] = await Promise.all([
+  getArticles(),
+  getAuthors(),
+  getTopicGroups(),
+  getTagGroups()
+]);
+const info = getScreenInfo({
+  pathname: '/tags',
+  data: metadata,
+  language: 'id',
+  defaults: contentDefaults,
+  articles,
+  authors,
+  topicGroups,
+  tagGroups
+});
+---
+<html lang="id-ID">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <SeoHead metadata={metadata} pathname="/tags" title={title} includeWebSiteSchema={false} />
+  </head>
+  <body>
+    <StandaloneAppFrame
+      pageId="tags"
+      pageTitle="Tag"
+      contentKind="page"
+      contentClass="tags-index"
+      info={info}
+    >
+      <section class="gaga-tag-index" data-gaga-preview-scope aria-labelledby="gaga-tags-title">
+        <div class="gaga-screen-section-head">
+          <h1 id="gaga-tags-title">Tag</h1>
+          <p>{i18nCount('label', tagGroups.length)}</p>
+        </div>
+        <ul class="gaga-tag-index__list">
+          {tagGroups.map((group) => (
+            <li>
+              <a
+                href={group.href}
+                data-gaga-preview
+                data-gaga-preview-title={group.tag}
+                data-gaga-preview-href={group.href}
+                data-gaga-preview-snippet={`${i18nCount('article', group.count)} memakai tag ${group.tag}.`}
+                data-gaga-preview-tags={group.tag}
+                data-gaga-preview-read-time={i18nCount('article', group.count)}
+                data-gaga-preview-author="Consumer Signature"
+              >
+                <span>{group.tag}</span>
+                <em>{i18nCount('article', group.count)}</em>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </StandaloneAppFrame>
+  </body>
+</html>

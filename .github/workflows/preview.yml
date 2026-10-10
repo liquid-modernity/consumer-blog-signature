@@ -1,0 +1,22 @@
+name: Preview Build
+on:
+  pull_request:
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22.19.0' }
+      - run: npm install
+      - run: npm run build
+        env:
+          PUBLIC_SITE_URL: ${{ vars.PREVIEW_SITE_URL }}
+          PUBLIC_GIT_SHA: ${{ github.sha }}
+          PUBLIC_BUILD_TIME: ${{ github.event.pull_request.updated_at }}
+      - name: Deploy preview worker
+        if: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
+        run: npx wrangler deploy --name "consumer-blog-signature-preview"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

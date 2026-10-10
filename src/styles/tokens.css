@@ -1,0 +1,221 @@
+:root {
+  /* Default = restrained blueprintism workspace. */
+  color-scheme: dark;
+  --gaga-color-background: #07101d;
+  --gaga-color-surface: #0b1726;
+  --gaga-color-surface-subtle: #102033;
+  --gaga-color-surface-elevated: #14283f;
+  --gaga-color-text: #f0f7ff;
+  --gaga-color-text-muted: #b6c8d9;
+  --gaga-color-text-subtle: #9eb3c7;
+  --gaga-color-border: rgba(188, 215, 241, 0.18);
+  --gaga-color-border-strong: rgba(188, 215, 241, 0.38);
+  --gaga-color-interactive: #dbeeff;
+  --gaga-color-interactive-hover: #ffffff;
+  --gaga-color-interactive-active: rgba(114, 169, 220, 0.16);
+  --gaga-color-focus: #ffffff;
+  --gaga-color-selection: rgba(114, 169, 220, 0.24);
+  --gaga-color-danger: #f0aaa7;
+  --gaga-color-warning: #e2cb8f;
+  --gaga-color-success: #bdd4b4;
+  --gaga-bg: var(--gaga-color-background);
+  --gaga-bg-grid: rgba(188, 215, 241, 0.02);
+  --gaga-bg-grid-strong: rgba(188, 215, 241, 0.05);
+  --gaga-surface: var(--gaga-color-surface);
+  --gaga-surface-subtle: var(--gaga-color-surface-subtle);
+  --gaga-surface-2: var(--gaga-color-surface-subtle);
+  --gaga-surface-elevated: var(--gaga-color-surface-elevated);
+  --gaga-ink: var(--gaga-color-text);
+  --gaga-muted: var(--gaga-color-text-muted);
+  --gaga-tertiary: var(--gaga-color-text-subtle);
+  --gaga-line: var(--gaga-color-border);
+  --gaga-line-strong: var(--gaga-color-border-strong);
+  --gaga-blue: var(--gaga-color-interactive);
+  --gaga-blue-soft: var(--gaga-color-interactive-active);
+  --gaga-focus-ring: var(--gaga-color-focus);
+  --gaga-shadow: 0 1.1rem 2.8rem rgba(1, 8, 16, 0.42);
+  --gaga-tooltip-bg: var(--gaga-ink);
+  --gaga-tooltip-ink: var(--gaga-bg);
+
+  --gaga-global-nav-width: 3.5rem;
+  --gaga-left-rail-width: 15.75rem;
+  --gaga-left-rail-collapsed: 3.5rem;
+  --gaga-nav-child-panel-width: 13.75rem;
+  --gaga-right-rail-width: 16.75rem;
+  --gaga-right-rail-collapsed: 3.5rem;
+  --gaga-content-width: 42rem;
+  --gaga-grid-size: 22px;
+
+  --gaga-radius-sm: 4px;
+  --gaga-radius-md: 6px;
+  --gaga-radius-lg: 8px;
+
+  --gaga-space-1: 0.25rem;
+  --gaga-space-2: 0.5rem;
+  --gaga-space-3: 0.75rem;
+  --gaga-space-4: 1rem;
+  --gaga-space-5: 1.25rem;
+  --gaga-space-6: 1.5rem;
+  --gaga-space-8: 2rem;
+
+  --gaga-z-rail: 20;
+  --gaga-z-dock: 40;
+  --gaga-z-sheet: 50;
+  --gaga-z-panel: 60;
+
+  --sl-color-accent-low: var(--gaga-blue-soft);
+  --sl-color-accent: var(--gaga-blue);
+  --sl-color-accent-high: var(--gaga-ink);
+  --sl-color-white: var(--gaga-bg);
+  --sl-color-gray-1: var(--gaga-ink);
+  --sl-color-gray-2: var(--gaga-tertiary);
+  --sl-color-gray-3: var(--gaga-muted);
+  --sl-color-gray-4: var(--gaga-tertiary);
+  --sl-color-gray-5: var(--gaga-surface-2);
+  --sl-color-gray-6: var(--gaga-surface);
+  --sl-color-black: var(--gaga-ink);
+
+  --gaga-font-display: Helvetica, "Helvetica", sans-serif;
+  --gaga-font-ui: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --gaga-font-body: var(--gaga-font-ui);
+  --gaga-font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --gaga-type-display-size: 3.5rem;
+  --gaga-type-display-line-height: 0.96;
+  --gaga-type-display-weight: 800;
+  --gaga-type-display-tracking: 0;
+  --gaga-type-page-title-size: 1.5rem;
+  --gaga-type-page-title-line-height: 1.04;
+  --gaga-type-page-title-weight: 800;
+  --gaga-type-article-title-size: 2.65rem;
+  --gaga-type-article-title-line-height: 1.04;
+  --gaga-type-article-title-weight: 800;
+  --gaga-type-section-heading-size: 1.85rem;
+  --gaga-type-section-heading-line-height: 1.12;
+  --gaga-type-section-heading-weight: 700;
+  --gaga-type-subheading-size: 1rem;
+  --gaga-type-subheading-line-height: 1.24;
+  --gaga-type-subheading-weight: 500;
+  --gaga-type-body-size: 1.04rem;
+  --gaga-type-body-line-height: 1.72;
+  --gaga-type-body-compact-size: 0.9rem;
+  --gaga-type-body-compact-line-height: 1.5;
+  --gaga-type-lead-size: 1.14rem;
+  --gaga-type-lead-line-height: 1.58;
+  --gaga-type-meta-size: 0.82rem;
+  --gaga-type-meta-line-height: 1.45;
+  --gaga-type-label-size: 0.72rem;
+  --gaga-type-label-line-height: 1.25;
+  --gaga-type-label-weight: 800;
+  --gaga-type-label-tracking: 0.06em;
+  --gaga-type-control-size: 0.85rem;
+  --gaga-type-control-line-height: 1.25;
+  --gaga-type-caption-size: 0.76rem;
+  --gaga-type-caption-line-height: 1.45;
+  --gaga-type-code-size: 0.92em;
+  --sl-font: var(--gaga-font-ui);
+  --sl-font-mono: var(--gaga-font-mono);
+  --sl-content-width: var(--gaga-content-width);
+  --sl-sidebar-width: var(--gaga-left-rail-width);
+}
+
+:root[data-gaga-theme='dark'],
+body[data-gaga-theme='dark'] {
+  color-scheme: dark;
+  --gaga-color-background: #080808;
+  --gaga-color-surface: #0d0d0d;
+  --gaga-color-surface-subtle: #151515;
+  --gaga-color-surface-elevated: #1b1b1b;
+  --gaga-color-text: #f4f4f2;
+  --gaga-color-text-muted: #adaca7;
+  --gaga-color-text-subtle: #999894;
+  --gaga-color-border: rgba(244, 244, 242, 0.13);
+  --gaga-color-border-strong: rgba(244, 244, 242, 0.3);
+  --gaga-color-interactive: #f4f4f2;
+  --gaga-color-interactive-hover: #ffffff;
+  --gaga-color-interactive-active: rgba(244, 244, 242, 0.11);
+  --gaga-color-focus: #ffffff;
+  --gaga-color-selection: rgba(244, 244, 242, 0.18);
+  --gaga-bg-grid: rgba(244, 244, 242, 0.014);
+  --gaga-bg-grid-strong: rgba(244, 244, 242, 0.038);
+  --gaga-shadow: 0 1.1rem 3rem rgba(0, 0, 0, 0.42);
+}
+
+:root[data-gaga-theme='paper'],
+body[data-gaga-theme='paper'] {
+  color-scheme: light;
+  --gaga-color-background: #f4f3ef;
+  --gaga-color-surface: #fbfaf7;
+  --gaga-color-surface-subtle: #eceae4;
+  --gaga-color-surface-elevated: #ffffff;
+  --gaga-color-text: #181816;
+  --gaga-color-text-muted: #5f5d57;
+  --gaga-color-text-subtle: #68645c;
+  --gaga-color-border: rgba(24, 24, 22, 0.16);
+  --gaga-color-border-strong: rgba(24, 24, 22, 0.34);
+  --gaga-color-interactive: #181816;
+  --gaga-color-interactive-hover: #000000;
+  --gaga-color-interactive-active: rgba(24, 24, 22, 0.085);
+  --gaga-color-focus: #000000;
+  --gaga-color-selection: rgba(24, 24, 22, 0.13);
+  --gaga-bg-grid: rgba(24, 24, 22, 0.018);
+  --gaga-bg-grid-strong: rgba(24, 24, 22, 0.045);
+  --gaga-shadow: 0 1rem 2.4rem rgba(24, 24, 22, 0.1);
+}
+
+:root[data-gaga-theme='sepia'],
+body[data-gaga-theme='sepia'] {
+  color-scheme: light;
+  --gaga-color-background: #eeeae1;
+  --gaga-color-surface: #f8f4eb;
+  --gaga-color-surface-subtle: #e6e0d4;
+  --gaga-color-surface-elevated: #fffaf0;
+  --gaga-color-text: #1f1d19;
+  --gaga-color-text-muted: #625d52;
+  --gaga-color-text-subtle: #6e6455;
+  --gaga-color-border: rgba(31, 29, 25, 0.17);
+  --gaga-color-border-strong: rgba(31, 29, 25, 0.34);
+  --gaga-color-interactive: #1f1d19;
+  --gaga-color-interactive-hover: #000000;
+  --gaga-color-interactive-active: rgba(31, 29, 25, 0.09);
+  --gaga-color-focus: #000000;
+  --gaga-color-selection: rgba(31, 29, 25, 0.13);
+  --gaga-bg-grid: rgba(31, 29, 25, 0.018);
+  --gaga-bg-grid-strong: rgba(31, 29, 25, 0.045);
+  --gaga-shadow: 0 1rem 2.4rem rgba(31, 29, 25, 0.1);
+}
+
+:root,
+:root[data-gaga-theme='default'],
+:root[data-gaga-theme='dark'],
+:root[data-gaga-theme='paper'],
+:root[data-gaga-theme='sepia'],
+body,
+body[data-gaga-theme='default'],
+body[data-gaga-theme='dark'],
+body[data-gaga-theme='paper'],
+body[data-gaga-theme='sepia'] {
+  --gaga-bg: var(--gaga-color-background);
+  --gaga-surface: var(--gaga-color-surface);
+  --gaga-surface-subtle: var(--gaga-color-surface-subtle);
+  --gaga-surface-2: var(--gaga-color-surface-subtle);
+  --gaga-surface-elevated: var(--gaga-color-surface-elevated);
+  --gaga-ink: var(--gaga-color-text);
+  --gaga-muted: var(--gaga-color-text-muted);
+  --gaga-tertiary: var(--gaga-color-text-subtle);
+  --gaga-line: var(--gaga-color-border);
+  --gaga-line-strong: var(--gaga-color-border-strong);
+  --gaga-blue: var(--gaga-color-interactive);
+  --gaga-blue-soft: var(--gaga-color-interactive-active);
+  --gaga-focus-ring: var(--gaga-color-focus);
+  --sl-color-white: var(--gaga-ink);
+  --sl-color-black: var(--gaga-bg);
+  --sl-color-text: var(--gaga-muted);
+  --sl-color-text-accent: var(--gaga-blue);
+  --sl-color-bg: var(--gaga-bg);
+  --sl-color-bg-nav: var(--gaga-surface);
+  --sl-color-bg-sidebar: var(--gaga-surface);
+  --sl-color-bg-inline-code: var(--gaga-surface-2);
+  --sl-color-hairline-light: var(--gaga-line);
+  --sl-color-hairline: var(--gaga-line);
+  --sl-color-hairline-shade: var(--gaga-line-strong);
+}

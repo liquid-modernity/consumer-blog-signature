@@ -1,0 +1,66 @@
+---
+import '../styles/tokens.css';
+import '../styles/signature.scss';
+import StandaloneAppFrame from '../components/frame/StandaloneAppFrame.astro';
+import SeoHead from '../components/seo/SeoHead.astro';
+import { normalizeContentMetadata } from '@gaga/engine/content';
+import type { ScreenInfo } from '../lib/screen-info';
+
+const title = '404 • Consumer Signature';
+const description = 'Route tidak terdaftar dalam peta Consumer Signature.';
+const metadata = normalizeContentMetadata({
+  title,
+  seoTitle: title,
+  description,
+  summary: description,
+  language: 'id',
+  author: 'Editorial Team',
+  canonical: '/404',
+  contentKind: 'system',
+  contentClass: 'lost-coordinate',
+  noindex: true
+});
+const info: ScreenInfo = {
+  kind: 'system',
+  outlineItems: [
+    { slug: '_top', text: 'Lost coordinate' }
+  ],
+  snippet: 'Halaman tidak ditemukan. Navigation rail tetap aktif untuk kembali ke area lain.',
+  topics: ['System', 'Navigation'],
+  tags: ['404', 'route', 'recovery'],
+  readTime: '< 1 min',
+  author: 'Editorial Team'
+};
+---
+<html lang="id-ID">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <SeoHead metadata={metadata} pathname="/404" title={title} noindex={true} includeWebSiteSchema={false} />
+  </head>
+  <body>
+    <StandaloneAppFrame
+      pageId="404"
+      pageTitle="404"
+      contentKind="system"
+      contentClass="lost-coordinate"
+      info={info}
+    >
+      <div class="gaga-system-screen" data-gaga-system-screen>
+        <p class="gaga-system-kicker">SYSTEM / 404</p>
+        <h1 id="_top">Lost Coordinate</h1>
+        <p>Route tidak terdaftar dalam peta Consumer Signature. Cek kembali URL atau gunakan navigasi sistem yang tetap aktif di rail dan dock.</p>
+        <dl class="gaga-system-readout" id="navigation-available">
+          <div>
+            <dt>Status</dt>
+            <dd>ERR/ROUTE_NOT_FOUND</dd>
+          </div>
+          <div>
+            <dt>Recovery</dt>
+            <dd>Navigation rail active</dd>
+          </div>
+        </dl>
+      </div>
+    </StandaloneAppFrame>
+  </body>
+</html>

@@ -1,0 +1,7 @@
+---
+import LeftRail from '../frame/LeftRail.astro';
+import { createLeftRailInput, normalizeCurrentPath } from '../frame/site-composition';
+
+const rail = createLeftRailInput(normalizeCurrentPath(Astro.url.pathname));
+---
+<LeftRail rail={rail} />

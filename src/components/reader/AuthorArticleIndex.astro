@@ -1,0 +1,41 @@
+---
+import { getArticlesByAuthorRef, toArticlePreview } from '../../lib/content';
+import { contentDefaults } from '../../config/content';
+import { i18nLabel } from '../../config/i18n';
+import { normalizeContentMetadata, resolveContentDateLocale } from '@gaga/engine/content';
+
+interface Props {
+  authorRef: string;
+}
+
+const { authorRef } = Astro.props;
+const route = Astro.locals.starlightRoute;
+const metadata = normalizeContentMetadata(route?.entry?.data ?? {});
+const surfaceLocale = resolveContentDateLocale(
+  metadata.language ?? route?.lang ?? contentDefaults.defaultLanguage,
+  contentDefaults.dateLocale
+);
+const articles = await getArticlesByAuthorRef(authorRef);
+const writingsLabel = i18nLabel('entity.writings');
+---
+{articles.length ? (
+  <section class="gaga-entity-articles gaga-author-articles" aria-labelledby="gaga-author-articles-title">
+    <div class="gaga-entity-articles__head gaga-author-articles__head">
+      <h2 id="gaga-author-articles-title" data-gaga-i18n-key={writingsLabel.key} data-gaga-i18n-id={writingsLabel.id} data-gaga-i18n-en={writingsLabel.en}>{writingsLabel.id}</h2>
+      <span>{articles.length}</span>
+    </div>
+    <ol>
+      {articles.map((article, index) => {
+        const preview = toArticlePreview(article, surfaceLocale, contentDefaults.preview);
+        return (
+          <li>
+            <a href={preview.href}>
+              <span class="gaga-mission-index" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+              <span>{preview.title}</span>
+            </a>
+          </li>
+        );
+      })}
+    </ol>
+  </section>
+) : null}

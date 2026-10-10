@@ -1,0 +1,44 @@
+---
+import { toArticlePreview, type TopicGroup } from '../../lib/content';
+import { contentDefaults } from '../../config/content';
+import { i18nLabel } from '../../config/i18n';
+import { resolveContentDateLocale } from '@gaga/engine/content';
+
+interface Props {
+  group: TopicGroup;
+  language?: string;
+}
+
+const { group, language } = Astro.props;
+const writingsLabel = i18nLabel('entity.writings');
+const surfaceLocale = resolveContentDateLocale(
+  language ?? contentDefaults.defaultLanguage,
+  contentDefaults.dateLocale
+);
+---
+{group.articles.length ? (
+  <section class="gaga-entity-articles gaga-topic-articles" aria-labelledby="gaga-topic-articles-title">
+    <div class="gaga-entity-articles__head">
+      <h2
+        id="gaga-topic-articles-title"
+        data-gaga-i18n-key={writingsLabel.key}
+        data-gaga-i18n-id={writingsLabel.id}
+        data-gaga-i18n-en={writingsLabel.en}
+      >{writingsLabel.id}</h2>
+      <span>{group.articles.length}</span>
+    </div>
+    <ol>
+      {group.articles.map((article, index) => {
+        const preview = toArticlePreview(article, surfaceLocale, contentDefaults.preview);
+        return (
+          <li>
+            <a href={preview.href}>
+              <span class="gaga-mission-index" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+              <span>{preview.title}</span>
+            </a>
+          </li>
+        );
+      })}
+    </ol>
+  </section>
+) : null}

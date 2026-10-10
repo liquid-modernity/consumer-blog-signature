@@ -1,0 +1,70 @@
+---
+import '../styles/tokens.css';
+import '../styles/signature.scss';
+import StandaloneAppFrame from '../components/frame/StandaloneAppFrame.astro';
+import SeoHead from '../components/seo/SeoHead.astro';
+import { normalizeContentMetadata } from '@gaga/engine/content';
+import type { ScreenInfo } from '../lib/screen-info';
+
+const title = 'Search - Consumer Signature';
+const description = 'Compatibility route for the Consumer Signature search workspace.';
+const metadata = normalizeContentMetadata({
+  title,
+  seoTitle: title,
+  description,
+  summary: description,
+  language: 'id',
+  author: 'Editorial Team',
+  canonical: '/console',
+  contentKind: 'system',
+  contentClass: 'console',
+  noindex: true
+});
+const info: ScreenInfo = {
+  kind: 'system',
+  outlineItems: [{ slug: '_top', text: 'Search' }],
+  snippet: description,
+  topics: ['System', 'Search', 'Reader'],
+  tags: ['search', 'fallback'],
+  readTime: '< 1 min',
+  author: 'Editorial Team'
+};
+---
+<html lang="id-ID">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <SeoHead metadata={metadata} pathname="/console" title={title} noindex={true} includeWebSiteSchema={false} />
+  </head>
+  <body>
+    <StandaloneAppFrame
+      pageId="console"
+      pageTitle="Search"
+      contentKind="system"
+      contentClass="console"
+      info={info}
+    >
+      <section class="gaga-console-fallback" data-gaga-console-fallback aria-labelledby="_top">
+        <p class="gaga-system-kicker">PAKRPP / SEARCH</p>
+        <h1 id="_top">Search publication</h1>
+        <form action="/search" method="get" role="search">
+          <label for="console-fallback-search">Search articles, topics, and references</label>
+          <div class="gaga-console-fallback__search">
+            <input id="console-fallback-search" type="search" name="q" />
+            <button type="submit">Search</button>
+          </div>
+        </form>
+        <nav aria-label="Search compatibility destinations">
+          <a href="/">Latest</a>
+          <a href="/topics">Topics</a>
+          <a href="/archive">Archive</a>
+          <a href="/library">Library</a>
+          <a href="/search">Search</a>
+          <a href="/rss.xml">RSS</a>
+          <a href="/sitemap-index.xml">Sitemap</a>
+        </nav>
+        <p>This compatibility route keeps historical links safe. The public workspace is now Search.</p>
+      </section>
+    </StandaloneAppFrame>
+  </body>
+</html>

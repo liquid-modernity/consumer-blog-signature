@@ -1,0 +1,35 @@
+/* Design language packs reinterpret semantic tokens without component forks. */
+.gaga-app-frame[data-gaga-design-language='blueprintism'] {
+  --gaga-radius-sm: 4px; --gaga-radius-md: 6px; --gaga-radius-lg: 8px;
+  --gaga-font-display: Helvetica, Arial, sans-serif;
+}
+.gaga-app-frame[data-gaga-design-language='editorial'] {
+  --gaga-font-display: Georgia, 'Times New Roman', serif;
+  --gaga-content-width: 46rem;
+  --gaga-radius-sm: 2px; --gaga-radius-md: 4px; --gaga-radius-lg: 6px;
+  --gaga-type-body-line-height: 1.82;
+}
+.gaga-app-frame[data-gaga-design-language='minimal'] {
+  --gaga-shadow: none;
+  --gaga-radius-sm: 0; --gaga-radius-md: 0; --gaga-radius-lg: 0;
+  --gaga-bg-grid: transparent; --gaga-bg-grid-strong: transparent;
+}
+.gaga-app-frame[data-gaga-design-language='brutalism'] {
+  --gaga-radius-sm: 0; --gaga-radius-md: 0; --gaga-radius-lg: 0;
+  --gaga-line: currentColor; --gaga-line-strong: currentColor;
+  --gaga-shadow: .5rem .5rem 0 color-mix(in srgb, var(--gaga-ink) 25%, transparent);
+  --gaga-type-label-tracking: .02em;
+}
+.gaga-app-frame[data-gaga-design-language='corporate'] {
+  --gaga-font-display: var(--gaga-font-ui);
+  --gaga-radius-sm: 6px; --gaga-radius-md: 10px; --gaga-radius-lg: 14px;
+  --gaga-shadow: 0 .75rem 2rem color-mix(in srgb, var(--gaga-ink) 10%, transparent);
+}
+.gaga-app-frame[data-gaga-design-language='futuristic'] {
+  --gaga-radius-sm: 10px; --gaga-radius-md: 16px; --gaga-radius-lg: 24px;
+  --gaga-shadow: 0 1.4rem 3.5rem color-mix(in srgb, var(--gaga-blue) 18%, transparent);
+  --gaga-type-label-tracking: .12em;
+}
+@media (prefers-contrast: more) {
+  .gaga-app-frame { --gaga-line: currentColor; --gaga-line-strong: currentColor; }
+}

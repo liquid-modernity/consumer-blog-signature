@@ -1,0 +1,32 @@
+---
+import { getAuthors, getArticlesByAuthorRef } from '../../lib/content';
+
+const authors = await getAuthors();
+const rows = await Promise.all(authors.map(async (author) => ({
+  author,
+  count: (await getArticlesByAuthorRef(author.contentId)).length
+})));
+---
+<section class="gaga-author-index" aria-labelledby="gaga-authors-title">
+  <header class="gaga-directory-header">
+    <p class="gaga-system-kicker">PAKRPP / PEOPLE</p>
+    <h1 id="gaga-authors-title">Authors</h1>
+  </header>
+  <ul class="gaga-author-index__list">
+    {rows.map(({ author, count }) => (
+      <li>
+        <a href={author.href} class="gaga-author-card">
+          {author.image ? (
+            <img src={author.image} alt={author.imageAlt ?? ''} width="72" height="72" loading="lazy" decoding="async" />
+          ) : (
+            <span class="gaga-author-card__monogram" aria-hidden="true">{author.title.slice(0, 1).toUpperCase()}</span>
+          )}
+          <span class="gaga-author-card__copy">
+            <strong>{author.title}</strong>
+            <small>{count} tulisan</small>
+          </span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</section>

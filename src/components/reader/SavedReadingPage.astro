@@ -1,0 +1,92 @@
+---
+import { i18nLabel } from '../../config/i18n';
+import Icon from '../ui/Icon.astro';
+
+const copy = {
+  title: i18nLabel('continuity.savedTitle'),
+  subtitle: i18nLabel('continuity.savedSubtitle'),
+  resumeTitle: i18nLabel('continuity.resumeTitle'),
+  noActiveState: i18nLabel('continuity.noActiveState'),
+  bookmarksTitle: i18nLabel('continuity.bookmarksTitle'),
+  bookmarksDescription: i18nLabel('continuity.bookmarksDescription'),
+  bookmarksLoading: i18nLabel('continuity.bookmarksLoading'),
+  progressTitle: i18nLabel('continuity.progressTitle'),
+  progressDescription: i18nLabel('continuity.progressDescription'),
+  statusLoading: i18nLabel('continuity.statusLoading'),
+  removeBookmark: i18nLabel('continuity.removeBookmark'),
+  noBookmarks: i18nLabel('continuity.noBookmarks'),
+  noBookmarksHint: i18nLabel('continuity.noBookmarksHint'),
+  noProgress: i18nLabel('continuity.noProgress'),
+  noProgressHint: i18nLabel('continuity.noProgressHint')
+};
+---
+<section class="gaga-saved-screen" data-gaga-saved-page aria-labelledby="saved-title">
+  <header class="gaga-screen-section-head gaga-screen-section-head--plain">
+    <h2 id="saved-title" data-gaga-i18n-key={copy.title.key} data-gaga-i18n-id={copy.title.id} data-gaga-i18n-en={copy.title.en}>{copy.title.id}</h2>
+    <p data-gaga-i18n-key={copy.subtitle.key} data-gaga-i18n-id={copy.subtitle.id} data-gaga-i18n-en={copy.subtitle.en}>{copy.subtitle.id}</p>
+  </header>
+
+  <section class="gaga-continuity-continue" data-gaga-continuity-continue hidden aria-labelledby="gaga-continuity-continue-title">
+    <h3 id="gaga-continuity-continue-title" data-gaga-i18n-key={copy.resumeTitle.key} data-gaga-i18n-id={copy.resumeTitle.id} data-gaga-i18n-en={copy.resumeTitle.en}>{copy.resumeTitle.id}</h3>
+    <a class="gaga-saved-link" href="/" data-gaga-continuity-continue-link data-gaga-preview>
+      <Icon name="bookmark" />
+      <span data-gaga-continuity-continue-label data-gaga-i18n-key={copy.noActiveState.key} data-gaga-i18n-id={copy.noActiveState.id} data-gaga-i18n-en={copy.noActiveState.en}>{copy.noActiveState.id}</span>
+    </a>
+  </section>
+
+  <section class="gaga-saved-section" data-gaga-saved-bookmarks-section aria-labelledby="gaga-saved-bookmarks-title">
+    <div class="gaga-saved-section__head">
+      <h3 id="gaga-saved-bookmarks-title" data-gaga-i18n-key={copy.bookmarksTitle.key} data-gaga-i18n-id={copy.bookmarksTitle.id} data-gaga-i18n-en={copy.bookmarksTitle.en}>{copy.bookmarksTitle.id}</h3>
+      <p data-gaga-i18n-key={copy.bookmarksDescription.key} data-gaga-i18n-id={copy.bookmarksDescription.id} data-gaga-i18n-en={copy.bookmarksDescription.en}>{copy.bookmarksDescription.id}</p>
+    </div>
+    <div class="gaga-saved-inventory" data-gaga-saved-list data-gaga-saved-bookmarks-list data-gaga-preview-scope aria-live="polite">
+      <div class="gaga-empty-inventory" data-gaga-saved-fallback>
+        <Icon name="bookmarks" />
+        <p data-gaga-i18n-key={copy.bookmarksLoading.key} data-gaga-i18n-id={copy.bookmarksLoading.id} data-gaga-i18n-en={copy.bookmarksLoading.en}>{copy.bookmarksLoading.id}</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="gaga-saved-section" data-gaga-continuity-status-section aria-labelledby="gaga-saved-status-title">
+    <div class="gaga-saved-section__head">
+      <h3 id="gaga-saved-status-title" data-gaga-i18n-key={copy.progressTitle.key} data-gaga-i18n-id={copy.progressTitle.id} data-gaga-i18n-en={copy.progressTitle.en}>{copy.progressTitle.id}</h3>
+      <p data-gaga-i18n-key={copy.progressDescription.key} data-gaga-i18n-id={copy.progressDescription.id} data-gaga-i18n-en={copy.progressDescription.en}>{copy.progressDescription.id}</p>
+    </div>
+    <div class="gaga-saved-inventory" data-gaga-continuity-status-inventory data-gaga-preview-scope aria-live="polite">
+      <div class="gaga-empty-inventory">
+        <Icon name="history" />
+        <p data-gaga-i18n-key={copy.statusLoading.key} data-gaga-i18n-id={copy.statusLoading.id} data-gaga-i18n-en={copy.statusLoading.en}>{copy.statusLoading.id}</p>
+      </div>
+    </div>
+  </section>
+
+  <template data-gaga-saved-item-template>
+    <article class="gaga-saved-item" data-gaga-continuity-item data-gaga-motion>
+      <a class="gaga-saved-link" data-gaga-preview>
+        <Icon name="bookmark" />
+        <span class="gaga-saved-copy">
+          <span class="gaga-saved-kind" data-gaga-saved-kind></span>
+          <span data-gaga-saved-title></span>
+        </span>
+      </a>
+      <p class="gaga-continuity-meta" data-gaga-continuity-meta></p>
+      <button class="gaga-saved-item__remove" type="button" data-gaga-saved-remove data-gaga-i18n-key={copy.removeBookmark.key} data-gaga-i18n-id={copy.removeBookmark.id} data-gaga-i18n-en={copy.removeBookmark.en}>{copy.removeBookmark.id}</button>
+    </article>
+  </template>
+
+  <template data-gaga-saved-bookmarks-empty-template>
+    <div class="gaga-empty-inventory" data-gaga-motion>
+      <Icon name="bookmark_add" />
+      <p data-gaga-i18n-key={copy.noBookmarks.key} data-gaga-i18n-id={copy.noBookmarks.id} data-gaga-i18n-en={copy.noBookmarks.en}>{copy.noBookmarks.id}</p>
+      <small data-gaga-i18n-key={copy.noBookmarksHint.key} data-gaga-i18n-id={copy.noBookmarksHint.id} data-gaga-i18n-en={copy.noBookmarksHint.en}>{copy.noBookmarksHint.id}</small>
+    </div>
+  </template>
+
+  <template data-gaga-continuity-status-empty-template>
+    <div class="gaga-empty-inventory" data-gaga-motion>
+      <Icon name="history" />
+      <p data-gaga-i18n-key={copy.noProgress.key} data-gaga-i18n-id={copy.noProgress.id} data-gaga-i18n-en={copy.noProgress.en}>{copy.noProgress.id}</p>
+      <small data-gaga-i18n-key={copy.noProgressHint.key} data-gaga-i18n-id={copy.noProgressHint.id} data-gaga-i18n-en={copy.noProgressHint.en}>{copy.noProgressHint.id}</small>
+    </div>
+  </template>
+</section>

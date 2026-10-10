@@ -1,0 +1,58 @@
+---
+import MobileDock from './MobileDock.astro';
+import GlobalNavigationRail from './GlobalNavigationRail.astro';
+import ReaderPreferences from '../reader/ReaderPreferences.astro';
+import ContextSurfaceTrigger from './ContextSurfaceTrigger.astro';
+import SkipLink from '../ui/SkipLink.astro';
+import type { AppShellInput } from './component-inputs';
+import { designContract } from '../../config/design';
+
+interface Props {
+  pageId: string;
+  pageTitle: string;
+  contentKind?: string;
+  contentClass?: string;
+  mainElement?: 'main' | 'div';
+  shell: AppShellInput;
+}
+
+const {
+  pageId,
+  pageTitle,
+  contentKind = 'page',
+  contentClass = contentKind,
+  mainElement = 'main',
+  shell
+} = Astro.props;
+---
+<SkipLink />
+<div
+  class="gaga-app-frame"
+  data-gaga-app-frame
+  data-gaga-page-id={pageId}
+  data-gaga-page-title={pageTitle}
+  data-gaga-content-kind={contentKind}
+  data-gaga-content-class={contentClass}
+  data-gaga-design-language={designContract.language}
+>
+  <GlobalNavigationRail />
+  <slot name="before-main" />
+  {mainElement === 'main' ? (
+    <main class="gaga-main-region" data-gaga-main-region>
+      <slot />
+      <slot name="after-content" />
+    </main>
+  ) : (
+    <div class="gaga-main-region" data-gaga-main-region>
+      <slot />
+      <slot name="after-content" />
+    </div>
+  )}
+  <ContextSurfaceTrigger action={shell.contextTrigger} />
+  <slot name="after-main" />
+  <MobileDock dock={shell.mobileDock} />
+  <ReaderPreferences preferences={shell.readerPreferences} />
+</div>
+<script>
+  import '../../scripts/app';
+</script>

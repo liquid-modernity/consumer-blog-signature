@@ -1,0 +1,31 @@
+---
+import Icon from '../ui/Icon.astro';
+import type { SearchBoxInput } from '../frame/component-inputs';
+import { siteConfig } from '../../config/site';
+import { isSameSitePath } from '../../lib/url-semantics';
+
+interface Props {
+  action: SearchBoxInput;
+  currentPath?: string;
+}
+
+const { action, currentPath = '/' } = Astro.props;
+const isCurrent = isSameSitePath(currentPath, action.href, siteConfig.url);
+---
+<a
+  class:list={['gaga-search-box', isCurrent && 'gaga-is-current']}
+  href={action.href}
+  data-gaga-search-trigger
+  data-gaga-action="open-search"
+  aria-label={action.ariaLabel.id}
+  data-gaga-i18n-key={action.ariaLabel.key}
+  data-gaga-i18n-id={action.ariaLabel.id}
+  data-gaga-i18n-en={action.ariaLabel.en}
+  data-gaga-i18n-target="aria"
+  aria-current={isCurrent ? 'page' : undefined}
+  data-gaga-tooltip={action.tooltip.id}
+>
+  {action.icon ? <Icon name={action.icon} /> : null}
+  <span class="gaga-search-box__label" data-gaga-i18n-key={action.label.key} data-gaga-i18n-id={action.label.id} data-gaga-i18n-en={action.label.en}>{action.label.id}</span>
+  <kbd class="gaga-search-box__kbd">{action.shortcutDisplay}</kbd>
+</a>

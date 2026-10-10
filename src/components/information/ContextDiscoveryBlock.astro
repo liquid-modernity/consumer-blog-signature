@@ -1,0 +1,38 @@
+---
+import type { PageContextCard } from '../../lib/page-context';
+
+interface Props {
+  items?: PageContextCard[];
+  title?: { key?: string; id: string; en: string };
+}
+
+const { items = [], title = { id: 'Jelajahi', en: 'Explore' } } = Astro.props;
+---
+{items.length ? (
+  <section class="gaga-context-discovery" data-gaga-context-discovery aria-labelledby="gaga-context-discovery-title">
+    <h2 id="gaga-context-discovery-title" data-gaga-i18n-key={title.key} data-gaga-i18n-id={title.id} data-gaga-i18n-en={title.en}>{title.id}</h2>
+    <ul>
+      {items.map((item) => (
+        <li>
+          <a href={item.href} class:list={["gaga-context-discovery__item", !item.image && "gaga-context-discovery__item--text"]}>
+            {item.image ? (
+              <img
+                src={item.image}
+                alt={item.imageAlt ?? ''}
+                width="80"
+                height="56"
+                loading="lazy"
+                decoding="async"
+                fetchpriority="low"
+              />
+            ) : null}
+            <span class="gaga-context-discovery__copy">
+              <span class="gaga-context-discovery__title">{item.title}</span>
+              {item.meta ? <small>{item.meta}</small> : null}
+            </span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+) : null}

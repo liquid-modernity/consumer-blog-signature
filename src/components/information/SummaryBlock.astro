@@ -1,0 +1,11 @@
+---
+import Icon from '../ui/Icon.astro';
+interface Props { description?: string; title: string; titleEn?: string; }
+const { description, title, titleEn } = Astro.props;
+---
+{description ? (
+  <section class="gaga-info-summary">
+    <p class="gaga-info-eyebrow"><Icon name="text_snippet" /> <span data-gaga-i18n-id={title} data-gaga-i18n-en={titleEn}>{title}</span></p>
+    <p data-gaga-info-field="snippet">{description}</p>
+  </section>
+) : null}

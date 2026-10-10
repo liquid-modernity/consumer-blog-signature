@@ -1,0 +1,29 @@
+.gaga-skip-link {
+  position: fixed;
+  inset-block-start: max(.75rem, var(--gaga-safe-area-top));
+  inset-inline-start: max(.75rem, var(--gaga-safe-area-left));
+  z-index: 999;
+  transform: translateY(-200%);
+  padding: .6rem .9rem;
+  border: 2px solid var(--gaga-blue);
+  border-radius: var(--gaga-radius-sm);
+  background: var(--gaga-surface);
+  color: var(--gaga-ink);
+}
+
+.gaga-skip-link:focus {
+  transform: translateY(0);
+}
+
+:focus-visible {
+  outline: 2px solid var(--gaga-blue);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}

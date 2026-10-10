@@ -1,0 +1,11 @@
+# Consumer Blog Signature
+
+A configurable publishing bootstrap powered by Astro and Gaga Engine.
+
+Primary machine-readable surfaces:
+- /search-index.json
+- /rss.xml
+- /sitemap-index.xml
+- /__consumer/review.json
+
+Content is structured around articles, topics, tags, authors, collections, series, media, and references.

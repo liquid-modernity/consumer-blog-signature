@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="id-ID">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Offline • Consumer Blog Signature</title>
+    <meta name="description" content="Offline fallback for the consumer signature when the network is unavailable." />
+    <meta name="robots" content="noindex, nofollow" />
+    <style>
+      :root {
+        --bg: #153765;
+        --panel: #153765;
+        --line: rgba(255,255,255,.12);
+        --line-soft: rgba(255,255,255,.055);
+        --ink: #eef3fb;
+        --muted: #98a9c8;
+        --dim: #5e739a;
+        --accent: #89a4d4;
+      }
+      * { box-sizing: border-box; border-radius: 0 !important; }
+      html, body { margin: 0; min-height: 100%; }
+      body {
+        min-height: 100svh;
+        min-height: 100dvh;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background-image:
+          linear-gradient(var(--line-soft) 1px, transparent 1px),
+          linear-gradient(90deg, var(--line-soft) 1px, transparent 1px);
+        background-size: 22px 22px;
+      }
+      main {
+        width: min(44rem, calc(100vw - 2rem));
+        margin-inline: auto;
+        padding-block: clamp(5rem, 16vh, 10rem);
+      }
+      .screen {
+        position: relative;
+        padding-block: 2rem;
+        border-block: 1px solid var(--line);
+      }
+      .kicker, .command span {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      }
+      .kicker {
+        margin: 0 0 1rem;
+        color: var(--accent);
+        font-size: .72rem;
+        font-weight: 800;
+        letter-spacing: .22em;
+        text-transform: uppercase;
+      }
+      h1 {
+        max-width: 36rem;
+        margin: 0 0 1.35rem;
+        color: var(--ink);
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(3.25rem, 10vw, 6.75rem);
+        font-weight: 800;
+        line-height: .9;
+        letter-spacing: -.06em;
+      }
+      p {
+        max-width: 34rem;
+        margin: 0;
+        color: var(--muted);
+        font-size: clamp(1rem, 1.2vw, 1.08rem);
+        line-height: 1.75;
+      }
+      .commands {
+        display: grid;
+        gap: 0;
+        max-width: 34rem;
+        margin-block-start: 1.65rem;
+        border-block: 1px solid var(--line);
+      }
+      .command {
+        display: grid;
+        grid-template-columns: 3.25rem 1fr;
+        align-items: center;
+        min-height: 2.85rem;
+        color: var(--ink);
+        text-decoration: none;
+        border-block-end: 1px solid var(--line);
+        background: transparent;
+        font: inherit;
+        text-align: start;
+        cursor: pointer;
+      }
+      .command:last-child { border-block-end: 0; }
+      .command span {
+        color: var(--dim);
+        font-size: .72rem;
+        font-weight: 800;
+        letter-spacing: .12em;
+      }
+      .command strong {
+        color: var(--ink);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+        font-size: .76rem;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+      }
+      .command:hover strong, .command:focus-visible strong { color: #fff; }
+      .command:hover span, .command:focus-visible span { color: var(--accent); }
+      .readout {
+        margin-block-start: 1rem;
+        color: var(--dim);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+        font-size: .68rem;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+      }
+      ::selection { background: var(--accent); color: var(--bg); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="screen" aria-labelledby="offline-title">
+        <p class="kicker">PAKRPP OFFLINE / CACHE MODE</p>
+        <h1 id="offline-title">Signal Lost</h1>
+        <p>Koneksi tidak tersedia. Beberapa halaman yang pernah dibuka mungkin masih bisa dibaca dari cache lokal.</p>
+        <div class="commands" aria-label="Offline commands">
+          <button class="command" type="button" onclick="location.reload()"><span>01</span><strong>Retry connection</strong></button>
+          <a class="command" href="/"><span>02</span><strong>Open blog cache</strong></a>
+          <a class="command" href="/saved"><span>03</span><strong>Open saved reading</strong></a>
+        </div>
+        <p class="readout">SW/OFFLINE_FALLBACK_ACTIVE</p>
+      </section>
+    </main>
+  </body>
+</html>

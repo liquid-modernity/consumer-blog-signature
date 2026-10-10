@@ -1,0 +1,155 @@
+---
+import Icon from '../ui/Icon.astro';
+import type { KnowledgeGraphData, KnowledgeGraphNodeKind } from '../../lib/knowledge-graph';
+
+interface Props {
+  graph: KnowledgeGraphData;
+}
+
+const { graph } = Astro.props;
+const graphJson = JSON.stringify(graph).replace(/</g, '\\u003c');
+const counts = graph.nodes.reduce<Record<KnowledgeGraphNodeKind, number>>((accumulator, node) => {
+  accumulator[node.kind] += 1;
+  return accumulator;
+}, { article: 0, topic: 0, author: 0 });
+const degree = new Map<string, number>();
+for (const edge of graph.edges) {
+  degree.set(edge.source, (degree.get(edge.source) ?? 0) + 1);
+  degree.set(edge.target, (degree.get(edge.target) ?? 0) + 1);
+}
+---
+<section class="gaga-knowledge-graph" data-gaga-knowledge-graph data-gaga-graph-labels="true" aria-labelledby="gaga-graph-title">
+  <header class="gaga-knowledge-graph__toolbar">
+    <div class="gaga-knowledge-graph__identity">
+      <p class="gaga-system-kicker">PAKRPP / GRAPH</p>
+      <h1 id="gaga-graph-title">Knowledge Graph</h1>
+      <p class="gaga-knowledge-graph__summary">
+        {graph.nodes.length} node · {graph.edges.length} relationship · public knowledge only
+      </p>
+    </div>
+
+    <div class="gaga-knowledge-graph__primary-controls" aria-label="Graph controls">
+      <form class="gaga-knowledge-graph__search" role="search" data-gaga-graph-search>
+        <label class="gaga-visually-hidden" for="gaga-graph-search-input">Cari node graph</label>
+        <Icon name="search" />
+        <input
+          id="gaga-graph-search-input"
+          name="q"
+          type="search"
+          placeholder="Cari node"
+          autocomplete="off"
+          list="gaga-graph-node-options"
+          data-gaga-graph-search-input
+        />
+        <button type="submit">Fokus</button>
+      </form>
+
+      <fieldset class="gaga-knowledge-graph__mode" aria-label="Graph mode">
+        <label>
+          <input type="radio" name="gaga-graph-mode" value="global" checked data-gaga-graph-mode />
+          <span>Global</span>
+        </label>
+        <label>
+          <input type="radio" name="gaga-graph-mode" value="local" data-gaga-graph-mode />
+          <span>Local</span>
+        </label>
+      </fieldset>
+
+      <details class="gaga-knowledge-graph__settings">
+        <summary aria-label="Filter dan pengaturan graph"><Icon name="settings" /></summary>
+        <div class="gaga-knowledge-graph__settings-panel">
+          <fieldset>
+            <legend>Jenis node</legend>
+            <label><input type="checkbox" value="article" checked data-gaga-graph-kind /> Artikel <span>{counts.article}</span></label>
+            <label><input type="checkbox" value="topic" checked data-gaga-graph-kind /> Topik <span>{counts.topic}</span></label>
+            <label><input type="checkbox" value="author" checked data-gaga-graph-kind /> Penulis <span>{counts.author}</span></label>
+          </fieldset>
+          <label class="gaga-knowledge-graph__setting-row">
+            <span>Kedalaman local</span>
+            <select data-gaga-graph-depth>
+              <option value="1" selected>1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+            </select>
+          </label>
+          <label class="gaga-knowledge-graph__setting-row">
+            <span>Label node</span>
+            <input type="checkbox" checked data-gaga-graph-label-toggle />
+          </label>
+        </div>
+      </details>
+    </div>
+  </header>
+
+  <datalist id="gaga-graph-node-options">
+    {graph.nodes.map((node) => <option value={node.label}>{node.id}</option>)}
+  </datalist>
+
+  <div class="gaga-knowledge-graph__workspace">
+    <div class="gaga-knowledge-graph__canvas" data-gaga-graph-canvas>
+      <svg
+        class="gaga-knowledge-graph__svg"
+        viewBox="0 0 1200 760"
+        preserveAspectRatio="xMidYMid meet"
+        role="group"
+        aria-label="Graph interaktif konten publik Consumer Signature. Gunakan Tab untuk berpindah node, Enter untuk membuka, dan Space untuk memilih."
+        data-gaga-graph-svg
+      >
+        <g data-gaga-graph-viewport>
+          <g data-gaga-graph-edges></g>
+          <g data-gaga-graph-nodes></g>
+        </g>
+      </svg>
+
+      <div class="gaga-knowledge-graph__zoom" aria-label="Zoom graph">
+        <button type="button" data-gaga-graph-zoom-out aria-label="Perkecil graph">−</button>
+        <button type="button" data-gaga-graph-reset aria-label="Reset tampilan graph">Reset</button>
+        <button type="button" data-gaga-graph-zoom-in aria-label="Perbesar graph">+</button>
+      </div>
+
+      <aside class="gaga-knowledge-graph__inspector" aria-live="polite" aria-atomic="false" data-gaga-graph-inspector>
+        <p class="gaga-knowledge-graph__inspector-eyebrow" data-gaga-graph-inspector-kind>GRAPH</p>
+        <h2 data-gaga-graph-inspector-title>Pilih sebuah node</h2>
+        <p data-gaga-graph-inspector-summary>Klik atau fokuskan node untuk melihat hubungan publiknya.</p>
+        <p class="gaga-knowledge-graph__inspector-meta" data-gaga-graph-inspector-meta></p>
+        <ul class="gaga-knowledge-graph__inspector-relations" data-gaga-graph-inspector-relations></ul>
+        <template data-gaga-graph-relation-template>
+          <li>
+            <a href="/" data-gaga-graph-relation-link></a>
+            <span data-gaga-graph-relation-meta></span>
+          </li>
+        </template>
+        <div class="gaga-knowledge-graph__inspector-actions">
+          <button type="button" data-gaga-graph-make-local disabled>Local graph</button>
+          <a href="/graphs" data-gaga-graph-open hidden>Buka</a>
+        </div>
+      </aside>
+
+      <p class="gaga-knowledge-graph__status" role="status" aria-live="polite" data-gaga-graph-status>
+        Graph siap dijelajahi.
+      </p>
+    </div>
+  </div>
+
+  <details class="gaga-knowledge-graph__fallback">
+    <summary>Daftar hubungan yang dapat diakses</summary>
+    <p>Daftar ini menyediakan jalur navigasi semantik tanpa bergantung pada visual graph.</p>
+    <ul>
+      {graph.nodes.map((node) => (
+        <li>
+          <a href={node.href}>{node.label}</a>
+          <span>{node.kind} · {degree.get(node.id) ?? 0} hubungan</span>
+        </li>
+      ))}
+    </ul>
+  </details>
+
+  <p class="gaga-knowledge-graph__policy-link">
+    <a href="/system/graphs">Tentang Graph Consumer Signature dan batas publiknya</a>
+  </p>
+
+  <script type="application/json" data-gaga-graph-data set:html={graphJson}></script>
+</section>
+<script>
+  import '../../scripts/systems/knowledge-graph';
+</script>

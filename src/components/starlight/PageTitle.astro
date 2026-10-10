@@ -1,0 +1,26 @@
+---
+import { normalizeContentMetadata } from '@gaga/engine/content';
+import { i18nText, resolveLocale } from '../../config/i18n';
+
+const route = Astro.locals.starlightRoute;
+const metadata = normalizeContentMetadata(route?.entry?.data ?? {});
+const isArticle = metadata.contentKind === 'article';
+const isEntity = metadata.contentKind === 'author' || metadata.contentKind === 'topic';
+const displayTitle = Astro.url.pathname.replace(/\/+$/, '') === '/topics'
+  ? i18nText('navigation.topics', resolveLocale(metadata.language))
+  : metadata.title;
+if (!metadata.title) throw new Error(`Page title is required for ${route?.id ?? Astro.url.pathname}.`);
+---
+{isArticle || isEntity ? null : <h1 id="_top">{displayTitle}</h1>}
+
+<style>
+  @layer starlight.core {
+    h1 {
+      margin-top: 1rem;
+      font-size: var(--gaga-type-page-title-size);
+      line-height: var(--gaga-type-page-title-line-height);
+      font-weight: var(--gaga-type-page-title-weight);
+      color: var(--sl-color-white);
+    }
+  }
+</style>
