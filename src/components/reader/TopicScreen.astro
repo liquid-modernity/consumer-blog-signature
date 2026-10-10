@@ -10,12 +10,20 @@ interface Props {
 
 const { group, dateLocale } = Astro.props;
 ---
+---
+const safeGroup = group ?? {
+  topic: "Unknown Topic",
+  count: 0,
+  articles: []
+};
+---
+
 <section class="gaga-index-screen gaga-topic-screen" aria-labelledby="topic-title">
   <div class="gaga-screen-section-head">
     <h2 id="topic-title">{group.topic}</h2>
     <p>{i18nCount('article', group.count)}</p>
   </div>
-  <ol class="gaga-mission-list" aria-label={`Artikel dalam topik ${group.topic}`} data-gaga-preview-scope>
+  <ol class="gaga-mission-list" aria-label={`Artikel dalam topik ${safeGroup.topic}`} data-gaga-preview-scope>
     {group.articles.map((article, index) => {
       const preview = toArticlePreview(article, dateLocale, contentDefaults.preview);
       return (
