@@ -1,0 +1,55 @@
+
+:root {
+
+ --rail-collapsed-width:56px;
+ --rail-expanded-width:280px;
+
+}
+
+
+.gaga-left-rail,
+.gaga-right-rail {
+
+ width:
+ var(--rail-collapsed-width);
+
+ transition:
+ width .22s ease,
+ opacity .22s ease;
+
+ overflow:hidden;
+
+}
+
+
+html[data-left-rail="expanded"]
+.gaga-left-rail {
+
+ width:
+ var(--rail-expanded-width);
+
+}
+
+
+
+html[data-right-rail="expanded"]
+.gaga-right-rail {
+
+ width:
+ var(--rail-expanded-width);
+
+}
+
+
+
+@media(max-width:1199px){
+
+ .gaga-left-rail,
+ .gaga-right-rail {
+
+   width:0;
+
+ }
+
+}
+
