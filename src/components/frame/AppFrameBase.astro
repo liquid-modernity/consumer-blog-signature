@@ -1,6 +1,5 @@
 ---
 import MobileDock from './MobileDock.astro';
-import ActionRuntime from './ActionRuntime.astro';
 import GlobalNavigationRail from './GlobalNavigationRail.astro';
 import ReaderPreferences from '../reader/ReaderPreferences.astro';
 import ContextSurfaceTrigger from './ContextSurfaceTrigger.astro';
@@ -42,13 +41,11 @@ const {
     <main class="gaga-main-region" data-gaga-main-region>
       <slot />
       <slot name="after-content" />
-      <ActionRuntime />
     </main>
   ) : (
     <div class="gaga-main-region" data-gaga-main-region>
       <slot />
       <slot name="after-content" />
-      <ActionRuntime />
     </div>
   )}
   <ContextSurfaceTrigger action={shell.contextTrigger} />
