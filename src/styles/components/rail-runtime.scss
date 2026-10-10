@@ -53,3 +53,64 @@ html[data-right-rail="expanded"]
 
 }
 
+
+
+/* Phase 2.2 runtime binding */
+
+
+html[data-left-rail="collapsed"]
+.gaga-left-rail {
+
+ width:56px;
+
+}
+
+
+html[data-left-rail="expanded"]
+.gaga-left-rail {
+
+ width:280px;
+
+}
+
+
+
+html[data-right-rail="collapsed"]
+.gaga-right-rail {
+
+ width:56px;
+
+}
+
+
+
+html[data-right-rail="expanded"]
+.gaga-right-rail {
+
+ width:280px;
+
+}
+
+
+
+.gaga-left-rail [data-label],
+.gaga-right-rail [data-label] {
+
+ opacity:0;
+
+ transition:
+ opacity .2s ease;
+
+}
+
+
+html[data-left-rail="expanded"]
+.gaga-left-rail [data-label],
+html[data-right-rail="expanded"]
+.gaga-right-rail [data-label] {
+
+ opacity:1;
+
+}
+
+

@@ -11,7 +11,7 @@ interface Props {
 
 const { rail } = Astro.props;
 ---
-<aside id="gaga-left-rail" class="gaga-left-rail" data-gaga-left-rail data-gaga-state="expanded" aria-label={rail.ariaLabel.id} data-gaga-i18n-key={rail.ariaLabel.key} data-gaga-i18n-id={rail.ariaLabel.id} data-gaga-i18n-en={rail.ariaLabel.en} data-gaga-i18n-target="aria">
+<aside data-gaga-rail="left" id="gaga-left-rail" class="gaga-left-rail" data-gaga-left-rail data-gaga-state="expanded" aria-label={rail.ariaLabel.id} data-gaga-i18n-key={rail.ariaLabel.key} data-gaga-i18n-id={rail.ariaLabel.id} data-gaga-i18n-en={rail.ariaLabel.en} data-gaga-i18n-target="aria">
   <div class="gaga-left-rail__brand">
     <a href={rail.brand.href} class="gaga-brand"><span class="gaga-brand__dot" aria-hidden="true"></span>{rail.brand.label}</a>
     <RailToggle action={rail.railToggle} />
