@@ -1,0 +1,13 @@
+:root {
+  --gaga-motion-instant: 100ms;
+  --gaga-motion-subtle: 180ms;
+  --gaga-motion-immersive: 360ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --gaga-motion-instant: 0ms;
+    --gaga-motion-subtle: 0ms;
+    --gaga-motion-immersive: 0ms;
+  }
+}
