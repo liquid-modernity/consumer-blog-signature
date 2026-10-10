@@ -144,7 +144,7 @@ export function initReaderPreferences() {
     requestQuickActionsSync
   });
 
-  const applyPreset = (preset: ReaderPresetId, values: ReaderPresetValues, event: MouseEvent, reset = false) => {
+  const applyPreset = (preset: ReaderPresetId, values: ReaderPresetValues) => {
     const readerState: ReaderState = {
       density: values.density,
       font: values.font,
@@ -167,7 +167,7 @@ export function initReaderPreferences() {
       const preset = control?.dataset.gagaReaderPreset;
       const values = control ? valuesFromControl(control) : undefined;
       if (!isReaderPresetId(preset) || !values) return;
-      applyPreset(preset, values, event, !!reset);
+      applyPreset(preset, values);
       return;
     }
     if (sfxButton) {

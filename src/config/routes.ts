@@ -18,6 +18,8 @@ export const routeRegistry = {
   graph: { enabled: true, path: '/graphs' }
 } as const;
 
-export const reservedRouteNamespaces = Object.values(routeRegistry)
-  .flatMap((route) => Object.values(route).filter((value): value is string => typeof value === 'string'))
-  .filter((value) => value.startsWith('/') && !value.includes(':'));
+export const reservedRouteNamespaces = Object.values(routeRegistry).flatMap((route) =>
+  Object.values(route).flatMap((value) =>
+    typeof value === 'string' && value.startsWith('/') && !value.includes(':') ? [value] : []
+  )
+);
