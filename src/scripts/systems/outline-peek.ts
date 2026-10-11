@@ -53,18 +53,19 @@ export function initOutlinePeek() {
   if (initialized) return;
   const sheet = document.querySelector('[data-gaga-outline-peek]') as HTMLElement | null;
   if (!sheet) return;
+  const outlineSheet = sheet;
   initialized = true;
 
-  const stack = sheet.closest<HTMLElement>('[data-gaga-outline-stack]');
+  const stack = outlineSheet.closest<HTMLElement>('[data-gaga-outline-stack]');
   const preview = stack?.querySelector<HTMLButtonElement>('[data-gaga-outline-peek-preview]') ?? null;
   const currentIndex = stack?.querySelector<HTMLElement>('[data-gaga-outline-current-index]') ?? null;
   const currentLabel = stack?.querySelector<HTMLElement>('[data-gaga-outline-current-label]') ?? null;
   const sheetCurrentIndex = stack?.querySelector<HTMLElement>('[data-gaga-outline-sheet-current-index]') ?? null;
   const sheetCurrentLabel = stack?.querySelector<HTMLElement>('[data-gaga-outline-sheet-current-label]') ?? null;
-  const links = Array.from(sheet.querySelectorAll<HTMLAnchorElement>('[data-gaga-info-field="outline"] a[href^="#"]'));
+  const links = Array.from(outlineSheet.querySelectorAll<HTMLAnchorElement>('[data-gaga-info-field="outline"] a[href^="#"]'));
 
   const capability = createOutlinePeekCapability({
-    sheet,
+    sheet: outlineSheet,
     getLayoutMode: () => document.documentElement.dataset.gagaLayout,
     isAvailable: ({ mode, sheet }) =>
       supportsOutlinePeek(mode) &&
@@ -93,7 +94,7 @@ export function initOutlinePeek() {
 
   function syncDynamicVisibility() {
     const context = resolveReadingScrollContext();
-    if (!context || !stack || sheet.dataset.gagaState === 'open') return;
+    if (!context || !stack || outlineSheet.dataset.gagaState === 'open') return;
     const measurements = context.scrollContext.measure();
     const delta = measurements.scrollTop - lastScrollTop;
     if (measurements.scrollTop > 140 && delta > 11) stack.dataset.gagaVisibility = 'micro';

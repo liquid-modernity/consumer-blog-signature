@@ -68,7 +68,7 @@ function ensureBlockIds(container: HTMLElement) {
   });
 }
 
-function findSelectionLocation(range: Range, container: HTMLElement): HighlightLocation | null {
+function findSelectionLocation(range: Range): HighlightLocation | null {
   const startBlock = range.startContainer.nodeType === Node.ELEMENT_NODE
     ? (range.startContainer as HTMLElement).closest<HTMLElement>('[data-gaga-block-id]')
     : range.startContainer.parentElement?.closest<HTMLElement>('[data-gaga-block-id]');
@@ -602,7 +602,7 @@ function createHighlightFromSelection(
   const text = selection.toString().trim();
   if (!text) return;
 
-  const loc = findSelectionLocation(range, article);
+  const loc = findSelectionLocation(range);
   if (!loc) {
     requestToast({
       message: 'Pilih teks di dalam paragraf artikel',

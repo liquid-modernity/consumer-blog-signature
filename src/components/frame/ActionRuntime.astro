@@ -150,23 +150,24 @@ const allActions = [...primary, ...secondary];
   function setupActionRuntime() {
     const runtime = document.querySelector<HTMLElement>('[data-gaga-action-runtime]');
     if (!runtime || runtime.dataset.wired === 'true') return;
-    runtime.dataset.wired = 'true';
+    const island = runtime;
+    island.dataset.wired = 'true';
 
-    const toggle = runtime.querySelector<HTMLButtonElement>('[data-gaga-action-island-toggle]');
-    const progress = runtime.querySelector<HTMLElement>('[data-gaga-reading-progress]');
-    const progressValue = runtime.querySelector<HTMLElement>('[data-gaga-reading-progress-value]');
+    const toggle = island.querySelector<HTMLButtonElement>('[data-gaga-action-island-toggle]');
+    const progress = island.querySelector<HTMLElement>('[data-gaga-reading-progress]');
+    const progressValue = island.querySelector<HTMLElement>('[data-gaga-reading-progress-value]');
     const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
     let unsubscribeScroll: (() => void) | null = null;
     let lastScrollTop = 0;
     let scheduled = false;
     let hoverTimer = 0;
 
-    const isSpeaking = () => runtime.dataset.gagaLiveState === 'speaking';
-    const isExpanded = () => runtime.dataset.gagaState === 'expanded';
+    const isSpeaking = () => island.dataset.gagaLiveState === 'speaking';
+    const isExpanded = () => island.dataset.gagaState === 'expanded';
 
     function setState(state: 'micro' | 'collapsed' | 'expanded') {
       if (isSpeaking() && state !== 'expanded') return;
-      runtime.dataset.gagaState = state;
+      island.dataset.gagaState = state;
       toggle?.setAttribute('aria-expanded', state === 'expanded' ? 'true' : 'false');
       if (toggle) toggle.setAttribute('aria-label', state === 'expanded' ? 'Tutup aksi halaman' : 'Buka aksi halaman');
     }
@@ -176,7 +177,7 @@ const allActions = [...primary, ...secondary];
       if (!progress || !progressValue) return;
       const metrics = getUnifiedScrollMetrics();
       const rounded = Math.round(metrics.percentage);
-      runtime.style.setProperty('--gaga-action-progress', `${Math.max(0, Math.min(1, metrics.percentage / 100))}`);
+      island.style.setProperty('--gaga-action-progress', `${Math.max(0, Math.min(1, metrics.percentage / 100))}`);
       progressValue.textContent = `${rounded}%`;
       progress.setAttribute('aria-valuenow', String(rounded));
 
@@ -202,7 +203,7 @@ const allActions = [...primary, ...secondary];
       scheduleProgress();
     }
 
-    runtime.addEventListener('click', (event) => {
+    island.addEventListener('click', (event) => {
       const target = event.target as HTMLElement;
       const islandToggle = target.closest<HTMLButtonElement>('[data-gaga-action-island-toggle]');
       if (islandToggle) {
@@ -227,22 +228,22 @@ const allActions = [...primary, ...secondary];
       }
     });
 
-    runtime.addEventListener('pointerenter', () => {
+    island.addEventListener('pointerenter', () => {
       if (!finePointer.matches || isSpeaking()) return;
       window.clearTimeout(hoverTimer);
       setState('expanded');
     });
 
-    runtime.addEventListener('pointerleave', () => {
+    island.addEventListener('pointerleave', () => {
       if (!finePointer.matches || isSpeaking()) return;
       window.clearTimeout(hoverTimer);
       hoverTimer = window.setTimeout(() => {
-        if (!runtime.matches(':focus-within')) setState('collapsed');
+        if (!island.matches(':focus-within')) setState('collapsed');
       }, 220);
     });
 
     document.addEventListener('pointerdown', (event) => {
-      if (!isExpanded() || runtime.contains(event.target as Node) || isSpeaking()) return;
+      if (!isExpanded() || island.contains(event.target as Node) || isSpeaking()) return;
       setState('collapsed');
     }, { passive: true });
 
