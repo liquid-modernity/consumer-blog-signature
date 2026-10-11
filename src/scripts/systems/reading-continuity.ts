@@ -19,12 +19,16 @@ import {
   formatDateLocale,
   type HighlightEntity
 } from './reading-knowledge';
-import { isValidCognitiveReading, getReadingBehaviorMetrics } from './reading-behaviour';
+import { getReadingBehaviorMetrics } from './reading-behaviour';
 
 let initialized = false;
 let lastProgressWrite = 0;
 let latestHeading: Pick<ContinuityItem, 'lastHeadingId' | 'lastHeadingText' | 'progress'> | null = null;
 let currentLibraryTab = 'saved';
+
+export function getActiveLibraryTab(): string {
+  return currentLibraryTab;
+}
 
 const statusMessageKeys = {
   'read-next': 'reading.statusReadNext',

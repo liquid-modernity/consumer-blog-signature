@@ -1,4 +1,4 @@
-import { createPersonalHighlight, type PersonalHighlight } from '@gaga/engine/annotation';
+import { createPersonalHighlight } from '@gaga/engine/annotation';
 import { createAnnotationStorage } from '@gaga/engine-web/runtime/annotation';
 import { readJson, writeJson } from '@gaga/engine-web/runtime/storage';
 
