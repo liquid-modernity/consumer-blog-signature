@@ -15,7 +15,7 @@ const hasOutlinePeek = outlineItems.length > 0;
 const initialOutlineLabel = outlineItems[0]?.text ?? rail.labels.outlineFallback;
 ---
 {hasOutlinePeek ? (
-  <div class="gaga-outline-stack" data-gaga-outline-stack data-gaga-visibility="visible">
+  <div class="gaga-outline-stack" data-gaga-outline-stack data-gaga-surface="dynamic-outline-peek" data-gaga-visibility="visible">
     <button
       type="button"
       class="gaga-outline-peek-preview"

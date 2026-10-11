@@ -1,0 +1,20 @@
+---
+interface Props {
+  src: string;
+  alt: string;
+  caption?: string;
+  credit?: string;
+}
+
+const { src, alt, caption, credit } = Astro.props;
+---
+
+<figure class="gaga-media">
+  <img src={src} alt={alt} loading="lazy" decoding="async" />
+  {caption || credit ? (
+    <figcaption>
+      {caption}
+      {credit ? ` · ${credit}` : ''}
+    </figcaption>
+  ) : null}
+</figure>

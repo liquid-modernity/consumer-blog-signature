@@ -11,8 +11,8 @@ const { dock } = Astro.props;
 <nav
   class="gaga-dock"
   data-gaga-dock
-  data-gaga-state="visible"
-  aria-label={dock.label.id}
+  data-gaga-state="collapsed"
+  aria-label={dock.label.id} data-gaga-surface="dock"
   data-gaga-i18n-key={dock.label.key}
   data-gaga-i18n-id={dock.label.id}
   data-gaga-i18n-en={dock.label.en}

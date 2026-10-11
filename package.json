@@ -19,14 +19,12 @@
     "test": "node tools/validate-signature.mjs && node --test tools/hardening.test.mjs"
   },
   "dependencies": {
-    "@astrojs/starlight": "0.41.10",
     "astro": "7.2.9",
     "sass": "1.89.2",
     "typescript": "5.8.3",
     "@gaga/engine": "0.1.6",
     "@gaga/engine-astro": "0.1.6",
     "@gaga/engine-obsidian": "0.1.6",
-    "@gaga/engine-starlight": "0.1.6",
     "@gaga/engine-web": "0.1.6"
   },
   "devDependencies": {

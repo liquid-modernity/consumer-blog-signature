@@ -34,3 +34,7 @@ GitHub Actions builds with Node 22.19 and deploys static Astro output through Cl
 
 ## Important
 This is version `0.0.1`: a migration candidate derived from the supplied vehicle-blog architecture, with generic identity/content, signature shell, Gaga 0.1.6 bindings, Cloudflare CI scaffolding, and Catalina remote-review launcher. The sample content is deliberately domain-neutral and replaceable.
+
+
+## GAGA 0.0.35
+Production hardening foundation added for runtime policy, content boundary, and lifecycle contracts.
