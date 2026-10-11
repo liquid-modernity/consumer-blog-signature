@@ -1,0 +1,24 @@
+---
+import { getCollection, render } from 'astro:content';
+import '../styles/tokens.css';
+import '../styles/signature.scss';
+import PageFrame from '../components/starlight/PageFrame.astro';
+
+const route = Astro.locals.gagaRoute;
+const docs = await getCollection('docs');
+
+const entry = docs.find((item) => {
+  if (!route?.id) return false;
+  return item.id === route.id;
+});
+
+if (!entry) {
+  return Astro.redirect('/404');
+}
+
+const { Content } = await render(entry);
+---
+
+<PageFrame>
+  <Content />
+</PageFrame>
