@@ -99,7 +99,7 @@ async function boot() {
     hasCapability('[data-gaga-entity-tabs]')
       ? import('./systems/entity-tabs')
       : Promise.resolve(null),
-    hasCapability('[data-gaga-article-shell]')
+    hasCapability('[data-gaga-article-shell], .gaga-flagship-article, [data-gaga-reading-surface]')
       ? import('./systems/reader-enhancements')
       : Promise.resolve(null)
   ]);

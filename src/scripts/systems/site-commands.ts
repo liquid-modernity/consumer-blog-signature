@@ -4,7 +4,8 @@ import {
   requestFocusMode,
   requestLeftRail,
   requestOutline,
-  requestReaderPanel
+  requestReaderPanel,
+  requestToast
 } from '@gaga/engine-web/runtime/events';
 import { actionForCommand, type GagaActionCommand } from '../../config/actions';
 import { supportsBottomDock } from '../../config/systems';
@@ -77,6 +78,45 @@ function openSearch() {
   return true;
 }
 
+function shareCurrentPage(pointer: { x?: number; y?: number }) {
+  const shareData = {
+    title: document.title,
+    text: document.querySelector('meta[name="description"]')?.getAttribute('content') || document.title,
+    url: window.location.href
+  };
+  if (typeof navigator !== 'undefined' && navigator.share && navigator.canShare?.(shareData)) {
+    navigator.share(shareData)
+      .then(() => requestToast({ message: 'Tautan berhasil dibagikan', tone: 'ok', x: pointer.x, y: pointer.y }))
+      .catch((err) => {
+        if (err.name !== 'AbortError') {
+          requestToast({ message: 'Berbagi dibatalkan', tone: 'info', x: pointer.x, y: pointer.y });
+        }
+      });
+  } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+    navigator.clipboard.writeText(window.location.href)
+      .then(() => requestToast({ message: 'Tautan disalin ke papan klip', tone: 'ok', x: pointer.x, y: pointer.y }))
+      .catch(() => requestToast({ message: 'Gagal menyalin tautan', tone: 'warn', x: pointer.x, y: pointer.y }));
+  }
+  return true;
+}
+
+function smartBack(pointer: { x?: number; y?: number }) {
+  if (window.history.length > 1 && document.referrer && document.referrer.includes(window.location.host)) {
+    requestToast({ message: 'Kembali ke halaman sebelumnya', tone: 'info', x: pointer.x, y: pointer.y });
+    window.history.back();
+  } else {
+    requestToast({ message: 'Kembali ke beranda', tone: 'info', x: pointer.x, y: pointer.y });
+    window.location.assign('/');
+  }
+  return true;
+}
+
+function resetKnowledgeGraph(pointer: { x?: number; y?: number }) {
+  window.dispatchEvent(new CustomEvent('gaga:graph:reset'));
+  requestToast({ message: 'Tampilan graf di-reset', tone: 'ok', x: pointer.x, y: pointer.y });
+  return true;
+}
+
 function runBuiltInCommand(command: GagaActionCommand, detail: SiteCommandDetail) {
   const pointer = detail.pointer ?? viewportPoint();
   if (command === 'close-top-surface') {
@@ -84,6 +124,9 @@ function runBuiltInCommand(command: GagaActionCommand, detail: SiteCommandDetail
     return true;
   }
   if (command === 'open-search') return openSearch();
+  if (command === 'share-page') return shareCurrentPage(pointer);
+  if (command === 'smart-back') return smartBack(pointer);
+  if (command === 'reset-knowledge-graph') return resetKnowledgeGraph(pointer);
   if (command === 'toggle-focus-mode') {
     requestFocusMode({ action: 'toggle', source: detail.source ?? 'site-command', x: pointer.x ?? window.innerWidth / 2, y: pointer.y ?? 24 });
     return true;

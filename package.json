@@ -15,7 +15,8 @@
     "lint": "astro check",
     "verify": "npm run validate:signature && npm run check && npm run build",
     "review": "./run_local.command",
-    "validate:signature": "node tools/validate-signature.mjs"
+    "validate:signature": "node tools/validate-signature.mjs",
+    "test": "node tools/validate-signature.mjs && node --test tools/hardening.test.mjs"
   },
   "dependencies": {
     "@astrojs/starlight": "0.41.10",

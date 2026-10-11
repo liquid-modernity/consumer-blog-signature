@@ -13,7 +13,10 @@ export type GagaActionId =
   | 'outline'
   | 'info-rail'
   | 'context-info'
-  | 'close-top';
+  | 'close-top'
+  | 'smart-back'
+  | 'highlight'
+  | 'speak';
 
 export type GagaActionKind = 'link' | 'toggle' | 'command';
 
@@ -27,6 +30,9 @@ export type GagaActionCommand =
   | 'toggle-left-rail'
   | 'toggle-save'
   | 'share-page'
+  | 'smart-back'
+  | 'highlight'
+  | 'speak'
   | 'toggle-reader-preferences'
   | 'toggle-focus-mode'
   | 'toggle-outline'
@@ -361,6 +367,48 @@ export const gagaActions: readonly GagaAction[] = [
     projections: ['keyboard'],
     shortcuts: [{ id: 'escape-close-top', key: 'escape', display: 'Esc', allowEditable: true }],
     feedback: { label: 'Close top surface', sfx: 'click' }
+  },
+  {
+    id: 'smart-back',
+    kind: 'command',
+    tier: 'READING_ACTION',
+    label: i18nLabel('article.back'),
+    description: i18nLabel('article.smartBack'),
+    icon: 'arrow_back',
+    command: 'smart-back',
+    projections: ['article-utility'],
+    shortcuts: [
+      { id: 'alt-left-back', key: 'arrowleft', display: 'Alt+←', modifiers: ['alt'], allowEditable: false }
+    ],
+    feedback: { label: 'Back', success: 'Returning to previous screen', sfx: 'click' }
+  },
+  {
+    id: 'highlight',
+    kind: 'command',
+    tier: 'READING_ACTION',
+    label: i18nLabel('article.highlight'),
+    description: i18nLabel('article.highlight'),
+    icon: 'edit',
+    command: 'highlight',
+    projections: ['reading-utility'],
+    shortcuts: [
+      { id: 'h-highlight', key: 'h', display: 'H', allowEditable: false }
+    ],
+    feedback: { label: 'Highlight', success: 'Highlight saved', failure: 'Select text first', sfx: 'confirm' }
+  },
+  {
+    id: 'speak',
+    kind: 'command',
+    tier: 'READING_ACTION',
+    label: i18nLabel('article.speak'),
+    description: i18nLabel('article.speak'),
+    icon: 'volume_up',
+    command: 'speak',
+    projections: ['reading-utility'],
+    shortcuts: [
+      { id: 's-speak', key: 's', display: 'S', allowEditable: false }
+    ],
+    feedback: { label: 'Speak', success: 'Speech started', cancelled: 'Speech stopped', sfx: 'click' }
   }
 ];
 

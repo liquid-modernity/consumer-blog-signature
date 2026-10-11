@@ -40,7 +40,8 @@ import type {
 const readerFontLabels = {
   sm: 'A−',
   md: 'A',
-  lg: 'A+'
+  lg: 'A+',
+  xl: 'A++'
 } satisfies Record<ReaderFontScale, string>;
 
 const readerDensityLabelKeys = {

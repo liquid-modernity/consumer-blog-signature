@@ -22,10 +22,64 @@ const copy = {
 ---
 <section class="gaga-saved-screen" data-gaga-saved-page aria-labelledby="saved-title">
   <header class="gaga-screen-section-head gaga-screen-section-head--plain">
-    <h2 id="saved-title" data-gaga-i18n-key={copy.title.key} data-gaga-i18n-id={copy.title.id} data-gaga-i18n-en={copy.title.en}>{copy.title.id}</h2>
-    <p data-gaga-i18n-key={copy.subtitle.key} data-gaga-i18n-id={copy.subtitle.id} data-gaga-i18n-en={copy.subtitle.en}>{copy.subtitle.id}</p>
+    <div class="gaga-library-head">
+      <div class="gaga-library-head__titles">
+        <h2 id="saved-title" data-gaga-i18n-key={copy.title.key} data-gaga-i18n-id={copy.title.id} data-gaga-i18n-en={copy.title.en}>Pustaka & Memori Pengetahuan</h2>
+        <p data-gaga-i18n-key={copy.subtitle.key} data-gaga-i18n-id={copy.subtitle.id} data-gaga-i18n-en={copy.subtitle.en}>Simpan artikel, bangun sorotan bacaan, kelola catatan refleksi, dan lanjutkan progres baca.</p>
+      </div>
+
+      <!-- Quick Knowledge Stats -->
+      <div class="gaga-library-stats" data-gaga-library-stats aria-label="Statistik Memori Baca">
+        <div class="gaga-library-stat">
+          <span class="gaga-library-stat__value" data-gaga-stat-saved>0</span>
+          <span class="gaga-library-stat__label">Tersimpan</span>
+        </div>
+        <div class="gaga-library-stat">
+          <span class="gaga-library-stat__value" data-gaga-stat-highlights>0</span>
+          <span class="gaga-library-stat__label">Sorotan</span>
+        </div>
+        <div class="gaga-library-stat">
+          <span class="gaga-library-stat__value" data-gaga-stat-notes>0</span>
+          <span class="gaga-library-stat__label">Catatan</span>
+        </div>
+        <div class="gaga-library-stat">
+          <span class="gaga-library-stat__value" data-gaga-stat-quotes>0</span>
+          <span class="gaga-library-stat__label">Kutipan</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Knowledge Section Tabs -->
+    <nav class="gaga-library-nav" data-gaga-library-nav aria-label="Navigasi Bagian Pustaka">
+      <button type="button" class="gaga-library-nav__item is-active" data-gaga-library-tab="saved" role="tab" aria-selected="true" aria-controls="section-saved">
+        <Icon name="bookmark" />
+        <span>Artikel Tersimpan</span>
+        <span class="gaga-library-nav__badge" data-gaga-badge-saved>0</span>
+      </button>
+      <button type="button" class="gaga-library-nav__item" data-gaga-library-tab="highlights" role="tab" aria-selected="false" aria-controls="section-highlights">
+        <Icon name="edit" />
+        <span>Sorotan</span>
+        <span class="gaga-library-nav__badge" data-gaga-badge-highlights>0</span>
+      </button>
+      <button type="button" class="gaga-library-nav__item" data-gaga-library-tab="notes" role="tab" aria-selected="false" aria-controls="section-notes">
+        <Icon name="format_quote" />
+        <span>Catatan</span>
+        <span class="gaga-library-nav__badge" data-gaga-badge-notes>0</span>
+      </button>
+      <button type="button" class="gaga-library-nav__item" data-gaga-library-tab="quotes" role="tab" aria-selected="false" aria-controls="section-quotes">
+        <Icon name="format_quote" />
+        <span>Kutipan</span>
+        <span class="gaga-library-nav__badge" data-gaga-badge-quotes>0</span>
+      </button>
+      <button type="button" class="gaga-library-nav__item" data-gaga-library-tab="history" role="tab" aria-selected="false" aria-controls="section-history">
+        <Icon name="history" />
+        <span>Riwayat Baca</span>
+        <span class="gaga-library-nav__badge" data-gaga-badge-history>0</span>
+      </button>
+    </nav>
   </header>
 
+  <!-- Resume Reading Continuity Bar -->
   <section class="gaga-continuity-continue" data-gaga-continuity-continue hidden aria-labelledby="gaga-continuity-continue-title">
     <h3 id="gaga-continuity-continue-title" data-gaga-i18n-key={copy.resumeTitle.key} data-gaga-i18n-id={copy.resumeTitle.id} data-gaga-i18n-en={copy.resumeTitle.en}>{copy.resumeTitle.id}</h3>
     <a class="gaga-saved-link" href="/" data-gaga-continuity-continue-link data-gaga-preview>
@@ -34,10 +88,11 @@ const copy = {
     </a>
   </section>
 
-  <section class="gaga-saved-section" data-gaga-saved-bookmarks-section aria-labelledby="gaga-saved-bookmarks-title">
+  <!-- SECTION 1: SAVED ARTICLES -->
+  <section class="gaga-saved-section gaga-library-section" id="section-saved" data-gaga-library-section="saved" data-gaga-saved-bookmarks-section aria-labelledby="gaga-saved-bookmarks-title">
     <div class="gaga-saved-section__head">
-      <h3 id="gaga-saved-bookmarks-title" data-gaga-i18n-key={copy.bookmarksTitle.key} data-gaga-i18n-id={copy.bookmarksTitle.id} data-gaga-i18n-en={copy.bookmarksTitle.en}>{copy.bookmarksTitle.id}</h3>
-      <p data-gaga-i18n-key={copy.bookmarksDescription.key} data-gaga-i18n-id={copy.bookmarksDescription.id} data-gaga-i18n-en={copy.bookmarksDescription.en}>{copy.bookmarksDescription.id}</p>
+      <h3 id="gaga-saved-bookmarks-title">Artikel Tersimpan</h3>
+      <p>Artikel dan esai yang Anda simpan untuk dibaca kembali.</p>
     </div>
     <div class="gaga-saved-inventory" data-gaga-saved-list data-gaga-saved-bookmarks-list data-gaga-preview-scope aria-live="polite">
       <div class="gaga-empty-inventory" data-gaga-saved-fallback>
@@ -47,10 +102,56 @@ const copy = {
     </div>
   </section>
 
-  <section class="gaga-saved-section" data-gaga-continuity-status-section aria-labelledby="gaga-saved-status-title">
+  <!-- SECTION 2: HIGHLIGHTS -->
+  <section class="gaga-saved-section gaga-library-section" id="section-highlights" data-gaga-library-section="highlights" hidden aria-labelledby="gaga-library-highlights-title">
     <div class="gaga-saved-section__head">
-      <h3 id="gaga-saved-status-title" data-gaga-i18n-key={copy.progressTitle.key} data-gaga-i18n-id={copy.progressTitle.id} data-gaga-i18n-en={copy.progressTitle.en}>{copy.progressTitle.id}</h3>
-      <p data-gaga-i18n-key={copy.progressDescription.key} data-gaga-i18n-id={copy.progressDescription.id} data-gaga-i18n-en={copy.progressDescription.en}>{copy.progressDescription.id}</p>
+      <h3 id="gaga-library-highlights-title">Sorotan Pengetahuan</h3>
+      <p>Koleksi kalimat dan wawasan berharga yang Anda tandai saat membaca.</p>
+    </div>
+    <div class="gaga-knowledge-inventory" data-gaga-highlights-list aria-live="polite">
+      <div class="gaga-empty-inventory">
+        <Icon name="edit" />
+        <p>Belum ada teks yang disorot.</p>
+        <small>Pilih teks pada artikel manapun lalu tekan "Sorot" (atau tombol H) untuk menyimpan ke sini.</small>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 3: NOTES -->
+  <section class="gaga-saved-section gaga-library-section" id="section-notes" data-gaga-library-section="notes" hidden aria-labelledby="gaga-library-notes-title">
+    <div class="gaga-saved-section__head">
+      <h3 id="gaga-library-notes-title">Catatan & Refleksi</h3>
+      <p>Anotasi pemikiran pribadi yang Anda sematkan pada bagian artikel.</p>
+    </div>
+    <div class="gaga-knowledge-inventory" data-gaga-notes-list aria-live="polite">
+      <div class="gaga-empty-inventory">
+        <Icon name="format_quote" />
+        <p>Belum ada catatan refleksi tersimpan.</p>
+        <small>Tambahkan catatan saat menyorot teks untuk merangkum wawasan Anda.</small>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 4: QUOTES -->
+  <section class="gaga-saved-section gaga-library-section" id="section-quotes" data-gaga-library-section="quotes" hidden aria-labelledby="gaga-library-quotes-title">
+    <div class="gaga-saved-section__head">
+      <h3 id="gaga-library-quotes-title">Kutipan Pilihan</h3>
+      <p>Kutipan penting yang siap disalin dan dibagikan.</p>
+    </div>
+    <div class="gaga-knowledge-inventory" data-gaga-quotes-list aria-live="polite">
+      <div class="gaga-empty-inventory">
+        <Icon name="format_quote" />
+        <p>Belum ada kutipan pilihan.</p>
+        <small>Semua teks yang Anda sorot dapat disalin sebagai kutipan berformat rapi.</small>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 5: READING HISTORY -->
+  <section class="gaga-saved-section gaga-library-section" id="section-history" data-gaga-library-section="history" hidden data-gaga-continuity-status-section aria-labelledby="gaga-saved-status-title">
+    <div class="gaga-saved-section__head">
+      <h3 id="gaga-saved-status-title">Riwayat Baca & Progres</h3>
+      <p>Jejak pembacaan dan kontinuitas posisi baca Anda di seluruh artikel.</p>
     </div>
     <div class="gaga-saved-inventory" data-gaga-continuity-status-inventory data-gaga-preview-scope aria-live="polite">
       <div class="gaga-empty-inventory">
@@ -60,6 +161,7 @@ const copy = {
     </div>
   </section>
 
+  <!-- TEMPLATES -->
   <template data-gaga-saved-item-template>
     <article class="gaga-saved-item" data-gaga-continuity-item data-gaga-motion>
       <a class="gaga-saved-link" data-gaga-preview>
@@ -71,6 +173,114 @@ const copy = {
       </a>
       <p class="gaga-continuity-meta" data-gaga-continuity-meta></p>
       <button class="gaga-saved-item__remove" type="button" data-gaga-saved-remove data-gaga-i18n-key={copy.removeBookmark.key} data-gaga-i18n-id={copy.removeBookmark.id} data-gaga-i18n-en={copy.removeBookmark.en}>{copy.removeBookmark.id}</button>
+    </article>
+  </template>
+
+  <!-- HIGHLIGHT ITEM TEMPLATE -->
+  <template data-gaga-highlight-item-template>
+    <article class="gaga-knowledge-card gaga-knowledge-card--highlight" data-gaga-knowledge-item data-gaga-motion>
+      <div class="gaga-knowledge-card__quote">
+        <span class="gaga-knowledge-card__quote-mark" aria-hidden="true">“</span>
+        <blockquote data-gaga-highlight-text></blockquote>
+      </div>
+
+      <div class="gaga-knowledge-card__note" data-gaga-highlight-note-container hidden>
+        <span class="gaga-knowledge-card__note-label">Catatan Pribadi:</span>
+        <p data-gaga-highlight-note-text></p>
+      </div>
+
+      <div class="gaga-knowledge-card__meta">
+        <div class="gaga-knowledge-card__source">
+          <a class="gaga-knowledge-card__article-link" data-gaga-highlight-article href="#">
+            <Icon name="article" />
+            <span data-gaga-highlight-title></span>
+          </a>
+          <span class="gaga-knowledge-card__author" data-gaga-highlight-author></span>
+          <span class="gaga-knowledge-card__topic" data-gaga-highlight-topic></span>
+          <time class="gaga-knowledge-card__date" data-gaga-highlight-date></time>
+        </div>
+
+        <div class="gaga-knowledge-card__actions">
+          <a class="gaga-btn gaga-btn--sm gaga-btn--primary" data-gaga-highlight-jump href="#" title="Kembali dan lompat ke posisi sorotan di artikel">
+            <Icon name="arrow_forward" />
+            <span>Buka di Artikel</span>
+          </a>
+          <button type="button" class="gaga-btn gaga-btn--sm" data-gaga-highlight-listen title="Dengarkan kutipan ini">
+            <Icon name="volume" />
+            <span>Dengarkan</span>
+          </button>
+          <button type="button" class="gaga-btn gaga-btn--sm" data-gaga-highlight-copy title="Salin kutipan">
+            <Icon name="share" />
+            <span>Salin</span>
+          </button>
+          <button type="button" class="gaga-btn gaga-btn--sm gaga-btn--ghost" data-gaga-highlight-remove title="Hapus sorotan">
+            <Icon name="close" />
+            <span>Hapus</span>
+          </button>
+        </div>
+      </div>
+    </article>
+  </template>
+
+  <!-- NOTE ITEM TEMPLATE -->
+  <template data-gaga-note-item-template>
+    <article class="gaga-knowledge-card gaga-knowledge-card--note" data-gaga-knowledge-item data-gaga-motion>
+      <div class="gaga-knowledge-card__note-box">
+        <div class="gaga-knowledge-card__note-header">
+          <span class="gaga-knowledge-card__note-tag">CATATAN REFLEKSI</span>
+          <time class="gaga-knowledge-card__date" data-gaga-note-date></time>
+        </div>
+        <p class="gaga-knowledge-card__note-body" data-gaga-note-text></p>
+      </div>
+
+      <div class="gaga-knowledge-card__context">
+        <span class="gaga-knowledge-card__context-label">Konteks Kutipan:</span>
+        <blockquote class="gaga-knowledge-card__context-quote" data-gaga-note-context></blockquote>
+      </div>
+
+      <div class="gaga-knowledge-card__meta">
+        <a class="gaga-knowledge-card__article-link" data-gaga-note-article href="#">
+          <Icon name="article" />
+          <span data-gaga-note-title></span>
+        </a>
+        <div class="gaga-knowledge-card__actions">
+          <a class="gaga-btn gaga-btn--sm gaga-btn--primary" data-gaga-note-jump href="#">
+            <Icon name="arrow_forward" />
+            <span>Buka di Artikel</span>
+          </a>
+          <button type="button" class="gaga-btn gaga-btn--sm gaga-btn--ghost" data-gaga-note-remove title="Hapus catatan">
+            <Icon name="close" />
+            <span>Hapus</span>
+          </button>
+        </div>
+      </div>
+    </article>
+  </template>
+
+  <!-- QUOTE ITEM TEMPLATE -->
+  <template data-gaga-quote-item-template>
+    <article class="gaga-knowledge-card gaga-knowledge-card--quote" data-gaga-knowledge-item data-gaga-motion>
+      <div class="gaga-knowledge-card__quote-body">
+        <span class="gaga-knowledge-card__quote-icon">“</span>
+        <blockquote data-gaga-quote-text></blockquote>
+        <cite class="gaga-knowledge-card__citation">
+          — <span data-gaga-quote-author></span>, <cite data-gaga-quote-title></cite>
+        </cite>
+      </div>
+
+      <div class="gaga-knowledge-card__meta">
+        <time class="gaga-knowledge-card__date" data-gaga-quote-date></time>
+        <div class="gaga-knowledge-card__actions">
+          <a class="gaga-btn gaga-btn--sm gaga-btn--primary" data-gaga-quote-jump href="#">
+            <Icon name="arrow_forward" />
+            <span>Buka di Artikel</span>
+          </a>
+          <button type="button" class="gaga-btn gaga-btn--sm" data-gaga-quote-copy title="Salin kutipan">
+            <Icon name="share" />
+            <span>Salin Kutipan</span>
+          </button>
+        </div>
+      </div>
     </article>
   </template>
 

@@ -22,7 +22,7 @@ const getActionsForContext = (ctx: string): { primary: ActionItem[]; secondary: 
     return {
       primary: [
         { id: 'back', command: 'smart-back', label: 'Kembali', icon: 'arrow_back', shortcut: 'Alt+←', tier: 'primary' },
-        { id: 'share', command: 'smart-share', label: 'Bagikan', icon: 'ios_share', shortcut: 'Ctrl+S', tier: 'primary' },
+        { id: 'share', command: 'share-page', label: 'Bagikan', icon: 'ios_share', shortcut: 'Ctrl+S', tier: 'primary' },
         { id: 'focus', command: 'toggle-focus-mode', label: 'Fokus', icon: 'width_full', shortcut: 'F', tier: 'primary' }
       ],
       secondary: [
@@ -37,7 +37,7 @@ const getActionsForContext = (ctx: string): { primary: ActionItem[]; secondary: 
     return {
       primary: [
         { id: 'back', command: 'smart-back', label: 'Kembali', icon: 'arrow_back', shortcut: 'Alt+←', tier: 'primary' },
-        { id: 'share', command: 'smart-share', label: 'Bagikan', icon: 'ios_share', shortcut: 'Ctrl+S', tier: 'primary' },
+        { id: 'share', command: 'share-page', label: 'Bagikan', icon: 'ios_share', shortcut: 'Ctrl+S', tier: 'primary' },
         { id: 'search', command: 'open-search', label: 'Cari', icon: 'search', shortcut: '⌘K', tier: 'primary' }
       ],
       secondary: [
@@ -50,7 +50,7 @@ const getActionsForContext = (ctx: string): { primary: ActionItem[]; secondary: 
     return {
       primary: [
         { id: 'back', command: 'smart-back', label: 'Kembali', icon: 'arrow_back', shortcut: 'Alt+←', tier: 'primary' },
-        { id: 'share', command: 'smart-share', label: 'Bagikan', icon: 'ios_share', shortcut: 'Ctrl+S', tier: 'primary' },
+        { id: 'share', command: 'share-page', label: 'Bagikan', icon: 'ios_share', shortcut: 'Ctrl+S', tier: 'primary' },
         { id: 'reset-graph', command: 'reset-knowledge-graph', label: 'Reset Graf', icon: 'sync', shortcut: 'R', tier: 'primary' }
       ],
       secondary: [
@@ -62,7 +62,7 @@ const getActionsForContext = (ctx: string): { primary: ActionItem[]; secondary: 
   return {
     primary: [
       { id: 'back', command: 'smart-back', label: 'Kembali', icon: 'arrow_back', shortcut: 'Alt+←', tier: 'primary' },
-      { id: 'share', command: 'smart-share', label: 'Bagikan', icon: 'ios_share', shortcut: 'Ctrl+S', tier: 'primary' }
+      { id: 'share', command: 'share-page', label: 'Bagikan', icon: 'ios_share', shortcut: 'Ctrl+S', tier: 'primary' }
     ],
     secondary: [
       { id: 'personalize', command: 'personalize', label: 'Personalisasi', icon: 'settings', shortcut: 'P', tier: 'secondary' }
@@ -142,27 +142,20 @@ const { primary, secondary } = getActionsForContext(context);
 </div>
 
 <script>
+  import { runSiteCommand } from '../../scripts/systems/site-commands';
+  import { requestToast } from '@gaga/engine-web/runtime/events';
+
   function setupActionRuntime() {
     const runtime = document.querySelector<HTMLElement>('[data-gaga-action-runtime]');
     if (!runtime || runtime.dataset.wired === 'true') return;
     runtime.dataset.wired = 'true';
 
-    // Toast notification manager
+    // System toast helper
     function showToast(message: string, isError = false) {
-      let toast = document.querySelector<HTMLElement>('#gaga-runtime-toast');
-      if (!toast) {
-        toast = document.createElement('div');
-        toast.id = 'gaga-runtime-toast';
-        toast.className = 'gaga-runtime-toast';
-        document.body.appendChild(toast);
-      }
-      toast.textContent = message;
-      toast.classList.toggle('gaga-runtime-toast--error', isError);
-      toast.classList.add('gaga-is-visible');
-
-      window.setTimeout(() => {
-        toast?.classList.remove('gaga-is-visible');
-      }, 2400);
+      requestToast({
+        message,
+        tone: isError ? 'warn' : 'info'
+      });
     }
 
     // Text highlighting helper
@@ -255,108 +248,31 @@ const { primary, secondary } = getActionsForContext(context);
       window.speechSynthesis.speak(synthUtterance);
     }
 
-    // Central Action Dispatcher
+    // Central Action Dispatcher delegates to single system runtime
     runtime.addEventListener('click', (event) => {
       const button = (event.target as HTMLElement).closest<HTMLButtonElement>('[data-gaga-action]');
       if (!button) return;
 
       const action = button.dataset.gagaAction;
+      const pointer = { x: event.clientX, y: event.clientY };
 
-      switch (action) {
-        case 'smart-back': {
-          if (window.history.length > 1 && document.referrer && document.referrer.includes(window.location.host)) {
-            showToast('Kembali ke tampilan sebelumnya');
-            window.history.back();
-          } else {
-            showToast('Kembali ke beranda');
-            window.location.assign('/');
-          }
-          break;
-        }
+      if (action === 'highlight') {
+        performHighlight();
+        return;
+      }
 
-        case 'smart-share': {
-          const shareData = {
-            title: document.title,
-            text: document.querySelector('meta[name="description"]')?.getAttribute('content') || document.title,
-            url: window.location.href
-          };
-          if (navigator.share && navigator.canShare?.(shareData)) {
-            navigator.share(shareData)
-              .then(() => showToast('Berhasil dibagikan'))
-              .catch((err) => {
-                if (err.name !== 'AbortError') showToast('Berbagi dibatalkan');
-              });
-          } else {
-            navigator.clipboard.writeText(window.location.href)
-              .then(() => showToast('Tautan disalin ke papan klip'))
-              .catch(() => showToast('Gagal menyalin tautan', true));
-          }
-          break;
-        }
+      if (action === 'speak') {
+        toggleSpeech(button);
+        return;
+      }
 
-        case 'toggle-focus-mode':
-        case 'focus-mode': {
-          const isFocus = document.documentElement.dataset.gagaFocusMode === 'on';
-          const newFocus = !isFocus;
-          document.documentElement.dataset.gagaFocusMode = newFocus ? 'on' : 'off';
-          document.body.dataset.gagaFocusMode = newFocus ? 'on' : 'off';
-          button.setAttribute('aria-pressed', String(newFocus));
-          button.classList.toggle('gaga-is-active', newFocus);
+      if (action === 'personalize') {
+        runSiteCommand('toggle-reader-preferences', { source: 'action-runtime', target: button, pointer });
+        return;
+      }
 
-          // Collapse side rails in focus mode
-          if (newFocus) {
-            const leftRail = document.querySelector<HTMLElement>('#gaga-left-rail, [data-gaga-left-rail]');
-            if (leftRail) leftRail.dataset.gagaState = 'collapsed';
-            const rightRail = document.querySelector<HTMLElement>('#gaga-right-rail, [data-gaga-right-rail]');
-            if (rightRail) rightRail.dataset.gagaState = 'collapsed';
-          }
-          showToast(newFocus ? 'Mode Fokus aktif (Tekan ESC untuk keluar)' : 'Mode Fokus dinonaktifkan');
-          break;
-        }
-
-        case 'highlight': {
-          performHighlight();
-          break;
-        }
-
-        case 'speak': {
-          toggleSpeech(button);
-          break;
-        }
-
-        case 'personalize':
-        case 'toggle-reader-preferences': {
-          const prefBtn = document.querySelector<HTMLButtonElement>('[data-gaga-action="toggle-reader-preferences"]');
-          const panel = document.querySelector<HTMLElement>('[data-gaga-reader-panel]');
-          if (panel) {
-            const isOpen = panel.dataset.gagaState === 'open';
-            const nextState = isOpen ? 'closed' : 'open';
-            panel.dataset.gagaState = nextState;
-            panel.setAttribute('aria-hidden', String(isOpen));
-            if (nextState === 'open') {
-              panel.removeAttribute('inert');
-              showToast('Membuka preferensi membaca');
-            } else {
-              panel.setAttribute('inert', '');
-              showToast('Preferensi membaca ditutup');
-            }
-          } else if (prefBtn) {
-            prefBtn.click();
-            showToast('Preferensi membaca');
-          }
-          break;
-        }
-
-        case 'open-search': {
-          window.location.assign('/search');
-          break;
-        }
-
-        case 'reset-knowledge-graph': {
-          window.dispatchEvent(new CustomEvent('gaga:graph:reset'));
-          showToast('Tampilan graf di-reset');
-          break;
-        }
+      if (action && (action as any)) {
+        runSiteCommand(action as any, { source: 'action-runtime', target: button, pointer });
       }
     });
 
@@ -668,37 +584,6 @@ const { primary, secondary } = getActionsForContext(context);
 </style>
 
 <style is:global>
-  /* Toast Notification */
-  .gaga-runtime-toast {
-    position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    z-index: 9999;
-    padding: 0.7rem 1.4rem;
-    border-radius: 999px;
-    background: var(--gaga-ink, #0f172a);
-    color: var(--gaga-bg, #ffffff);
-    font-size: 0.85rem;
-    font-weight: 600;
-    font-family: var(--gaga-font-body, system-ui, sans-serif);
-    box-shadow: 0 10px 32px rgba(0, 0, 0, 0.25);
-    border: 1px solid var(--gaga-line, rgba(255, 255, 255, 0.1));
-    opacity: 0;
-    transform: translateY(14px) scale(0.96);
-    transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1), transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-    pointer-events: none;
-  }
-
-  .gaga-runtime-toast.gaga-is-visible {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-
-  .gaga-runtime-toast--error {
-    background: #ef4444 !important;
-    color: #ffffff !important;
-  }
-
   /* Text Highlight Marks */
   mark.gaga-highlight {
     background: color-mix(in srgb, #fef08a 75%, transparent);

@@ -272,34 +272,15 @@ const galleryItems = [
         font-weight: 500;
       }
 
-      /* Editorial Prose & Drop Cap */
+      /* Editorial Prose & Drop Cap - Connected directly to Gaga Reader Runtime */
       .gaga-flagship-article__prose {
-        font-family: var(--gaga-font-body, sans-serif);
-        font-size: 1.1rem;
-        line-height: 1.82;
+        font-family: var(--gaga-article-font-family, var(--gaga-font-body, sans-serif));
+        font-size: var(--gaga-article-font-size, 1.1rem);
+        line-height: var(--gaga-article-line-height, 1.82);
+        letter-spacing: var(--gaga-article-letter-spacing, normal);
+        max-width: var(--gaga-article-measure, 44rem);
         color: var(--gaga-ink);
-        transition: font-size 0.2s ease, line-height 0.2s ease;
-      }
-
-      /* Reading Preferences Adaptations */
-      body[data-gaga-reader-font="sm"] .gaga-flagship-article__prose {
-        font-size: 1rem;
-      }
-      body[data-gaga-reader-font="lg"] .gaga-flagship-article__prose {
-        font-size: 1.25rem;
-        line-height: 1.95;
-      }
-      body[data-gaga-reader-density="compact"] .gaga-flagship-article__prose {
-        line-height: 1.6;
-      }
-      body[data-gaga-reader-density="compact"] .gaga-flagship-article__prose p {
-        margin: 0.9rem 0;
-      }
-      body[data-gaga-reader-density="wide"] .gaga-flagship-article {
-        max-width: min(52rem, 95vw);
-      }
-      body[data-gaga-reader-density="wide"] .gaga-flagship-article__prose {
-        line-height: 2.0;
+        transition: font-size 0.2s ease, line-height 0.2s ease, letter-spacing 0.2s ease;
       }
 
       .gaga-flagship-article__lead::first-letter {
@@ -378,7 +359,16 @@ const galleryItems = [
       contentClass="article-flagship"
       info={info}
     >
-      <article class="gaga-flagship-article" id="article-root">
+      <article
+        class="gaga-flagship-article"
+        id="article-root"
+        data-gaga-article-shell
+        data-gaga-article-route="/article"
+        data-gaga-language="id-ID"
+        data-gaga-article-title={title}
+        data-gaga-article-author="Tim Riset Editorial & Rekayasa Gaga"
+        data-gaga-article-topic="Arsitektur Produk"
+      >
         <!-- Breadcrumbs -->
         <nav class="gaga-flagship-article__breadcrumb" aria-label="Breadcrumb navigation">
           <a href="/">Beranda</a>
