@@ -1,23 +1,25 @@
 ---
 import QuickAction from '../navigation/QuickAction.astro';
-import type { MobileDockInput } from './component-inputs';
+import type { GagaDockInput } from './component-inputs';
 
 interface Props {
-  dock: MobileDockInput;
+  dock: GagaDockInput;
 }
 
 const { dock } = Astro.props;
 ---
 <nav
-  class="gaga-mobile-dock"
-  data-gaga-mobile-dock
+  class="gaga-dock"
+  data-gaga-dock
   data-gaga-state="visible"
   aria-label={dock.label.id}
   data-gaga-i18n-key={dock.label.key}
   data-gaga-i18n-id={dock.label.id}
   data-gaga-i18n-en={dock.label.en}
   data-gaga-i18n-target="aria"
-  style={`--gaga-mobile-dock-action-capacity: ${dock.actionCapacity}`}
+  style={`--gaga-dock-action-capacity: ${dock.actionCapacity}`}
 >
-  {dock.items.map((item) => <QuickAction action={item} currentPath={dock.currentPath} />)}
+  <div class="gaga-dock__surface">
+    {dock.items.map((item) => <QuickAction action={item} currentPath={dock.currentPath} />)}
+  </div>
 </nav>

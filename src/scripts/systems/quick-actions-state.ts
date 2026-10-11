@@ -2,7 +2,7 @@ import { createQuickActionsStateCapability, type QuickActionElement } from '@gag
 import { isSavedItem } from '@gaga/engine-web/reader';
 import { readArray } from '@gaga/engine-web/runtime/storage';
 import { actionById, actionForCommand, isGagaActionId, type GagaAction } from '../../config/actions';
-import { storageKeys, supportsBottomDock } from '../../config/systems';
+import { storageKeys, supportsGagaDock } from '../../config/systems';
 import { isSameSitePath, normalizeSitePath } from '../../lib/url-semantics';
 
 function currentPageId() {
@@ -27,7 +27,7 @@ function readerIsOpen() {
 
 function leftRailIsOpen() {
   const rail = document.querySelector('[data-gaga-left-rail]') as HTMLElement | null;
-  return supportsBottomDock(document.documentElement.dataset.gagaLayout) && rail?.dataset.gagaState === 'drawer';
+  return supportsGagaDock(document.documentElement.dataset.gagaLayout) && rail?.dataset.gagaState === 'drawer';
 }
 
 function actionIsActive(action: GagaAction) {

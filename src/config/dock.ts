@@ -1,3 +1,5 @@
-import { actionsForProjection } from './actions';
+import { experienceSurfaceProfile, type ExperienceContext } from './experience';
 
-export const mobileDockItems = actionsForProjection('mobile-dock');
+export function gagaDockActionIds(context: ExperienceContext) {
+  return experienceSurfaceProfile(context).dockActionIds;
+}

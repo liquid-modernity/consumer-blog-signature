@@ -3,11 +3,11 @@
 Universal, configurable, softcoded high-end blog / knowledge-publishing bootstrap. Astro is the rendering framework; Gaga Engine is the external kernel installed from Cloudsmith.
 
 ## Signature shell
-- All reading layouts: Gaga Dynamic Notch Island at top-center for contextual actions and live reading state.
-- Article layouts: Gaga Dynamic Outline Peek at bottom-center for semantic section position and outline navigation.
+- All reading layouts: Gaga Dynamic Notch Island v2 is top-attached for contextual actions, live reading state, and perimeter reading progress.
+- Article layouts: Gaga Dynamic Outline Peek v2 is a bottom-center semantic locator with progressive peek, expanded, and full states.
 - Desktop: vertical global navigation icon-only at the far left, context-aware left rail, main canvas, context-aware right intelligence rail.
 - Tablet large: icon global navigation, collapsed left rail, optional right intelligence rail.
-- Tablet mini / Mobile: compact reading chrome; article pages suppress the conventional mobile dock so the Outline Peek remains the single bottom reading surface. Non-article compact pages retain the mobile dock.
+- Tablet mini / Mobile: article pages use Notch + Outline without a competing dock. Non-article compact pages use Gaga Dock v1 as a contextual workspace surface rather than a conventional bottom navigation bar.
 
 ## Core contracts
 `src/config/capabilities.ts`, `routes.ts`, `actions.ts`, `experience.ts`, and `design.ts` are the product-policy authorities. Gaga Engine remains an npm dependency and is not vendored into this repository.

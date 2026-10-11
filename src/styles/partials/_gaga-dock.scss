@@ -1,0 +1,120 @@
+@use 'breakpoints' as bp;
+
+.gaga-dock {
+  display: none;
+}
+
+@media (max-width: bp.$compact-max) {
+  .gaga-dock {
+    position: fixed;
+    inset-inline-start: 50%;
+    inset-block-end: max(.55rem, var(--gaga-safe-area-bottom));
+    z-index: var(--gaga-z-dock);
+    display: block;
+    max-inline-size: calc(100vw - var(--gaga-safe-area-left) - var(--gaga-safe-area-right) - 1rem);
+    pointer-events: none;
+    transform: translateX(-50%);
+  }
+
+  .gaga-dock[hidden] {
+    display: none;
+  }
+
+  .gaga-dock__surface {
+    display: grid;
+    grid-template-columns: repeat(var(--gaga-dock-action-capacity), minmax(3.1rem, 1fr));
+    gap: .2rem;
+    min-block-size: 3.15rem;
+    padding: .28rem;
+    border: 1px solid var(--gaga-line-strong);
+    border-radius: 1.05rem;
+    background: color-mix(in srgb, var(--gaga-surface-elevated) 92%, transparent);
+    box-shadow: 0 .65rem 2.2rem rgba(0, 0, 0, .22);
+    backdrop-filter: blur(20px) saturate(1.12);
+    -webkit-backdrop-filter: blur(20px) saturate(1.12);
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+    opacity: 1;
+    transition: transform .18s ease-out, opacity .14s ease-out, visibility 0s linear 0s;
+  }
+
+  .gaga-dock[data-gaga-state='hidden'] .gaga-dock__surface {
+    transform: translateY(calc(100% + var(--gaga-safe-area-bottom) + .75rem)) scale(.96);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: transform .18s ease-out, opacity .12s ease-out, visibility 0s linear .18s;
+  }
+
+  .gaga-dock a,
+  .gaga-dock button {
+    display: grid;
+    grid-template-rows: auto auto;
+    gap: .12rem;
+    place-items: center;
+    min-inline-size: 44px;
+    min-block-size: 44px;
+    padding: .28rem .42rem;
+    border: 0;
+    border-radius: .82rem;
+    color: var(--gaga-muted);
+    background: transparent;
+    text-decoration: none;
+    touch-action: manipulation;
+    transition: color .14s ease, background-color .14s ease, transform .12s ease;
+  }
+
+  .gaga-dock a:is(:hover, :focus-visible),
+  .gaga-dock button:is(:hover, :focus-visible) {
+    color: var(--gaga-blue);
+    background: var(--gaga-blue-soft);
+    outline: none;
+  }
+
+  .gaga-dock a:focus-visible,
+  .gaga-dock button:focus-visible {
+    box-shadow: 0 0 0 2px var(--gaga-focus-ring);
+  }
+
+  .gaga-dock a:active,
+  .gaga-dock button:active {
+    transform: scale(.94);
+  }
+
+  .gaga-dock [data-gaga-quick-action][data-gaga-active='true'],
+  .gaga-dock [data-gaga-quick-action][aria-current='page'],
+  .gaga-dock [data-gaga-quick-action][aria-pressed='true'] {
+    color: var(--gaga-blue);
+    background: var(--gaga-blue-soft);
+  }
+
+  .gaga-dock .gaga-quick-action__label {
+    display: block;
+    max-inline-size: 6.8rem;
+    overflow: hidden;
+    color: currentColor;
+    font: 700 var(--gaga-type-label-size) / 1.15 var(--gaga-font-ui);
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 22rem) {
+  .gaga-dock .gaga-quick-action__label {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gaga-dock__surface,
+  .gaga-dock a,
+  .gaga-dock button {
+    transition: none;
+  }
+}

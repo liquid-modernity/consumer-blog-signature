@@ -63,7 +63,7 @@ async function boot() {
 
   const [
     inputMode,
-    mobileDock,
+    gagaDock,
     toast,
     readerPreferences,
     savedReading,
@@ -79,7 +79,7 @@ async function boot() {
     diagnosticHud
   ] = await Promise.all([
     import('./systems/input-mode').catch(() => null),
-    import('./systems/mobile-dock').catch(() => null),
+    import('./systems/gaga-dock').catch(() => null),
     import('./systems/toast').catch(() => null),
     import('./systems/reader-preferences').catch(() => null),
     import('./systems/saved-reading').catch(() => null),
@@ -104,7 +104,7 @@ async function boot() {
   ]);
 
   inputMode?.initInputMode();
-  mobileDock?.initMobileDock();
+  gagaDock?.initGagaDock();
   toast?.initToast();
   readerPreferences?.initReaderPreferences();
   savedReading?.initSavedReading();

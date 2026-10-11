@@ -33,7 +33,7 @@ The global navigation remains stable while contextual rails adapt to the current
 
 ## Progressive immersion
 
-The main canvas can move from a compact reading measure to wide or full-bleed media. On smaller devices, the bottom dock and outline peek replace persistent rails.
+The main canvas can move from a compact reading measure to wide or full-bleed media. On compact screens, the Gaga Dynamic Notch and semantic Outline Peek preserve reading context while the contextual Gaga Dock stays out of immersive article mode.
 
 ## Inclusive interaction
 

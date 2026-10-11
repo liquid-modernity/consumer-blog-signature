@@ -2,7 +2,8 @@ import fs from 'node:fs';
 const required = [
   'src/config/capabilities.ts','src/config/actions.ts','src/config/routes.ts','src/config/design.ts',
   'src/components/frame/GlobalNavigationRail.astro','src/components/frame/LeftRail.astro',
-  'src/components/frame/MainCanvas.astro','src/components/frame/RightInfoRail.astro','src/components/frame/MobileDock.astro'
+  'src/components/frame/MainCanvas.astro','src/components/frame/RightInfoRail.astro','src/components/frame/GagaDock.astro',
+  'src/config/experience.ts'
 ];
 const missing = required.filter(file => !fs.existsSync(file));
 if (missing.length) { console.error('Missing signature files:', missing); process.exit(1); }

@@ -1,110 +1,66 @@
 ---
 import Icon from '../ui/Icon.astro';
+import { actionById } from '../../config/actions';
+import { experienceSurfaceProfile, type ExperienceContext } from '../../config/experience';
+import { i18nLabel } from '../../config/i18n';
 
 interface Props {
   className?: string;
-  context?: 'article' | 'archive' | 'graph' | 'topic' | 'default';
+  context?: ExperienceContext;
 }
 
 const { className = '', context = 'default' } = Astro.props;
-
-type ActionItem = {
-  id: string;
-  command: string;
-  label: string;
-  icon: string;
-  shortcut?: string;
-  tier: 'primary' | 'secondary';
-};
-
-const getActionsForContext = (ctx: string): { primary: ActionItem[]; secondary: ActionItem[] } => {
-  if (ctx === 'article') {
-    return {
-      primary: [
-        { id: 'back', command: 'smart-back', label: 'Kembali', icon: 'arrow_back', shortcut: 'Alt+←', tier: 'primary' },
-        { id: 'share', command: 'share-page', label: 'Bagikan', icon: 'ios_share', shortcut: 'Ctrl+S', tier: 'primary' },
-        { id: 'focus', command: 'toggle-focus-mode', label: 'Fokus', icon: 'width_full', shortcut: 'F', tier: 'primary' }
-      ],
-      secondary: [
-        { id: 'highlight', command: 'highlight', label: 'Sorot', icon: 'edit', shortcut: 'H', tier: 'secondary' },
-        { id: 'speak', command: 'speak', label: 'Dengarkan', icon: 'volume_up', shortcut: 'S', tier: 'secondary' },
-        { id: 'intelligence', command: 'toggle-context-surface', label: 'Intelijen', icon: 'info', tier: 'secondary' },
-        { id: 'personalize', command: 'personalize', label: 'Personalisasi', icon: 'settings', shortcut: 'P', tier: 'secondary' }
-      ]
-    };
-  }
-
-  if (ctx === 'archive') {
-    return {
-      primary: [
-        { id: 'back', command: 'smart-back', label: 'Kembali', icon: 'arrow_back', shortcut: 'Alt+←', tier: 'primary' },
-        { id: 'share', command: 'share-page', label: 'Bagikan', icon: 'ios_share', shortcut: 'Ctrl+S', tier: 'primary' },
-        { id: 'search', command: 'open-search', label: 'Cari', icon: 'search', shortcut: '⌘K', tier: 'primary' }
-      ],
-      secondary: [
-        { id: 'personalize', command: 'personalize', label: 'Personalisasi', icon: 'settings', shortcut: 'P', tier: 'secondary' }
-      ]
-    };
-  }
-
-  if (ctx === 'graph') {
-    return {
-      primary: [
-        { id: 'back', command: 'smart-back', label: 'Kembali', icon: 'arrow_back', shortcut: 'Alt+←', tier: 'primary' },
-        { id: 'share', command: 'share-page', label: 'Bagikan', icon: 'ios_share', shortcut: 'Ctrl+S', tier: 'primary' },
-        { id: 'reset-graph', command: 'reset-knowledge-graph', label: 'Reset Graf', icon: 'sync', shortcut: 'R', tier: 'primary' }
-      ],
-      secondary: [
-        { id: 'personalize', command: 'personalize', label: 'Personalisasi', icon: 'settings', shortcut: 'P', tier: 'secondary' }
-      ]
-    };
-  }
-
-  return {
-    primary: [
-      { id: 'back', command: 'smart-back', label: 'Kembali', icon: 'arrow_back', shortcut: 'Alt+←', tier: 'primary' },
-      { id: 'share', command: 'share-page', label: 'Bagikan', icon: 'ios_share', shortcut: 'Ctrl+S', tier: 'primary' }
-    ],
-    secondary: [
-      { id: 'personalize', command: 'personalize', label: 'Personalisasi', icon: 'settings', shortcut: 'P', tier: 'secondary' }
-    ]
-  };
-};
-
-const { primary, secondary } = getActionsForContext(context);
-const allActions = [...primary, ...secondary];
+const profile = experienceSurfaceProfile(context);
+const actions = profile.notchActionIds
+  .map((id) => actionById(id))
+  .filter((action) => Boolean(action.command));
+const islandLabel = i18nLabel('actionIsland.label');
+const toolbarLabel = i18nLabel('actionIsland.toolbar');
+const progressLabel = i18nLabel('actionIsland.progress');
+const toggleLabel = i18nLabel('actionIsland.toggle');
+const actionsLabel = i18nLabel('actionIsland.actions');
 ---
 <div class={`gaga-action-runtime-container ${className}`} data-gaga-action-runtime-container>
   <nav
     class="gaga-action-runtime"
-    aria-label="Gaga Dynamic Notch Island"
+    aria-label={islandLabel.id}
+    data-gaga-i18n-key={islandLabel.key}
+    data-gaga-i18n-id={islandLabel.id}
+    data-gaga-i18n-en={islandLabel.en}
+    data-gaga-i18n-target="aria"
     data-gaga-action-runtime
     data-gaga-context={context}
     data-gaga-state="collapsed"
     data-gaga-live-state="idle"
   >
-    <div class="gaga-action-runtime__shell" role="toolbar" aria-label="Reading & Page Actions">
+    <div class="gaga-action-runtime__shell" role="toolbar" aria-label={toolbarLabel.id} data-gaga-i18n-key={toolbarLabel.key} data-gaga-i18n-id={toolbarLabel.id} data-gaga-i18n-en={toolbarLabel.en} data-gaga-i18n-target="aria">
       {context === 'article' ? (
-        <span class="gaga-action-runtime__progress-track" aria-hidden="true">
-          <span class="gaga-action-runtime__progress-fill"></span>
-        </span>
+        <svg class="gaga-action-runtime__perimeter" viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+          <path class="gaga-action-runtime__perimeter-track" pathLength="1" d="M0.5 0.5 H99.5 V29 Q99.5 39.5 89 39.5 H11 Q0.5 39.5 0.5 29 Z" />
+          <path class="gaga-action-runtime__perimeter-progress" pathLength="1" d="M0.5 0.5 H99.5 V29 Q99.5 39.5 89 39.5 H11 Q0.5 39.5 0.5 29 Z" />
+        </svg>
       ) : null}
 
       <div class="gaga-action-runtime__actions" data-gaga-action-runtime-actions>
-        {allActions.map((act, index) => (
+        {actions.map((action, index) => (
           <button
             type="button"
             class={`gaga-action-runtime__btn ${index === 0 ? 'gaga-action-runtime__btn--anchor' : ''}`}
-            data-gaga-action={act.command}
-            data-gaga-action-id={act.id}
-            data-gaga-action-tier={act.tier}
-            data-gaga-tooltip={act.shortcut ? `${act.label} (${act.shortcut})` : act.label}
-            aria-label={act.shortcut ? `${act.label} (${act.shortcut})` : act.label}
+            data-gaga-action={action.command}
+            data-gaga-action-id={action.id}
+            data-gaga-quick-action={action.id}
+            data-gaga-active="false"
+            data-gaga-tooltip={action.label.id}
+            aria-label={action.label.id}
+            data-gaga-i18n-key={action.label.key}
+            data-gaga-i18n-id={action.label.id}
+            data-gaga-i18n-en={action.label.en}
+            data-gaga-i18n-target="aria"
           >
-            <span class="gaga-action-runtime__icon" aria-hidden="true">
-              <Icon name={act.icon} />
-            </span>
-            <span class="gaga-action-runtime__label">{act.label}</span>
+            {action.icon ? (
+              <span class="gaga-action-runtime__icon" aria-hidden="true"><Icon name={action.icon} /></span>
+            ) : null}
+            <span class="gaga-action-runtime__label" data-gaga-i18n-key={action.label.key} data-gaga-i18n-id={action.label.id} data-gaga-i18n-en={action.label.en}>{action.label.id}</span>
           </button>
         ))}
       </div>
@@ -115,7 +71,11 @@ const allActions = [...primary, ...secondary];
             class="gaga-action-runtime__reading-progress"
             data-gaga-reading-progress
             role="progressbar"
-            aria-label="Progres membaca"
+            aria-label={progressLabel.id}
+            data-gaga-i18n-key={progressLabel.key}
+            data-gaga-i18n-id={progressLabel.id}
+            data-gaga-i18n-en={progressLabel.en}
+            data-gaga-i18n-target="aria"
             aria-valuemin="0"
             aria-valuemax="100"
             aria-valuenow="0"
@@ -123,7 +83,7 @@ const allActions = [...primary, ...secondary];
             <span data-gaga-reading-progress-value>0%</span>
           </span>
         ) : (
-          <span class="gaga-action-runtime__context-label">Actions</span>
+          <span class="gaga-action-runtime__context-label" data-gaga-i18n-key={actionsLabel.key} data-gaga-i18n-id={actionsLabel.id} data-gaga-i18n-en={actionsLabel.en}>{actionsLabel.id}</span>
         )}
       </div>
 
@@ -132,7 +92,11 @@ const allActions = [...primary, ...secondary];
         class="gaga-action-runtime__toggle"
         data-gaga-action-island-toggle
         aria-expanded="false"
-        aria-label="Buka aksi halaman"
+        aria-label={toggleLabel.id}
+        data-gaga-i18n-key={toggleLabel.key}
+        data-gaga-i18n-id={toggleLabel.id}
+        data-gaga-i18n-en={toggleLabel.en}
+        data-gaga-i18n-target="aria"
       >
         <span aria-hidden="true"><Icon name="menu" /></span>
       </button>
@@ -161,6 +125,7 @@ const allActions = [...primary, ...secondary];
     let lastScrollTop = 0;
     let scheduled = false;
     let hoverTimer = 0;
+    let intentTimer = 0;
 
     const isSpeaking = () => island.dataset.gagaLiveState === 'speaking';
     const isExpanded = () => island.dataset.gagaState === 'expanded';
@@ -169,22 +134,35 @@ const allActions = [...primary, ...secondary];
       if (isSpeaking() && state !== 'expanded') return;
       island.dataset.gagaState = state;
       toggle?.setAttribute('aria-expanded', state === 'expanded' ? 'true' : 'false');
-      if (toggle) toggle.setAttribute('aria-label', state === 'expanded' ? 'Tutup aksi halaman' : 'Buka aksi halaman');
+    }
+
+    function acknowledgeIntent() {
+      if (isExpanded() || isSpeaking()) return;
+      island.dataset.gagaIntent = 'aware';
+      window.clearTimeout(intentTimer);
+      intentTimer = window.setTimeout(() => {
+        delete island.dataset.gagaIntent;
+      }, 900);
     }
 
     function updateProgress() {
       scheduled = false;
       if (!progress || !progressValue) return;
       const metrics = getUnifiedScrollMetrics();
-      const rounded = Math.round(metrics.percentage);
-      island.style.setProperty('--gaga-action-progress', `${Math.max(0, Math.min(1, metrics.percentage / 100))}`);
+      const percentage = Math.max(0, Math.min(100, metrics.percentage));
+      const rounded = Math.round(percentage);
+      const progressRatio = percentage / 100;
+      island.style.setProperty('--gaga-action-progress-offset', `${1 - progressRatio}`);
       progressValue.textContent = `${rounded}%`;
       progress.setAttribute('aria-valuenow', String(rounded));
 
       const delta = metrics.scrollTop - lastScrollTop;
       if (!isExpanded() && !isSpeaking()) {
-        if (metrics.scrollTop > 120 && delta > 10) setState('micro');
-        else if (delta < -7 || metrics.scrollTop < 72) setState('collapsed');
+        if (metrics.scrollTop > 140 && delta > 10) setState('micro');
+        else if (delta < -6 || metrics.scrollTop < 84) {
+          setState('collapsed');
+          acknowledgeIntent();
+        }
       }
       lastScrollTop = metrics.scrollTop;
     }
@@ -212,23 +190,22 @@ const allActions = [...primary, ...secondary];
       }
 
       const button = target.closest<HTMLButtonElement>('[data-gaga-action]');
-      if (!button) return;
-      const rawAction = button.dataset.gagaAction;
-      if (!rawAction) return;
+      const command = button?.dataset.gagaAction;
+      if (!button || !command) return;
 
-      const command = rawAction === 'personalize' ? 'toggle-reader-preferences' : rawAction;
       runSiteCommand(command as any, {
         source: 'action-runtime',
         target: button,
         pointer: { x: event.clientX, y: event.clientY }
       });
 
-      if (rawAction !== 'speak' && rawAction !== 'toggle-focus-mode' && rawAction !== 'personalize') {
+      if (command !== 'speak' && command !== 'toggle-focus-mode' && command !== 'toggle-reader-preferences') {
         setState('collapsed');
       }
     });
 
     island.addEventListener('pointerenter', () => {
+      acknowledgeIntent();
       if (!finePointer.matches || isSpeaking()) return;
       window.clearTimeout(hoverTimer);
       setState('expanded');
@@ -239,8 +216,10 @@ const allActions = [...primary, ...secondary];
       window.clearTimeout(hoverTimer);
       hoverTimer = window.setTimeout(() => {
         if (!island.matches(':focus-within')) setState('collapsed');
-      }, 220);
+      }, 240);
     });
+
+    island.addEventListener('focusin', acknowledgeIntent);
 
     document.addEventListener('pointerdown', (event) => {
       if (!isExpanded() || island.contains(event.target as Node) || isSpeaking()) return;
@@ -260,6 +239,7 @@ const allActions = [...primary, ...secondary];
     window.addEventListener('pagehide', () => {
       unsubscribeScroll?.();
       window.clearTimeout(hoverTimer);
+      window.clearTimeout(intentTimer);
     }, { once: true });
   }
 

@@ -569,13 +569,13 @@
 @media (max-width: bp.$compact-max) {
   .gaga-app-frame[data-gaga-page-id='graphs'] .gaga-main-region {
     box-sizing: border-box;
-    padding-block-end: var(--gaga-bottom-dock-occupied-block-size);
+    padding-block-end: var(--gaga-dock-occupied-block-size);
     scroll-padding-block-end: 0;
   }
 
   .gaga-knowledge-graph {
-    block-size: calc(100svh - var(--gaga-bottom-dock-occupied-block-size));
-    block-size: calc(100dvh - var(--gaga-bottom-dock-occupied-block-size));
+    block-size: calc(100svh - var(--gaga-dock-occupied-block-size));
+    block-size: calc(100dvh - var(--gaga-dock-occupied-block-size));
   }
 
   .gaga-knowledge-graph__toolbar {

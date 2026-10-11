@@ -1,5 +1,5 @@
 import { createModalIsolationController } from '@gaga/engine-web/runtime/modal-isolation';
-import { supportsBottomDock } from '../../config/systems';
+import { supportsGagaDock } from '../../config/systems';
 
 type ModalIsolationOwner = string;
 
@@ -38,7 +38,7 @@ const controller = createModalIsolationController({
     }
 
     if (element.matches('[data-gaga-left-rail]')) {
-      return supportsBottomDock(document.documentElement.dataset.gagaLayout) && element.dataset.gagaState !== 'drawer';
+      return supportsGagaDock(document.documentElement.dataset.gagaLayout) && element.dataset.gagaState !== 'drawer';
     }
 
     return false;

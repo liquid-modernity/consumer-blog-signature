@@ -123,6 +123,10 @@ body:has(.gaga-app-frame) {
     scroll-padding-block-end: var(--gaga-compact-reading-clearance);
   }
 
+  .gaga-app-frame[data-gaga-content-kind='article'] .gaga-article-scroll__inner {
+    padding-block-start: max(var(--gaga-compact-reading-top-clearance), 3.25rem);
+  }
+
   .gaga-app-frame[data-gaga-content-kind='article'] .gaga-main-region::after {
     display: block;
     block-size: var(--gaga-compact-reading-clearance);

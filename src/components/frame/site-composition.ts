@@ -7,10 +7,10 @@ import {
   tooltipForProjection,
   type GagaAction,
   type GagaActionId,
-  type GagaActionProjection,
-  type GagaProjectedAction
+  type GagaActionProjection
 } from '../../config/actions';
-import { mobileDockItems } from '../../config/dock';
+import { gagaDockActionIds } from '../../config/dock';
+import { resolveExperienceContext, type ExperienceContext } from '../../config/experience';
 import { i18nLabel, i18nText } from '../../config/i18n';
 import { navGroups, primaryNav } from '../../config/nav';
 import {
@@ -28,12 +28,11 @@ import type {
   AppShellInput,
   ArticleWorkspaceActionsInput,
   LeftRailInput,
-  MobileDockInput,
+  GagaDockInput,
   QuickActionInput,
   RailToggleInput,
   ReaderPreferencesInput,
   RightRailInput,
-  SavedButtonInput,
   SearchBoxInput
 } from './component-inputs';
 
@@ -76,10 +75,6 @@ function projectActionInput(action: GagaAction, projection: GagaActionProjection
   };
 }
 
-function projectQuickAction(action: GagaProjectedAction): QuickActionInput {
-  return projectActionInput(action, action.projection);
-}
-
 function projectAction(actionId: GagaActionId, projection: GagaActionProjection): QuickActionInput {
   return projectActionInput(actionById(actionId), projection);
 }
@@ -111,22 +106,8 @@ export function createSearchBoxInput(): SearchBoxInput {
   };
 }
 
-export function createSavedButtonInput(): SavedButtonInput {
-  const action = actionById('save');
-  const projection = 'saved-inline';
-  const aria = ariaForProjection(action, projection);
-  return {
-    command: action.command,
-    label: shortLabelForProjection(action, projection),
-    ariaLabel: aria.label ?? action.description,
-    icon: iconForProjection(action, projection)
-  };
-}
-
 export function createArticleWorkspaceActionsInput(): ArticleWorkspaceActionsInput {
   return {
-    back: i18nLabel('article.back'),
-    actionsLabel: i18nLabel('article.actions'),
     readingUtilitiesLabel: i18nLabel('reading.utilities'),
     readingStatusLabel: i18nLabel('reading.status'),
     readingStatusUnset: i18nLabel('reading.statusUnset'),
@@ -138,11 +119,7 @@ export function createArticleWorkspaceActionsInput(): ArticleWorkspaceActionsInp
     blogLabel: i18nLabel('article.blog'),
     continuityResumeTitle: i18nLabel('continuity.resumeTitle'),
     continuityResumeAt: i18nLabel('continuity.resumeAt'),
-    continuityDismiss: i18nLabel('continuity.dismiss'),
-    share: projectAction('share', 'article-utility'),
-    context: projectAction('context-info', 'article-utility'),
-    reader: projectAction('settings', 'reading-utility'),
-    focus: projectAction('focusmode', 'reading-utility')
+    continuityDismiss: i18nLabel('continuity.dismiss')
   };
 }
 
@@ -162,10 +139,10 @@ export function createLeftRailInput(currentPath: string): LeftRailInput {
   };
 }
 
-export function createMobileDockInput(currentPath: string): MobileDockInput {
-  const items = mobileDockItems.map(projectQuickAction);
+export function createGagaDockInput(currentPath: string, context: ExperienceContext): GagaDockInput {
+  const items = gagaDockActionIds(context).map((id) => projectAction(id, 'gaga-dock'));
   return {
-    label: i18nLabel('navigation.mobileDock'),
+    label: i18nLabel('navigation.gagaDock'),
     currentPath,
     items,
     actionCapacity: items.length
@@ -303,7 +280,7 @@ export function createReaderPreferencesInput(): ReaderPreferencesInput {
 
 export function createAppShellInput(currentPath: string): AppShellInput {
   return {
-    mobileDock: createMobileDockInput(currentPath),
+    gagaDock: createGagaDockInput(currentPath, resolveExperienceContext({ pathname: currentPath })),
     readerPreferences: createReaderPreferencesInput(),
     contextTrigger: projectAction('context-info', 'context-trigger')
   };

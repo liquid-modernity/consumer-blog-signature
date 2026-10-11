@@ -3,16 +3,14 @@ import TocBlock from '../information/TocBlock.astro';
 import Icon from '../ui/Icon.astro';
 import type { RightRailInput } from './component-inputs';
 
-interface Props {
-  rail: RightRailInput;
-}
-
+interface Props { rail: RightRailInput; }
 const { rail } = Astro.props;
 const outlineItems = rail.outlineItems;
 const outlinePeekId = 'gaga-outline-peek';
 const outlineTitleId = 'gaga-outline-peek-title';
 const outlineOpenLabelId = 'gaga-outline-peek-open-label';
 const outlineCurrentLabelId = 'gaga-outline-peek-current-label';
+const outlineCounterLabelId = 'gaga-outline-peek-counter-label';
 const hasOutlinePeek = outlineItems.length > 0;
 const initialOutlineLabel = outlineItems[0]?.text ?? rail.labels.outlineFallback;
 ---
@@ -26,73 +24,33 @@ const initialOutlineLabel = outlineItems[0]?.text ?? rail.labels.outlineFallback
       data-gaga-action="toggle-outline"
       aria-controls={outlinePeekId}
       aria-expanded="false"
-      aria-labelledby={`${outlineOpenLabelId} ${outlineCurrentLabelId}`}
+      aria-labelledby={`${outlineOpenLabelId} ${outlineCounterLabelId} ${outlineCurrentLabelId}`}
     >
-      <span
-        id={outlineOpenLabelId}
-        class="gaga-visually-hidden"
-        data-gaga-i18n-key={rail.labels.outlineOpenPrefix.key}
-        data-gaga-i18n-id={rail.labels.outlineOpenPrefix.id}
-        data-gaga-i18n-en={rail.labels.outlineOpenPrefix.en}
-      >
-        {rail.labels.outlineOpenPrefix.id}
-      </span>
-      <span class="gaga-outline-peek-preview__icon" aria-hidden="true">
-        <Icon name="outline" />
-      </span>
-      <span class="gaga-outline-peek-preview__counter" aria-hidden="true">
-        <span data-gaga-outline-current-index>1</span>/<span data-gaga-outline-total>{outlineItems.length}</span>
-      </span>
+      <span id={outlineOpenLabelId} class="gaga-visually-hidden" data-gaga-i18n-key={rail.labels.outlineOpenPrefix.key} data-gaga-i18n-id={rail.labels.outlineOpenPrefix.id} data-gaga-i18n-en={rail.labels.outlineOpenPrefix.en}>{rail.labels.outlineOpenPrefix.id}</span>
+      <span class="gaga-outline-peek-preview__icon" aria-hidden="true"><Icon name="outline" /></span>
+      <span id={outlineCounterLabelId} class="gaga-outline-peek-preview__counter"><span data-gaga-outline-current-index>1</span>/<span data-gaga-outline-total>{outlineItems.length}</span></span>
       <span id={outlineCurrentLabelId} class="gaga-outline-peek-preview__label" data-gaga-outline-current-label>{initialOutlineLabel}</span>
       <span class="gaga-outline-peek-preview__chevron" aria-hidden="true">↑</span>
     </button>
+
+    <span class="gaga-outline-peek__scrim" data-gaga-outline-scrim aria-hidden="true"></span>
     <section
       id={outlinePeekId}
       class="gaga-outline-peek"
       data-gaga-outline-peek
       data-gaga-outline-toc="true"
       data-gaga-state="closed"
+      data-gaga-depth="expanded"
       aria-labelledby={outlineTitleId}
       aria-hidden="true"
       inert
       data-gaga-info-kind={rail.kind}
     >
-      <header class="gaga-outline-peek__header">
-        <span class="gaga-outline-peek__handle" aria-hidden="true"></span>
-        <div class="gaga-outline-peek__header-row">
-          <span class="gaga-outline-peek__title-icon" aria-hidden="true">
-            <Icon name="outline" />
-          </span>
-          <div class="gaga-outline-peek__heading">
-            <h2
-              id={outlineTitleId}
-              class="gaga-outline-peek__title"
-              data-gaga-i18n-key={rail.labels.outlineTitle.key}
-              data-gaga-i18n-id={rail.labels.outlineTitle.id}
-              data-gaga-i18n-en={rail.labels.outlineTitle.en}
-            >
-              {rail.labels.outlineTitle.id}
-            </h2>
-            <p class="gaga-outline-peek__semantic-progress" aria-live="polite">
-              <span>Section </span><span data-gaga-outline-sheet-current-index>1</span><span> / {outlineItems.length}</span>
-              <span aria-hidden="true"> · </span>
-              <span data-gaga-outline-sheet-current-label>{initialOutlineLabel}</span>
-            </p>
-          </div>
-          <button
-            type="button"
-            data-gaga-outline-close
-            data-gaga-action="toggle-outline"
-            aria-label={rail.labels.outlineClose.id}
-            data-gaga-tooltip
-            aria-controls={outlinePeekId}
-            data-gaga-i18n-key={rail.labels.outlineClose.key}
-            data-gaga-i18n-id={rail.labels.outlineClose.id}
-            data-gaga-i18n-en={rail.labels.outlineClose.en}
-            data-gaga-i18n-target="aria"
-          >×</button>
-        </div>
-      </header>
+      <h2 id={outlineTitleId} class="gaga-visually-hidden" data-gaga-i18n-key={rail.labels.outlineTitle.key} data-gaga-i18n-id={rail.labels.outlineTitle.id} data-gaga-i18n-en={rail.labels.outlineTitle.en}>{rail.labels.outlineTitle.id}</h2>
+      <p class="gaga-visually-hidden" aria-live="polite">
+        <span data-gaga-outline-sheet-current-index>1</span><span> / {outlineItems.length}: </span><span data-gaga-outline-sheet-current-label>{initialOutlineLabel}</span>
+      </p>
+      <span class="gaga-outline-peek__handle" aria-hidden="true"></span>
       <div class="gaga-outline-peek__scroll" data-gaga-outline-peek-scroll>
         <TocBlock items={outlineItems} showTitle={false} wrapper="nav" ariaLabelledby={outlineTitleId} />
       </div>

@@ -2,8 +2,6 @@ import { i18nLabel, type GagaLocalizedLabel } from './i18n';
 import type { LayoutMode } from '../lib/schema';
 
 export type GagaActionId =
-  | 'home'
-  | 'blog'
   | 'menu'
   | 'save'
   | 'share'
@@ -16,7 +14,9 @@ export type GagaActionId =
   | 'close-top'
   | 'smart-back'
   | 'highlight'
-  | 'speak';
+  | 'speak'
+  | 'library'
+  | 'graph-reset';
 
 export type GagaActionKind = 'link' | 'toggle' | 'command';
 
@@ -43,7 +43,7 @@ export type GagaActionCommand =
   | 'close-top-surface';
 
 export type GagaActionProjection =
-  | 'mobile-dock'
+  | 'gaga-dock'
   | 'article-utility'
   | 'context-trigger'
   | 'reading-utility'
@@ -75,7 +75,7 @@ export type GagaActionShortcut = {
 
 export type GagaActionAvailability = {
   layouts?: readonly LayoutMode[];
-  capabilities?: readonly ('bottom-dock' | 'right-rail' | 'table-of-contents' | 'share' | 'clipboard')[];
+  capabilities?: readonly ('gaga-dock' | 'right-rail' | 'table-of-contents' | 'share' | 'clipboard')[];
 };
 
 export type GagaActionAria = {
@@ -124,36 +124,19 @@ export type GagaAction = {
   feedback?: GagaActionFeedback;
 };
 
-export type GagaProjectedAction = GagaAction & {
-  projection: GagaActionProjection;
-};
-
 export const gagaActions: readonly GagaAction[] = [
   {
-    id: 'home',
+    id: 'library',
     kind: 'link',
     tier: 'GLOBAL_NAVIGATION',
-    label: i18nLabel('navigation.home'),
-    description: i18nLabel('navigation.home'),
-    icon: 'home',
-    href: '/landing',
-    projections: ['mobile-dock'],
+    label: i18nLabel('navigation.saved'),
+    description: i18nLabel('navigation.saved'),
+    icon: 'bookmark',
+    href: '/library',
+    projections: ['gaga-dock'],
     activeSource: 'route',
-    tooltip: i18nLabel('navigation.home'),
-    feedback: { label: 'Home', sfx: 'click' }
-  },
-  {
-    id: 'blog',
-    kind: 'link',
-    tier: 'GLOBAL_NAVIGATION',
-    label: i18nLabel('navigation.blog'),
-    description: i18nLabel('navigation.blog'),
-    icon: 'newsmode',
-    href: '/',
-    projections: ['mobile-dock'],
-    activeSource: 'route',
-    tooltip: i18nLabel('navigation.blog'),
-    feedback: { label: 'Blog', sfx: 'click' }
+    tooltip: i18nLabel('navigation.saved'),
+    feedback: { label: 'Library', sfx: 'click' }
   },
   {
     id: 'menu',
@@ -163,13 +146,13 @@ export const gagaActions: readonly GagaAction[] = [
     description: i18nLabel('navigation.toggleRail'),
     icon: 'menu',
     command: 'toggle-left-rail',
-    projections: ['mobile-dock', 'left-rail-toggle'],
+    projections: ['gaga-dock', 'left-rail-toggle'],
     availability: { layouts: ['mobile', 'tablet-mini', 'tablet-large', 'desktop'] },
     activeSource: 'left-rail-drawer',
     tooltip: i18nLabel('navigation.toggleRail'),
     aria: { controls: 'gaga-left-rail' },
     projectionMeta: {
-      'mobile-dock': { aria: { pressed: true } },
+      'gaga-dock': { aria: { pressed: true } },
       'left-rail-toggle': {
         aria: {
           label: i18nLabel('navigation.toggleRail'),
@@ -265,11 +248,11 @@ export const gagaActions: readonly GagaAction[] = [
     description: i18nLabel('navigation.readerPreferences'),
     icon: 'settings',
     command: 'toggle-reader-preferences',
-    projections: ['mobile-dock', 'reading-utility', 'reader-panel-close'],
+    projections: ['gaga-dock', 'reading-utility', 'reader-panel-close'],
     activeSource: 'reader-panel',
     tooltip: i18nLabel('navigation.reader'),
     projectionMeta: {
-      'mobile-dock': { aria: { pressed: true } },
+      'gaga-dock': { aria: { pressed: true } },
       'reading-utility': {
         label: i18nLabel('navigation.reader'),
         aria: { label: i18nLabel('navigation.reader'), pressed: true }
@@ -309,7 +292,7 @@ export const gagaActions: readonly GagaAction[] = [
     icon: 'search',
     href: '/search',
     command: 'open-search',
-    projections: ['mobile-dock', 'search-trigger', 'keyboard'],
+    projections: ['gaga-dock', 'search-trigger', 'keyboard'],
     shortcuts: [
       { id: 'command-search', key: 'k', display: '⌘K', modifiers: ['meta'], allowEditable: true },
       { id: 'control-search', key: 'k', display: 'Ctrl K', modifiers: ['ctrl'], allowEditable: true }
@@ -356,6 +339,17 @@ export const gagaActions: readonly GagaAction[] = [
       }
     },
     feedback: { label: 'Information rail', sfx: 'open' }
+  },
+  {
+    id: 'graph-reset',
+    kind: 'command',
+    tier: 'CONTEXTUAL_ACTION',
+    label: i18nLabel('navigation.graphs'),
+    description: i18nLabel('navigation.graphs'),
+    icon: 'sync',
+    command: 'reset-knowledge-graph',
+    projections: [],
+    feedback: { label: 'Reset graph', success: 'Graph reset', sfx: 'confirm' }
   },
   {
     id: 'close-top',
@@ -429,12 +423,6 @@ export function actionById(id: GagaActionId) {
 
 export function actionForCommand(command: string | null | undefined) {
   return command ? commandMap.get(command as GagaActionCommand) : undefined;
-}
-
-export function actionsForProjection(projection: GagaActionProjection): GagaProjectedAction[] {
-  return gagaActions
-    .filter((action) => action.projections.includes(projection))
-    .map((action) => ({ ...action, projection }));
 }
 
 export function actionsForTier(tier: GagaActionTier): GagaAction[] {

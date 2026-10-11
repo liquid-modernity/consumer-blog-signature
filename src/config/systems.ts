@@ -17,7 +17,7 @@ export const responsiveShellConfig = {
     informationPreviewRestoreDelayMs: 900
   },
   surfaces: {
-    bottomDock: {
+    gagaDock: {
       enabledModes: ['mobile', 'tablet-mini']
     },
     outlinePeek: {
@@ -66,8 +66,8 @@ export function getInformationPreviewRestoreDelayMs() {
   return responsiveShellConfig.behavior.informationPreviewRestoreDelayMs;
 }
 
-export function supportsBottomDock(mode: string | undefined) {
-  return modeEnabled(responsiveShellConfig.surfaces.bottomDock.enabledModes, mode);
+export function supportsGagaDock(mode: string | undefined) {
+  return modeEnabled(responsiveShellConfig.surfaces.gagaDock.enabledModes, mode);
 }
 
 export function supportsOutlinePeek(mode: string | undefined) {

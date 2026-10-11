@@ -46,8 +46,6 @@
 }
 
 .gaga-rail-toggle,
-.gaga-mobile-dock a,
-.gaga-mobile-dock button,
 .gaga-reader-panel button {
   border: 0;
   background: transparent;
@@ -270,9 +268,6 @@
   display: none;
 }
 
-.gaga-mobile-dock .gaga-quick-action__label {
-  display: none;
-}
 
 .gaga-left-rail[data-gaga-state='collapsed'] {
   width: var(--gaga-left-rail-collapsed);

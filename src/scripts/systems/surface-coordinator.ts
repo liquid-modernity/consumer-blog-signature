@@ -1,5 +1,5 @@
 import { createSurfaceCoordinatorCapability } from '@gaga/engine-web/runtime/surface-coordinator';
-import { getConfiguredLeftRailState, supportsBottomDock } from '../../config/systems';
+import { getConfiguredLeftRailState, supportsGagaDock } from '../../config/systems';
 import {
   requestFocusMode,
   requestLeftRail,
@@ -21,7 +21,7 @@ function readerIsOpen() {
 }
 
 function compactLeftRailIsOpen() {
-  if (!supportsBottomDock(document.documentElement.dataset.gagaLayout)) return false;
+  if (!supportsGagaDock(document.documentElement.dataset.gagaLayout)) return false;
   return document.querySelector<HTMLElement>('[data-gaga-left-rail]')?.dataset.gagaState === 'drawer';
 }
 

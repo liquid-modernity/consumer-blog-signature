@@ -37,21 +37,12 @@ export type SearchBoxInput = {
   shortcutDisplay?: string;
 };
 
-export type SavedButtonInput = {
-  command?: string;
-  label: GagaComponentLabel;
-  ariaLabel: GagaComponentLabel;
-  icon?: string;
-};
-
 export type InformationDateInput = {
   datetime: string;
   text: string;
 };
 
 export type ArticleWorkspaceActionsInput = {
-  back: GagaComponentLabel;
-  actionsLabel: GagaComponentLabel;
   readingUtilitiesLabel: GagaComponentLabel;
   readingStatusLabel: GagaComponentLabel;
   readingStatusUnset: GagaComponentLabel;
@@ -64,10 +55,6 @@ export type ArticleWorkspaceActionsInput = {
   continuityResumeTitle: GagaComponentLabel;
   continuityResumeAt: GagaComponentLabel;
   continuityDismiss: GagaComponentLabel;
-  share: QuickActionInput;
-  context: QuickActionInput;
-  reader: QuickActionInput;
-  focus: QuickActionInput;
 };
 
 export type NavItemInput = {
@@ -103,7 +90,7 @@ export type LeftRailInput = {
   search: SearchBoxInput;
 };
 
-export type MobileDockInput = {
+export type GagaDockInput = {
   label: GagaComponentLabel;
   currentPath: string;
   items: QuickActionInput[];
@@ -169,7 +156,7 @@ export type ReaderPreferencesInput = {
 };
 
 export type AppShellInput = {
-  mobileDock: MobileDockInput;
+  gagaDock: GagaDockInput;
   readerPreferences: ReaderPreferencesInput;
   contextTrigger: QuickActionInput;
 };

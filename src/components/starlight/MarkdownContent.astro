@@ -4,7 +4,7 @@ import ArticleShell from './ArticleShell.astro';
 import AuthorArticleIndex from '../reader/AuthorArticleIndex.astro';
 import TopicArticleIndex from '../reader/TopicArticleIndex.astro';
 import Icon from '../ui/Icon.astro';
-import { createArticleWorkspaceActionsInput, createSavedButtonInput } from '../frame/site-composition';
+import { createArticleWorkspaceActionsInput } from '../frame/site-composition';
 import { contentDefaults } from '../../config/content';
 import { i18nLabel } from '../../config/i18n';
 import { getArticles, getAuthorBySlug, getAuthors, getTagGroups, getTopicGroups } from '../../lib/content';
@@ -20,7 +20,6 @@ const isTopic = metadata.contentKind === 'topic';
 const language = metadata.language ?? route?.lang;
 const routeIdentity = metadata.canonical ?? route?.id ?? Astro.url.pathname;
 const missingTitleSource = route?.id ?? Astro.url.pathname;
-const savedAction = createSavedButtonInput();
 const articleActions = createArticleWorkspaceActionsInput();
 let breadcrumbs: BreadcrumbItem[] = [];
 
@@ -63,7 +62,6 @@ const entityParentHref = isAuthor ? '/authors/' : '/topics/';
   <ArticleShell
     identity={metadata}
     language={language}
-    savedAction={savedAction}
     actions={articleActions}
     routeIdentity={routeIdentity}
     missingTitleSource={missingTitleSource}

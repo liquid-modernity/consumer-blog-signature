@@ -9,7 +9,7 @@ import {
   defaultRailPreference,
   getConfiguredLeftRailState,
   storageKeys,
-  supportsBottomDock
+  supportsGagaDock
 } from '../../config/systems';
 import { activateModalIsolation, clearModalIsolation } from './modal-isolation';
 
@@ -33,7 +33,7 @@ export function initLeftRailState() {
     defaultPreference: defaultRailPreference,
     getLayoutMode: () => document.documentElement.dataset.gagaLayout,
     getConfiguredState: getConfiguredLeftRailState,
-    isCompactMode: supportsBottomDock,
+    isCompactMode: supportsGagaDock,
     isPersistentPreferenceMode: (mode) => mode === 'desktop',
     modalIsolation: {
       activate: activateModalIsolation,

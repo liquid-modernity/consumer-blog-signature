@@ -106,19 +106,32 @@ test('Gaga Dynamic Notch Island + Dynamic Outline Peek signature', () => {
   const outlineStyles = fs.readFileSync('src/styles/partials/_outline-peek.scss', 'utf8');
   const systems = fs.readFileSync('src/config/systems.ts', 'utf8');
   const appFrame = fs.readFileSync('src/components/frame/AppFrameBase.astro', 'utf8');
+  const experience = fs.readFileSync('src/config/experience.ts', 'utf8');
+  const dockStyles = fs.readFileSync('src/styles/partials/_gaga-dock.scss', 'utf8');
 
-  assert.ok(actionRuntime.includes('Gaga Dynamic Notch Island'), 'ActionRuntime must project the top-center Dynamic Notch Island');
+  assert.ok(actionRuntime.includes('data-gaga-action-runtime') && actionRuntime.includes("i18nLabel('actionIsland.label')"), 'ActionRuntime must project the localized top-center Dynamic Notch Island');
   assert.ok(actionRuntime.includes('data-gaga-action-island-toggle'), 'Island must have an explicit expand/collapse control');
   assert.ok(actionRuntime.includes('data-gaga-action-runtime-live'), 'Island must expose one live state surface for speech/status');
   assert.ok(actionStyles.includes('var(--gaga-safe-area-top)'), 'Island must be safe-area aware');
   assert.ok(actionStyles.includes('--gaga-action-progress'), 'Island must render reading progress from one progress state');
+  assert.ok(actionRuntime.includes('gaga-action-runtime__perimeter-progress'), 'Notch v2 must render perimeter reading progress');
+  assert.ok(actionStyles.includes('border-radius: 0 0'), 'Notch v2 must attach visually to the top viewport edge');
   assert.ok(outline.includes('data-gaga-outline-current-index'), 'Outline Peek must expose semantic section position');
   assert.ok(outline.includes('data-gaga-outline-sheet-current-label'), 'Expanded outline must expose the current semantic section label');
+  assert.ok(!outline.includes('data-gaga-outline-close'), 'Outline v2 must not use a legacy close button');
+  assert.ok(!outline.includes('gaga-outline-peek__head'), 'Outline v2 must not restore the legacy visible utility header');
+  assert.ok(outline.includes('data-gaga-depth="expanded"'), 'Outline v2 must support progressive sheet depth');
   assert.ok(!outline.includes('gaga-outline-progress'), 'Bottom Outline Peek must not duplicate the numeric reading progress bar');
   assert.ok(outlineStyles.includes('inset-inline-start: 50%'), 'Outline Peek must anchor bottom-center');
   assert.ok(systems.includes("enabledModes: ['mobile', 'tablet-mini', 'tablet-large', 'desktop']"), 'Outline Peek must be available across all device classes');
-  assert.ok(appFrame.includes('showMobileDock'), 'Article layout must explicitly resolve mobile dock coexistence');
+  assert.ok(appFrame.includes('showGagaDock'), 'Layout must resolve Gaga Dock coexistence from the surface profile');
   assert.ok(!fs.existsSync('src/components/navigation/NotchIslandAction.astro'), 'Legacy parallel notch action component must be removed');
+  assert.ok(fs.existsSync('src/components/frame/GagaDock.astro'), 'Gaga Dock v1 must replace the legacy mobile dock');
+  assert.ok(!fs.existsSync('src/components/frame/MobileDock.astro'), 'Legacy MobileDock component must be removed');
+  assert.ok(fs.existsSync('src/config/experience.ts'), 'Surface behavior must be centralized in the experience contract');
+  assert.ok(experience.includes('resolveExperienceContext') && experience.includes('surfaces:'), 'Experience contract must own context resolution and surface policy');
+  assert.ok(experience.includes("articleDock: 'hidden'"), 'Immersive article mode must suppress Gaga Dock');
+  assert.ok(dockStyles.includes('inset-inline-start: 50%'), 'Gaga Dock must be a compact contextual workspace surface, not a full-width legacy nav bar');
 });
 
 test('Human Behaviour Algorithms & Algorithmic Self-Healing Diagnostic HUD', () => {

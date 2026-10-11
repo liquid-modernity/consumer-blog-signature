@@ -1,5 +1,5 @@
 ---
-import MobileDock from './MobileDock.astro';
+import GagaDock from './GagaDock.astro';
 import GlobalNavigationRail from './GlobalNavigationRail.astro';
 import ReaderPreferences from '../reader/ReaderPreferences.astro';
 import ContextSurfaceTrigger from './ContextSurfaceTrigger.astro';
@@ -7,6 +7,7 @@ import ActionRuntime from './ActionRuntime.astro';
 import SkipLink from '../ui/SkipLink.astro';
 import type { AppShellInput } from './component-inputs';
 import { designContract } from '../../config/design';
+import { experienceSurfaceProfile, resolveExperienceContext } from '../../config/experience';
 
 interface Props {
   pageId: string;
@@ -27,19 +28,16 @@ const {
 } = Astro.props;
 
 const showActionRuntime = pageId !== 'landing';
-const showMobileDock = contentKind !== 'article' && contentClass !== 'article-flagship';
 
-const pathname = Astro.url.pathname;
-let runtimeContext: 'article' | 'archive' | 'graph' | 'topic' | 'default' = 'default';
-if (contentKind === 'article' || contentClass === 'article-flagship' || pathname.includes('/article')) {
-  runtimeContext = 'article';
-} else if (pageId === 'archive' || pathname.includes('/archive')) {
-  runtimeContext = 'archive';
-} else if (pageId === 'graph' || pathname.includes('/graph')) {
-  runtimeContext = 'graph';
-} else if (contentKind === 'topic' || pageId.includes('topic') || pathname.includes('/topics')) {
-  runtimeContext = 'topic';
-}
+const runtimeContext = resolveExperienceContext({
+  pathname: Astro.url.pathname,
+  pageId,
+  contentKind,
+  contentClass
+});
+const surfaceProfile = experienceSurfaceProfile(runtimeContext);
+const showGagaDock = surfaceProfile.dockMode === 'workspace';
+const showContextTrigger = runtimeContext !== 'article';
 ---
 <SkipLink />
 <div
@@ -66,9 +64,9 @@ if (contentKind === 'article' || contentClass === 'article-flagship' || pathname
       <slot name="after-content" />
     </div>
   )}
-  <ContextSurfaceTrigger action={shell.contextTrigger} />
+  {showContextTrigger ? <ContextSurfaceTrigger action={shell.contextTrigger} /> : null}
   <slot name="after-main" />
-  {showMobileDock ? <MobileDock dock={shell.mobileDock} /> : null}
+  {showGagaDock ? <GagaDock dock={shell.gagaDock} /> : null}
   <ReaderPreferences preferences={shell.readerPreferences} />
 </div>
 <script>

@@ -1,6 +1,6 @@
 import { createKeyboardCapability } from '@gaga/engine-web/runtime/keyboard';
 import { keyboardActionBindings, type GagaAction } from '../../config/actions';
-import { supportsBottomDock } from '../../config/systems';
+import { supportsGagaDock } from '../../config/systems';
 import { runSiteCommand } from './site-commands';
 
 let initialized = false;
@@ -13,7 +13,7 @@ function activeModalSurface() {
   if (reader?.dataset.gagaState === 'open') return reader;
 
   const rail = document.querySelector<HTMLElement>('[data-gaga-left-rail]');
-  if (supportsBottomDock(document.documentElement.dataset.gagaLayout) && rail?.dataset.gagaState === 'drawer') return rail;
+  if (supportsGagaDock(document.documentElement.dataset.gagaLayout) && rail?.dataset.gagaState === 'drawer') return rail;
 
   const consoleDialog = document.querySelector<HTMLDialogElement>('[data-gaga-console-dialog]');
   if (consoleDialog?.open) return consoleDialog;

@@ -1,13 +1,12 @@
 ---
 import type { CanonicalContentMetadata } from '@gaga/engine/content';
 import Icon from '../ui/Icon.astro';
-import type { ArticleWorkspaceActionsInput, SavedButtonInput } from '../frame/component-inputs';
+import type { ArticleWorkspaceActionsInput } from '../frame/component-inputs';
 import type { BreadcrumbItem } from '../../lib/page-context';
 
 interface Props {
   identity: CanonicalContentMetadata;
   language?: string;
-  savedAction?: SavedButtonInput;
   actions: ArticleWorkspaceActionsInput;
   routeIdentity: string;
   missingTitleSource: string;
@@ -17,7 +16,6 @@ interface Props {
 const {
   identity,
   language,
-  savedAction: _savedAction,
   actions,
   routeIdentity,
   missingTitleSource,
@@ -110,46 +108,6 @@ const articleTitleId = '_top';
         </span>
         </span>
       </section>
-    </div>
-    <div class="gaga-article-chrome__end gaga-article-reading-utilities__actions">
-      <button
-        class="gaga-article-utility__action gaga-article-reader"
-        type="button"
-        data-gaga-action={actions.reader.command}
-        data-gaga-quick-action={actions.reader.id}
-        data-gaga-active="false"
-        data-gaga-tooltip={actions.reader.ariaLabel.id}
-        aria-pressed={actions.reader.ariaPressed ? 'false' : undefined}
-        aria-label={actions.reader.ariaLabel.id}
-        aria-controls={actions.reader.ariaControls}
-        aria-expanded={actions.reader.ariaExpanded}
-        data-gaga-i18n-key={actions.reader.ariaLabel.key}
-        data-gaga-i18n-id={actions.reader.ariaLabel.id}
-        data-gaga-i18n-en={actions.reader.ariaLabel.en}
-        data-gaga-i18n-target="aria"
-      >
-        {actions.reader.icon ? <Icon name={actions.reader.icon} /> : null}
-        <span class="gaga-article-utility__label" data-gaga-i18n-key={actions.reader.label.key} data-gaga-i18n-id={actions.reader.label.id} data-gaga-i18n-en={actions.reader.label.en}>{actions.reader.label.id}</span>
-      </button>
-      <button
-        class="gaga-article-utility__action gaga-article-focus"
-        type="button"
-        data-gaga-action={actions.focus.command}
-        data-gaga-quick-action={actions.focus.id}
-        data-gaga-active="false"
-        data-gaga-tooltip={actions.focus.ariaLabel.id}
-        aria-pressed={actions.focus.ariaPressed ? 'false' : undefined}
-        aria-label={actions.focus.ariaLabel.id}
-        aria-controls={actions.focus.ariaControls}
-        aria-expanded={actions.focus.ariaExpanded}
-        data-gaga-i18n-key={actions.focus.ariaLabel.key}
-        data-gaga-i18n-id={actions.focus.ariaLabel.id}
-        data-gaga-i18n-en={actions.focus.ariaLabel.en}
-        data-gaga-i18n-target="aria"
-      >
-        {actions.focus.icon ? <Icon name={actions.focus.icon} /> : null}
-        <span class="gaga-article-utility__label" data-gaga-i18n-key={actions.focus.label.key} data-gaga-i18n-id={actions.focus.label.id} data-gaga-i18n-en={actions.focus.label.en}>{actions.focus.label.id}</span>
-      </button>
     </div>
   </div>
 </article>

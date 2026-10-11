@@ -5,7 +5,7 @@ import {
   requestRightRail,
   type SurfaceCommandDetail
 } from '@gaga/engine-web/runtime/events';
-import { supportsBottomDock } from '../../config/systems';
+import { supportsGagaDock } from '../../config/systems';
 
 let initialized = false;
 
@@ -15,13 +15,13 @@ export function initFocusMode() {
 
   const capability = createFocusModeCapability({
     getLayoutMode: () => document.documentElement.dataset.gagaLayout,
-    isAvailable: (mode) => !supportsBottomDock(mode),
+    isAvailable: (mode) => !supportsGagaDock(mode),
     onActivate: () => {
       requestLeftRail({ action: 'collapse', source: 'focus-mode' });
       requestRightRail({ action: 'collapse', source: 'focus-mode' });
     },
     onDeactivate: ({ detail, mode }) => {
-      if (detail.source === 'layoutChanged' || supportsBottomDock(mode)) return;
+      if (detail.source === 'layoutChanged' || supportsGagaDock(mode)) return;
       requestLeftRail({ action: 'restore', source: 'focus-mode' });
       requestRightRail({ action: 'restore', source: 'focus-mode' });
     },

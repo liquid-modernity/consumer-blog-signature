@@ -1,6 +1,6 @@
 import { createInputModeCapability } from '@gaga/engine-web/runtime/input-mode';
 import { requestLeftRail, requestOutline, requestReaderPanel, requestToast } from '@gaga/engine-web/runtime/events';
-import { supportsBottomDock } from '../../config/systems';
+import { supportsGagaDock } from '../../config/systems';
 
 let initialized = false;
 
@@ -9,11 +9,11 @@ export function initInputMode() {
   initialized = true;
   createInputModeCapability({
     getLayoutMode: () => document.documentElement.dataset.gagaLayout,
-    isGestureEnabled: supportsBottomDock,
+    isGestureEnabled: supportsGagaDock,
     isVerticalCloseTarget: (target) => !!target?.closest('[data-gaga-outline-peek], [data-gaga-reader-panel]'),
     onEdgeSwipe({ x, y }) {
       const rail = document.querySelector('[data-gaga-left-rail]') as HTMLElement | null;
-      if (!rail || !supportsBottomDock(document.documentElement.dataset.gagaLayout)) return;
+      if (!rail || !supportsGagaDock(document.documentElement.dataset.gagaLayout)) return;
       requestLeftRail({ action: 'open', source: 'edge-swipe', x, y });
     },
     onVerticalCloseSwipe({ x, y }) {

@@ -1,5 +1,5 @@
 import { onRuntimeEvent, requestLeftRail, requestOutline, requestReaderPanel } from '@gaga/engine-web/runtime/events';
-import { supportsBottomDock } from '../../config/systems';
+import { supportsGagaDock } from '../../config/systems';
 import { activateModalIsolation, clearModalIsolation } from './modal-isolation';
 import { registerSiteCommand, runSiteCommand } from './site-commands';
 
@@ -15,7 +15,7 @@ function scrim() {
 }
 
 function compactMode() {
-  return supportsBottomDock(document.documentElement.dataset.gagaLayout);
+  return supportsGagaDock(document.documentElement.dataset.gagaLayout);
 }
 
 export function contextSurfaceIsOpen() {

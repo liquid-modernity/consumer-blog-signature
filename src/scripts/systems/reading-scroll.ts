@@ -2,7 +2,7 @@ import {
   createElementScrollContext,
   type ScrollContext
 } from '@gaga/engine-web/runtime/scroll-context';
-import { supportsBottomDock } from '../../config/systems';
+import { supportsGagaDock } from '../../config/systems';
 
 export type ReadingScrollContext = {
   owner: HTMLElement;
@@ -46,7 +46,7 @@ export function readingScrollOwner(): HTMLElement {
 
   // Test actual scrollability
   if (article && article.scrollHeight > article.clientHeight + 10) {
-    if (!supportsBottomDock(mode)) return article;
+    if (!supportsGagaDock(mode)) return article;
   }
 
   if (main && main.scrollHeight > main.clientHeight + 10) {

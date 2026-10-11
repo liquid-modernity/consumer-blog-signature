@@ -8,7 +8,7 @@ import {
   requestToast
 } from '@gaga/engine-web/runtime/events';
 import { actionForCommand, type GagaActionCommand } from '../../config/actions';
-import { supportsBottomDock } from '../../config/systems';
+import { supportsGagaDock } from '../../config/systems';
 import { isSameSitePath } from '../../lib/url-semantics';
 
 type SiteCommandHandler = (detail: SiteCommandDetail) => boolean | void | Promise<boolean | void>;
@@ -136,7 +136,7 @@ function runBuiltInCommand(command: GagaActionCommand, detail: SiteCommandDetail
       action: 'toggle',
       source: detail.source ?? 'site-command',
       x: pointer.x ?? window.innerWidth / 2,
-      y: pointer.y ?? (supportsBottomDock(document.documentElement.dataset.gagaLayout) ? window.innerHeight - 72 : 24)
+      y: pointer.y ?? (supportsGagaDock(document.documentElement.dataset.gagaLayout) ? window.innerHeight - 72 : 24)
     });
     return true;
   }
@@ -149,7 +149,7 @@ function runBuiltInCommand(command: GagaActionCommand, detail: SiteCommandDetail
       action: 'toggle',
       source: detail.source ?? 'site-command',
       x: pointer.x ?? window.innerWidth / 2,
-      y: pointer.y ?? (supportsBottomDock(document.documentElement.dataset.gagaLayout) ? window.innerHeight - 72 : 24)
+      y: pointer.y ?? (supportsGagaDock(document.documentElement.dataset.gagaLayout) ? window.innerHeight - 72 : 24)
     });
     return true;
   }
