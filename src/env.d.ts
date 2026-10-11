@@ -2,8 +2,12 @@
 
 import type { GagaRouteContext } from './gaga/content/runtime-route';
 
-declare namespace App {
-  interface Locals {
-    gagaRoute: GagaRouteContext;
+declare global {
+  namespace App {
+    interface Locals {
+      gagaRoute: GagaRouteContext;
+    }
   }
 }
+
+export {};
