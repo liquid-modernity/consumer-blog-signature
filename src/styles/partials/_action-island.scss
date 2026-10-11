@@ -1,0 +1,379 @@
+@use 'breakpoints' as bp;
+
+:root {
+  --gaga-action-island-height: 2.9rem;
+  --gaga-action-island-top-gap: .55rem;
+  --gaga-action-island-top-offset: max(var(--gaga-action-island-top-gap), var(--gaga-safe-area-top));
+}
+
+.gaga-action-runtime-container {
+  position: fixed;
+  inset-block-start: var(--gaga-action-island-top-offset);
+  inset-inline: var(--gaga-safe-area-left) var(--gaga-safe-area-right);
+  z-index: var(--gaga-z-panel);
+  display: flex;
+  justify-content: center;
+  margin: 0;
+  pointer-events: none;
+}
+
+.gaga-action-runtime {
+  --gaga-action-progress: 0;
+  pointer-events: auto;
+  max-inline-size: min(52rem, calc(100vw - var(--gaga-safe-area-left) - var(--gaga-safe-area-right) - 1rem));
+  color: var(--gaga-ink);
+}
+
+.gaga-action-runtime__shell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-block-size: var(--gaga-action-island-height);
+  max-inline-size: 100%;
+  padding: .26rem .32rem;
+  overflow: visible;
+  border: 1px solid var(--gaga-line-strong);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--gaga-surface-elevated) 90%, transparent);
+  box-shadow: 0 .5rem 1.7rem rgba(0, 0, 0, .18);
+  backdrop-filter: blur(18px) saturate(1.15);
+  -webkit-backdrop-filter: blur(18px) saturate(1.15);
+  transition: inline-size .18s ease, transform .16s ease, opacity .16s ease, background-color .16s ease;
+}
+
+.gaga-action-runtime__progress-track {
+  position: absolute;
+  inset-inline: .6rem;
+  inset-block-end: -.08rem;
+  block-size: .12rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--gaga-line-strong) 68%, transparent);
+  pointer-events: none;
+}
+
+.gaga-action-runtime__progress-fill {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  border-radius: inherit;
+  background: var(--gaga-blue);
+  transform: scaleX(var(--gaga-action-progress));
+  transform-origin: left center;
+  transition: transform .08s linear;
+}
+
+.gaga-action-runtime__actions {
+  display: flex;
+  align-items: center;
+  gap: .16rem;
+  min-inline-size: 0;
+}
+
+.gaga-action-runtime__btn,
+.gaga-action-runtime__toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .42rem;
+  min-inline-size: 2.2rem;
+  min-block-size: 2.2rem;
+  padding: .42rem .66rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  color: var(--gaga-ink);
+  background: transparent;
+  font: 700 var(--gaga-type-control-size) / 1 var(--gaga-font-ui);
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  white-space: nowrap;
+  transition: opacity .14s ease, transform .14s ease, max-inline-size .18s ease, padding .18s ease, color .14s ease, background-color .14s ease;
+}
+
+.gaga-action-runtime__btn:is(:hover, :focus-visible),
+.gaga-action-runtime__toggle:is(:hover, :focus-visible) {
+  color: var(--gaga-blue);
+  background: var(--gaga-blue-soft);
+  outline: none;
+}
+
+.gaga-action-runtime__btn:focus-visible,
+.gaga-action-runtime__toggle:focus-visible {
+  box-shadow: 0 0 0 2px var(--gaga-focus-ring);
+}
+
+.gaga-action-runtime__btn:active,
+.gaga-action-runtime__toggle:active {
+  transform: scale(.94);
+}
+
+.gaga-action-runtime__btn.gaga-is-active {
+  color: var(--gaga-bg);
+  background: var(--gaga-blue);
+}
+
+.gaga-action-runtime__icon,
+.gaga-action-runtime__toggle > span {
+  display: grid;
+  place-items: center;
+  inline-size: 1.05rem;
+  block-size: 1.05rem;
+  flex: none;
+}
+
+.gaga-action-runtime__status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 3.35rem;
+  padding-inline: .45rem;
+  color: var(--gaga-muted);
+  font: 800 var(--gaga-type-label-size) / 1 var(--gaga-font-mono);
+  letter-spacing: .04em;
+  white-space: nowrap;
+}
+
+.gaga-action-runtime__reading-progress {
+  color: var(--gaga-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.gaga-action-runtime__toggle {
+  padding-inline: .56rem;
+}
+
+.gaga-action-runtime__live[hidden] {
+  display: none;
+}
+
+.gaga-action-runtime__live {
+  display: flex;
+  align-items: center;
+  max-inline-size: min(44rem, calc(100vw - 2rem));
+  min-inline-size: 0;
+}
+
+/* Collapsed: only the anchor action, live reading state, and expander remain. */
+.gaga-action-runtime[data-gaga-state='collapsed'] .gaga-action-runtime__btn:not(.gaga-action-runtime__btn--anchor),
+.gaga-action-runtime[data-gaga-state='micro'] .gaga-action-runtime__btn:not(.gaga-action-runtime__btn--anchor) {
+  max-inline-size: 0;
+  min-inline-size: 0;
+  padding-inline: 0;
+  overflow: hidden;
+  border-width: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.gaga-action-runtime[data-gaga-state='collapsed'] .gaga-action-runtime__btn--anchor .gaga-action-runtime__label,
+.gaga-action-runtime[data-gaga-state='micro'] .gaga-action-runtime__btn--anchor .gaga-action-runtime__label {
+  display: none;
+}
+
+.gaga-action-runtime[data-gaga-state='expanded'] .gaga-action-runtime__status {
+  padding-inline: .55rem;
+}
+
+.gaga-action-runtime[data-gaga-state='expanded'] .gaga-action-runtime__toggle {
+  transform: rotate(90deg);
+}
+
+/* Micro mode prioritizes the live reading percentage while scrolling down. */
+.gaga-action-runtime[data-gaga-state='micro'] .gaga-action-runtime__btn--anchor {
+  max-inline-size: 0;
+  min-inline-size: 0;
+  padding-inline: 0;
+  overflow: hidden;
+  border-width: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.gaga-action-runtime[data-gaga-state='micro'] .gaga-action-runtime__toggle {
+  max-inline-size: 1.9rem;
+  min-inline-size: 1.9rem;
+  min-block-size: 1.9rem;
+  padding: .3rem;
+  opacity: .72;
+}
+
+.gaga-action-runtime[data-gaga-state='micro'] .gaga-action-runtime__shell {
+  transform: translateY(-.12rem) scale(.96);
+  opacity: .88;
+}
+
+/* Speech becomes the active island state, not a second floating toolbar. */
+.gaga-action-runtime[data-gaga-live-state='speaking'] .gaga-action-runtime__actions,
+.gaga-action-runtime[data-gaga-live-state='speaking'] .gaga-action-runtime__status,
+.gaga-action-runtime[data-gaga-live-state='speaking'] .gaga-action-runtime__toggle {
+  display: none;
+}
+
+.gaga-action-runtime[data-gaga-live-state='speaking'] .gaga-action-runtime__live {
+  display: flex;
+}
+
+.gaga-action-runtime[data-gaga-live-state='speaking'] .gaga-action-runtime__shell {
+  border-radius: 1.15rem;
+  padding-inline: .6rem;
+}
+
+.gaga-action-runtime__live .gaga-speech-dock__inner {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  min-inline-size: 0;
+  padding: .15rem 0;
+}
+
+.gaga-action-runtime__live .gaga-speech-dock__info {
+  min-inline-size: 0;
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+}
+
+.gaga-action-runtime__live .gaga-speech-dock__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  color: var(--gaga-blue);
+  font: 800 var(--gaga-type-label-size) / 1 var(--gaga-font-mono);
+  white-space: nowrap;
+}
+
+.gaga-action-runtime__live .gaga-speech-dock__text {
+  max-inline-size: 18rem;
+  overflow: hidden;
+  color: var(--gaga-muted);
+  font-size: var(--gaga-type-caption-size);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gaga-action-runtime__live .gaga-speech-dock__controls {
+  display: flex;
+  align-items: center;
+  gap: .2rem;
+  flex: none;
+}
+
+.gaga-action-runtime__live .gaga-speech-dock__btn {
+  display: grid;
+  place-items: center;
+  min-inline-size: 2rem;
+  min-block-size: 2rem;
+  padding: .3rem .48rem;
+  border: 0;
+  border-radius: 999px;
+  color: var(--gaga-ink);
+  background: transparent;
+  font: 800 var(--gaga-type-label-size) / 1 var(--gaga-font-mono);
+  cursor: pointer;
+}
+
+.gaga-action-runtime__live .gaga-speech-dock__btn:is(:hover, :focus-visible) {
+  color: var(--gaga-blue);
+  background: var(--gaga-blue-soft);
+  outline: none;
+}
+
+/* Tooltips open downward because the island lives at the top edge. */
+.gaga-action-runtime [data-gaga-tooltip]::after {
+  position: absolute;
+  inset-block-start: calc(100% + .55rem);
+  inset-inline-start: 50%;
+  z-index: calc(var(--gaga-z-panel) + 1);
+  max-inline-size: 15rem;
+  padding: .34rem .55rem;
+  border: 1px solid var(--gaga-line);
+  border-radius: var(--gaga-radius-sm);
+  color: var(--gaga-tooltip-ink);
+  background: var(--gaga-tooltip-bg);
+  content: attr(data-gaga-tooltip);
+  font: 700 var(--gaga-type-label-size) / 1.25 var(--gaga-font-mono);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -.2rem);
+  transition: opacity .12s ease, transform .12s ease;
+  white-space: nowrap;
+}
+
+.gaga-action-runtime [data-gaga-tooltip]:is(:hover, :focus-visible)::after {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+@media (min-width: bp.$tablet-large-min) {
+  .gaga-action-runtime__btn[data-gaga-action='toggle-context-surface'] {
+    display: none;
+  }
+}
+
+@media (max-width: bp.$tablet-large-max) {
+  .gaga-action-runtime__label {
+    display: none;
+  }
+
+  .gaga-action-runtime[data-gaga-state='expanded'] .gaga-action-runtime__btn {
+    padding-inline: .56rem;
+  }
+}
+
+@media (max-width: bp.$compact-max) {
+  :root {
+    --gaga-action-island-top-gap: .3rem;
+  }
+
+  .gaga-action-runtime {
+    max-inline-size: calc(100vw - var(--gaga-safe-area-left) - var(--gaga-safe-area-right) - .75rem);
+  }
+
+  .gaga-action-runtime__shell {
+    min-block-size: 2.65rem;
+  }
+
+  .gaga-action-runtime__btn,
+  .gaga-action-runtime__toggle {
+    min-inline-size: 2rem;
+    min-block-size: 2rem;
+    padding: .38rem .5rem;
+  }
+
+  .gaga-action-runtime[data-gaga-state='expanded'] .gaga-action-runtime__status {
+    display: none;
+  }
+
+  .gaga-action-runtime__live .gaga-speech-dock__text {
+    display: none;
+  }
+}
+
+@media (max-width: bp.$mobile-max) {
+  .gaga-action-runtime[data-gaga-state='expanded'] .gaga-action-runtime__shell {
+    transform: scale(.94);
+  }
+
+  .gaga-action-runtime__status {
+    min-inline-size: 2.8rem;
+    padding-inline: .3rem;
+  }
+
+  .gaga-action-runtime__live .gaga-speech-dock__badge {
+    max-inline-size: 7rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gaga-action-runtime__shell,
+  .gaga-action-runtime__btn,
+  .gaga-action-runtime__toggle,
+  .gaga-action-runtime__progress-fill,
+  .gaga-action-runtime [data-gaga-tooltip]::after {
+    transition: none;
+  }
+}

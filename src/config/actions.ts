@@ -331,7 +331,7 @@ export const gagaActions: readonly GagaAction[] = [
     icon: 'outline',
     command: 'toggle-outline',
     projections: [],
-    availability: { layouts: ['mobile', 'tablet-mini'], capabilities: ['bottom-dock', 'table-of-contents'] },
+    availability: { layouts: ['mobile', 'tablet-mini', 'tablet-large', 'desktop'], capabilities: ['table-of-contents'] },
     feedback: { label: 'Outline', sfx: 'open' }
   },
   {

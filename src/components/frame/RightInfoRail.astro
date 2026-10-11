@@ -1,6 +1,5 @@
 ---
 import RailToggle from '../navigation/RailToggle.astro';
-import TocBlock from '../information/TocBlock.astro';
 import MetaBlock from '../information/MetaBlock.astro';
 import SummaryBlock from '../information/SummaryBlock.astro';
 import ContextFactBlock from '../information/ContextFactBlock.astro';
@@ -13,7 +12,6 @@ interface Props {
 }
 
 const { rail } = Astro.props;
-const outlineItems = rail.outlineItems;
 const hasContextFacts = (rail.facts?.length ?? 0) > 0;
 ---
 <button
@@ -58,7 +56,6 @@ const hasContextFacts = (rail.facts?.length ?? 0) > 0;
     </button>
   </div>
   <div class="gaga-right-rail__body">
-    {rail.mode === 'outline' ? <TocBlock items={outlineItems} title={rail.labels.outlineTitle.id} titleEn={rail.labels.outlineTitle.en} /> : null}
     <div class="gaga-right-rail__section gaga-right-rail__section--summary" data-gaga-right-rail-section="summary">
       <SummaryBlock description={rail.snippet} title={rail.labels.articleSnippet.id} titleEn={rail.labels.articleSnippet.en} />
     </div>

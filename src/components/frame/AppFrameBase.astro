@@ -27,6 +27,7 @@ const {
 } = Astro.props;
 
 const showActionRuntime = pageId !== 'landing';
+const showMobileDock = contentKind !== 'article' && contentClass !== 'article-flagship';
 
 const pathname = Astro.url.pathname;
 let runtimeContext: 'article' | 'archive' | 'graph' | 'topic' | 'default' = 'default';
@@ -67,7 +68,7 @@ if (contentKind === 'article' || contentClass === 'article-flagship' || pathname
   )}
   <ContextSurfaceTrigger action={shell.contextTrigger} />
   <slot name="after-main" />
-  <MobileDock dock={shell.mobileDock} />
+  {showMobileDock ? <MobileDock dock={shell.mobileDock} /> : null}
   <ReaderPreferences preferences={shell.readerPreferences} />
 </div>
 <script>

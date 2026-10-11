@@ -17,7 +17,7 @@ const hasOutlinePeek = outlineItems.length > 0;
 const initialOutlineLabel = outlineItems[0]?.text ?? rail.labels.outlineFallback;
 ---
 {hasOutlinePeek ? (
-  <div class="gaga-outline-stack" data-gaga-outline-stack>
+  <div class="gaga-outline-stack" data-gaga-outline-stack data-gaga-visibility="visible">
     <button
       type="button"
       class="gaga-outline-peek-preview"
@@ -40,7 +40,11 @@ const initialOutlineLabel = outlineItems[0]?.text ?? rail.labels.outlineFallback
       <span class="gaga-outline-peek-preview__icon" aria-hidden="true">
         <Icon name="outline" />
       </span>
+      <span class="gaga-outline-peek-preview__counter" aria-hidden="true">
+        <span data-gaga-outline-current-index>1</span>/<span data-gaga-outline-total>{outlineItems.length}</span>
+      </span>
       <span id={outlineCurrentLabelId} class="gaga-outline-peek-preview__label" data-gaga-outline-current-label>{initialOutlineLabel}</span>
+      <span class="gaga-outline-peek-preview__chevron" aria-hidden="true">↑</span>
     </button>
     <section
       id={outlinePeekId}
@@ -59,15 +63,22 @@ const initialOutlineLabel = outlineItems[0]?.text ?? rail.labels.outlineFallback
           <span class="gaga-outline-peek__title-icon" aria-hidden="true">
             <Icon name="outline" />
           </span>
-          <h2
-            id={outlineTitleId}
-            class="gaga-outline-peek__title"
-            data-gaga-i18n-key={rail.labels.outlineTitle.key}
-            data-gaga-i18n-id={rail.labels.outlineTitle.id}
-            data-gaga-i18n-en={rail.labels.outlineTitle.en}
-          >
-            {rail.labels.outlineTitle.id}
-          </h2>
+          <div class="gaga-outline-peek__heading">
+            <h2
+              id={outlineTitleId}
+              class="gaga-outline-peek__title"
+              data-gaga-i18n-key={rail.labels.outlineTitle.key}
+              data-gaga-i18n-id={rail.labels.outlineTitle.id}
+              data-gaga-i18n-en={rail.labels.outlineTitle.en}
+            >
+              {rail.labels.outlineTitle.id}
+            </h2>
+            <p class="gaga-outline-peek__semantic-progress" aria-live="polite">
+              <span>Section </span><span data-gaga-outline-sheet-current-index>1</span><span> / {outlineItems.length}</span>
+              <span aria-hidden="true"> · </span>
+              <span data-gaga-outline-sheet-current-label>{initialOutlineLabel}</span>
+            </p>
+          </div>
           <button
             type="button"
             data-gaga-outline-close
@@ -86,8 +97,5 @@ const initialOutlineLabel = outlineItems[0]?.text ?? rail.labels.outlineFallback
         <TocBlock items={outlineItems} showTitle={false} wrapper="nav" ariaLabelledby={outlineTitleId} />
       </div>
     </section>
-    <div class="gaga-outline-progress" data-gaga-outline-progress aria-hidden="true">
-      <span class="gaga-outline-progress__fill" data-gaga-outline-progress-fill></span>
-    </div>
   </div>
 ) : null}

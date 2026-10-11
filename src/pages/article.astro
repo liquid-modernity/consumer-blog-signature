@@ -101,19 +101,6 @@ const galleryItems = [
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <SeoHead metadata={metadata} pathname="/article" title={title} includeWebSiteSchema={false} />
     <style is:global>
-      /* Smooth reading progress indicator */
-      .gaga-reading-progress-bar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        height: 3px;
-        background: var(--gaga-blue);
-        width: 0%;
-        z-index: 999;
-        transition: width 0.08s ease-out;
-        pointer-events: none;
-      }
-
       /* Editorial Longform Typography */
       .gaga-flagship-article {
         max-width: var(--gaga-content-width, 44rem);
@@ -349,9 +336,6 @@ const galleryItems = [
     </style>
   </head>
   <body>
-    <!-- Reading Progress Bar -->
-    <div class="gaga-reading-progress-bar" id="gaga-reading-progress-bar"></div>
-
     <StandaloneAppFrame
       pageId="article-benchmark"
       pageTitle={title}
@@ -516,58 +500,5 @@ const galleryItems = [
       </article>
     </StandaloneAppFrame>
 
-    <!-- Reading Scroll Progress Script -->
-    <script>
-      function setupReadingProgress() {
-        const progressBar = document.getElementById('gaga-reading-progress-bar');
-        if (!progressBar) return;
-
-        let ticking = false;
-
-        function updateProgress() {
-          const scrollElement = document.querySelector('.gaga-main-region') as HTMLElement | null;
-          let scrollTop = 0;
-          let scrollHeight = 0;
-          let clientHeight = 0;
-
-          if (scrollElement && scrollElement.scrollTop > 0) {
-            scrollTop = scrollElement.scrollTop;
-            scrollHeight = scrollElement.scrollHeight;
-            clientHeight = scrollElement.clientHeight;
-          } else {
-            scrollTop = window.scrollY || document.documentElement.scrollTop || 0;
-            scrollHeight = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
-            clientHeight = window.innerHeight;
-          }
-
-          const maxScroll = Math.max(1, scrollHeight - clientHeight);
-          const percentage = Math.min(100, Math.max(0, (scrollTop / maxScroll) * 100));
-          if (progressBar) {
-            progressBar.style.width = `${percentage}%`;
-          }
-          ticking = false;
-        }
-
-        function onScroll() {
-          if (!ticking) {
-            ticking = true;
-            requestAnimationFrame(updateProgress);
-          }
-        }
-
-        window.addEventListener('scroll', onScroll, { passive: true });
-        const scrollContainer = document.querySelector('.gaga-main-region');
-        if (scrollContainer) {
-          scrollContainer.addEventListener('scroll', onScroll, { passive: true });
-        }
-        updateProgress();
-      }
-
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', setupReadingProgress);
-      } else {
-        setupReadingProgress();
-      }
-    </script>
   </body>
 </html>

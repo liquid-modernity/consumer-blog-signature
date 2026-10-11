@@ -32,7 +32,9 @@ test('Reader Runtime tokens and schema configuration', () => {
 
 test('Article canvas completeness & rich typography', () => {
   const articleContent = fs.readFileSync('src/pages/article.astro', 'utf8');
-  assert.ok(articleContent.includes('gaga-reading-progress-bar'), 'Must include reading progress bar');
+  assert.ok(!articleContent.includes('gaga-reading-progress-bar'), 'Legacy viewport progress bar must be removed from flagship article');
+  const actionRuntime = fs.readFileSync('src/components/frame/ActionRuntime.astro', 'utf8');
+  assert.ok(actionRuntime.includes('data-gaga-reading-progress'), 'Reading progress must live in Gaga Dynamic Notch Island');
   assert.ok(articleContent.includes('gaga-flagship-article__author-card'), 'Must include rich author identity');
   assert.ok(articleContent.includes('gaga-editorial-quote'), 'Must include editorial quotes');
   assert.ok(articleContent.includes('MediaCarousel'), 'Must include carousel rich media');
@@ -48,8 +50,8 @@ test('Contextual Rails separation: Navigation vs Intelligence', () => {
   const rightRail = fs.readFileSync('src/components/frame/RightInfoRail.astro', 'utf8');
   assert.ok(leftRail.includes('gaga-left-rail'), 'Left rail is dedicated to navigation ("Where can I go?")');
   assert.ok(rightRail.includes('gaga-right-rail'), 'Right rail is dedicated to intelligence ("What should I know?")');
-  assert.ok(rightRail.includes('TocBlock') || rightRail.includes('outlineItems'), 'Right rail includes outline items');
-  assert.ok(rightRail.includes('SummaryBlock'), 'Right rail includes summary snippet');
+  assert.ok(!rightRail.includes('TocBlock'), 'Right Intelligence Rail must not duplicate the bottom semantic outline');
+  assert.ok(rightRail.includes('SummaryBlock'), 'Right rail includes contextual summary intelligence');
 });
 
 test('Personal Reading Intelligence & Persistent Knowledge Memory', () => {
@@ -71,6 +73,52 @@ test('Personal Reading Intelligence & Persistent Knowledge Memory', () => {
   assert.ok(libraryPage.includes('data-gaga-library-tab="quotes"'), 'Must include Quotes tab');
   assert.ok(libraryPage.includes('data-gaga-library-tab="history"'), 'Must include Reading History tab');
   assert.ok(libraryPage.includes('data-gaga-highlight-jump'), 'Must support return jump back to article');
+});
+
+
+test('Reading Intelligence uses one runtime path without legacy component-local duplication', () => {
+  const actionRuntime = fs.readFileSync('src/components/frame/ActionRuntime.astro', 'utf8');
+  assert.ok(!actionRuntime.includes('SpeechSynthesisUtterance'), 'ActionRuntime must not own speech synthesis');
+  assert.ok(!actionRuntime.includes('gaga:highlights:v1'), 'ActionRuntime must not own highlight persistence');
+  assert.ok(!actionRuntime.includes('gaga-selection-popover'), 'ActionRuntime must not own a duplicate selection menu');
+  assert.ok(actionRuntime.includes('runSiteCommand'), 'ActionRuntime must dispatch through the site command registry');
+
+  const enhancements = fs.readFileSync('src/scripts/systems/reader-enhancements.ts', 'utf8');
+  assert.ok(enhancements.includes("registerSiteCommand('highlight'"), 'Highlight command must be owned by Reader Enhancements');
+  assert.ok(enhancements.includes("registerSiteCommand('speak'"), 'Speak command must be owned by Reader Enhancements');
+  assert.ok(enhancements.includes('language: meta.language'), 'Highlight entities must preserve content language');
+  assert.ok(enhancements.includes('textRangeForHighlight'), 'Restoration must support offset-aware text ranges');
+
+  const continuity = fs.readFileSync('src/scripts/systems/reading-continuity.ts', 'utf8');
+  assert.ok(continuity.includes("updateHighlightNote(highlight.id, '')"), 'Removing a note must preserve its highlight');
+  assert.ok(continuity.includes('normalizeSpeechLang(highlight.language'), 'Library speech must follow stored content language');
+
+  const knowledge = fs.readFileSync('src/scripts/systems/reading-knowledge.ts', 'utf8');
+  assert.ok(knowledge.includes('LEGACY_HIGHLIGHT_STORAGE_KEY'), 'Legacy highlights must migrate into the unified knowledge store');
+  assert.ok(knowledge.includes('language?: string'), 'Highlight schema must carry content language metadata');
+});
+
+
+test('Gaga Dynamic Notch Island + Dynamic Outline Peek signature', () => {
+  const actionRuntime = fs.readFileSync('src/components/frame/ActionRuntime.astro', 'utf8');
+  const actionStyles = fs.readFileSync('src/styles/partials/_action-island.scss', 'utf8');
+  const outline = fs.readFileSync('src/components/frame/ArticleOutlinePeek.astro', 'utf8');
+  const outlineStyles = fs.readFileSync('src/styles/partials/_outline-peek.scss', 'utf8');
+  const systems = fs.readFileSync('src/config/systems.ts', 'utf8');
+  const appFrame = fs.readFileSync('src/components/frame/AppFrameBase.astro', 'utf8');
+
+  assert.ok(actionRuntime.includes('Gaga Dynamic Notch Island'), 'ActionRuntime must project the top-center Dynamic Notch Island');
+  assert.ok(actionRuntime.includes('data-gaga-action-island-toggle'), 'Island must have an explicit expand/collapse control');
+  assert.ok(actionRuntime.includes('data-gaga-action-runtime-live'), 'Island must expose one live state surface for speech/status');
+  assert.ok(actionStyles.includes('var(--gaga-safe-area-top)'), 'Island must be safe-area aware');
+  assert.ok(actionStyles.includes('--gaga-action-progress'), 'Island must render reading progress from one progress state');
+  assert.ok(outline.includes('data-gaga-outline-current-index'), 'Outline Peek must expose semantic section position');
+  assert.ok(outline.includes('data-gaga-outline-sheet-current-label'), 'Expanded outline must expose the current semantic section label');
+  assert.ok(!outline.includes('gaga-outline-progress'), 'Bottom Outline Peek must not duplicate the numeric reading progress bar');
+  assert.ok(outlineStyles.includes('inset-inline-start: 50%'), 'Outline Peek must anchor bottom-center');
+  assert.ok(systems.includes("enabledModes: ['mobile', 'tablet-mini', 'tablet-large', 'desktop']"), 'Outline Peek must be available across all device classes');
+  assert.ok(appFrame.includes('showMobileDock'), 'Article layout must explicitly resolve mobile dock coexistence');
+  assert.ok(!fs.existsSync('src/components/navigation/NotchIslandAction.astro'), 'Legacy parallel notch action component must be removed');
 });
 
 test('Human Behaviour Algorithms & Algorithmic Self-Healing Diagnostic HUD', () => {

@@ -21,7 +21,7 @@ export const responsiveShellConfig = {
       enabledModes: ['mobile', 'tablet-mini']
     },
     outlinePeek: {
-      enabledModes: ['mobile', 'tablet-mini'],
+      enabledModes: ['mobile', 'tablet-mini', 'tablet-large', 'desktop'],
       requiresTableOfContents: true,
       attachTo: 'bottom-dock'
     },

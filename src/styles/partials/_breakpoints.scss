@@ -15,4 +15,5 @@
   --gaga-outline-peek-offset: var(--gaga-bottom-dock-occupied-block-size);
   --gaga-compact-reading-top-clearance: calc(var(--gaga-safe-area-top) + var(--gaga-article-chrome-min-block-size));
   --gaga-compact-reading-clearance: calc(var(--gaga-bottom-dock-occupied-block-size) + var(--gaga-outline-peek-preview-min-block-size) + var(--gaga-outline-peek-progress-size));
+  --gaga-article-outline-clearance: calc(var(--gaga-safe-area-bottom) + var(--gaga-outline-peek-preview-min-block-size) + .85rem);
 }

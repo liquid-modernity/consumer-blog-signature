@@ -16,7 +16,9 @@ import { storageKeys } from '../../config/systems';
 import {
   readAllHighlights,
   removeHighlight,
+  updateHighlightNote,
   formatDateLocale,
+  normalizeSpeechLang,
   type HighlightEntity
 } from './reading-knowledge';
 import { getReadingBehaviorMetrics } from './reading-behaviour';
@@ -272,7 +274,7 @@ function cloneHighlightItem(highlight: HighlightEntity) {
       if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
         window.speechSynthesis.cancel();
         const utt = new SpeechSynthesisUtterance(highlight.text);
-        utt.lang = 'id-ID';
+        utt.lang = normalizeSpeechLang(highlight.language || document.documentElement.lang || 'id');
         window.speechSynthesis.speak(utt);
         requestToast({ message: 'Mendengarkan kutipan sorotan', tone: 'ok' });
       }
@@ -321,10 +323,9 @@ function cloneNoteItem(highlight: HighlightEntity) {
   const removeBtn = card.querySelector<HTMLButtonElement>('[data-gaga-note-remove]');
   if (removeBtn) {
     removeBtn.addEventListener('click', () => {
-      highlight.note = undefined;
-      removeHighlight(highlight.id);
+      updateHighlightNote(highlight.id, '');
       renderSavedScreen();
-      requestToast({ message: 'Catatan dihapus', tone: 'info' });
+      requestToast({ message: 'Catatan dihapus, sorotan tetap tersimpan', tone: 'info' });
     });
   }
 

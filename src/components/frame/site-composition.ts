@@ -313,7 +313,7 @@ export function createRightRailInput(info: ScreenInfo): RightRailInput {
   const outlineItems = sanitizeOutlineItems(info.outlineItems);
   return {
     ...info,
-    mode: outlineItems.length > 0 ? 'outline' : 'summary',
+    mode: 'summary',
     outlineItems,
     railToggle: createRailToggleInput('right'),
     labels: {

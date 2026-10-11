@@ -13,7 +13,7 @@ type ActionItem = {
   command: string;
   label: string;
   icon: string;
-  shortcut: string;
+  shortcut?: string;
   tier: 'primary' | 'secondary';
 };
 
@@ -28,6 +28,7 @@ const getActionsForContext = (ctx: string): { primary: ActionItem[]; secondary: 
       secondary: [
         { id: 'highlight', command: 'highlight', label: 'Sorot', icon: 'edit', shortcut: 'H', tier: 'secondary' },
         { id: 'speak', command: 'speak', label: 'Dengarkan', icon: 'volume_up', shortcut: 'S', tier: 'secondary' },
+        { id: 'intelligence', command: 'toggle-context-surface', label: 'Intelijen', icon: 'info', tier: 'secondary' },
         { id: 'personalize', command: 'personalize', label: 'Personalisasi', icon: 'settings', shortcut: 'P', tier: 'secondary' }
       ]
     };
@@ -71,25 +72,34 @@ const getActionsForContext = (ctx: string): { primary: ActionItem[]; secondary: 
 };
 
 const { primary, secondary } = getActionsForContext(context);
+const allActions = [...primary, ...secondary];
 ---
 <div class={`gaga-action-runtime-container ${className}`} data-gaga-action-runtime-container>
   <nav
     class="gaga-action-runtime"
-    aria-label="Universal Action Runtime"
+    aria-label="Gaga Dynamic Notch Island"
     data-gaga-action-runtime
     data-gaga-context={context}
+    data-gaga-state="collapsed"
+    data-gaga-live-state="idle"
   >
-    <div class="gaga-action-runtime__bar" role="toolbar" aria-label="Reading & Page Actions">
-      <!-- Primary Group -->
-      <div class="gaga-action-runtime__group gaga-action-runtime__group--primary" role="group" aria-label="Aksi Utama">
-        {primary.map((act) => (
+    <div class="gaga-action-runtime__shell" role="toolbar" aria-label="Reading & Page Actions">
+      {context === 'article' ? (
+        <span class="gaga-action-runtime__progress-track" aria-hidden="true">
+          <span class="gaga-action-runtime__progress-fill"></span>
+        </span>
+      ) : null}
+
+      <div class="gaga-action-runtime__actions" data-gaga-action-runtime-actions>
+        {allActions.map((act, index) => (
           <button
             type="button"
-            class="gaga-action-runtime__btn"
+            class={`gaga-action-runtime__btn ${index === 0 ? 'gaga-action-runtime__btn--anchor' : ''}`}
             data-gaga-action={act.command}
             data-gaga-action-id={act.id}
-            data-gaga-tooltip={`${act.label} (${act.shortcut})`}
-            aria-label={`${act.label} (${act.shortcut})`}
+            data-gaga-action-tier={act.tier}
+            data-gaga-tooltip={act.shortcut ? `${act.label} (${act.shortcut})` : act.label}
+            aria-label={act.shortcut ? `${act.label} (${act.shortcut})` : act.label}
           >
             <span class="gaga-action-runtime__icon" aria-hidden="true">
               <Icon name={act.icon} />
@@ -99,533 +109,162 @@ const { primary, secondary } = getActionsForContext(context);
         ))}
       </div>
 
-      <!-- Hairline Visual Divider -->
-      {secondary.length > 0 && (
-        <span class="gaga-action-runtime__divider" aria-hidden="true" />
-      )}
+      <div class="gaga-action-runtime__status" data-gaga-action-runtime-status aria-live="polite">
+        {context === 'article' ? (
+          <span
+            class="gaga-action-runtime__reading-progress"
+            data-gaga-reading-progress
+            role="progressbar"
+            aria-label="Progres membaca"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow="0"
+          >
+            <span data-gaga-reading-progress-value>0%</span>
+          </span>
+        ) : (
+          <span class="gaga-action-runtime__context-label">Actions</span>
+        )}
+      </div>
 
-      <!-- Secondary Group -->
-      {secondary.length > 0 && (
-        <div class="gaga-action-runtime__group gaga-action-runtime__group--secondary" role="group" aria-label="Aksi Sekunder">
-          {secondary.map((act) => (
-            <button
-              type="button"
-              class="gaga-action-runtime__btn"
-              data-gaga-action={act.command}
-              data-gaga-action-id={act.id}
-              data-gaga-tooltip={`${act.label} (${act.shortcut})`}
-              aria-label={`${act.label} (${act.shortcut})`}
-            >
-              <span class="gaga-action-runtime__icon" aria-hidden="true">
-                <Icon name={act.icon} />
-              </span>
-              <span class="gaga-action-runtime__label">{act.label}</span>
-            </button>
-          ))}
-        </div>
-      )}
+      <button
+        type="button"
+        class="gaga-action-runtime__toggle"
+        data-gaga-action-island-toggle
+        aria-expanded="false"
+        aria-label="Buka aksi halaman"
+      >
+        <span aria-hidden="true"><Icon name="menu" /></span>
+      </button>
+
+      <div class="gaga-action-runtime__live" data-gaga-action-runtime-live hidden></div>
     </div>
   </nav>
-
-  <!-- Floating Text Selection Popover -->
-  <div class="gaga-selection-popover" id="gaga-selection-popover" role="toolbar" aria-label="Aksi Seleksi Teks" hidden>
-    <button type="button" class="gaga-selection-popover__btn" data-gaga-selection-action="highlight" aria-label="Sorot teks">
-      <span class="gaga-selection-popover__icon"><Icon name="edit" /></span>
-      <span>Sorot</span>
-    </button>
-    <span class="gaga-selection-popover__divider" aria-hidden="true"></span>
-    <button type="button" class="gaga-selection-popover__btn" data-gaga-selection-action="copy" aria-label="Salin kutipan">
-      <span class="gaga-selection-popover__icon"><Icon name="ios_share" /></span>
-      <span>Salin Kutipan</span>
-    </button>
-  </div>
 </div>
 
 <script>
+  import { onRuntimeEvent } from '@gaga/engine-web/runtime/events';
   import { runSiteCommand } from '../../scripts/systems/site-commands';
-  import { requestToast } from '@gaga/engine-web/runtime/events';
+  import { getUnifiedScrollMetrics, resolveReadingScrollContext } from '../../scripts/systems/reading-scroll';
 
   function setupActionRuntime() {
     const runtime = document.querySelector<HTMLElement>('[data-gaga-action-runtime]');
     if (!runtime || runtime.dataset.wired === 'true') return;
     runtime.dataset.wired = 'true';
 
-    // System toast helper
-    function showToast(message: string, isError = false) {
-      requestToast({
-        message,
-        tone: isError ? 'warn' : 'info'
-      });
+    const toggle = runtime.querySelector<HTMLButtonElement>('[data-gaga-action-island-toggle]');
+    const progress = runtime.querySelector<HTMLElement>('[data-gaga-reading-progress]');
+    const progressValue = runtime.querySelector<HTMLElement>('[data-gaga-reading-progress-value]');
+    const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
+    let unsubscribeScroll: (() => void) | null = null;
+    let lastScrollTop = 0;
+    let scheduled = false;
+    let hoverTimer = 0;
+
+    const isSpeaking = () => runtime.dataset.gagaLiveState === 'speaking';
+    const isExpanded = () => runtime.dataset.gagaState === 'expanded';
+
+    function setState(state: 'micro' | 'collapsed' | 'expanded') {
+      if (isSpeaking() && state !== 'expanded') return;
+      runtime.dataset.gagaState = state;
+      toggle?.setAttribute('aria-expanded', state === 'expanded' ? 'true' : 'false');
+      if (toggle) toggle.setAttribute('aria-label', state === 'expanded' ? 'Tutup aksi halaman' : 'Buka aksi halaman');
     }
 
-    // Text highlighting helper
-    function performHighlight(targetRange?: Range | null) {
-      const sel = window.getSelection();
-      const range = targetRange || (sel && sel.rangeCount > 0 ? sel.getRangeAt(0) : null);
-      if (!range || range.collapsed || range.toString().trim().length === 0) {
-        showToast('Pilih teks di artikel terlebih dahulu untuk menyorot', true);
-        return;
+    function updateProgress() {
+      scheduled = false;
+      if (!progress || !progressValue) return;
+      const metrics = getUnifiedScrollMetrics();
+      const rounded = Math.round(metrics.percentage);
+      runtime.style.setProperty('--gaga-action-progress', `${Math.max(0, Math.min(1, metrics.percentage / 100))}`);
+      progressValue.textContent = `${rounded}%`;
+      progress.setAttribute('aria-valuenow', String(rounded));
+
+      const delta = metrics.scrollTop - lastScrollTop;
+      if (!isExpanded() && !isSpeaking()) {
+        if (metrics.scrollTop > 120 && delta > 10) setState('micro');
+        else if (delta < -7 || metrics.scrollTop < 72) setState('collapsed');
       }
-
-      try {
-        const mark = document.createElement('mark');
-        mark.className = 'gaga-highlight';
-        mark.title = 'Kutipan tersimpan';
-        range.surroundContents(mark);
-        sel?.removeAllRanges();
-
-        // Save highlight to localStorage
-        try {
-          const stored = JSON.parse(localStorage.getItem('gaga:highlights:v1') || '[]');
-          stored.push({
-            text: mark.textContent,
-            time: new Date().toISOString(),
-            url: window.location.pathname
-          });
-          localStorage.setItem('gaga:highlights:v1', JSON.stringify(stored));
-        } catch {
-          // Ignore localStorage errors
-        }
-
-        showToast('Kutipan berhasil disorot & disimpan');
-      } catch {
-        showToast('Pilih teks di dalam satu paragraf yang sama', true);
-      }
+      lastScrollTop = metrics.scrollTop;
     }
 
-    // Speech synthesis narration
-    let synthUtterance: SpeechSynthesisUtterance | null = null;
-    let isSpeaking = false;
-
-    function toggleSpeech(button: HTMLButtonElement) {
-      if (!('speechSynthesis' in window)) {
-        showToast('Sintesis suara tidak didukung di peramban ini', true);
-        return;
-      }
-
-      if (isSpeaking) {
-        window.speechSynthesis.cancel();
-        isSpeaking = false;
-        button.classList.remove('gaga-is-active');
-        button.setAttribute('aria-pressed', 'false');
-        showToast('Narasi suara dihentikan');
-        return;
-      }
-
-      const articleEl = document.querySelector<HTMLElement>('#article-content, .gaga-flagship-article__prose, article, main');
-      const textToSpeak = articleEl ? (articleEl.innerText || articleEl.textContent || '') : document.title;
-      const cleanText = textToSpeak.replace(/\s+/g, ' ').trim().slice(0, 3500);
-
-      if (!cleanText) {
-        showToast('Tidak ada teks untuk dibacakan', true);
-        return;
-      }
-
-      synthUtterance = new SpeechSynthesisUtterance(cleanText);
-      synthUtterance.lang = document.documentElement.lang || 'id-ID';
-      synthUtterance.rate = 1.0;
-
-      synthUtterance.onstart = () => {
-        isSpeaking = true;
-        button.classList.add('gaga-is-active');
-        button.setAttribute('aria-pressed', 'true');
-        showToast('Narasi suara dimulai...');
-      };
-
-      synthUtterance.onend = () => {
-        isSpeaking = false;
-        button.classList.remove('gaga-is-active');
-        button.setAttribute('aria-pressed', 'false');
-      };
-
-      synthUtterance.onerror = () => {
-        isSpeaking = false;
-        button.classList.remove('gaga-is-active');
-        button.setAttribute('aria-pressed', 'false');
-      };
-
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(synthUtterance);
+    function scheduleProgress() {
+      if (scheduled) return;
+      scheduled = true;
+      requestAnimationFrame(updateProgress);
     }
 
-    // Central Action Dispatcher delegates to single system runtime
+    function bindReadingProgress() {
+      unsubscribeScroll?.();
+      const context = resolveReadingScrollContext();
+      unsubscribeScroll = context?.scrollContext.addChangeListener(scheduleProgress) ?? null;
+      lastScrollTop = getUnifiedScrollMetrics().scrollTop;
+      scheduleProgress();
+    }
+
     runtime.addEventListener('click', (event) => {
-      const button = (event.target as HTMLElement).closest<HTMLButtonElement>('[data-gaga-action]');
+      const target = event.target as HTMLElement;
+      const islandToggle = target.closest<HTMLButtonElement>('[data-gaga-action-island-toggle]');
+      if (islandToggle) {
+        setState(isExpanded() ? 'collapsed' : 'expanded');
+        return;
+      }
+
+      const button = target.closest<HTMLButtonElement>('[data-gaga-action]');
       if (!button) return;
+      const rawAction = button.dataset.gagaAction;
+      if (!rawAction) return;
 
-      const action = button.dataset.gagaAction;
-      const pointer = { x: event.clientX, y: event.clientY };
+      const command = rawAction === 'personalize' ? 'toggle-reader-preferences' : rawAction;
+      runSiteCommand(command as any, {
+        source: 'action-runtime',
+        target: button,
+        pointer: { x: event.clientX, y: event.clientY }
+      });
 
-      if (action === 'highlight') {
-        performHighlight();
-        return;
-      }
-
-      if (action === 'speak') {
-        toggleSpeech(button);
-        return;
-      }
-
-      if (action === 'personalize') {
-        runSiteCommand('toggle-reader-preferences', { source: 'action-runtime', target: button, pointer });
-        return;
-      }
-
-      if (action && (action as any)) {
-        runSiteCommand(action as any, { source: 'action-runtime', target: button, pointer });
+      if (rawAction !== 'speak' && rawAction !== 'toggle-focus-mode' && rawAction !== 'personalize') {
+        setState('collapsed');
       }
     });
 
-    // Floating text selection popover
-    const popover = document.getElementById('gaga-selection-popover');
-    let currentSelectionRange: Range | null = null;
+    runtime.addEventListener('pointerenter', () => {
+      if (!finePointer.matches || isSpeaking()) return;
+      window.clearTimeout(hoverTimer);
+      setState('expanded');
+    });
 
-    function handleSelectionUpdate() {
-      if (!popover) return;
-      const selection = window.getSelection();
-      if (!selection || selection.isCollapsed || !selection.toString().trim()) {
-        popover.hidden = true;
-        currentSelectionRange = null;
-        return;
-      }
+    runtime.addEventListener('pointerleave', () => {
+      if (!finePointer.matches || isSpeaking()) return;
+      window.clearTimeout(hoverTimer);
+      hoverTimer = window.setTimeout(() => {
+        if (!runtime.matches(':focus-within')) setState('collapsed');
+      }, 220);
+    });
 
-      // Check if selection is within article area
-      const anchorNode = selection.anchorNode;
-      const articleContainer = anchorNode instanceof HTMLElement ? anchorNode.closest('.gaga-flagship-article, article, main') : anchorNode?.parentElement?.closest('.gaga-flagship-article, article, main');
-      if (!articleContainer) {
-        popover.hidden = true;
-        currentSelectionRange = null;
-        return;
-      }
+    document.addEventListener('pointerdown', (event) => {
+      if (!isExpanded() || runtime.contains(event.target as Node) || isSpeaking()) return;
+      setState('collapsed');
+    }, { passive: true });
 
-      currentSelectionRange = selection.getRangeAt(0).cloneRange();
-      const rect = currentSelectionRange.getBoundingClientRect();
-      if (rect.width === 0 || rect.height === 0) {
-        popover.hidden = true;
-        return;
-      }
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && isExpanded() && !isSpeaking()) setState('collapsed');
+    });
 
-      popover.hidden = false;
-      const top = Math.max(10, rect.top + window.scrollY - 46);
-      const left = Math.max(10, rect.left + window.scrollX + (rect.width / 2));
-      popover.style.top = `${top}px`;
-      popover.style.left = `${left}px`;
+    if (progress) {
+      bindReadingProgress();
+      onRuntimeEvent('layoutChanged', bindReadingProgress);
+      window.addEventListener('resize', scheduleProgress, { passive: true });
     }
 
-    document.addEventListener('mouseup', () => {
-      window.setTimeout(handleSelectionUpdate, 20);
-    });
-
-    document.addEventListener('keyup', (e) => {
-      if (e.key === 'Shift' || e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
-        window.setTimeout(handleSelectionUpdate, 20);
-      }
-    });
-
-    // Popover actions
-    popover?.addEventListener('click', (e) => {
-      const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-gaga-selection-action]');
-      if (!btn) return;
-      const action = btn.dataset.gagaSelectionAction;
-
-      if (action === 'highlight') {
-        performHighlight(currentSelectionRange);
-        if (popover) popover.hidden = true;
-      } else if (action === 'copy') {
-        const text = currentSelectionRange ? currentSelectionRange.toString().trim() : '';
-        if (text) {
-          const quoteText = `"${text}" — dari ${document.title} (${window.location.href})`;
-          navigator.clipboard.writeText(quoteText)
-            .then(() => showToast('Kutipan disalin ke papan klip'))
-            .catch(() => showToast('Gagal menyalin', true));
-        }
-        if (popover) popover.hidden = true;
-      }
-    });
-
-    // Global keyboard shortcuts
-    document.addEventListener('keydown', (e) => {
-      const target = e.target as HTMLElement;
-      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) return;
-
-      if ((e.key === 'f' || e.key === 'F') && !e.metaKey && !e.ctrlKey) {
-        e.preventDefault();
-        runtime.querySelector<HTMLButtonElement>('[data-gaga-action="toggle-focus-mode"], [data-gaga-action="focus-mode"]')?.click();
-      } else if ((e.key === 's' || e.key === 'S') && !e.metaKey && !e.ctrlKey && !e.altKey) {
-        e.preventDefault();
-        runtime.querySelector<HTMLButtonElement>('[data-gaga-action="speak"]')?.click();
-      } else if ((e.key === 'h' || e.key === 'H') && !e.metaKey && !e.ctrlKey) {
-        e.preventDefault();
-        runtime.querySelector<HTMLButtonElement>('[data-gaga-action="highlight"]')?.click();
-      } else if ((e.key === 'p' || e.key === 'P') && !e.metaKey && !e.ctrlKey) {
-        e.preventDefault();
-        runtime.querySelector<HTMLButtonElement>('[data-gaga-action="personalize"]')?.click();
-      } else if (e.key === 'Escape') {
-        // Exit focus mode if on
-        if (document.documentElement.dataset.gagaFocusMode === 'on') {
-          e.preventDefault();
-          runtime.querySelector<HTMLButtonElement>('[data-gaga-action="toggle-focus-mode"], [data-gaga-action="focus-mode"]')?.click();
-        }
-        if (popover && !popover.hidden) {
-          popover.hidden = true;
-        }
-      }
-    });
+    window.addEventListener('pagehide', () => {
+      unsubscribeScroll?.();
+      window.clearTimeout(hoverTimer);
+    }, { once: true });
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', setupActionRuntime);
+    document.addEventListener('DOMContentLoaded', setupActionRuntime, { once: true });
   } else {
     setupActionRuntime();
   }
 </script>
-
-<style>
-  .gaga-action-runtime-container {
-    position: sticky;
-    top: 1rem;
-    z-index: 40;
-    margin: 0.75rem 0 2rem;
-    display: flex;
-    justify-content: flex-start;
-    pointer-events: auto;
-  }
-
-  .gaga-action-runtime {
-    display: inline-flex;
-    pointer-events: auto;
-  }
-
-  .gaga-action-runtime__bar {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    padding: 0.35rem 0.5rem;
-    border-radius: 999px;
-    background: color-mix(in srgb, var(--gaga-surface-elevated, var(--gaga-surface, #ffffff)) 92%, transparent);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid var(--gaga-line-strong, rgba(0, 0, 0, 0.12));
-    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
-    transition: all 0.2s ease;
-  }
-
-  .gaga-action-runtime__group {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-  }
-
-  .gaga-action-runtime__divider {
-    display: inline-block;
-    width: 1px;
-    height: 1.25rem;
-    background: var(--gaga-line-strong, rgba(0, 0, 0, 0.15));
-    margin-inline: 0.35rem;
-    opacity: 0.8;
-  }
-
-  .gaga-action-runtime__btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.45rem;
-    padding: 0.45rem 0.8rem;
-    min-height: 2.25rem;
-    border-radius: 999px;
-    border: 1px solid transparent;
-    background: transparent;
-    color: var(--gaga-ink, #0f172a);
-    font-size: 0.82rem;
-    font-weight: 600;
-    font-family: var(--gaga-font-body, system-ui, -apple-system, sans-serif);
-    cursor: pointer;
-    position: relative;
-    transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
-    white-space: nowrap;
-    touch-action: manipulation;
-    user-select: none;
-
-    &:active {
-      transform: scale(0.96);
-    }
-
-    &:hover {
-      background: var(--gaga-blue-soft, rgba(37, 99, 235, 0.08));
-      border-color: var(--gaga-line, rgba(0, 0, 0, 0.08));
-      color: var(--gaga-blue, #2563eb);
-    }
-
-    &:focus-visible {
-      outline: 2px solid var(--gaga-blue, #2563eb);
-      outline-offset: 2px;
-      background: var(--gaga-blue-soft, rgba(37, 99, 235, 0.08));
-      color: var(--gaga-blue, #2563eb);
-    }
-
-    &.gaga-is-active {
-      background: var(--gaga-blue, #2563eb);
-      color: #ffffff;
-      border-color: var(--gaga-blue, #2563eb);
-      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
-
-      .gaga-action-runtime__icon {
-        animation: pulse-active 1.8s infinite ease-in-out;
-      }
-    }
-  }
-
-  @keyframes pulse-active {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.15); }
-  }
-
-  .gaga-action-runtime__icon {
-    display: grid;
-    place-items: center;
-    width: 1.05rem;
-    height: 1.05rem;
-    flex-shrink: 0;
-  }
-
-  /* Accessible Tooltip */
-  .gaga-action-runtime [data-gaga-tooltip]::after {
-    position: absolute;
-    bottom: calc(100% + 0.55rem);
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--gaga-ink, #0f172a);
-    color: var(--gaga-bg, #ffffff);
-    padding: 0.3rem 0.6rem;
-    font-size: 0.72rem;
-    font-family: var(--gaga-font-mono, monospace);
-    border-radius: var(--gaga-radius-sm, 4px);
-    white-space: nowrap;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.15s ease, transform 0.15s ease;
-    content: attr(data-gaga-tooltip);
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
-    z-index: 60;
-  }
-
-  .gaga-action-runtime [data-gaga-tooltip]:hover::after,
-  .gaga-action-runtime [data-gaga-tooltip]:focus-visible::after {
-    opacity: 1;
-    transform: translateX(-50%) translateY(-2px);
-  }
-
-  /* Floating Selection Popover */
-  .gaga-selection-popover {
-    position: absolute;
-    transform: translateX(-50%);
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    padding: 0.3rem 0.5rem;
-    border-radius: 999px;
-    background: var(--gaga-ink, #0f172a);
-    color: #ffffff;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
-    z-index: 100;
-    transition: opacity 0.15s ease;
-    pointer-events: auto;
-  }
-
-  .gaga-selection-popover[hidden] {
-    display: none !important;
-  }
-
-  .gaga-selection-popover__btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    padding: 0.35rem 0.65rem;
-    border-radius: 999px;
-    border: none;
-    background: transparent;
-    color: #ffffff;
-    font-size: 0.75rem;
-    font-weight: 600;
-    font-family: var(--gaga-font-body, sans-serif);
-    cursor: pointer;
-    white-space: nowrap;
-
-    &:hover {
-      background: rgba(255, 255, 255, 0.15);
-    }
-
-    &:active {
-      transform: scale(0.96);
-    }
-  }
-
-  .gaga-selection-popover__icon {
-    display: grid;
-    place-items: center;
-    width: 0.95rem;
-    height: 0.95rem;
-  }
-
-  .gaga-selection-popover__divider {
-    display: inline-block;
-    width: 1px;
-    height: 1rem;
-    background: rgba(255, 255, 255, 0.25);
-  }
-
-  @media (max-width: 1023px) and (orientation: portrait) {
-    .gaga-action-runtime-container {
-      position: fixed;
-      top: env(safe-area-inset-top, 0px);
-      left: 0;
-      right: 0;
-      width: 100%;
-      margin: 0;
-      padding: 0.25rem max(0.5rem, env(safe-area-inset-right, 0px)) 0.25rem max(0.5rem, env(safe-area-inset-left, 0px));
-      box-sizing: border-box;
-      pointer-events: none; /* Prevents center notch deadzone block */
-      z-index: 50;
-      justify-content: flex-end; /* Parks action pills gracefully away from notch center */
-    }
-
-    .gaga-action-runtime {
-      pointer-events: auto; /* Re-enables interaction for buttons */
-    }
-
-    .gaga-action-runtime__bar {
-      padding: 0.25rem 0.4rem;
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
-    }
-  }
-
-  @media (max-width: 680px) {
-    .gaga-action-runtime__label {
-      display: none;
-    }
-    .gaga-action-runtime__btn {
-      padding: 0.45rem 0.55rem;
-      min-height: 2rem;
-    }
-  }
-</style>
-
-<style is:global>
-  /* Text Highlight Marks */
-  mark.gaga-highlight {
-    background: color-mix(in srgb, #fef08a 75%, transparent);
-    color: inherit;
-    padding: 0.12rem 0.3rem;
-    border-radius: 3px;
-    border-bottom: 2px solid #ca8a04;
-    transition: background 0.2s ease;
-  }
-
-  :root[data-gaga-theme='dark'] mark.gaga-highlight,
-  body[data-gaga-theme='dark'] mark.gaga-highlight {
-    background: color-mix(in srgb, #ca8a04 45%, transparent);
-    border-bottom: 2px solid #facc15;
-    color: #fef08a;
-  }
-</style>

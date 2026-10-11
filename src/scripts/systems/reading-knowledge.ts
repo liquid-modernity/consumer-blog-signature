@@ -4,6 +4,7 @@ import { readJson, writeJson } from '@gaga/engine-web/runtime/storage';
 
 export const ANNOTATION_STORAGE_KEY = 'gaga:annotations:v1';
 export const KNOWLEDGE_STORAGE_KEY = 'gaga:reading-knowledge:v1';
+const LEGACY_HIGHLIGHT_STORAGE_KEY = 'gaga:highlights:v1';
 
 export interface HighlightLocation {
   blockId: string;
@@ -23,6 +24,7 @@ export interface HighlightEntity {
   text: string;
   location: HighlightLocation;
   createdAt: string;
+  language?: string;
   tags?: string[];
   note?: string;
 }
@@ -55,6 +57,42 @@ export function resolveContentLanguage(element?: Element | null): string {
   return 'id-ID';
 }
 
+
+interface LegacyHighlightRecord {
+  text?: string;
+  time?: string;
+  url?: string;
+}
+
+function readLegacyHighlights(): HighlightEntity[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = JSON.parse(localStorage.getItem(LEGACY_HIGHLIGHT_STORAGE_KEY) || '[]') as unknown;
+    if (!Array.isArray(raw)) return [];
+    return raw.flatMap((item, index) => {
+      const legacy = item as LegacyHighlightRecord;
+      const text = legacy.text?.trim();
+      if (!text) return [];
+      const createdAt = legacy.time || new Date(0).toISOString();
+      const articleId = legacy.url || location.pathname;
+      return [{
+        id: `legacy-${Date.parse(createdAt) || 0}-${index}`,
+        articleId,
+        text,
+        location: {
+          blockId: '',
+          startOffset: 0,
+          endOffset: text.length
+        },
+        createdAt,
+        language: normalizeSpeechLang(document.documentElement.lang || 'id')
+      } satisfies HighlightEntity];
+    });
+  } catch {
+    return [];
+  }
+}
+
 function isHighlightEntity(value: unknown): value is HighlightEntity {
   if (typeof value !== 'object' || value === null) return false;
   const item = value as Record<string, unknown>;
@@ -83,8 +121,18 @@ export function readAllHighlights(): HighlightEntity[] {
     idMap.set(item.id, item);
   }
 
-  // Import any engine highlights that might not be in knowledgeItems
+  // One-way compatibility import for highlights created by the legacy
+  // component-local Action Runtime. IDs are deterministic so the migration
+  // stays idempotent while the old key remains present.
   let updated = false;
+  for (const legacy of readLegacyHighlights()) {
+    if (!idMap.has(legacy.id)) {
+      idMap.set(legacy.id, legacy);
+      updated = true;
+    }
+  }
+
+  // Sync with engine annotation storage
   for (const eng of engineHighlights) {
     if (!idMap.has(eng.id)) {
       const entity: HighlightEntity = {

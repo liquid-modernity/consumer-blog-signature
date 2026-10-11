@@ -117,6 +117,7 @@ body:has(.gaga-app-frame) {
   }
 
   .gaga-app-frame[data-gaga-content-kind='article'] .gaga-main-region {
+    --gaga-compact-reading-clearance: var(--gaga-article-outline-clearance);
     padding-block-end: 0;
     scroll-padding-block-start: var(--gaga-compact-reading-top-clearance);
     scroll-padding-block-end: var(--gaga-compact-reading-clearance);

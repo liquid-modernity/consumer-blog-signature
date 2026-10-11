@@ -30,14 +30,12 @@ interface SpeakerController {
 
 let activeSpeaker: SpeakerController | null = null;
 let speechDockEl: HTMLElement | null = null;
+let speechDockEmbedded = false;
 let selectionMenuEl: HTMLElement | null = null;
 let activeHighlightPopupEl: HTMLElement | null = null;
 
 function getArticleMetadata(article: HTMLElement) {
-  const route =
-    article.dataset.gagaArticleRoute ||
-    (article.closest('[data-gaga-app-frame]') as HTMLElement)?.dataset.gagaPageId ||
-    location.pathname;
+  const route = article.dataset.gagaArticleRoute || location.pathname;
 
   const title =
     article.dataset.gagaArticleTitle ||
@@ -79,14 +77,9 @@ function findSelectionLocation(range: Range, container: HTMLElement): HighlightL
     ? (range.endContainer as HTMLElement).closest<HTMLElement>('[data-gaga-block-id]')
     : range.endContainer.parentElement?.closest<HTMLElement>('[data-gaga-block-id]');
 
-  if (!startBlock || startBlock !== endBlock) {
-    const fallbackBlock = (range.commonAncestorContainer.nodeType === Node.ELEMENT_NODE
-      ? (range.commonAncestorContainer as HTMLElement)
-      : range.commonAncestorContainer.parentElement)?.closest<HTMLElement>('[data-gaga-block-id]');
-    if (!fallbackBlock) return null;
-  }
+  if (!startBlock || !endBlock || startBlock !== endBlock) return null;
 
-  const targetBlock = startBlock || (container.querySelector('[data-gaga-block-id]') as HTMLElement);
+  const targetBlock = startBlock;
   if (!targetBlock) return null;
 
   const blockId = targetBlock.dataset.gagaBlockId || 'block-0';
@@ -176,43 +169,93 @@ function restoreArticleHighlights(article: HTMLElement) {
   }
 }
 
-function applyHighlightToElement(element: HTMLElement, highlight: HighlightEntity) {
-  const text = highlight.text.trim();
-  if (!text) return;
+function textRangeForHighlight(element: HTMLElement, highlight: HighlightEntity): Range | null {
+  const nodes: Text[] = [];
+  const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, {
+    acceptNode(node) {
+      const parent = node.parentElement;
+      if (!node.nodeValue || !parent || parent.closest('.gaga-highlight-mark')) return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    }
+  });
 
-  const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
-  let textNode: Text | null = null;
-  while ((textNode = walker.nextNode() as Text | null)) {
-    if (textNode.parentElement?.classList.contains('gaga-highlight-mark')) continue;
+  let node: Text | null;
+  while ((node = walker.nextNode() as Text | null)) nodes.push(node);
+  if (!nodes.length) return null;
 
-    const idx = textNode.nodeValue?.indexOf(text) ?? -1;
-    if (idx !== -1 && textNode.nodeValue) {
-      const matchRange = document.createRange();
-      matchRange.setStart(textNode, idx);
-      matchRange.setEnd(textNode, idx + text.length);
+  const fullText = nodes.map((item) => item.nodeValue || '').join('');
+  const exact = highlight.text.trim();
+  if (!exact) return null;
 
-      const mark = document.createElement('mark');
-      mark.className = 'gaga-highlight-mark';
-      mark.dataset.gagaHighlightId = highlight.id;
-      mark.id = `hl-${highlight.id}`;
-      mark.tabIndex = 0;
-      mark.setAttribute('role', 'mark');
-      mark.setAttribute(
-        'aria-label',
-        highlight.note ? `Sorotan dengan catatan: ${highlight.note}` : 'Teks yang disorot'
-      );
-      if (highlight.note) {
-        mark.dataset.gagaHasNote = 'true';
-      }
+  let start = highlight.location?.startOffset ?? -1;
+  let end = highlight.location?.endOffset ?? -1;
+  const storedSlice = start >= 0 && end > start ? fullText.slice(start, end) : '';
 
-      try {
-        matchRange.surroundContents(mark);
-        wireHighlightClick(mark, highlight);
-      } catch {
-        // Fallback for non-simple boundary range
-      }
+  if (storedSlice !== exact) {
+    const contextualNeedle = `${highlight.location?.prefix || ''}${exact}${highlight.location?.suffix || ''}`;
+    const contextualIndex = contextualNeedle.length > exact.length ? fullText.indexOf(contextualNeedle) : -1;
+    if (contextualIndex >= 0) {
+      start = contextualIndex + (highlight.location?.prefix?.length || 0);
+      end = start + exact.length;
+    } else {
+      start = fullText.indexOf(exact);
+      end = start >= 0 ? start + exact.length : -1;
+    }
+  }
+
+  if (start < 0 || end <= start) return null;
+
+  let cursor = 0;
+  let startNode: Text | null = null;
+  let endNode: Text | null = null;
+  let startOffset = 0;
+  let endOffset = 0;
+
+  for (const textNode of nodes) {
+    const length = textNode.nodeValue?.length || 0;
+    const nextCursor = cursor + length;
+    if (!startNode && start >= cursor && start <= nextCursor) {
+      startNode = textNode;
+      startOffset = Math.min(length, Math.max(0, start - cursor));
+    }
+    if (endNode === null && end >= cursor && end <= nextCursor) {
+      endNode = textNode;
+      endOffset = Math.min(length, Math.max(0, end - cursor));
       break;
     }
+    cursor = nextCursor;
+  }
+
+  if (!startNode || !endNode) return null;
+  const range = document.createRange();
+  range.setStart(startNode, startOffset);
+  range.setEnd(endNode, endOffset);
+  return range;
+}
+
+function applyHighlightToElement(element: HTMLElement, highlight: HighlightEntity) {
+  const matchRange = textRangeForHighlight(element, highlight);
+  if (!matchRange || matchRange.collapsed) return;
+
+  const mark = document.createElement('mark');
+  mark.className = 'gaga-highlight-mark';
+  mark.dataset.gagaHighlightId = highlight.id;
+  mark.id = `hl-${highlight.id}`;
+  mark.tabIndex = 0;
+  mark.setAttribute('role', 'mark');
+  mark.setAttribute(
+    'aria-label',
+    highlight.note ? `Sorotan dengan catatan: ${highlight.note}` : 'Teks yang disorot'
+  );
+  if (highlight.note) mark.dataset.gagaHasNote = 'true';
+
+  try {
+    const contents = matchRange.extractContents();
+    mark.appendChild(contents);
+    matchRange.insertNode(mark);
+    wireHighlightClick(mark, highlight);
+  } catch {
+    // Keep the article readable if a stale annotation cannot be reconstructed.
   }
 }
 
@@ -582,6 +625,7 @@ function createHighlightFromSelection(
     text,
     location: loc,
     createdAt: new Date().toISOString(),
+    language: meta.language,
     tags: ['reading', meta.topic.toLowerCase()],
     ...(note ? { note } : {})
   };
@@ -635,6 +679,14 @@ function copyTextToClipboard(text: string, contextElement: HTMLElement) {
    SMART SPEAKER RUNTIME (ARTICLE & SELECTION SPEECH WITH DOCK)
    ========================================================================= */
 
+function getSpeakableBlocks(article: HTMLElement): HTMLElement[] {
+  const prose = article.querySelector<HTMLElement>(
+    '.gaga-flagship-article__prose, .sl-markdown-content, [data-gaga-reading-surface]'
+  ) || article;
+  return Array.from(prose.querySelectorAll<HTMLElement>('h2, h3, p, blockquote, li'))
+    .filter((el) => el.innerText.trim().length > 0);
+}
+
 function initSmartSpeaker(): SpeakerController {
   const synth = typeof window !== 'undefined' ? window.speechSynthesis : null;
   let currentUtterance: SpeechSynthesisUtterance | null = null;
@@ -644,6 +696,7 @@ function initSmartSpeaker(): SpeakerController {
     if (synth) voices = synth.getVoices();
   };
   updateVoices();
+  synth?.addEventListener?.('voiceschanged', updateVoices);
   let keepAliveTimer: number | undefined;
 
   const startKeepAlive = () => {
@@ -701,6 +754,10 @@ function initSmartSpeaker(): SpeakerController {
       utt.onerror = () => {
         this.state = 'error';
         renderSpeechDock(this);
+        requestToast({ message: 'Narasi suara tidak dapat diputar', tone: 'warn' });
+        setTimeout(() => {
+          if (this.state === 'error') this.stop();
+        }, 1800);
       };
 
       currentUtterance = utt;
@@ -811,13 +868,15 @@ function initSmartSpeaker(): SpeakerController {
 
     setRate(rate: number) {
       this.rate = rate;
-      if (currentUtterance && this.state === 'playing') {
-        // Restart with new rate
+      if (currentUtterance && this.state === 'playing' && this.mode === 'selection') {
         const text = this.currentText;
         const lang = currentUtterance.lang;
         this.stop();
-        if (this.mode === 'selection') this.playSelection(text, lang);
+        this.playSelection(text, lang);
+        return;
       }
+      // Article narration applies the new rate to the next block without
+      // discarding the reader's current position.
       renderSpeechDock(this);
     },
 
@@ -830,18 +889,41 @@ function initSmartSpeaker(): SpeakerController {
   return controller;
 }
 
+function syncSpeechActionState(controller?: SpeakerController | null) {
+  const active = !!controller && (controller.state === 'playing' || controller.state === 'paused');
+  document.querySelectorAll<HTMLButtonElement>('[data-gaga-action="speak"]').forEach((button) => {
+    button.classList.toggle('gaga-is-active', active);
+    button.setAttribute('aria-pressed', active ? 'true' : 'false');
+  });
+}
+
 function renderSpeechDock(controller: SpeakerController) {
+  syncSpeechActionState(controller);
   if (controller.state === 'idle') {
     closeSpeechDock();
     return;
   }
 
   if (!speechDockEl) {
-    speechDockEl = document.createElement('div');
-    speechDockEl.className = 'gaga-speech-dock';
-    speechDockEl.setAttribute('role', 'region');
-    speechDockEl.setAttribute('aria-label', 'Kontrol Narasi Suara');
-    document.body.appendChild(speechDockEl);
+    const embeddedSurface = document.querySelector<HTMLElement>('[data-gaga-action-runtime-live]');
+    if (embeddedSurface) {
+      speechDockEl = embeddedSurface;
+      speechDockEmbedded = true;
+      speechDockEl.hidden = false;
+      speechDockEl.setAttribute('role', 'region');
+      speechDockEl.setAttribute('aria-label', 'Kontrol Narasi Suara');
+      const runtime = speechDockEl.closest<HTMLElement>('[data-gaga-action-runtime]');
+      if (runtime) {
+        runtime.dataset.gagaLiveState = 'speaking';
+        runtime.dataset.gagaState = 'expanded';
+      }
+    } else {
+      speechDockEl = document.createElement('div');
+      speechDockEl.className = 'gaga-speech-dock';
+      speechDockEl.setAttribute('role', 'region');
+      speechDockEl.setAttribute('aria-label', 'Kontrol Narasi Suara');
+      document.body.appendChild(speechDockEl);
+    }
   }
 
   const snippet =
@@ -893,10 +975,26 @@ function renderSpeechDock(controller: SpeakerController) {
 }
 
 function closeSpeechDock() {
-  if (speechDockEl) {
+  syncSpeechActionState(null);
+  if (!speechDockEl) return;
+
+  if (speechDockEmbedded) {
+    const runtime = speechDockEl.closest<HTMLElement>('[data-gaga-action-runtime]');
+    speechDockEl.innerHTML = '';
+    speechDockEl.hidden = true;
+    speechDockEl.removeAttribute('role');
+    speechDockEl.removeAttribute('aria-label');
+    if (runtime) {
+      runtime.dataset.gagaLiveState = 'idle';
+      runtime.dataset.gagaState = 'collapsed';
+      runtime.querySelector('[data-gaga-action-island-toggle]')?.setAttribute('aria-expanded', 'false');
+    }
+  } else {
     speechDockEl.remove();
-    speechDockEl = null;
   }
+
+  speechDockEl = null;
+  speechDockEmbedded = false;
 }
 
 function escapeHtml(str: string): string {
@@ -933,12 +1031,7 @@ export function initReaderEnhancements() {
         } else if (activeSpeaker?.state === 'paused') {
           activeSpeaker.resume();
         } else {
-          const blocks = Array.from(
-            article.querySelectorAll<HTMLElement>(
-              '.gaga-flagship-article__prose p, .sl-markdown-content p, p'
-            )
-          );
-          activeSpeaker?.playArticle(blocks, resolveContentLanguage(article));
+          activeSpeaker?.playArticle(getSpeakableBlocks(article), resolveContentLanguage(article));
         }
       });
     }
@@ -991,12 +1084,7 @@ export function initReaderEnhancements() {
     } else if (activeSpeaker?.state === 'paused') {
       activeSpeaker.resume();
     } else {
-      const blocks = Array.from(
-        currentArticle.querySelectorAll<HTMLElement>(
-          '.gaga-flagship-article__prose p, .sl-markdown-content p, p'
-        )
-      );
-      activeSpeaker?.playArticle(blocks, resolveContentLanguage(currentArticle));
+      activeSpeaker?.playArticle(getSpeakableBlocks(currentArticle), resolveContentLanguage(currentArticle));
     }
     return true;
   });

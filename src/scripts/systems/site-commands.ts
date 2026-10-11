@@ -177,5 +177,10 @@ export function runSiteCommand(command: GagaActionCommand, detail: SiteCommandDe
   if (result.ok) return result.value !== false;
   if (result.code !== 'GAGA_COMMAND_NOT_FOUND') return true;
   if (runBuiltInCommand(command, detail)) return true;
+
+  // Avoid recursively clicking the same projection when its runtime handler
+  // has not registered yet. Programmatic callers can still fall back to an
+  // active projection elsewhere on the page.
+  if (detail.target?.matches(`[data-gaga-action="${command}"]`)) return false;
   return triggerActiveCommandTarget(command);
 }
