@@ -1,14 +1,13 @@
 ---
-import { getCollection } from 'astro:content';
+import { getCollection, render } from 'astro:content';
 import PageFrame from '../components/starlight/PageFrame.astro';
-import MarkdownContent from '../components/starlight/MarkdownContent.astro';
 
 export const prerender = true;
 
 export async function getStaticPaths() {
-  const docs = await getCollection('docs').catch(() => []);
+  const entries = await getCollection('docs');
 
-  return docs.map((entry) => ({
+  return entries.map((entry) => ({
     params: {
       slug: entry.id
     },
@@ -20,14 +19,13 @@ export async function getStaticPaths() {
 
 const { entry } = Astro.props;
 
-const metadata = entry?.data ?? {};
+if (!entry) {
+  return Astro.redirect('/404');
+}
 
+const { Content } = await render(entry);
 ---
 
-<PageFrame
-  metadata={metadata}
->
-  <MarkdownContent
-    entry={entry}
-  />
+<PageFrame>
+  <Content />
 </PageFrame>

@@ -41,12 +41,8 @@ export async function resolveGagaRoute(pathname: string) {
     return normalizeGagaRouteContext({
       id: cleanPath,
       lang: 'id',
-      entry: {
-        data: {}
-      },
-      toc: {
-        items: []
-      },
+      entry: { data: {} },
+      toc: { items: [] },
       head: []
     });
   }
@@ -57,15 +53,12 @@ export async function resolveGagaRoute(pathname: string) {
       typeof match.data.language === 'string'
         ? match.data.language
         : 'id',
-
     entry: {
       data: match.data
     },
-
     toc: {
       items: []
     },
-
     head: []
   });
 }
