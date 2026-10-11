@@ -72,3 +72,20 @@ test('Personal Reading Intelligence & Persistent Knowledge Memory', () => {
   assert.ok(libraryPage.includes('data-gaga-library-tab="history"'), 'Must include Reading History tab');
   assert.ok(libraryPage.includes('data-gaga-highlight-jump'), 'Must support return jump back to article');
 });
+
+test('Human Behaviour Algorithms & Algorithmic Self-Healing Diagnostic HUD', () => {
+  const behaviourCode = fs.readFileSync('src/scripts/systems/reading-behaviour.ts', 'utf8');
+  assert.ok(behaviourCode.includes('SKIMMING'), 'Must classify SKIMMING behavior state');
+  assert.ok(behaviourCode.includes('DEEP_READING'), 'Must classify DEEP_READING behavior state');
+  assert.ok(behaviourCode.includes('calculateVisibleWords'), 'Must calculate words in viewport');
+  assert.ok(behaviourCode.includes('smoothedVelocity'), 'Must track smoothed scroll velocity');
+
+  const hudCode = fs.readFileSync('src/scripts/systems/diagnostic-hud.ts', 'utf8');
+  assert.ok(hudCode.includes('detectHorizontalOverflowElements'), 'Must detect horizontal overflow');
+  assert.ok(hudCode.includes('selfHealLayoutOverflow'), 'Must provide self-healing for overflow');
+  assert.ok(hudCode.includes('selfHealTocAlignment'), 'Must provide self-healing for TOC alignment');
+  assert.ok(hudCode.includes('toggleDiagnosticHud'), 'Must provide toggleable diagnostic overlay');
+
+  const scrollCode = fs.readFileSync('src/scripts/systems/reading-scroll.ts', 'utf8');
+  assert.ok(scrollCode.includes('getUnifiedScrollMetrics'), 'Must provide unified scroll metrics');
+});

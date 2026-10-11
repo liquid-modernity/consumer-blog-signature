@@ -79,7 +79,9 @@ async function boot() {
     keyboard,
     focusMode,
     entityTabs,
-    readerEnhancements
+    readerEnhancements,
+    readingBehaviour,
+    diagnosticHud
   ] = await Promise.all([
     import('./systems/input-mode'),
     import('./systems/mobile-dock'),
@@ -101,7 +103,9 @@ async function boot() {
       : Promise.resolve(null),
     hasCapability('[data-gaga-article-shell], .gaga-flagship-article, [data-gaga-reading-surface]')
       ? import('./systems/reader-enhancements')
-      : Promise.resolve(null)
+      : Promise.resolve(null),
+    import('./systems/reading-behaviour'),
+    import('./systems/diagnostic-hud')
   ]);
 
   inputMode.initInputMode();
@@ -117,6 +121,8 @@ async function boot() {
   readerEnhancements?.initReaderEnhancements();
   surfaceCoordinator.initSurfaceCoordinator();
   keyboard.initKeyboard();
+  readingBehaviour.initReadingBehavior();
+  diagnosticHud.initDiagnosticHud();
   document.documentElement.dataset.gagaRuntime = 'ready';
 
   onIdle(async () => {

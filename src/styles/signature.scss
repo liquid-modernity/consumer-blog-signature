@@ -17,12 +17,14 @@
 html {
   background: var(--gaga-bg);
   scrollbar-gutter: stable;
+  overflow-x: clip;
 }
 
 body {
   margin: 0;
   color: var(--gaga-ink);
   background: var(--gaga-bg);
+  overflow-x: clip;
 }
 
 a {

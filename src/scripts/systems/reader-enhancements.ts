@@ -644,9 +644,21 @@ function initSmartSpeaker(): SpeakerController {
     if (synth) voices = synth.getVoices();
   };
   updateVoices();
-  if (synth && 'onvoiceschanged' in synth) {
-    synth.onvoiceschanged = updateVoices;
-  }
+  let keepAliveTimer: number | undefined;
+
+  const startKeepAlive = () => {
+    window.clearInterval(keepAliveTimer);
+    keepAliveTimer = window.setInterval(() => {
+      if (synth && synth.speaking && !synth.paused) {
+        synth.pause();
+        synth.resume();
+      }
+    }, 10000);
+  };
+
+  const stopKeepAlive = () => {
+    window.clearInterval(keepAliveTimer);
+  };
 
   const controller: SpeakerController = {
     state: 'idle',
@@ -702,55 +714,75 @@ function initSmartSpeaker(): SpeakerController {
       this.stop();
       this.mode = 'article';
 
-      const combinedText = elements
-        .map((el) => el.innerText.trim())
-        .filter((t) => t.length > 0)
-        .join('. ');
-
-      if (!combinedText) {
+      const validElements = elements.filter((el) => el.innerText.trim().length > 0);
+      if (!validElements.length) {
         requestToast({ message: 'Tidak ada teks yang dapat dinarasikan', tone: 'warn' });
         return;
       }
 
-      this.currentText = combinedText;
-      this.state = 'playing';
-
-      const utt = new SpeechSynthesisUtterance(combinedText);
-      utt.lang = lang;
-      utt.rate = this.rate;
-
+      let currentIndex = 0;
       const matchedVoice = voices.find((v) => v.lang.startsWith(lang.split('-')[0])) || null;
-      if (matchedVoice) {
-        utt.voice = matchedVoice;
-        this.voice = matchedVoice;
-      }
+      if (matchedVoice) this.voice = matchedVoice;
 
-      utt.onstart = () => {
-        this.state = 'playing';
-        renderSpeechDock(this);
-      };
-      utt.onend = () => {
-        this.state = 'completed';
-        renderSpeechDock(this);
-        setTimeout(() => {
-          if (this.state === 'completed') this.stop();
-        }, 2400);
-      };
-      utt.onerror = () => {
-        this.state = 'error';
-        renderSpeechDock(this);
+      const clearActiveBlockHighlight = () => {
+        document.querySelectorAll('.gaga-speech-active-sentence').forEach((el) => {
+          el.classList.remove('gaga-speech-active-sentence');
+        });
       };
 
-      currentUtterance = utt;
-      synth.speak(utt);
-      renderSpeechDock(this);
-      requestToast({ message: 'Memutar narasi artikel penuh', tone: 'ok' });
+      const speakNextBlock = () => {
+        if (this.state !== 'playing' || currentIndex >= validElements.length) {
+          if (currentIndex >= validElements.length) {
+            clearActiveBlockHighlight();
+            this.state = 'completed';
+            renderSpeechDock(this);
+            setTimeout(() => {
+              if (this.state === 'completed') this.stop();
+            }, 2400);
+          }
+          return;
+        }
+
+        const el = validElements[currentIndex];
+        const blockText = el.innerText.trim();
+        clearActiveBlockHighlight();
+        el.classList.add('gaga-speech-active-sentence');
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+        this.currentText = blockText;
+        renderSpeechDock(this);
+
+        const utt = new SpeechSynthesisUtterance(blockText);
+        utt.lang = lang;
+        utt.rate = this.rate;
+        if (matchedVoice) utt.voice = matchedVoice;
+
+        utt.onend = () => {
+          currentIndex++;
+          speakNextBlock();
+        };
+
+        utt.onerror = (err) => {
+          console.warn('[Gaga Speech] Block error:', err);
+          currentIndex++;
+          speakNextBlock();
+        };
+
+        currentUtterance = utt;
+        synth.speak(utt);
+      };
+
+      this.state = 'playing';
+      startKeepAlive();
+      speakNextBlock();
+      requestToast({ message: 'Memulai narasi terpandu artikel', tone: 'ok' });
     },
 
     pause() {
       if (synth && this.state === 'playing') {
         synth.pause();
         this.state = 'paused';
+        stopKeepAlive();
         renderSpeechDock(this);
       }
     },
@@ -759,14 +791,19 @@ function initSmartSpeaker(): SpeakerController {
       if (synth && this.state === 'paused') {
         synth.resume();
         this.state = 'playing';
+        startKeepAlive();
         renderSpeechDock(this);
       }
     },
 
     stop() {
+      stopKeepAlive();
       if (synth) {
         synth.cancel();
       }
+      document.querySelectorAll('.gaga-speech-active-sentence').forEach((el) => {
+        el.classList.remove('gaga-speech-active-sentence');
+      });
       this.state = 'idle';
       this.currentText = '';
       closeSpeechDock();

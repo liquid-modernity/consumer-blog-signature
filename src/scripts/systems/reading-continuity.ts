@@ -19,6 +19,7 @@ import {
   formatDateLocale,
   type HighlightEntity
 } from './reading-knowledge';
+import { isValidCognitiveReading, getReadingBehaviorMetrics } from './reading-behaviour';
 
 let initialized = false;
 let lastProgressWrite = 0;
@@ -92,7 +93,14 @@ function destinationFor(item: ContinuityItem) {
 }
 
 function statusFromProgress(existing: ContinuityItem | undefined, progress: number): ContinuityStatus {
-  if (progress >= continuityStoragePolicy.completionProgress) return 'completed';
+  if (progress >= continuityStoragePolicy.completionProgress) {
+    // Prevent premature completion if user is just rapidly skimming through the page
+    const metrics = getReadingBehaviorMetrics();
+    if (metrics.state === 'SKIMMING' && metrics.totalDeepReadingMs < 12000) {
+      return existing?.status ?? 'in-progress';
+    }
+    return 'completed';
+  }
   if (existing?.status === 'reference' || existing?.status === 'completed') return existing.status;
   if (progress > 2) return 'in-progress';
   return existing?.status ?? 'in-progress';
