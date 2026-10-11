@@ -74,16 +74,30 @@ const { preferences } = Astro.props;
           ))}
         </fieldset>
         <fieldset>
+          <legend data-gaga-i18n-key={preferences.theme.legend.key} data-gaga-i18n-id={preferences.theme.legend.id} data-gaga-i18n-en={preferences.theme.legend.en}>{preferences.theme.legend.id}</legend>
+          {preferences.theme.options.map((theme) => (
+            <button type="button" data-gaga-reader-pref="theme" data-gaga-reader-value={theme.value} data-gaga-i18n-key={theme.labelKey} data-gaga-i18n-id={theme.label} data-gaga-i18n-en={theme.labelEn}>{theme.label}</button>
+          ))}
+        </fieldset>
+        <fieldset>
           <legend>Design Identity</legend>
           <button type="button" data-gaga-reader-pref="identity" data-gaga-reader-value="editorial">Editorial</button>
           <button type="button" data-gaga-reader-pref="identity" data-gaga-reader-value="blueprintism">Blueprint</button>
           <button type="button" data-gaga-reader-pref="identity" data-gaga-reader-value="brutalism">Brutalism</button>
           <button type="button" data-gaga-reader-pref="identity" data-gaga-reader-value="enterprise">Enterprise</button>
         </fieldset>
+        {preferences.fontFamily && (
+          <fieldset>
+            <legend data-gaga-i18n-id={preferences.fontFamily.legend.id} data-gaga-i18n-en={preferences.fontFamily.legend.en}>{preferences.fontFamily.legend.id}</legend>
+            {preferences.fontFamily.options.map((option) => (
+              <button type="button" data-gaga-reader-pref="fontFamily" data-gaga-reader-value={option.value}>{option.label}</button>
+            ))}
+          </fieldset>
+        )}
         <fieldset>
-          <legend data-gaga-i18n-key={preferences.theme.legend.key} data-gaga-i18n-id={preferences.theme.legend.id} data-gaga-i18n-en={preferences.theme.legend.en}>{preferences.theme.legend.id}</legend>
-          {preferences.theme.options.map((theme) => (
-            <button type="button" data-gaga-reader-pref="theme" data-gaga-reader-value={theme.value} data-gaga-i18n-key={theme.labelKey} data-gaga-i18n-id={theme.label} data-gaga-i18n-en={theme.labelEn}>{theme.label}</button>
+          <legend data-gaga-i18n-key={preferences.font.legend.key} data-gaga-i18n-id={preferences.font.legend.id} data-gaga-i18n-en={preferences.font.legend.en}>{preferences.font.legend.id}</legend>
+          {preferences.font.options.map((option) => (
+            <button type="button" data-gaga-reader-pref="font" data-gaga-reader-value={option.value}>{option.label}</button>
           ))}
         </fieldset>
         <fieldset>
@@ -92,12 +106,54 @@ const { preferences } = Astro.props;
             <button type="button" data-gaga-reader-pref="density" data-gaga-reader-value={option.value} data-gaga-i18n-key={option.labelKey} data-gaga-i18n-id={option.label} data-gaga-i18n-en={option.labelEn}>{option.label}</button>
           ))}
         </fieldset>
-        <fieldset>
-          <legend data-gaga-i18n-key={preferences.font.legend.key} data-gaga-i18n-id={preferences.font.legend.id} data-gaga-i18n-en={preferences.font.legend.en}>{preferences.font.legend.id}</legend>
-          {preferences.font.options.map((option) => (
-            <button type="button" data-gaga-reader-pref="font" data-gaga-reader-value={option.value}>{option.label}</button>
-          ))}
-        </fieldset>
+        {preferences.lineHeight && (
+          <fieldset>
+            <legend data-gaga-i18n-id={preferences.lineHeight.legend.id} data-gaga-i18n-en={preferences.lineHeight.legend.en}>{preferences.lineHeight.legend.id}</legend>
+            {preferences.lineHeight.options.map((option) => (
+              <button type="button" data-gaga-reader-pref="lineHeight" data-gaga-reader-value={option.value}>{option.label}</button>
+            ))}
+          </fieldset>
+        )}
+        {preferences.letterSpacing && (
+          <fieldset>
+            <legend data-gaga-i18n-id={preferences.letterSpacing.legend.id} data-gaga-i18n-en={preferences.letterSpacing.legend.en}>{preferences.letterSpacing.legend.id}</legend>
+            {preferences.letterSpacing.options.map((option) => (
+              <button type="button" data-gaga-reader-pref="letterSpacing" data-gaga-reader-value={option.value}>{option.label}</button>
+            ))}
+          </fieldset>
+        )}
+        {preferences.measure && (
+          <fieldset>
+            <legend data-gaga-i18n-id={preferences.measure.legend.id} data-gaga-i18n-en={preferences.measure.legend.en}>{preferences.measure.legend.id}</legend>
+            {preferences.measure.options.map((option) => (
+              <button type="button" data-gaga-reader-pref="measure" data-gaga-reader-value={option.value}>{option.label}</button>
+            ))}
+          </fieldset>
+        )}
+        {preferences.contrast && (
+          <fieldset>
+            <legend data-gaga-i18n-id={preferences.contrast.legend.id} data-gaga-i18n-en={preferences.contrast.legend.en}>{preferences.contrast.legend.id}</legend>
+            {preferences.contrast.options.map((option) => (
+              <button type="button" data-gaga-reader-pref="contrast" data-gaga-reader-value={option.value}>{option.label}</button>
+            ))}
+          </fieldset>
+        )}
+        {preferences.motion && (
+          <fieldset>
+            <legend data-gaga-i18n-id={preferences.motion.legend.id} data-gaga-i18n-en={preferences.motion.legend.en}>{preferences.motion.legend.id}</legend>
+            {preferences.motion.options.map((option) => (
+              <button type="button" data-gaga-reader-pref="motion" data-gaga-reader-value={option.value}>{option.label}</button>
+            ))}
+          </fieldset>
+        )}
+        {preferences.links && (
+          <fieldset>
+            <legend data-gaga-i18n-id={preferences.links.legend.id} data-gaga-i18n-en={preferences.links.legend.en}>{preferences.links.legend.id}</legend>
+            {preferences.links.options.map((option) => (
+              <button type="button" data-gaga-reader-pref="links" data-gaga-reader-value={option.value}>{option.label}</button>
+            ))}
+          </fieldset>
+        )}
         <fieldset class="gaga-reader-panel__sfx" data-gaga-reader-sfx-control>
           <legend data-gaga-i18n-key={preferences.sfx.legend.key} data-gaga-i18n-id={preferences.sfx.legend.id} data-gaga-i18n-en={preferences.sfx.legend.en}>{preferences.sfx.legend.id}</legend>
           {preferences.sfx.options.map((option) => (

@@ -182,17 +182,104 @@
 body {
   --gaga-article-font-size: clamp(1rem, calc(.96rem + .2vw), var(--gaga-type-body-size));
   --gaga-article-line-height: var(--gaga-type-body-line-height);
-  --gaga-article-measure: 40.5rem;
+  --gaga-article-letter-spacing: normal;
+  --gaga-article-measure: 44rem;
+  --gaga-article-font-family: var(--gaga-font-sans, system-ui, -apple-system, sans-serif);
 }
 
-body[data-gaga-reader-font='sm'] { --gaga-article-font-size: clamp(.94rem, calc(.90rem + .2vw), .98rem); }
+/* Font Scales */
+body[data-gaga-reader-font='sm'] { --gaga-article-font-size: clamp(.92rem, calc(.88rem + .2vw), .98rem); }
 body[data-gaga-reader-font='md'] { --gaga-article-font-size: clamp(1rem, calc(.96rem + .2vw), var(--gaga-type-body-size)); }
-body[data-gaga-reader-font='lg'] { --gaga-article-font-size: clamp(1.06rem, calc(1rem + .45vw), 1.16rem); }
-body[data-gaga-reader-density='compact'] { --gaga-article-line-height: 1.54; }
-body[data-gaga-reader-density='comfort'] { --gaga-article-line-height: 1.72; }
+body[data-gaga-reader-font='lg'] { --gaga-article-font-size: clamp(1.1rem, calc(1.02rem + .45vw), 1.2rem); }
+body[data-gaga-reader-font='xl'] { --gaga-article-font-size: clamp(1.24rem, calc(1.15rem + .6vw), 1.38rem); }
+
+/* Font Family Selection */
+body[data-gaga-reader-font-family='sans'] {
+  --gaga-article-font-family: var(--gaga-font-sans, system-ui, -apple-system, sans-serif);
+  font-family: var(--gaga-font-sans, system-ui, -apple-system, sans-serif);
+}
+body[data-gaga-reader-font-family='serif'] {
+  --gaga-article-font-family: var(--gaga-font-serif, "Lora", Georgia, serif);
+  font-family: var(--gaga-font-serif, "Lora", Georgia, serif);
+}
+body[data-gaga-reader-font-family='mono'] {
+  --gaga-article-font-family: var(--gaga-font-mono, "JetBrains Mono", monospace);
+}
+
+/* Line Height */
+body[data-gaga-reader-line-height='normal'] { --gaga-article-line-height: 1.6; }
+body[data-gaga-reader-line-height='relaxed'] { --gaga-article-line-height: 1.8; }
+body[data-gaga-reader-line-height='loose'] { --gaga-article-line-height: 2.05; }
+
+/* Letter Spacing (Tracking) */
+body[data-gaga-reader-letter-spacing='normal'] { --gaga-article-letter-spacing: 0; }
+body[data-gaga-reader-letter-spacing='wide'] { --gaga-article-letter-spacing: 0.035em; }
+
+/* Density */
+body[data-gaga-reader-density='compact'] {
+  --gaga-article-line-height: 1.52;
+  --gaga-reading-paragraph-gap: 1.15rem;
+}
+body[data-gaga-reader-density='comfort'] {
+  --gaga-article-line-height: 1.76;
+  --gaga-reading-paragraph-gap: 1.55rem;
+}
 body[data-gaga-reader-density='wide'] {
-  --gaga-article-line-height: 1.86;
-  --gaga-article-measure: 44rem;
+  --gaga-article-line-height: 1.95;
+  --gaga-reading-paragraph-gap: 2rem;
+  --gaga-article-measure: 48rem;
+}
+
+/* Reading Width Measure */
+body[data-gaga-reader-measure='standard'] { --gaga-article-measure: 38rem; }
+body[data-gaga-reader-measure='comfortable'] { --gaga-article-measure: 44rem; }
+body[data-gaga-reader-measure='wide'] { --gaga-article-measure: 52rem; }
+
+/* Contrast Mode */
+body[data-gaga-reader-contrast='high'] {
+  --gaga-ink: #000000 !important;
+  --gaga-surface: #ffffff !important;
+  --gaga-line: #000000 !important;
+  --gaga-muted: #1e293b !important;
+}
+body[data-gaga-theme='dark'][data-gaga-reader-contrast='high'] {
+  --gaga-ink: #ffffff !important;
+  --gaga-surface: #000000 !important;
+  --gaga-line: #ffffff !important;
+  --gaga-muted: #e2e8f0 !important;
+}
+
+/* Reduced Motion Preference */
+body[data-gaga-reader-motion='reduced'],
+body[data-gaga-reader-motion='reduced'] * {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Link Underlines Control */
+body[data-gaga-reader-links='plain'] article a,
+body[data-gaga-reader-links='plain'] .gaga-flagship-article a {
+  text-decoration: none !important;
+}
+body[data-gaga-reader-links='underlined'] article a,
+body[data-gaga-reader-links='underlined'] .gaga-flagship-article a {
+  text-decoration: underline !important;
+  text-underline-offset: 3px !important;
+}
+
+/* Apply across article, topic, archive, library, and search surfaces */
+article,
+.gaga-flagship-article,
+.gaga-flagship-article__prose,
+[data-gaga-article-shell],
+[data-gaga-reading-surface] {
+  font-family: var(--gaga-article-font-family, inherit);
+  font-size: var(--gaga-article-font-size, 1.05rem);
+  line-height: var(--gaga-article-line-height, 1.75);
+  letter-spacing: var(--gaga-article-letter-spacing, normal);
+  max-width: var(--gaga-article-measure, 44rem);
 }
 
 /* Icon-only close control: accessible name is the source for the visual tooltip. */

@@ -235,8 +235,60 @@ export function createReaderPreferencesInput(): ReaderPreferencesInput {
       legend: i18nLabel('reader.font'),
       options: readerPreferences.fontScale.map((value) => ({
         value,
-        label: readerFontLabels[value]
+        label: value === 'xl' ? 'A++' : readerFontLabels[value as keyof typeof readerFontLabels] ?? value
       }))
+    },
+    fontFamily: {
+      legend: { id: 'Rupa Huruf', en: 'Typeface', key: 'reader.fontFamily' as any },
+      options: [
+        { value: 'sans', label: 'Modern Sans', labelEn: 'Modern Sans' },
+        { value: 'serif', label: 'Editorial Serif', labelEn: 'Editorial Serif' },
+        { value: 'mono', label: 'Blueprint Mono', labelEn: 'Blueprint Mono' }
+      ]
+    },
+    lineHeight: {
+      legend: { id: 'Jarak Baris', en: 'Line Height', key: 'reader.lineHeight' as any },
+      options: [
+        { value: 'normal', label: 'Padat', labelEn: 'Normal' },
+        { value: 'relaxed', label: 'Renggang', labelEn: 'Relaxed' },
+        { value: 'loose', label: 'Leluasa', labelEn: 'Loose' }
+      ]
+    },
+    letterSpacing: {
+      legend: { id: 'Spasi Karakter', en: 'Tracking', key: 'reader.letterSpacing' as any },
+      options: [
+        { value: 'normal', label: 'Normal', labelEn: 'Normal' },
+        { value: 'wide', label: 'Lebar', labelEn: 'Wide' }
+      ]
+    },
+    measure: {
+      legend: { id: 'Lebar Baca', en: 'Reading Width', key: 'reader.measure' as any },
+      options: [
+        { value: 'standard', label: 'Fokus (38rem)', labelEn: 'Focus (38rem)' },
+        { value: 'comfortable', label: 'Standar (44rem)', labelEn: 'Standard (44rem)' },
+        { value: 'wide', label: 'Lega (50rem)', labelEn: 'Wide (50rem)' }
+      ]
+    },
+    contrast: {
+      legend: { id: 'Kontras Warna', en: 'Contrast Mode', key: 'reader.contrast' as any },
+      options: [
+        { value: 'normal', label: 'Alami', labelEn: 'Natural' },
+        { value: 'high', label: 'Kontras Tinggi', labelEn: 'High Contrast' }
+      ]
+    },
+    motion: {
+      legend: { id: 'Animasi & Gerak', en: 'Motion', key: 'reader.motion' as any },
+      options: [
+        { value: 'system', label: 'Sistem', labelEn: 'System' },
+        { value: 'reduced', label: 'Reduksi Gerak', labelEn: 'Reduced' }
+      ]
+    },
+    links: {
+      legend: { id: 'Garis Bawah Tautan', en: 'Link Decor', key: 'reader.links' as any },
+      options: [
+        { value: 'underlined', label: 'Garis Bawah', labelEn: 'Underlined' },
+        { value: 'plain', label: 'Polos', labelEn: 'Plain' }
+      ]
     },
     sfx: {
       legend: i18nLabel('reader.sfx'),

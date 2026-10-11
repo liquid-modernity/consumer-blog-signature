@@ -3,13 +3,27 @@ import type { ThemeId } from './theme';
 
 export const readerPreferences = {
   density: ['comfort', 'compact', 'wide'],
-  fontScale: ['sm', 'md', 'lg'],
+  fontScale: ['sm', 'md', 'lg', 'xl'],
+  fontFamily: ['sans', 'serif', 'mono'],
+  lineHeight: ['normal', 'relaxed', 'loose'],
+  letterSpacing: ['normal', 'wide'],
+  measure: ['standard', 'comfortable', 'wide'],
+  contrast: ['normal', 'high'],
+  motion: ['system', 'reduced'],
+  links: ['underlined', 'plain'],
   language: ['id', 'en'],
   sfx: ['on', 'off']
 } as const;
 
 export type ReaderDensity = typeof readerPreferences.density[number];
 export type ReaderFontScale = typeof readerPreferences.fontScale[number];
+export type ReaderFontFamily = typeof readerPreferences.fontFamily[number];
+export type ReaderLineHeight = typeof readerPreferences.lineHeight[number];
+export type ReaderLetterSpacing = typeof readerPreferences.letterSpacing[number];
+export type ReaderMeasure = typeof readerPreferences.measure[number];
+export type ReaderContrast = typeof readerPreferences.contrast[number];
+export type ReaderMotion = typeof readerPreferences.motion[number];
+export type ReaderLinks = typeof readerPreferences.links[number];
 export type ReaderLanguage = typeof readerPreferences.language[number];
 export type ReaderSfxPreference = typeof readerPreferences.sfx[number];
 export type ReaderPresetId = 'everyday' | 'paper' | 'night';
@@ -19,6 +33,13 @@ export type ReaderPresetValues = {
   theme: ThemeId;
   density: ReaderDensity;
   font: ReaderFontScale;
+  fontFamily?: ReaderFontFamily;
+  lineHeight?: ReaderLineHeight;
+  letterSpacing?: ReaderLetterSpacing;
+  measure?: ReaderMeasure;
+  contrast?: ReaderContrast;
+  motion?: ReaderMotion;
+  links?: ReaderLinks;
   sfx: ReaderSfxPreference;
 };
 
@@ -30,6 +51,13 @@ export type ReaderPreset = ReaderPresetValues & {
 export type ReaderState = {
   density: ReaderDensity;
   font: ReaderFontScale;
+  fontFamily?: ReaderFontFamily;
+  lineHeight?: ReaderLineHeight;
+  letterSpacing?: ReaderLetterSpacing;
+  measure?: ReaderMeasure;
+  contrast?: ReaderContrast;
+  motion?: ReaderMotion;
+  links?: ReaderLinks;
   preset?: ReaderPresetSelection;
 };
 
@@ -65,6 +93,13 @@ export const defaultReaderPreset: ReaderPresetId = 'everyday';
 export const defaultReaderState: ReaderState = {
   density: 'comfort',
   font: 'md',
+  fontFamily: 'sans',
+  lineHeight: 'normal',
+  letterSpacing: 'normal',
+  measure: 'comfortable',
+  contrast: 'normal',
+  motion: 'system',
+  links: 'underlined',
   preset: defaultReaderPreset
 };
 
@@ -77,6 +112,34 @@ export function isReaderDensity(value: unknown): value is ReaderDensity {
 
 export function isReaderFontScale(value: unknown): value is ReaderFontScale {
   return readerPreferences.fontScale.some((item) => item === value);
+}
+
+export function isReaderFontFamily(value: unknown): value is ReaderFontFamily {
+  return readerPreferences.fontFamily.some((item) => item === value);
+}
+
+export function isReaderLineHeight(value: unknown): value is ReaderLineHeight {
+  return readerPreferences.lineHeight.some((item) => item === value);
+}
+
+export function isReaderLetterSpacing(value: unknown): value is ReaderLetterSpacing {
+  return readerPreferences.letterSpacing.some((item) => item === value);
+}
+
+export function isReaderMeasure(value: unknown): value is ReaderMeasure {
+  return readerPreferences.measure.some((item) => item === value);
+}
+
+export function isReaderContrast(value: unknown): value is ReaderContrast {
+  return readerPreferences.contrast.some((item) => item === value);
+}
+
+export function isReaderMotion(value: unknown): value is ReaderMotion {
+  return readerPreferences.motion.some((item) => item === value);
+}
+
+export function isReaderLinks(value: unknown): value is ReaderLinks {
+  return readerPreferences.links.some((item) => item === value);
 }
 
 export function isReaderLanguage(value: unknown): value is ReaderLanguage {
@@ -97,7 +160,7 @@ export function isReaderPresetSelection(value: unknown): value is ReaderPresetSe
 
 export function isReaderState(value: unknown): value is ReaderState {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
-  const state = value as { density?: unknown; font?: unknown; preset?: unknown };
+  const state = value as Record<string, unknown>;
   return isReaderDensity(state.density) &&
     isReaderFontScale(state.font) &&
     (state.preset === undefined || isReaderPresetSelection(state.preset));

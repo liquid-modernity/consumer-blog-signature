@@ -158,6 +158,13 @@ export type ReaderPreferencesInput = {
   theme: ReaderOptionGroupInput;
   density: ReaderOptionGroupInput;
   font: ReaderOptionGroupInput;
+  fontFamily?: ReaderOptionGroupInput;
+  lineHeight?: ReaderOptionGroupInput;
+  letterSpacing?: ReaderOptionGroupInput;
+  measure?: ReaderOptionGroupInput;
+  contrast?: ReaderOptionGroupInput;
+  motion?: ReaderOptionGroupInput;
+  links?: ReaderOptionGroupInput;
   sfx: ReaderOptionGroupInput;
 };
 

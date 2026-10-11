@@ -10,6 +10,13 @@ import {
   defaultReaderState,
   isReaderDensity,
   isReaderFontScale,
+  isReaderFontFamily,
+  isReaderLineHeight,
+  isReaderLetterSpacing,
+  isReaderMeasure,
+  isReaderContrast,
+  isReaderMotion,
+  isReaderLinks,
   isReaderPresetId,
   isReaderSfxPreference,
   defaultReaderLanguage,
@@ -37,7 +44,7 @@ function isReaderPresetValues(value: ReaderPresetValues): boolean {
 function readReaderState(): ReaderState {
   return readJson(storageKeys.reader, defaultReaderState, (value): value is ReaderState => {
     if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
-    const state = value as { density?: unknown; font?: unknown; preset?: unknown };
+    const state = value as Record<string, unknown>;
     return isReaderDensity(state.density) &&
       isReaderFontScale(state.font) &&
       (state.preset === undefined || state.preset === 'custom' || isReaderPresetId(state.preset));
@@ -60,6 +67,13 @@ function currentPresetValues(): ReaderPresetValues {
     theme: readThemeState(),
     density: isReaderDensity(document.body.dataset.gagaReaderDensity) ? document.body.dataset.gagaReaderDensity : readerState.density,
     font: isReaderFontScale(document.body.dataset.gagaReaderFont) ? document.body.dataset.gagaReaderFont : readerState.font,
+    fontFamily: isReaderFontFamily(document.body.dataset.gagaReaderFontFamily) ? document.body.dataset.gagaReaderFontFamily : readerState.fontFamily,
+    lineHeight: isReaderLineHeight(document.body.dataset.gagaReaderLineHeight) ? document.body.dataset.gagaReaderLineHeight : readerState.lineHeight,
+    letterSpacing: isReaderLetterSpacing(document.body.dataset.gagaReaderLetterSpacing) ? document.body.dataset.gagaReaderLetterSpacing : readerState.letterSpacing,
+    measure: isReaderMeasure(document.body.dataset.gagaReaderMeasure) ? document.body.dataset.gagaReaderMeasure : readerState.measure,
+    contrast: isReaderContrast(document.body.dataset.gagaReaderContrast) ? document.body.dataset.gagaReaderContrast : readerState.contrast,
+    motion: isReaderMotion(document.body.dataset.gagaReaderMotion) ? document.body.dataset.gagaReaderMotion : readerState.motion,
+    links: isReaderLinks(document.body.dataset.gagaReaderLinks) ? document.body.dataset.gagaReaderLinks : readerState.links,
     sfx: readSfxState()
   };
 }
@@ -119,6 +133,45 @@ function syncPresetSelection() {
   projectPresetSelection(selection);
 }
 
+/**
+ * Apply extended Gaga Reader Runtime state to DOM attributes and active buttons
+ */
+export function applyReaderRuntimeState(state: ReaderState) {
+  if (state.fontFamily) {
+    document.body.dataset.gagaReaderFontFamily = state.fontFamily;
+  }
+  if (state.lineHeight) {
+    document.body.dataset.gagaReaderLineHeight = state.lineHeight;
+  }
+  if (state.letterSpacing) {
+    document.body.dataset.gagaReaderLetterSpacing = state.letterSpacing;
+  }
+  if (state.measure) {
+    document.body.dataset.gagaReaderMeasure = state.measure;
+  }
+  if (state.contrast) {
+    document.body.dataset.gagaReaderContrast = state.contrast;
+  }
+  if (state.motion) {
+    document.body.dataset.gagaReaderMotion = state.motion;
+  }
+  if (state.links) {
+    document.body.dataset.gagaReaderLinks = state.links;
+  }
+
+  // Update active states on panel buttons
+  const prefs: (keyof ReaderState)[] = ['fontFamily', 'lineHeight', 'letterSpacing', 'measure', 'contrast', 'motion', 'links'];
+  for (const pref of prefs) {
+    const val = state[pref];
+    if (!val) continue;
+    for (const btn of document.querySelectorAll<HTMLElement>(`[data-gaga-reader-pref="${pref}"]`)) {
+      const active = btn.dataset.gagaReaderValue === val;
+      btn.dataset.gagaActive = String(active);
+      btn.setAttribute('aria-pressed', String(active));
+    }
+  }
+}
+
 export function initReaderPreferences() {
   if (initialized) return;
   initialized = true;
@@ -145,13 +198,23 @@ export function initReaderPreferences() {
   });
 
   const applyPreset = (preset: ReaderPresetId, values: ReaderPresetValues) => {
+    const currentState = readReaderState();
     const readerState: ReaderState = {
+      ...currentState,
       density: values.density,
       font: values.font,
+      fontFamily: values.fontFamily ?? currentState.fontFamily,
+      lineHeight: values.lineHeight ?? currentState.lineHeight,
+      letterSpacing: values.letterSpacing ?? currentState.letterSpacing,
+      measure: values.measure ?? currentState.measure,
+      contrast: values.contrast ?? currentState.contrast,
+      motion: values.motion ?? currentState.motion,
+      links: values.links ?? currentState.links,
       preset
     };
     writeJson(storageKeys.reader, readerState);
     reader.apply(readerState);
+    applyReaderRuntimeState(readerState);
     setThemePreference(values.theme);
     setSfxPreference(values.sfx);
     projectPresetSelection(preset);
@@ -162,6 +225,8 @@ export function initReaderPreferences() {
     const reset = target?.closest('button[data-gaga-reader-reset]') as HTMLElement | null;
     const presetButton = target?.closest('button[data-gaga-reader-preset]') as HTMLElement | null;
     const sfxButton = target?.closest('[data-gaga-reader-pref="sfx"]') as HTMLElement | null;
+    const prefButton = target?.closest('[data-gaga-reader-pref]') as HTMLElement | null;
+
     if (reset || presetButton) {
       const control = reset ?? presetButton;
       const preset = control?.dataset.gagaReaderPreset;
@@ -170,15 +235,54 @@ export function initReaderPreferences() {
       applyPreset(preset, values);
       return;
     }
+
     if (sfxButton) {
       const value = sfxButton.dataset.gagaReaderValue;
       if (isReaderSfxPreference(value)) setSfxPreference(value);
     }
-    if (target?.closest('[data-gaga-reader-pref]')) {
+
+    if (prefButton) {
+      const prefName = prefButton.dataset.gagaReaderPref;
+      const prefValue = prefButton.dataset.gagaReaderValue;
+      if (prefName && prefValue) {
+        const currentState = readReaderState();
+        let updated = false;
+
+        if (prefName === 'fontFamily' && isReaderFontFamily(prefValue)) {
+          currentState.fontFamily = prefValue;
+          updated = true;
+        } else if (prefName === 'lineHeight' && isReaderLineHeight(prefValue)) {
+          currentState.lineHeight = prefValue;
+          updated = true;
+        } else if (prefName === 'letterSpacing' && isReaderLetterSpacing(prefValue)) {
+          currentState.letterSpacing = prefValue;
+          updated = true;
+        } else if (prefName === 'measure' && isReaderMeasure(prefValue)) {
+          currentState.measure = prefValue;
+          updated = true;
+        } else if (prefName === 'contrast' && isReaderContrast(prefValue)) {
+          currentState.contrast = prefValue;
+          updated = true;
+        } else if (prefName === 'motion' && isReaderMotion(prefValue)) {
+          currentState.motion = prefValue;
+          updated = true;
+        } else if (prefName === 'links' && isReaderLinks(prefValue)) {
+          currentState.links = prefValue;
+          updated = true;
+        }
+
+        if (updated) {
+          writeJson(storageKeys.reader, currentState);
+          applyReaderRuntimeState(currentState);
+        }
+      }
       syncPresetSelection();
     }
   });
 
+  // Apply initial saved state on page boot
+  const initialState = readReaderState();
+  applyReaderRuntimeState(initialState);
   projectSfxPreference(readSfxState());
   syncPresetSelection();
 }
