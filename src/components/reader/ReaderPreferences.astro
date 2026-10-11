@@ -74,6 +74,13 @@ const { preferences } = Astro.props;
           ))}
         </fieldset>
         <fieldset>
+          <legend>Design Identity</legend>
+          <button type="button" data-gaga-reader-pref="identity" data-gaga-reader-value="editorial">Editorial</button>
+          <button type="button" data-gaga-reader-pref="identity" data-gaga-reader-value="blueprintism">Blueprint</button>
+          <button type="button" data-gaga-reader-pref="identity" data-gaga-reader-value="brutalism">Brutalism</button>
+          <button type="button" data-gaga-reader-pref="identity" data-gaga-reader-value="enterprise">Enterprise</button>
+        </fieldset>
+        <fieldset>
           <legend data-gaga-i18n-key={preferences.theme.legend.key} data-gaga-i18n-id={preferences.theme.legend.id} data-gaga-i18n-en={preferences.theme.legend.en}>{preferences.theme.legend.id}</legend>
           {preferences.theme.options.map((theme) => (
             <button type="button" data-gaga-reader-pref="theme" data-gaga-reader-value={theme.value} data-gaga-i18n-key={theme.labelKey} data-gaga-i18n-id={theme.label} data-gaga-i18n-en={theme.labelEn}>{theme.label}</button>

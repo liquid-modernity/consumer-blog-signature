@@ -1,0 +1,388 @@
+---
+import Icon from '../ui/Icon.astro';
+
+interface GalleryItem {
+  src?: string;
+  alt: string;
+  title?: string;
+  caption?: string;
+}
+
+interface Props {
+  items: GalleryItem[];
+  columns?: 2 | 3 | 4;
+  title?: string;
+  id?: string;
+}
+
+const {
+  items,
+  columns = 3,
+  title = 'Media Gallery',
+  id = `gallery-${Math.random().toString(36).substring(2, 9)}`
+} = Astro.props;
+---
+<section class="gaga-media-gallery" data-gaga-media="gallery" id={id} aria-label={title} data-items={JSON.stringify(items)}>
+  <div class="gaga-media-gallery__header">
+    <span class="gaga-media-gallery__kicker">COLLECTION</span>
+    <h3 class="gaga-media-gallery__title">{title}</h3>
+  </div>
+
+  <div class={`gaga-media-gallery__grid gaga-media-gallery__grid--cols-${columns}`}>
+    {items.map((item, index) => (
+      <figure class="gaga-media-gallery__item" data-gaga-gallery-index={index}>
+        <button
+          type="button"
+          class="gaga-media-gallery__thumb-btn"
+          aria-label={`View ${item.title || item.alt} full size`}
+          data-gaga-gallery-trigger={index}
+        >
+          {item.src ? (
+            <img
+              src={item.src}
+              alt={item.alt}
+              loading="lazy"
+              decoding="async"
+              referrerpolicy="no-referrer"
+              class="gaga-media-gallery__thumb"
+            />
+          ) : (
+            <div class="gaga-media-gallery__fallback-thumb">
+              <Icon name="article" />
+              <span>{item.title || item.alt}</span>
+            </div>
+          )}
+          <span class="gaga-media-gallery__overlay-icon">
+            <Icon name="width_full" />
+          </span>
+        </button>
+        {item.title && <figcaption class="gaga-media-gallery__caption">{item.title}</figcaption>}
+      </figure>
+    ))}
+  </div>
+
+  <!-- Accessible Lightbox Modal -->
+  <dialog class="gaga-media-gallery__dialog" data-gaga-gallery-dialog aria-label="Gallery lightbox">
+    <div class="gaga-media-gallery__dialog-backdrop" data-gaga-gallery-close></div>
+    <div class="gaga-media-gallery__dialog-content">
+      <div class="gaga-media-gallery__dialog-head">
+        <span class="gaga-media-gallery__dialog-counter" data-gaga-gallery-counter>1 / {items.length}</span>
+        <button type="button" class="gaga-media-gallery__dialog-close-btn" data-gaga-gallery-close aria-label="Close lightbox">
+          <Icon name="close" />
+        </button>
+      </div>
+      <div class="gaga-media-gallery__dialog-stage">
+        <button type="button" class="gaga-media-gallery__dialog-nav gaga-media-gallery__dialog-prev" data-gaga-gallery-prev aria-label="Previous image">
+          <Icon name="arrow_back" />
+        </button>
+        <div class="gaga-media-gallery__dialog-view" data-gaga-gallery-view>
+          <!-- Dynamic target -->
+          <div class="gaga-media-gallery__dialog-placeholder" data-gaga-gallery-target></div>
+        </div>
+        <button type="button" class="gaga-media-gallery__dialog-nav gaga-media-gallery__dialog-next" data-gaga-gallery-next aria-label="Next image">
+          <Icon name="chevron_right" />
+        </button>
+      </div>
+      <div class="gaga-media-gallery__dialog-foot">
+        <p class="gaga-media-gallery__dialog-title" data-gaga-gallery-title></p>
+        <p class="gaga-media-gallery__dialog-caption" data-gaga-gallery-caption></p>
+      </div>
+    </div>
+  </dialog>
+</section>
+
+<script>
+  function setupGallery() {
+    const gallery = document.querySelector<HTMLElement>('[data-gaga-media="gallery"]');
+    if (!gallery || gallery.dataset.wired) return;
+    gallery.dataset.wired = 'true';
+
+    interface GalleryItemData {
+      src?: string;
+      alt: string;
+      title?: string;
+      caption?: string;
+    }
+    const items: GalleryItemData[] = JSON.parse(gallery.getAttribute('data-items') || '[]');
+
+    const dialog = gallery.querySelector<HTMLDialogElement>('[data-gaga-gallery-dialog]');
+    const triggers = gallery.querySelectorAll<HTMLButtonElement>('[data-gaga-gallery-trigger]');
+    const closeBtns = gallery.querySelectorAll<HTMLButtonElement>('[data-gaga-gallery-close]');
+    const prevBtn = gallery.querySelector<HTMLButtonElement>('[data-gaga-gallery-prev]');
+    const nextBtn = gallery.querySelector<HTMLButtonElement>('[data-gaga-gallery-next]');
+    const target = gallery.querySelector<HTMLElement>('[data-gaga-gallery-target]');
+    const counter = gallery.querySelector<HTMLElement>('[data-gaga-gallery-counter]');
+    const titleEl = gallery.querySelector<HTMLElement>('[data-gaga-gallery-title]');
+    const captionEl = gallery.querySelector<HTMLElement>('[data-gaga-gallery-caption]');
+
+    let currentIndex = 0;
+
+    function renderSlide(index: number) {
+      currentIndex = (index + items.length) % items.length;
+      const item = items[currentIndex];
+
+      if (counter) counter.textContent = `${currentIndex + 1} / ${items.length}`;
+      if (titleEl) titleEl.textContent = item.title || item.alt || '';
+      if (captionEl) captionEl.textContent = item.caption || '';
+
+      if (target) {
+        if (item.src) {
+          target.innerHTML = `<img src="${item.src}" alt="${item.alt}" style="max-width:100%; max-height:75vh; object-fit:contain;" />`;
+        } else {
+          target.innerHTML = `<div style="padding:3rem; text-align:center; color:var(--gaga-muted);"><p style="font-size:1.1rem; font-weight:bold;">${item.title || item.alt}</p></div>`;
+        }
+      }
+    }
+
+    triggers.forEach((btn, idx) => {
+      btn.addEventListener('click', () => {
+        renderSlide(idx);
+        dialog?.showModal();
+      });
+    });
+
+    closeBtns.forEach((btn) => {
+      btn.addEventListener('click', () => dialog?.close());
+    });
+
+    prevBtn?.addEventListener('click', () => renderSlide(currentIndex - 1));
+    nextBtn?.addEventListener('click', () => renderSlide(currentIndex + 1));
+
+    dialog?.addEventListener('keydown', (e: Event) => {
+      const keyEvt = e as KeyboardEvent;
+      if (keyEvt.key === 'ArrowLeft') renderSlide(currentIndex - 1);
+      if (keyEvt.key === 'ArrowRight') renderSlide(currentIndex + 1);
+      if (keyEvt.key === 'Escape') dialog?.close();
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupGallery);
+  } else {
+    setupGallery();
+  }
+</script>
+
+<style>
+  .gaga-media-gallery {
+    margin: 2.5rem 0;
+    width: 100%;
+  }
+
+  .gaga-media-gallery__header {
+    margin-bottom: 1.25rem;
+  }
+
+  .gaga-media-gallery__kicker {
+    font-family: var(--gaga-font-mono);
+    font-size: 0.65rem;
+    color: var(--gaga-blue);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+
+  .gaga-media-gallery__title {
+    margin: 0.2rem 0 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--gaga-ink);
+  }
+
+  .gaga-media-gallery__grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(1, 1fr);
+  }
+
+  @media (min-width: 640px) {
+    .gaga-media-gallery__grid--cols-2 { grid-template-columns: repeat(2, 1fr); }
+    .gaga-media-gallery__grid--cols-3 { grid-template-columns: repeat(2, 1fr); }
+    .gaga-media-gallery__grid--cols-4 { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (min-width: 900px) {
+    .gaga-media-gallery__grid--cols-3 { grid-template-columns: repeat(3, 1fr); }
+    .gaga-media-gallery__grid--cols-4 { grid-template-columns: repeat(4, 1fr); }
+  }
+
+  .gaga-media-gallery__item {
+    margin: 0;
+    position: relative;
+    border-radius: var(--gaga-radius-md);
+    overflow: hidden;
+    background: var(--gaga-surface);
+    border: 1px solid var(--gaga-line);
+    transition: transform 0.15s ease, border-color 0.15s ease;
+  }
+
+  .gaga-media-gallery__item:hover {
+    border-color: var(--gaga-blue);
+    transform: translateY(-2px);
+  }
+
+  .gaga-media-gallery__thumb-btn {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4/3;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .gaga-media-gallery__thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.25s ease;
+  }
+
+  .gaga-media-gallery__thumb-btn:hover .gaga-media-gallery__thumb {
+    transform: scale(1.05);
+  }
+
+  .gaga-media-gallery__fallback-thumb {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    background: var(--gaga-surface-subtle);
+    color: var(--gaga-muted);
+    font-size: 0.8rem;
+    padding: 1rem;
+    text-align: center;
+  }
+
+  .gaga-media-gallery__overlay-icon {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: rgba(0, 0, 0, 0.4);
+    color: white;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  .gaga-media-gallery__thumb-btn:hover .gaga-media-gallery__overlay-icon,
+  .gaga-media-gallery__thumb-btn:focus-visible .gaga-media-gallery__overlay-icon {
+    opacity: 1;
+  }
+
+  .gaga-media-gallery__caption {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.85rem;
+    color: var(--gaga-ink);
+    font-weight: 500;
+    border-top: 1px solid var(--gaga-line);
+  }
+
+  /* Lightbox */
+  .gaga-media-gallery__dialog {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    max-width: 95vw;
+    max-height: 95vh;
+  }
+
+  .gaga-media-gallery__dialog::backdrop {
+    background: rgba(0, 0, 0, 0.88);
+    backdrop-filter: blur(12px);
+  }
+
+  .gaga-media-gallery__dialog-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+  }
+
+  .gaga-media-gallery__dialog-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    background: var(--gaga-surface-elevated);
+    border: 1px solid var(--gaga-line-strong);
+    border-radius: var(--gaga-radius-md);
+    overflow: hidden;
+    min-width: min(90vw, 42rem);
+  }
+
+  .gaga-media-gallery__dialog-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--gaga-line);
+  }
+
+  .gaga-media-gallery__dialog-counter {
+    font-family: var(--gaga-font-mono);
+    font-size: 0.85rem;
+    color: var(--gaga-muted);
+  }
+
+  .gaga-media-gallery__dialog-close-btn {
+    border: 0;
+    background: transparent;
+    color: var(--gaga-muted);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+  }
+
+  .gaga-media-gallery__dialog-stage {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    background: black;
+    min-height: 50vh;
+  }
+
+  .gaga-media-gallery__dialog-nav {
+    border: 0;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    cursor: pointer;
+    padding: 0.8rem;
+    border-radius: var(--gaga-radius-sm);
+    margin: 0.5rem;
+    display: grid;
+    place-items: center;
+    transition: background 0.15s ease;
+  }
+
+  .gaga-media-gallery__dialog-nav:hover {
+    background: var(--gaga-blue);
+  }
+
+  .gaga-media-gallery__dialog-view {
+    flex: 1;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+  }
+
+  .gaga-media-gallery__dialog-foot {
+    padding: 0.8rem 1.25rem;
+    border-top: 1px solid var(--gaga-line);
+    background: var(--gaga-surface);
+  }
+
+  .gaga-media-gallery__dialog-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--gaga-ink);
+  }
+
+  .gaga-media-gallery__dialog-caption {
+    margin: 0.2rem 0 0;
+    font-size: 0.85rem;
+    color: var(--gaga-muted);
+  }
+</style>

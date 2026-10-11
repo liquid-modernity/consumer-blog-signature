@@ -43,4 +43,34 @@ export function initLeftRailState() {
     beforeOpen: closeConflictingSurfaces,
     requestQuickActionsSync
   });
+
+  // Hover expansion when collapsed on desktop
+  let hoverTimeout: number | undefined;
+  rail.addEventListener('mouseenter', () => {
+    if (document.documentElement.dataset.gagaLayout === 'desktop' && rail.dataset.gagaState === 'collapsed') {
+      window.clearTimeout(hoverTimeout);
+      rail.dataset.gagaHoverExpanded = 'true';
+    }
+  });
+
+  rail.addEventListener('mouseleave', () => {
+    if (rail.dataset.gagaHoverExpanded) {
+      hoverTimeout = window.setTimeout(() => {
+        delete rail.dataset.gagaHoverExpanded;
+      }, 160);
+    }
+  });
+
+  // Focus within expansion for keyboard accessibility
+  rail.addEventListener('focusin', () => {
+    if (document.documentElement.dataset.gagaLayout === 'desktop' && rail.dataset.gagaState === 'collapsed') {
+      rail.dataset.gagaHoverExpanded = 'true';
+    }
+  });
+
+  rail.addEventListener('focusout', (e) => {
+    if (!rail.contains(e.relatedTarget as Node)) {
+      delete rail.dataset.gagaHoverExpanded;
+    }
+  });
 }

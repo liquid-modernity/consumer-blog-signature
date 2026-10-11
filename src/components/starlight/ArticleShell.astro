@@ -1,6 +1,5 @@
 ---
 import type { CanonicalContentMetadata } from '@gaga/engine/content';
-import SavedButton from '../reader/SavedButton.astro';
 import Icon from '../ui/Icon.astro';
 import type { ArticleWorkspaceActionsInput, SavedButtonInput } from '../frame/component-inputs';
 import type { BreadcrumbItem } from '../../lib/page-context';
@@ -8,7 +7,7 @@ import type { BreadcrumbItem } from '../../lib/page-context';
 interface Props {
   identity: CanonicalContentMetadata;
   language?: string;
-  savedAction: SavedButtonInput;
+  savedAction?: SavedButtonInput;
   actions: ArticleWorkspaceActionsInput;
   routeIdentity: string;
   missingTitleSource: string;
@@ -18,7 +17,7 @@ interface Props {
 const {
   identity,
   language,
-  savedAction,
+  savedAction: _savedAction,
   actions,
   routeIdentity,
   missingTitleSource,
@@ -35,88 +34,6 @@ const articleTitleId = '_top';
   aria-labelledby={articleTitleId}
   lang={language}
 >
-  <div class="gaga-article-chrome gaga-article-utility" data-gaga-article-utility>
-    <div class="gaga-article-chrome__start">
-      <a
-        class="gaga-article-utility__action gaga-article-utility__back"
-        href="/"
-        data-gaga-return-navigation
-        data-gaga-smart-back="fallback"
-        data-gaga-smart-back-context-label={actions.back.id}
-        aria-label={actions.back.id}
-        data-gaga-tooltip={actions.back.id}
-      >
-        <Icon name="arrow_back" />
-        <span class="gaga-article-utility__label" data-gaga-smart-back-text data-gaga-i18n-key={actions.back.key}
-          data-gaga-i18n-id={actions.back.id} data-gaga-i18n-en={actions.back.en}>{actions.back.id}</span>
-      </a>
-    </div>
-    <div
-      class="gaga-article-chrome__end gaga-article-utility__actions"
-      role="group"
-      aria-label={actions.actionsLabel.id}
-      data-gaga-i18n-key={actions.actionsLabel.key}
-      data-gaga-i18n-id={actions.actionsLabel.id}
-      data-gaga-i18n-en={actions.actionsLabel.en}
-      data-gaga-i18n-target="aria"
-    >
-      <button
-        class="gaga-article-utility__action gaga-article-utility__share"
-        type="button"
-        data-gaga-action={actions.share.command}
-        data-gaga-article-share
-        data-gaga-tooltip={actions.share.ariaLabel.id}
-        aria-label={actions.share.ariaLabel.id}
-        data-gaga-i18n-key={actions.share.ariaLabel.key}
-        data-gaga-i18n-id={actions.share.ariaLabel.id}
-        data-gaga-i18n-en={actions.share.ariaLabel.en}
-        data-gaga-i18n-target="aria"
-      >
-        {actions.share.icon ? <Icon name={actions.share.icon} /> : null}
-        <span class="gaga-article-utility__label" data-gaga-i18n-key={actions.share.label.key} data-gaga-i18n-id={actions.share.label.id} data-gaga-i18n-en={actions.share.label.en}>{actions.share.label.id}</span>
-      </button>
-      <button
-        class="gaga-article-utility__action"
-        type="button"
-        data-gaga-highlight-selection
-        data-gaga-tooltip="Highlight selection"
-        aria-label="Highlight selection"
-      >
-        <Icon name="edit" />
-        <span class="gaga-article-utility__label">Highlight</span>
-      </button>
-      <button
-        class="gaga-article-utility__action"
-        type="button"
-        data-gaga-speak-article
-        data-gaga-tooltip="Speak article"
-        aria-label="Speak article"
-        aria-pressed="false"
-      >
-        <Icon name="volume" />
-        <span class="gaga-article-utility__label">Speak</span>
-      </button>
-      <SavedButton action={savedAction} />
-      <button
-        class="gaga-article-utility__action gaga-article-context"
-        type="button"
-        data-gaga-action={actions.context.command}
-        data-gaga-quick-action={actions.context.id}
-        data-gaga-active="false"
-        data-gaga-tooltip={actions.context.ariaLabel.id}
-        aria-expanded={actions.context.ariaExpanded ? 'false' : undefined}
-        aria-controls={actions.context.ariaControls}
-        aria-label={actions.context.ariaLabel.id}
-        data-gaga-i18n-key={actions.context.ariaLabel.key}
-        data-gaga-i18n-id={actions.context.ariaLabel.id}
-        data-gaga-i18n-en={actions.context.ariaLabel.en}
-        data-gaga-i18n-target="aria"
-      >
-        {actions.context.icon ? <Icon name={actions.context.icon} /> : null}
-        <span class="gaga-article-utility__label" data-gaga-i18n-key={actions.context.label.key} data-gaga-i18n-id={actions.context.label.id} data-gaga-i18n-en={actions.context.label.en}>{actions.context.label.id}</span>
-      </button>
-    </div>
-  </div>
 
   <div class="gaga-article-scroll" data-gaga-article-scroll>
     <div class="gaga-article-scroll__inner">

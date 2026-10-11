@@ -1,89 +1,572 @@
 ---
-const article = {
-  title: 'Building a Publishing Experience OS: From Content Pages to Knowledge Spaces',
-  author: 'Gaga Editorial Lab',
-  topic: 'Product Architecture',
-  reading: '8 min read'
-};
----
-<html lang="id">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{article.title}</title>
-  <style is:global>
-    :root { --ink:#141414; --bg:#faf8f3; --card:#fff; --line:#ddd6ca; --accent:#2554d7; }
-    * { box-sizing:border-box; }
-    body { margin:0; background:var(--bg); color:var(--ink); font-family: Inter, ui-sans-serif, system-ui; }
-    button { font:inherit; }
-    .os-shell { min-height:100vh; display:grid; grid-template-columns:72px 1fr; }
-    .global { position:sticky; top:0; height:100vh; border-right:1px solid var(--line); padding:18px 10px; display:flex; flex-direction:column; gap:14px; background:#fff; }
-    .global button { border:0; background:none; border-radius:14px; padding:12px 4px; cursor:pointer; }
-    .global button:hover,.global button:focus { background:#eee8dd; }
-    .workspace { display:grid; grid-template-columns:minmax(0,820px) 300px; gap:28px; justify-content:center; padding:40px 36px; }
-    .article { background:var(--card); border:1px solid var(--line); border-radius:28px; padding:48px; }
-    .hero { width:100%; aspect-ratio:16/8; border-radius:22px; background:linear-gradient(135deg,#202b4d,#8fa4ff); margin:28px 0; }
-    .meta { color:#68645c; display:flex; gap:14px; font-size:.95rem; }
-    h1 { font-size:clamp(2.2rem,5vw,4.2rem); line-height:1.02; margin:20px 0; letter-spacing:-.04em; }
-    .body { font-size:1.15rem; line-height:1.8; }
-    .body mark { background:#ffe98b; }
-    .actions { display:flex; gap:10px; position:sticky; top:20px; margin-bottom:20px; flex-wrap:wrap; }
-    .actions button { border:1px solid var(--line); background:white; border-radius:999px; padding:10px 16px; cursor:pointer; }
-    .rail { border-left:1px solid var(--line); padding-left:24px; }
-    .rail section { background:white; border:1px solid var(--line); border-radius:20px; padding:18px; margin-bottom:16px; }
-    .progress { position:fixed; top:0; left:72px; height:4px; background:var(--accent); width:0; z-index:5; }
-    .toast { position:fixed; bottom:24px; right:24px; background:#111; color:#fff; padding:12px 18px; border-radius:999px; opacity:0; transform:translateY(10px); transition:.2s; }
-    .toast.show { opacity:1; transform:none; }
-    .focus .rail { display:none; }
-    .focus .workspace { grid-template-columns:minmax(0,820px); }
-    @media(max-width:900px){ .os-shell{display:block}.global{height:auto;position:sticky;flex-direction:row}.workspace{display:block;padding:16px}.rail{display:none}.article{padding:24px}.progress{left:0} }
-  </style>
-</head>
-<body>
-<div class="progress" id="progress"></div>
-<div class="os-shell" id="app">
-  <nav class="global" aria-label="Global navigation">
-    {['⌂','⌕','◫','▣','◴'].map((i)=><button title="Navigation">{i}</button>)}
-    <button id="personalize" title="Personalize">◉</button>
-  </nav>
-  <div class="workspace">
-    <main class="article" id="reader">
-      <div class="actions" aria-label="Action runtime">
-        <button data-action="back">Smart Back</button>
-        <button data-action="share">Smart Share</button>
-        <button data-action="focus">Focus Mode</button>
-        <button data-action="highlight">Highlight</button>
-        <button data-action="speak">Speak</button>
-      </div>
-      <div class="meta"><span>{article.author}</span><span>{article.topic}</span><span>{article.reading}</span></div>
-      <h1>{article.title}</h1>
-      <div class="hero" role="img" aria-label="Immersive article media"></div>
-      <article class="body" id="content">
-        <p>Publishing products should not only display information. They should help readers discover context, build understanding, and continue exploration.</p>
-        <p>The article canvas becomes a workspace where content, intelligence, and interaction meet. Readers receive the right information at the right moment.</p>
-        <p>Experience quality is proven through visible behaviour. A button, rail, or capability only matters when it changes what users can do.</p>
-      </article>
-    </main>
-    <aside class="rail" aria-label="Intelligence rail">
-      <section><strong>What should I know?</strong><p>Related concepts: publishing systems, knowledge graph, reader experience.</p></section>
-      <section><strong>Outline</strong><p>01 Experience OS<br/>02 Runtime behaviour<br/>03 Future knowledge surface</p></section>
-      <section><strong>Source</strong><p>Editorial knowledge object</p></section>
-    </aside>
-  </div>
-</div>
-<div class="toast" id="toast"></div>
-<script>
-const toast=document.querySelector('#toast'); const app=document.querySelector('#app');
-const notify=(m)=>{toast.textContent=m;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),1800)};
-document.querySelectorAll('[data-action]').forEach(b=>b.onclick=()=>{
- const a=b.dataset.action;
- if(a==='focus'){app.classList.toggle('focus');notify('Focus mode changed')}
- if(a==='share'){navigator.share?.({title:document.title,url:location.href});notify('Share action ready')}
- if(a==='back'){history.back()}
- if(a==='highlight'){const s=getSelection(); if(s?.toString()) {const r=s.getRangeAt(0);const m=document.createElement('mark');r.surroundContents(m);notify('Highlight saved locally')}}
- if(a==='speak'){speechSynthesis.speak(new SpeechSynthesisUtterance(document.querySelector('#content').innerText));notify('Narration started')}
+import '../styles/tokens.css';
+import '../styles/signature.scss';
+import StandaloneAppFrame from '../components/frame/StandaloneAppFrame.astro';
+import SeoHead from '../components/seo/SeoHead.astro';
+import ResponsiveImage from '../components/media/ResponsiveImage.astro';
+import MediaCarousel from '../components/media/MediaCarousel.astro';
+import MediaGallery from '../components/media/MediaGallery.astro';
+import VideoPlayer from '../components/media/VideoPlayer.astro';
+import AudioPlayer from '../components/media/AudioPlayer.astro';
+import InteractiveEmbed from '../components/media/InteractiveEmbed.astro';
+import RelatedKnowledge from '../components/knowledge/RelatedKnowledge.astro';
+import { normalizeContentMetadata } from '@gaga/engine/content';
+import type { ScreenInfo } from '../lib/screen-info';
+
+const title = 'Akal Imitasi & Arsitektur Pengetahuan: Merancang Ruang Publikasi Generasi Baru';
+const subtitle = 'Mengubah pola pikir dari sekadar halaman dokumentasi statis menjadi ruang kerja pengetahuan kontekstual yang adaptif, imersif, dan terintegrasi.';
+const description = 'Laporan khusus tentang bagaimana Consumer Blog Signature memadukan rel navigasi stabil, kanvas baca bernutrisi tinggi, rel intelijen kontekstual, dan runtime aksi universal.';
+
+const metadata = normalizeContentMetadata({
+  title,
+  seoTitle: `${title} • Consumer Signature`,
+  subtitle,
+  description,
+  summary: description,
+  language: 'id',
+  author: 'Editorial Team',
+  canonical: '/article',
+  contentKind: 'article',
+  contentClass: 'article-flagship',
+  publishedAt: '2026-10-11',
+  updatedAt: '2026-10-11',
+  readTime: '8 min read',
+  topics: ['Product Architecture', 'Reader Experience'],
+  tags: ['architecture', 'ux', 'rich-media', 'knowledge-graph']
 });
-window.addEventListener('scroll',()=>{const h=document.documentElement;document.querySelector('#progress').style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%'})
-</script>
-</body>
+
+const info: ScreenInfo = {
+  kind: 'article',
+  outlineItems: [
+    { slug: 'dekonstruksi-paradigma', text: '01. Dekonstruksi Paradigma Halaman' },
+    { slug: 'pemisahan-aksi-global', text: '02. Pemisahan Aksi Global dan Konteks Pengetahuan' },
+    { slug: 'integrasi-media-interaktif', text: '03. Integrasi Media Interaktif dan Graf Semantik' },
+    { slug: 'kesimpulan-arsitektur', text: '04. Kesimpulan Arsitektur Pengetahuan' }
+  ],
+  snippet: 'Merancang ruang publikasi generasi baru yang memadukan rel navigasi global, kanvas baca fokus, rel intelijen kontekstual, dan runtime aksi universal.',
+  publishedDate: { text: '11 Oktober 2026', datetime: '2026-10-11' },
+  updatedAtDisplay: { text: 'Hari ini', datetime: '2026-10-11' },
+  readTime: '8 min read',
+  topics: ['Product Architecture', 'Reader Experience'],
+  tags: ['architecture', 'ux', 'rich-media', 'knowledge-graph'],
+  author: 'Editorial Team',
+  discovery: [
+    { title: 'Softcoded Systems Scale Better', href: '/softcoded-systems-scale-better-than-theme-forks', meta: 'Article · 5 min' },
+    { title: 'Designing Context-Aware Reading Surface', href: '/designing-context-aware-reading-surface', meta: 'Article · 6 min' }
+  ]
+};
+
+const carouselSlides = [
+  {
+    alt: 'Arsitektur Blueprint Ruang Kerja',
+    title: 'Visualisasi Workspace Blueprint',
+    caption: 'Konfigurasi rel navigasi vertikal ikon-saja berdampingan dengan rel konteks kiri dan intelijen kanan.',
+    credit: 'Gaga Engineering Design Studio'
+  },
+  {
+    alt: 'Topografi Tipografi Editorial',
+    title: 'Skala Tipografi Bebas-Pills',
+    caption: 'Menghilangkan pill badge berlebihan untuk mendukung kejelasan hierarki teks murni bergaya kuratorial.',
+    credit: 'Editorial Typography Archive'
+  },
+  {
+    alt: 'Graf Pengetahuan Semantik',
+    title: 'Pemetaan Relasi Entitas',
+    caption: 'Menghubungkan artikel ke topik, penulis, dan sumber bukti secara organik tanpa pemisah artifisial.',
+    credit: 'Semantic Intelligence Lab'
+  }
+];
+
+const galleryItems = [
+  {
+    alt: 'Desain Kanvas Baca Fokus',
+    title: 'Kanvas Baca Ergonomis',
+    caption: 'Lebar membaca 65–75ch dengan proporsi leading longgar untuk ketahanan fokus jangka panjang.'
+  },
+  {
+    alt: 'Runtime Aksi Kontekstual',
+    title: 'Aksi Halaman Universal',
+    caption: 'Smart Back, Smart Share, Focus Mode, Highlight, dan Narasi Suara selalu terjangkau dalam 1 ketukan.'
+  },
+  {
+    alt: 'Rel Intelijen Kontekstual',
+    title: 'Menjawab: Apa yang Harus Diketahui?',
+    caption: 'Daftar isi interaktif, ringkasan kontekstual, dan tautan eksplorasi pengetahuan terkait.'
+  }
+];
+---
+<html lang="id-ID">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <SeoHead metadata={metadata} pathname="/article" title={title} includeWebSiteSchema={false} />
+    <style is:global>
+      /* Smooth reading progress indicator */
+      .gaga-reading-progress-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 3px;
+        background: var(--gaga-blue);
+        width: 0%;
+        z-index: 999;
+        transition: width 0.08s ease-out;
+        pointer-events: none;
+      }
+
+      /* Editorial Longform Typography */
+      .gaga-flagship-article {
+        max-width: var(--gaga-content-width, 44rem);
+        margin-inline: auto;
+        padding-block: 1rem 4rem;
+        color: var(--gaga-ink);
+      }
+
+      .gaga-flagship-article__breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-family: var(--gaga-font-mono);
+        font-size: 0.72rem;
+        color: var(--gaga-muted);
+        margin-bottom: 1.25rem;
+      }
+
+      .gaga-flagship-article__breadcrumb a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .gaga-flagship-article__breadcrumb a:hover {
+        color: var(--gaga-blue);
+      }
+
+      .gaga-flagship-article__kicker {
+        font-family: var(--gaga-font-mono);
+        font-size: 0.75rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--gaga-blue);
+        font-weight: 700;
+        margin-bottom: 0.6rem;
+      }
+
+      .gaga-flagship-article__title {
+        font-family: var(--gaga-font-display, serif);
+        font-size: clamp(2.2rem, 4.5vw, 3.4rem);
+        line-height: 1.08;
+        letter-spacing: -0.025em;
+        margin: 0 0 1rem;
+        font-weight: 700;
+        color: var(--gaga-ink);
+        text-wrap: balance;
+      }
+
+      .gaga-flagship-article__subtitle {
+        font-size: 1.2rem;
+        line-height: 1.55;
+        color: var(--gaga-muted);
+        margin: 0 0 1.5rem;
+        font-weight: 400;
+      }
+
+      /* Rich Author Identity Card */
+      .gaga-flagship-article__author-card {
+        display: flex;
+        align-items: center;
+        gap: 1.15rem;
+        margin: 1.6rem 0 1.4rem;
+        padding: 1rem 1.25rem;
+        border-radius: var(--gaga-radius-md, 8px);
+        background: var(--gaga-surface-subtle, rgba(0, 0, 0, 0.02));
+        border: 1px solid var(--gaga-line, rgba(0, 0, 0, 0.08));
+      }
+
+      .gaga-flagship-article__author-avatar {
+        width: 2.75rem;
+        height: 2.75rem;
+        border-radius: 999px;
+        background: var(--gaga-blue, #2563eb);
+        color: #ffffff;
+        display: grid;
+        place-items: center;
+        font-family: var(--gaga-font-mono, monospace);
+        font-weight: 700;
+        font-size: 0.95rem;
+        letter-spacing: 0.05em;
+        flex-shrink: 0;
+        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+      }
+
+      .gaga-flagship-article__author-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+      }
+
+      .gaga-flagship-article__author-row {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        flex-wrap: wrap;
+      }
+
+      .gaga-flagship-article__author-name {
+        font-weight: 700;
+        font-size: 0.98rem;
+        color: var(--gaga-ink, #0f172a);
+      }
+
+      .gaga-flagship-article__verified-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-family: var(--gaga-font-mono, monospace);
+        font-size: 0.72rem;
+        color: var(--gaga-blue, #2563eb);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .gaga-flagship-article__badge-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--gaga-blue, #2563eb);
+      }
+
+      .gaga-flagship-article__author-bio {
+        margin: 0;
+        font-size: 0.82rem;
+        color: var(--gaga-muted, #64748b);
+        line-height: 1.45;
+      }
+
+      /* Zero-Pill Unboxed Metadata */
+      .gaga-flagship-article__meta {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem 0.65rem;
+        padding-block: 0.85rem;
+        border-block: 1px solid var(--gaga-line);
+        margin-bottom: 2.5rem;
+        font-size: 0.82rem;
+        color: var(--gaga-muted);
+        font-family: var(--gaga-font-mono);
+      }
+
+      .gaga-flagship-article__meta-sep {
+        color: var(--gaga-tertiary, #cbd5e1);
+      }
+
+      .gaga-meta-link {
+        color: var(--gaga-blue, #2563eb);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+
+      .gaga-meta-tag {
+        color: var(--gaga-ink, #0f172a);
+        font-weight: 500;
+      }
+
+      /* Editorial Prose & Drop Cap */
+      .gaga-flagship-article__prose {
+        font-family: var(--gaga-font-body, sans-serif);
+        font-size: 1.1rem;
+        line-height: 1.82;
+        color: var(--gaga-ink);
+        transition: font-size 0.2s ease, line-height 0.2s ease;
+      }
+
+      /* Reading Preferences Adaptations */
+      body[data-gaga-reader-font="sm"] .gaga-flagship-article__prose {
+        font-size: 1rem;
+      }
+      body[data-gaga-reader-font="lg"] .gaga-flagship-article__prose {
+        font-size: 1.25rem;
+        line-height: 1.95;
+      }
+      body[data-gaga-reader-density="compact"] .gaga-flagship-article__prose {
+        line-height: 1.6;
+      }
+      body[data-gaga-reader-density="compact"] .gaga-flagship-article__prose p {
+        margin: 0.9rem 0;
+      }
+      body[data-gaga-reader-density="wide"] .gaga-flagship-article {
+        max-width: min(52rem, 95vw);
+      }
+      body[data-gaga-reader-density="wide"] .gaga-flagship-article__prose {
+        line-height: 2.0;
+      }
+
+      .gaga-flagship-article__lead::first-letter {
+        font-family: var(--gaga-font-display, serif);
+        font-size: 3.8rem;
+        float: left;
+        line-height: 0.8;
+        padding-right: 0.6rem;
+        padding-top: 0.2rem;
+        color: var(--gaga-blue);
+        font-weight: 700;
+      }
+
+      .gaga-flagship-article__prose h2 {
+        font-family: var(--gaga-font-display, serif);
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin: 3.2rem 0 1.2rem;
+        padding-top: 1.6rem;
+        border-top: 1px solid var(--gaga-line);
+        letter-spacing: -0.015em;
+        color: var(--gaga-ink);
+      }
+
+      .gaga-flagship-article__prose p {
+        margin: 1.35rem 0;
+      }
+
+      /* Pull Quote */
+      .gaga-editorial-quote {
+        margin: 2.8rem 0;
+        padding: 1.75rem 2.25rem;
+        border-block: 1px solid var(--gaga-line-strong);
+        background: var(--gaga-surface-subtle);
+        border-left: 3px solid var(--gaga-blue);
+      }
+
+      .gaga-editorial-quote blockquote {
+        margin: 0;
+        font-family: var(--gaga-font-display, serif);
+        font-style: italic;
+        font-size: 1.35rem;
+        line-height: 1.55;
+        color: var(--gaga-ink);
+      }
+
+      .gaga-editorial-quote cite {
+        display: block;
+        margin-top: 0.9rem;
+        font-family: var(--gaga-font-mono);
+        font-size: 0.75rem;
+        font-style: normal;
+        color: var(--gaga-muted);
+        letter-spacing: 0.06em;
+      }
+
+      /* Reduced motion support */
+      @media (prefers-reduced-motion: reduce) {
+        *, ::before, ::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Reading Progress Bar -->
+    <div class="gaga-reading-progress-bar" id="gaga-reading-progress-bar"></div>
+
+    <StandaloneAppFrame
+      pageId="article-benchmark"
+      pageTitle={title}
+      contentKind="article"
+      contentClass="article-flagship"
+      info={info}
+    >
+      <article class="gaga-flagship-article" id="article-root">
+        <!-- Breadcrumbs -->
+        <nav class="gaga-flagship-article__breadcrumb" aria-label="Breadcrumb navigation">
+          <a href="/">Beranda</a>
+          <span aria-hidden="true">/</span>
+          <a href="/topics/experience">Arsitektur Produk</a>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">Laporan Khusus</span>
+        </nav>
+
+        <!-- Editorial Header -->
+        <header class="gaga-flagship-article__header">
+          <div class="gaga-flagship-article__kicker">SPECIAL BENCHMARK REPORT · ARSITEKTUR SISTEM</div>
+          <h1 class="gaga-flagship-article__title">{title}</h1>
+          <p class="gaga-flagship-article__subtitle">{subtitle}</p>
+
+          <!-- Rich Author Identity -->
+          <div class="gaga-flagship-article__author-card">
+            <div class="gaga-flagship-article__author-avatar" aria-hidden="true">
+              <span class="gaga-flagship-article__avatar-initials">ER</span>
+            </div>
+            <div class="gaga-flagship-article__author-info">
+              <div class="gaga-flagship-article__author-row">
+                <span class="gaga-flagship-article__author-name">Tim Riset Editorial & Rekayasa Gaga</span>
+                <span class="gaga-flagship-article__verified-badge" title="Tinjauan Komite Editorial">
+                  <span class="gaga-flagship-article__badge-dot" aria-hidden="true"></span> Terverifikasi Redaksi
+                </span>
+              </div>
+              <p class="gaga-flagship-article__author-bio">
+                Divisi Riset Interaksi Kognitif & Arsitektur Publikasi Digital · Gaga Engineering Systems Group
+              </p>
+            </div>
+          </div>
+
+          <!-- Zero-Pill Unboxed Metadata -->
+          <div class="gaga-flagship-article__meta">
+            <span class="gaga-flagship-article__meta-item">
+              <strong>Dipublikasikan:</strong> 11 Oktober 2026
+            </span>
+            <span class="gaga-flagship-article__meta-sep" aria-hidden="true">·</span>
+            <span class="gaga-flagship-article__meta-item">
+              <strong>Estimasi Baca:</strong> 8 min bacaan (~2.150 kata)
+            </span>
+            <span class="gaga-flagship-article__meta-sep" aria-hidden="true">·</span>
+            <span class="gaga-flagship-article__meta-item">
+              <strong>Topik Utama:</strong> <a href="/topics/experience" class="gaga-meta-link">Arsitektur Produk</a>
+            </span>
+            <span class="gaga-flagship-article__meta-sep" aria-hidden="true">·</span>
+            <span class="gaga-flagship-article__meta-item">
+              <strong>Relasi Pengetahuan:</strong>
+              <span class="gaga-meta-tag">Sistem Kontekstual</span> /
+              <span class="gaga-meta-tag">Ergonomi Kognitif</span> /
+              <span class="gaga-meta-tag">Graf Semantik</span>
+            </span>
+          </div>
+        </header>
+
+        <!-- Audio Narration Player -->
+        <AudioPlayer
+          title="Narasi Lengkap: Akal Imitasi & Arsitektur Pengetahuan"
+          author="Editorial Voice Synthesis"
+          duration="08:24"
+        />
+
+        <!-- Hero Responsive Image with Fullscreen Lightbox -->
+        <ResponsiveImage
+          alt="Paviliun Arsitektur Perpustakaan Pengetahuan Kontemporer"
+          caption="Ruang baca arsitektural yang memadukan pencahayaan alami, struktur batu monolitik, dan ketenangan kontemplatif."
+          credit="Curatorial Archival Studio"
+          aspectRatio="16/9"
+          layout="wide"
+        />
+
+        <!-- Article Prose Body -->
+        <div class="gaga-flagship-article__prose" id="article-content">
+          <p class="gaga-flagship-article__lead">
+            Pergeseran mendasar dalam arsitektur publikasi digital kontemporer tidak lagi berkisar pada estetika dekoratif, melainkan pada bagaimana sistem informasi menghargai kognisi pembaca. Selama lebih dari dua dekade, situs web penerbitan dan portal pengetahuan terjebak dalam dikotomi sempit: antara template dokumentasi yang kaku dengan deretan menu panjang yang menakutkan, atau blog komersial yang dipenuhi badge warna-warni dan elemen mengganggu.
+          </p>
+
+          <h2 id="dekonstruksi-paradigma">01. Dekonstruksi Paradigma Halaman</h2>
+          <p>
+            Ketika pembaca membuka sebuah tulisan bernilai tinggi, pertanyaan utama yang muncul bukanlah "bahasa pemrograman apa yang dipakai", melainkan dua orientasi kognitif mendasar: <em>Di mana saya bisa pergi?</em> dan <em>Apa yang perlu saya pahami sekarang?</em>
+          </p>
+          <p>
+            Dengan memisahkan kedua pertanyaan ini secara tegas ke dalam dua permukaan terpisah—Rel Konteks Kiri yang menjawab navigasi rute ("Where can I go?"), dan Rel Intelijen Kanan yang menyajikan ringkasan intisari serta daftar isi ("What should I know?")—antarmuka tidak lagi bersaing memperebutkan perhatian mata. Keduanya secara default berada dalam status <strong>collapsed</strong> pada layar desktop, memberikan ketenangan total bagi kanvas membaca utama.
+          </p>
+
+          <!-- Editorial Pull Quote -->
+          <div class="gaga-editorial-quote">
+            <blockquote>
+              "Sistem publikasi yang berkelas tidak pernah memaksa pembaca mempelajari tombol-tombolnya; antarmukanya beroperasi dalam hening, hanya hadir ketika dipanggil oleh niat sadar."
+            </blockquote>
+            <cite>— PRINSIP DESAIN CONSUMER SIGNATURE</cite>
+          </div>
+
+          <!-- Curated Exhibit Carousel -->
+          <MediaCarousel
+            title="Eksplorasi Dimensi Visual & Interaksi Workspace"
+            slides={carouselSlides}
+          />
+
+          <h2 id="pemisahan-aksi-global">02. Pemisahan Aksi Global dan Konteks Pengetahuan</h2>
+          <p>
+            Sebagian besar situs berita atau dokumentasi mencampuradukkan tautan rute umum dengan kontrol membaca. Hal tersebut menciptakan kelelahan visual (visual fatigue). Melalui Global Navigation Rail yang berorientasi vertikal dan beroperasi dengan ikon bersih, navigasi utama (Beranda, Pencarian, Topik, Pustaka, Arsip, dan Informasi) terkonsentrasi di sisi paling kiri sebagai fondasi yang kokoh.
+          </p>
+          <p>
+            Sebaliknya, kontrol utilitas aktif pembaca diwujudkan dalam <strong>Action Runtime</strong> yang universal. Aksi Smart Back mengerti riwayat navigasi Anda; Smart Share menyalin tautan secara cerdas; Focus Mode memperluas kanvas dan meredupkan gangguan; Highlight menyimpan anotasi lokal; serta Narasi Suara membacakan artikel secara langsung.
+          </p>
+
+          <!-- Interactive Embed Showcase -->
+          <InteractiveEmbed
+            title="Matriks Penyelarasan Kognitif Interaktif"
+            caption="Uji coba simulasi metrik relasi pengetahuan dan latensi komputasi antarmuka."
+            aspectRatio="16/9"
+          />
+
+          <h2 id="integrasi-media-interaktif">03. Integrasi Media Interaktif dan Graf Semantik</h2>
+          <p>
+            Media bukan sekadar gambar dekoratif pelengkap teks. Setiap komponen media—mulai dari gambar responsif, korsel kuratorial, galeri masonry, hingga video dan audio—harus mendukung interaksi penuh melalui sentuhan jari, keyboard, aksesibilitas screen reader, serta kemampuan perbesaran layar penuh (fullscreen lightbox).
+          </p>
+
+          <!-- Video Broadcast Component -->
+          <VideoPlayer
+            title="Dokumenter: Menemukan Kembali Keheningan Membaca"
+            caption="Rekaman diskusi panel perancangan tipografi dan arsitektur publikasi tanpa gangguan."
+            duration="04:12"
+          />
+
+          <!-- Gallery Component -->
+          <MediaGallery
+            title="Katalog Monograf Desain & Tipografi"
+            items={galleryItems}
+            columns={3}
+          />
+
+          <h2 id="kesimpulan-arsitektur">04. Kesimpulan Arsitektur Pengetahuan</h2>
+          <p>
+            Masa depan penerbitan digital adalah perpaduan antara keanggunan majalah cetak kelas atas dengan ketajaman sistem basis pengetahuan cerdas. Melalui fondasi yang dapat dikonfigurasi penuh, arsitektur ini siap menjadi standar baku bagi publikasi korporat, institusi riset, maupun media editorial independen.
+          </p>
+        </div>
+
+        <!-- Semantic Related Knowledge Section -->
+        <RelatedKnowledge
+          graphNodeId="consumer.article.context-aware-reading"
+        />
+      </article>
+    </StandaloneAppFrame>
+
+    <!-- Reading Scroll Progress Script -->
+    <script>
+      function setupReadingProgress() {
+        const progressBar = document.getElementById('gaga-reading-progress-bar');
+
+        function updateProgress() {
+          const scrollElement = document.querySelector('.gaga-main-region') as HTMLElement | null;
+          let scrollTop = 0;
+          let scrollHeight = 0;
+          let clientHeight = 0;
+
+          if (scrollElement) {
+            scrollTop = scrollElement.scrollTop;
+            scrollHeight = scrollElement.scrollHeight;
+            clientHeight = scrollElement.clientHeight;
+          } else {
+            scrollTop = window.scrollY;
+            scrollHeight = document.documentElement.scrollHeight;
+            clientHeight = window.innerHeight;
+          }
+
+          const maxScroll = scrollHeight - clientHeight;
+          const percentage = maxScroll > 0 ? (scrollTop / maxScroll) * 100 : 0;
+          if (progressBar) {
+            progressBar.style.width = `${Math.min(100, Math.max(0, percentage))}%`;
+          }
+        }
+
+        const scrollContainer = document.querySelector('.gaga-main-region');
+        if (scrollContainer) {
+          scrollContainer.addEventListener('scroll', updateProgress, { passive: true });
+        } else {
+          window.addEventListener('scroll', updateProgress, { passive: true });
+        }
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', setupReadingProgress);
+      } else {
+        setupReadingProgress();
+      }
+    </script>
+  </body>
 </html>

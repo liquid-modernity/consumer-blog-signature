@@ -1,0 +1,381 @@
+---
+import Icon from '../ui/Icon.astro';
+
+interface Props {
+  src?: string;
+  poster?: string;
+  title: string;
+  caption?: string;
+  duration?: string;
+  id?: string;
+}
+
+const {
+  src,
+  poster,
+  title,
+  caption,
+  duration = '04:12',
+  id = `video-${Math.random().toString(36).substring(2, 9)}`
+} = Astro.props;
+---
+<figure class="gaga-media-video" data-gaga-media="video" id={id} aria-label={title}>
+  <div class="gaga-media-video__container" data-gaga-video-container>
+    {src ? (
+      <video
+        class="gaga-media-video__element"
+        data-gaga-video-element
+        poster={poster}
+        preload="metadata"
+        playsinline
+      >
+        <source src={src} type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+    ) : (
+      <div class="gaga-media-video__simulation" data-gaga-video-sim>
+        <div class="gaga-media-video__sim-mesh"></div>
+        <div class="gaga-media-video__sim-content">
+          <span class="gaga-media-video__sim-badge">FEATURED BROADCAST</span>
+          <h3 class="gaga-media-video__sim-title">{title}</h3>
+          <span class="gaga-media-video__sim-duration">{duration}</span>
+        </div>
+      </div>
+    )}
+
+    <!-- Big Center Play Button Overlay -->
+    <button
+      type="button"
+      class="gaga-media-video__big-play"
+      data-gaga-video-big-play
+      aria-label="Play video"
+    >
+      <div class="gaga-media-video__play-triangle"></div>
+    </button>
+
+    <!-- Custom High-End Video Controls Bar -->
+    <div class="gaga-media-video__controls" data-gaga-video-controls>
+      <div class="gaga-media-video__progress-bar" data-gaga-video-progress role="slider" aria-label="Seek track" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
+        <div class="gaga-media-video__progress-fill" data-gaga-video-progress-fill style="width: 0%;"></div>
+      </div>
+
+      <div class="gaga-media-video__controls-row">
+        <div class="gaga-media-video__controls-left">
+          <button type="button" class="gaga-media-video__btn" data-gaga-video-play-btn aria-label="Play">
+            <span class="gaga-media-video__icon-play"><Icon name="smart_display" /></span>
+          </button>
+          <span class="gaga-media-video__time" data-gaga-video-time>0:00 / {duration}</span>
+        </div>
+
+        <div class="gaga-media-video__controls-right">
+          <button type="button" class="gaga-media-video__btn" data-gaga-video-mute-btn aria-label="Mute">
+            <Icon name="volume" />
+          </button>
+          <button type="button" class="gaga-media-video__btn" data-gaga-video-fullscreen-btn aria-label="Fullscreen">
+            <Icon name="width_full" />
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {(title || caption) && (
+    <figcaption class="gaga-media-video__caption">
+      <span class="gaga-media-video__caption-title">{title}</span>
+      {caption && <span class="gaga-media-video__caption-desc">· {caption}</span>}
+    </figcaption>
+  )}
+</figure>
+
+<script>
+  function setupVideoPlayers() {
+    document.querySelectorAll<HTMLElement>('[data-gaga-media="video"]').forEach((player) => {
+      if (player.dataset.wired) return;
+      player.dataset.wired = 'true';
+
+      const container = player.querySelector<HTMLElement>('[data-gaga-video-container]');
+      const video = player.querySelector<HTMLVideoElement>('[data-gaga-video-element]');
+      const bigPlay = player.querySelector<HTMLButtonElement>('[data-gaga-video-big-play]');
+      const playBtn = player.querySelector<HTMLButtonElement>('[data-gaga-video-play-btn]');
+      const muteBtn = player.querySelector<HTMLButtonElement>('[data-gaga-video-mute-btn]');
+      const fsBtn = player.querySelector<HTMLButtonElement>('[data-gaga-video-fullscreen-btn]');
+      const progress = player.querySelector<HTMLElement>('[data-gaga-video-progress]');
+      const progressFill = player.querySelector<HTMLElement>('[data-gaga-video-progress-fill]');
+      const timeDisplay = player.querySelector<HTMLElement>('[data-gaga-video-time]');
+
+      let isPlaying = false;
+      let simTimer: number | undefined;
+      let simProgress = 0;
+
+      function togglePlay() {
+        if (video) {
+          if (video.paused) {
+            video.play();
+            isPlaying = true;
+          } else {
+            video.pause();
+            isPlaying = false;
+          }
+        } else {
+          // Simulated playback for demo fixtures
+          isPlaying = !isPlaying;
+          if (isPlaying) {
+            simTimer = window.setInterval(() => {
+              simProgress += 1;
+              if (simProgress > 100) simProgress = 0;
+              if (progressFill) progressFill.style.width = `${simProgress}%`;
+              if (timeDisplay) {
+                const s = Math.floor(simProgress * 2.4);
+                const mins = Math.floor(s / 60);
+                const secs = (s % 60).toString().padStart(2, '0');
+                timeDisplay.textContent = `${mins}:${secs} / 04:12`;
+              }
+            }, 500);
+          } else {
+            clearInterval(simTimer);
+          }
+        }
+
+        container?.classList.toggle('gaga-is-playing', isPlaying);
+        if (bigPlay) bigPlay.style.display = isPlaying ? 'none' : 'grid';
+      }
+
+      bigPlay?.addEventListener('click', togglePlay);
+      playBtn?.addEventListener('click', togglePlay);
+
+      muteBtn?.addEventListener('click', () => {
+        if (video) {
+          video.muted = !video.muted;
+          muteBtn.classList.toggle('gaga-is-muted', video.muted);
+        }
+      });
+
+      fsBtn?.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+          container?.requestFullscreen().catch(() => {});
+        } else {
+          document.exitFullscreen().catch(() => {});
+        }
+      });
+
+      video?.addEventListener('timeupdate', () => {
+        if (video.duration && progressFill) {
+          const pct = (video.currentTime / video.duration) * 100;
+          progressFill.style.width = `${pct}%`;
+          if (timeDisplay) {
+            const m = Math.floor(video.currentTime / 60);
+            const s = Math.floor(video.currentTime % 60).toString().padStart(2, '0');
+            timeDisplay.textContent = `${m}:${s}`;
+          }
+        }
+      });
+
+      progress?.addEventListener('click', (e) => {
+        const rect = progress.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const pct = Math.max(0, Math.min(1, clickX / rect.width));
+        if (video && video.duration) {
+          video.currentTime = pct * video.duration;
+        } else {
+          simProgress = pct * 100;
+          if (progressFill) progressFill.style.width = `${simProgress}%`;
+        }
+      });
+
+      // Keyboard controls
+      player.addEventListener('keydown', (e) => {
+        if (e.key === ' ' || e.key === 'k') {
+          e.preventDefault();
+          togglePlay();
+        } else if (e.key === 'f') {
+          e.preventDefault();
+          fsBtn?.click();
+        } else if (e.key === 'm') {
+          e.preventDefault();
+          muteBtn?.click();
+        }
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupVideoPlayers);
+  } else {
+    setupVideoPlayers();
+  }
+</script>
+
+<style>
+  .gaga-media-video {
+    margin: 2.5rem 0;
+    width: 100%;
+  }
+
+  .gaga-media-video__container {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: #050505;
+    border-radius: var(--gaga-radius-md);
+    overflow: hidden;
+    border: 1px solid var(--gaga-line);
+  }
+
+  .gaga-media-video__element {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .gaga-media-video__simulation {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    position: relative;
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+  }
+
+  .gaga-media-video__sim-mesh {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  .gaga-media-video__sim-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    color: white;
+    padding: 2rem;
+  }
+
+  .gaga-media-video__sim-badge {
+    font-family: var(--gaga-font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    color: var(--gaga-blue);
+    font-weight: 700;
+  }
+
+  .gaga-media-video__sim-title {
+    margin: 0.4rem 0;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: white;
+  }
+
+  .gaga-media-video__sim-duration {
+    font-family: var(--gaga-font-mono);
+    font-size: 0.8rem;
+    opacity: 0.7;
+  }
+
+  .gaga-media-video__big-play {
+    position: absolute;
+    inset: 50% auto auto 50%;
+    transform: translate(-50%, -50%);
+    width: 4.5rem;
+    height: 4.5rem;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--gaga-blue) 90%, black);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    transition: transform 0.15s ease, background 0.15s ease;
+    z-index: 3;
+  }
+
+  .gaga-media-video__big-play:hover {
+    transform: translate(-50%, -50%) scale(1.08);
+    background: var(--gaga-blue);
+  }
+
+  .gaga-media-video__play-triangle {
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0.8rem 0 0.8rem 1.4rem;
+    border-color: transparent transparent transparent white;
+    margin-left: 0.3rem;
+  }
+
+  .gaga-media-video__controls {
+    position: absolute;
+    inset-block-end: 0;
+    inset-inline: 0;
+    padding: 0.8rem 1rem;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, transparent 100%);
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    z-index: 2;
+  }
+
+  .gaga-media-video__progress-bar {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 3px;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .gaga-media-video__progress-fill {
+    height: 100%;
+    background: var(--gaga-blue);
+    border-radius: 3px;
+    transition: width 0.1s linear;
+  }
+
+  .gaga-media-video__controls-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .gaga-media-video__controls-left,
+  .gaga-media-video__controls-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .gaga-media-video__btn {
+    border: 0;
+    background: transparent;
+    color: white;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    padding: 0.3rem;
+    border-radius: var(--gaga-radius-sm);
+  }
+
+  .gaga-media-video__btn:hover {
+    color: var(--gaga-blue);
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  .gaga-media-video__time {
+    color: rgba(255, 255, 255, 0.85);
+    font-family: var(--gaga-font-mono);
+    font-size: 0.8rem;
+  }
+
+  .gaga-media-video__caption {
+    margin-top: 0.6rem;
+    font-size: 0.85rem;
+    color: var(--gaga-muted);
+  }
+
+  .gaga-media-video__caption-title {
+    font-weight: 600;
+    color: var(--gaga-ink);
+  }
+</style>

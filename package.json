@@ -8,10 +8,11 @@
     "node": ">=22.19.0"
   },
   "scripts": {
-    "dev": "astro dev",
+    "dev": "astro dev --host 0.0.0.0 --port 3000",
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
+    "lint": "astro check",
     "verify": "npm run validate:signature && npm run check && npm run build",
     "review": "./run_local.command",
     "validate:signature": "node tools/validate-signature.mjs"

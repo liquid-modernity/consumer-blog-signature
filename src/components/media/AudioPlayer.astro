@@ -1,0 +1,333 @@
+---
+import Icon from '../ui/Icon.astro';
+
+interface Props {
+  src?: string;
+  title: string;
+  author?: string;
+  duration?: string;
+  id?: string;
+}
+
+const {
+  src,
+  title,
+  author = 'Editorial Voice',
+  duration = '06:45',
+  id = `audio-${Math.random().toString(36).substring(2, 9)}`
+} = Astro.props;
+---
+<section class="gaga-media-audio" data-gaga-media="audio" id={id} aria-label={title} tabindex="0">
+  {src && (
+    <audio data-gaga-audio-element preload="metadata">
+      <source src={src} type="audio/mpeg" />
+    </audio>
+  )}
+
+  <div class="gaga-media-audio__head">
+    <div class="gaga-media-audio__lead">
+      <span class="gaga-media-audio__kicker">AUDIO NARRATION</span>
+      <h3 class="gaga-media-audio__title">{title}</h3>
+      <span class="gaga-media-audio__author">Read by {author}</span>
+    </div>
+
+    <div class="gaga-media-audio__speed">
+      <button type="button" class="gaga-media-audio__speed-btn" data-gaga-audio-speed aria-label="Playback speed: 1.0x">
+        1.0x
+      </button>
+    </div>
+  </div>
+
+  <div class="gaga-media-audio__scrubber">
+    <div
+      class="gaga-media-audio__track"
+      data-gaga-audio-track
+      role="slider"
+      aria-label="Audio progress slider"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      aria-valuenow="0"
+      tabindex="0"
+    >
+      <div class="gaga-media-audio__fill" data-gaga-audio-fill style="width: 0%;"></div>
+    </div>
+    <div class="gaga-media-audio__time-row">
+      <span class="gaga-media-audio__time" data-gaga-audio-current>0:00</span>
+      <span class="gaga-media-audio__time" data-gaga-audio-total>{duration}</span>
+    </div>
+  </div>
+
+  <div class="gaga-media-audio__controls">
+    <button
+      type="button"
+      class="gaga-media-audio__skip-btn"
+      data-gaga-audio-rewind
+      aria-label="Rewind 15 seconds"
+      data-gaga-tooltip="-15s"
+    >
+      <Icon name="arrow_back" />
+    </button>
+
+    <button
+      type="button"
+      class="gaga-media-audio__play-btn"
+      data-gaga-audio-play
+      aria-label="Play audio"
+    >
+      <span class="gaga-media-audio__play-icon" data-gaga-audio-play-icon>
+        <Icon name="volume" />
+      </span>
+      <span class="gaga-media-audio__play-label" data-gaga-audio-play-text>Play</span>
+    </button>
+
+    <button
+      type="button"
+      class="gaga-media-audio__skip-btn"
+      data-gaga-audio-forward
+      aria-label="Forward 15 seconds"
+      data-gaga-tooltip="+15s"
+    >
+      <Icon name="chevron_right" />
+    </button>
+  </div>
+</section>
+
+<script>
+  function setupAudioPlayers() {
+    document.querySelectorAll<HTMLElement>('[data-gaga-media="audio"]').forEach((player) => {
+      if (player.dataset.wired) return;
+      player.dataset.wired = 'true';
+
+      const audio = player.querySelector<HTMLAudioElement>('[data-gaga-audio-element]');
+      const playBtn = player.querySelector<HTMLButtonElement>('[data-gaga-audio-play]');
+      const playText = player.querySelector<HTMLElement>('[data-gaga-audio-play-text]');
+      const track = player.querySelector<HTMLElement>('[data-gaga-audio-track]');
+      const fill = player.querySelector<HTMLElement>('[data-gaga-audio-fill]');
+      const currentTimeEl = player.querySelector<HTMLElement>('[data-gaga-audio-current]');
+      const speedBtn = player.querySelector<HTMLButtonElement>('[data-gaga-audio-speed]');
+      const rewindBtn = player.querySelector<HTMLButtonElement>('[data-gaga-audio-rewind]');
+      const forwardBtn = player.querySelector<HTMLButtonElement>('[data-gaga-audio-forward]');
+
+      let isPlaying = false;
+      let simTimer: number | undefined;
+      let simSeconds = 0;
+      const speeds = [1.0, 1.25, 1.5, 2.0];
+      let speedIndex = 0;
+
+      function togglePlay() {
+        if (audio) {
+          if (audio.paused) {
+            audio.play();
+            isPlaying = true;
+          } else {
+            audio.pause();
+            isPlaying = false;
+          }
+        } else {
+          isPlaying = !isPlaying;
+          if (isPlaying) {
+            simTimer = window.setInterval(() => {
+              simSeconds += 1;
+              if (simSeconds > 405) simSeconds = 0;
+              const pct = (simSeconds / 405) * 100;
+              if (fill) fill.style.width = `${pct}%`;
+              if (currentTimeEl) {
+                const m = Math.floor(simSeconds / 60);
+                const s = (simSeconds % 60).toString().padStart(2, '0');
+                currentTimeEl.textContent = `${m}:${s}`;
+              }
+            }, 1000 / speeds[speedIndex]);
+          } else {
+            clearInterval(simTimer);
+          }
+        }
+
+        player.classList.toggle('gaga-is-playing', isPlaying);
+        if (playText) playText.textContent = isPlaying ? 'Pause' : 'Play';
+      }
+
+      playBtn?.addEventListener('click', togglePlay);
+
+      speedBtn?.addEventListener('click', () => {
+        speedIndex = (speedIndex + 1) % speeds.length;
+        const currentSpeed = speeds[speedIndex];
+        if (speedBtn) speedBtn.textContent = `${currentSpeed.toFixed(1)}x`;
+        if (audio) audio.playbackRate = currentSpeed;
+      });
+
+      rewindBtn?.addEventListener('click', () => {
+        if (audio) audio.currentTime = Math.max(0, audio.currentTime - 15);
+        else simSeconds = Math.max(0, simSeconds - 15);
+      });
+
+      forwardBtn?.addEventListener('click', () => {
+        if (audio) audio.currentTime = Math.min(audio.duration || 405, audio.currentTime + 15);
+        else simSeconds = Math.min(405, simSeconds + 15);
+      });
+
+      track?.addEventListener('click', (e) => {
+        const rect = track.getBoundingClientRect();
+        const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+        if (audio && audio.duration) {
+          audio.currentTime = pct * audio.duration;
+        } else {
+          simSeconds = Math.floor(pct * 405);
+          if (fill) fill.style.width = `${pct * 100}%`;
+        }
+      });
+
+      player.addEventListener('keydown', (e) => {
+        if (e.key === ' ') {
+          e.preventDefault();
+          togglePlay();
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          rewindBtn?.click();
+        } else if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          forwardBtn?.click();
+        }
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupAudioPlayers);
+  } else {
+    setupAudioPlayers();
+  }
+</script>
+
+<style>
+  .gaga-media-audio {
+    margin: 2rem 0;
+    width: 100%;
+    padding: 1.25rem 1.5rem;
+    border-radius: var(--gaga-radius-md);
+    background: var(--gaga-surface);
+    border: 1px solid var(--gaga-line);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    outline: none;
+  }
+
+  .gaga-media-audio:focus-visible {
+    border-color: var(--gaga-blue);
+  }
+
+  .gaga-media-audio__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+  }
+
+  .gaga-media-audio__kicker {
+    font-family: var(--gaga-font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    color: var(--gaga-blue);
+    font-weight: 700;
+  }
+
+  .gaga-media-audio__title {
+    margin: 0.2rem 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--gaga-ink);
+  }
+
+  .gaga-media-audio__author {
+    font-size: 0.85rem;
+    color: var(--gaga-muted);
+  }
+
+  .gaga-media-audio__speed-btn {
+    border: 1px solid var(--gaga-line);
+    background: var(--gaga-surface-subtle);
+    color: var(--gaga-ink);
+    font-family: var(--gaga-font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.3rem 0.6rem;
+    border-radius: var(--gaga-radius-sm);
+    cursor: pointer;
+  }
+
+  .gaga-media-audio__speed-btn:hover {
+    border-color: var(--gaga-blue);
+    color: var(--gaga-blue);
+  }
+
+  .gaga-media-audio__scrubber {
+    margin-bottom: 1rem;
+  }
+
+  .gaga-media-audio__track {
+    width: 100%;
+    height: 6px;
+    background: var(--gaga-surface-subtle);
+    border-radius: 3px;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .gaga-media-audio__fill {
+    height: 100%;
+    background: var(--gaga-blue);
+    border-radius: 3px;
+    transition: width 0.1s linear;
+  }
+
+  .gaga-media-audio__time-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.4rem;
+  }
+
+  .gaga-media-audio__time {
+    font-family: var(--gaga-font-mono);
+    font-size: 0.75rem;
+    color: var(--gaga-muted);
+  }
+
+  .gaga-media-audio__controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem;
+  }
+
+  .gaga-media-audio__play-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.4rem;
+    border-radius: 999px;
+    background: var(--gaga-blue);
+    color: var(--gaga-bg);
+    border: 0;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s ease, opacity 0.15s ease;
+  }
+
+  .gaga-media-audio__play-btn:hover {
+    transform: scale(1.04);
+  }
+
+  .gaga-media-audio__skip-btn {
+    border: 0;
+    background: transparent;
+    color: var(--gaga-muted);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    padding: 0.4rem;
+    border-radius: var(--gaga-radius-sm);
+  }
+
+  .gaga-media-audio__skip-btn:hover {
+    color: var(--gaga-ink);
+    background: var(--gaga-blue-soft);
+  }
+</style>

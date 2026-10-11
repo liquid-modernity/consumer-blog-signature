@@ -1,7 +1,7 @@
 import type { LayoutMode, LeftRailState, RightRailState } from '../lib/schema';
 
 export type RailPreference = 'expanded' | 'collapsed';
-export const defaultRailPreference: RailPreference = 'expanded';
+export const defaultRailPreference: RailPreference = 'collapsed';
 
 // SITE composition: responsive shell inventory and surface availability.
 export const responsiveShellConfig = {
@@ -30,7 +30,7 @@ export const responsiveShellConfig = {
         mobile: 'hidden',
         'tablet-mini': 'hidden',
         'tablet-large': 'collapsed',
-        desktop: 'expanded'
+        desktop: 'collapsed'
       }
     },
     rightRail: {
@@ -38,7 +38,7 @@ export const responsiveShellConfig = {
         mobile: 'detached',
         'tablet-mini': 'detached',
         'tablet-large': 'collapsed',
-        desktop: 'expanded'
+        desktop: 'collapsed'
       }
     }
   }

@@ -5,6 +5,10 @@ import { toStarlightSidebar } from './src/config/nav.ts';
 import { remarkObsidianBridge } from './src/lib/remark-obsidian.mjs';
 
 export default defineConfig({
+  server: {
+    host: '0.0.0.0',
+    port: 3000
+  },
   site: process.env.PUBLIC_SITE_URL || 'https://example.com',
   trailingSlash: 'never',
   markdown: {

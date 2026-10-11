@@ -340,6 +340,44 @@
   overflow: visible;
 }
 
+.gaga-left-rail[data-gaga-state='collapsed'][data-gaga-hover-expanded='true'] {
+  width: var(--gaga-left-rail-width);
+  z-index: calc(var(--gaga-z-rail) + 6);
+  box-shadow: var(--gaga-shadow);
+
+  .gaga-brand,
+  .gaga-search-box__label,
+  .gaga-search-box__kbd,
+  .gaga-nav-label,
+  .gaga-nav-disclosure,
+  .gaga-nav-group__details {
+    display: revert;
+  }
+
+  .gaga-left-rail__brand {
+    justify-content: space-between;
+    padding-inline: .75rem;
+  }
+
+  .gaga-search-box {
+    display: grid;
+    grid-template-columns: var(--gaga-rail-icon-column) minmax(0, 1fr) auto;
+    background: var(--gaga-surface-subtle, var(--gaga-surface-2));
+    padding: 0 .8rem 0 0;
+    margin: 0.5rem 0.5rem;
+  }
+
+  .gaga-nav-item,
+  .gaga-nav-group__summary {
+    display: flex;
+    justify-content: flex-start;
+  }
+
+  .gaga-left-rail__nav {
+    overflow: auto;
+  }
+}
+
 .gaga-rail-scrim {
   display: none;
 }

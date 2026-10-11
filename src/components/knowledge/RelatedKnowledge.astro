@@ -1,0 +1,373 @@
+---
+import Icon from '../ui/Icon.astro';
+
+interface RelatedArticle {
+  title: string;
+  href: string;
+  readTime?: string;
+  description?: string;
+}
+
+interface SourceItem {
+  name: string;
+  type: string;
+  href?: string;
+}
+
+interface Props {
+  topics?: Array<{ label: string; href: string; count?: number }>;
+  author?: {
+    name: string;
+    role?: string;
+    href: string;
+    bio?: string;
+  };
+  sources?: SourceItem[];
+  relatedArticles?: RelatedArticle[];
+  graphNodeId?: string;
+}
+
+const {
+  topics = [
+    { label: 'Reader Experience', href: '/topics/experience', count: 12 },
+    { label: 'Publishing Architecture', href: '/topics/publishing', count: 8 }
+  ],
+  author = {
+    name: 'Editorial Team',
+    role: 'Core Publishing Architecture',
+    href: '/authors/editorial-team',
+    bio: 'Curating modern digital knowledge systems, ergonomic publishing patterns, and contextual reader surfaces.'
+  },
+  sources = [
+    { name: 'Starlight Architecture Specification', type: 'Framework Spec', href: '/library' },
+    { name: 'Gaga Engine Runtime Contract', type: 'Kernel Contract', href: '/about' }
+  ],
+  relatedArticles = [
+    {
+      title: 'Softcoded Systems Scale Better Than Theme Forks',
+      href: '/softcoded-systems-scale-better-than-theme-forks',
+      readTime: '5 min read',
+      description: 'Why configuration and semantic tokens outlast hardcoded component rewrites.'
+    },
+    {
+      title: 'Designing a Context-Aware Reading Surface',
+      href: '/designing-context-aware-reading-surface',
+      readTime: '6 min read',
+      description: 'Separating stable global action anchors from content-adaptive sidebars.'
+    }
+  ],
+  graphNodeId
+} = Astro.props;
+---
+<section class="gaga-related-knowledge" data-gaga-knowledge="explorer" aria-labelledby="gaga-knowledge-heading">
+  <div class="gaga-related-knowledge__header">
+    <div class="gaga-related-knowledge__eyebrow">
+      <span class="gaga-related-knowledge__kicker">SEMANTIC RELATIONSHIPS</span>
+      <h2 id="gaga-knowledge-heading" class="gaga-related-knowledge__title">Related Knowledge & Graph Context</h2>
+    </div>
+    <a href={graphNodeId ? `/graphs?focus=${graphNodeId}` : '/graphs'} class="gaga-related-knowledge__graph-cta">
+      <Icon name="graphs" />
+      <span>Explore Knowledge Graph</span>
+    </a>
+  </div>
+
+  <div class="gaga-related-knowledge__grid">
+    <!-- Topics -->
+    <div class="gaga-related-knowledge__card">
+      <div class="gaga-related-knowledge__card-head">
+        <Icon name="topics" />
+        <h3>Connected Topics</h3>
+      </div>
+      <ul class="gaga-related-knowledge__topics-list">
+        {topics.map((t) => (
+          <li>
+            <a href={t.href} class="gaga-related-knowledge__topic-item">
+              <span class="gaga-related-knowledge__topic-name">{t.label}</span>
+              {t.count && <span class="gaga-related-knowledge__topic-count">{t.count} items</span>}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <!-- Author Profile -->
+    <div class="gaga-related-knowledge__card">
+      <div class="gaga-related-knowledge__card-head">
+        <Icon name="author" />
+        <h3>Author & Provenance</h3>
+      </div>
+      <div class="gaga-related-knowledge__author-box">
+        <div class="gaga-related-knowledge__author-avatar">
+          <Icon name="person" />
+        </div>
+        <div class="gaga-related-knowledge__author-body">
+          <a href={author.href} class="gaga-related-knowledge__author-name">{author.name}</a>
+          {author.role && <span class="gaga-related-knowledge__author-role">{author.role}</span>}
+          {author.bio && <p class="gaga-related-knowledge__author-bio">{author.bio}</p>}
+        </div>
+      </div>
+    </div>
+
+    <!-- Sources & Evidence -->
+    <div class="gaga-related-knowledge__card">
+      <div class="gaga-related-knowledge__card-head">
+        <Icon name="shield" />
+        <h3>Sources & References</h3>
+      </div>
+      <ul class="gaga-related-knowledge__sources-list">
+        {sources.map((s) => (
+          <li>
+            <a href={s.href || '#'} class="gaga-related-knowledge__source-item">
+              <span class="gaga-related-knowledge__source-name">{s.name}</span>
+              <span class="gaga-related-knowledge__source-type">{s.type}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <!-- Related Articles -->
+    <div class="gaga-related-knowledge__card gaga-related-knowledge__card--full">
+      <div class="gaga-related-knowledge__card-head">
+        <Icon name="article" />
+        <h3>Connected Reading Pathways</h3>
+      </div>
+      <div class="gaga-related-knowledge__articles-grid">
+        {relatedArticles.map((art) => (
+          <a href={art.href} class="gaga-related-knowledge__article-card">
+            <div class="gaga-related-knowledge__article-meta">
+              <span>Next in pathway</span>
+              {art.readTime && <span>· {art.readTime}</span>}
+            </div>
+            <h4 class="gaga-related-knowledge__article-title">{art.title}</h4>
+            {art.description && <p class="gaga-related-knowledge__article-desc">{art.description}</p>}
+          </a>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .gaga-related-knowledge {
+    margin: 3.5rem 0 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--gaga-line);
+  }
+
+  .gaga-related-knowledge__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .gaga-related-knowledge__kicker {
+    font-family: var(--gaga-font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    color: var(--gaga-blue);
+    font-weight: 700;
+  }
+
+  .gaga-related-knowledge__title {
+    margin: 0.2rem 0 0;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--gaga-ink);
+  }
+
+  .gaga-related-knowledge__graph-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: var(--gaga-radius-sm);
+    background: var(--gaga-surface-subtle);
+    border: 1px solid var(--gaga-line);
+    color: var(--gaga-ink);
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.15s ease;
+  }
+
+  .gaga-related-knowledge__graph-cta:hover {
+    background: var(--gaga-blue);
+    color: var(--gaga-bg);
+    border-color: var(--gaga-blue);
+  }
+
+  .gaga-related-knowledge__grid {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 1.25rem;
+  }
+
+  @media (min-width: 768px) {
+    .gaga-related-knowledge__grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .gaga-related-knowledge__card {
+    background: var(--gaga-surface);
+    border: 1px solid var(--gaga-line);
+    border-radius: var(--gaga-radius-md);
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .gaga-related-knowledge__card--full {
+    grid-column: 1 / -1;
+  }
+
+  .gaga-related-knowledge__card-head {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--gaga-blue);
+    margin-bottom: 0.8rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--gaga-line);
+  }
+
+  .gaga-related-knowledge__card-head h3 {
+    margin: 0;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--gaga-ink);
+  }
+
+  .gaga-related-knowledge__topics-list,
+  .gaga-related-knowledge__sources-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .gaga-related-knowledge__topic-item,
+  .gaga-related-knowledge__source-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.45rem 0.6rem;
+    border-radius: var(--gaga-radius-sm);
+    text-decoration: none;
+    background: var(--gaga-surface-subtle);
+    color: var(--gaga-ink);
+    font-size: 0.85rem;
+    transition: background 0.15s ease;
+  }
+
+  .gaga-related-knowledge__topic-item:hover,
+  .gaga-related-knowledge__source-item:hover {
+    background: var(--gaga-blue-soft);
+    color: var(--gaga-blue);
+  }
+
+  .gaga-related-knowledge__topic-count,
+  .gaga-related-knowledge__source-type {
+    font-family: var(--gaga-font-mono);
+    font-size: 0.72rem;
+    color: var(--gaga-muted);
+  }
+
+  .gaga-related-knowledge__author-box {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+
+  .gaga-related-knowledge__author-avatar {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: var(--gaga-surface-subtle);
+    border: 1px solid var(--gaga-line);
+    display: grid;
+    place-items: center;
+    color: var(--gaga-muted);
+    flex-shrink: 0;
+  }
+
+  .gaga-related-knowledge__author-name {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--gaga-ink);
+    text-decoration: none;
+    display: block;
+  }
+
+  .gaga-related-knowledge__author-name:hover {
+    color: var(--gaga-blue);
+  }
+
+  .gaga-related-knowledge__author-role {
+    font-family: var(--gaga-font-mono);
+    font-size: 0.72rem;
+    color: var(--gaga-muted);
+    display: block;
+  }
+
+  .gaga-related-knowledge__author-bio {
+    margin: 0.4rem 0 0;
+    font-size: 0.82rem;
+    color: var(--gaga-muted);
+    line-height: 1.4;
+  }
+
+  .gaga-related-knowledge__articles-grid {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .gaga-related-knowledge__articles-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .gaga-related-knowledge__article-card {
+    padding: 1rem;
+    border-radius: var(--gaga-radius-sm);
+    background: var(--gaga-surface-subtle);
+    border: 1px solid var(--gaga-line);
+    text-decoration: none;
+    color: var(--gaga-ink);
+    transition: all 0.15s ease;
+  }
+
+  .gaga-related-knowledge__article-card:hover {
+    border-color: var(--gaga-blue);
+    transform: translateY(-2px);
+  }
+
+  .gaga-related-knowledge__article-meta {
+    font-family: var(--gaga-font-mono);
+    font-size: 0.72rem;
+    color: var(--gaga-muted);
+    margin-bottom: 0.35rem;
+  }
+
+  .gaga-related-knowledge__article-title {
+    margin: 0 0 0.35rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--gaga-ink);
+  }
+
+  .gaga-related-knowledge__article-desc {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--gaga-muted);
+    line-height: 1.45;
+  }
+</style>

@@ -124,6 +124,22 @@
   display: none;
 }
 
+.gaga-right-rail[data-gaga-state='collapsed'][data-gaga-hover-expanded='true'] {
+  width: var(--gaga-right-rail-width);
+  z-index: calc(var(--gaga-z-rail) + 6);
+  box-shadow: var(--gaga-shadow);
+
+  .gaga-right-rail__body,
+  .gaga-right-rail__foot,
+  .gaga-right-rail__head p {
+    display: revert;
+  }
+
+  .gaga-right-rail__cta {
+    display: block;
+  }
+}
+
 .gaga-context-surface__close,
 .gaga-context-surface__scrim {
   display: none;

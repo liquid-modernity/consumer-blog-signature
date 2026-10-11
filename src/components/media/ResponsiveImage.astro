@@ -1,0 +1,315 @@
+---
+import Icon from '../ui/Icon.astro';
+
+interface Props {
+  src?: string;
+  alt: string;
+  caption?: string;
+  credit?: string;
+  aspectRatio?: '16/9' | '4/3' | '1/1' | '21/9' | 'auto';
+  layout?: 'inline' | 'wide' | 'bleed';
+  id?: string;
+}
+
+const {
+  src,
+  alt,
+  caption,
+  credit,
+  aspectRatio = '16/9',
+  layout = 'inline',
+  id = `media-img-${Math.random().toString(36).substring(2, 9)}`
+} = Astro.props;
+---
+<figure class={`gaga-media-image gaga-media-image--${layout}`} data-gaga-media="image" id={id}>
+  <div class="gaga-media-image__wrapper" style={`--aspect-ratio: ${aspectRatio};`}>
+    {src ? (
+      <img
+        src={src}
+        alt={alt}
+        loading="lazy"
+        decoding="async"
+        referrerpolicy="no-referrer"
+        class="gaga-media-image__element"
+      />
+    ) : (
+      <div class="gaga-media-image__fallback" role="img" aria-label={alt}>
+        <div class="gaga-media-image__fallback-mesh"></div>
+        <div class="gaga-media-image__fallback-content">
+          <Icon name="article" />
+          <span class="gaga-media-image__fallback-title">{alt}</span>
+        </div>
+      </div>
+    )}
+    <button
+      class="gaga-media-image__zoom-btn"
+      type="button"
+      aria-label="Expand image to fullscreen"
+      data-gaga-media-fullscreen
+      data-gaga-tooltip="Fullscreen"
+    >
+      <Icon name="width_full" />
+    </button>
+  </div>
+  {(caption || credit) && (
+    <figcaption class="gaga-media-image__caption">
+      {caption && <span class="gaga-media-image__caption-text">{caption}</span>}
+      {credit && <span class="gaga-media-image__credit">— {credit}</span>}
+    </figcaption>
+  )}
+
+  <!-- Fullscreen Modal Lightbox -->
+  <dialog class="gaga-media-dialog" data-gaga-media-dialog aria-label={alt}>
+    <div class="gaga-media-dialog__backdrop" data-gaga-media-dialog-close></div>
+    <div class="gaga-media-dialog__content">
+      <div class="gaga-media-dialog__body">
+        {src ? (
+          <img src={src} alt={alt} class="gaga-media-dialog__img" />
+        ) : (
+          <div class="gaga-media-dialog__fallback">
+            <Icon name="article" />
+            <p>{alt}</p>
+          </div>
+        )}
+      </div>
+      <div class="gaga-media-dialog__footer">
+        <p class="gaga-media-dialog__caption">{caption || alt}</p>
+        <button type="button" class="gaga-media-dialog__close" data-gaga-media-dialog-close aria-label="Close fullscreen">
+          <Icon name="close" />
+        </button>
+      </div>
+    </div>
+  </dialog>
+</figure>
+
+<script>
+  function setupResponsiveImages() {
+    document.querySelectorAll<HTMLElement>('[data-gaga-media="image"]').forEach((fig) => {
+      if (fig.dataset.wired) return;
+      fig.dataset.wired = 'true';
+      const zoomBtn = fig.querySelector<HTMLButtonElement>('[data-gaga-media-fullscreen]');
+      const dialog = fig.querySelector<HTMLDialogElement>('[data-gaga-media-dialog]');
+      const closeBtns = fig.querySelectorAll('[data-gaga-media-dialog-close]');
+
+      zoomBtn?.addEventListener('click', () => {
+        dialog?.showModal();
+      });
+
+      closeBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          dialog?.close();
+        });
+      });
+
+      dialog?.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') dialog.close();
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupResponsiveImages);
+  } else {
+    setupResponsiveImages();
+  }
+</script>
+
+<style>
+  .gaga-media-image {
+    margin: 2rem 0;
+    width: 100%;
+  }
+
+  .gaga-media-image--wide {
+    width: min(100vw - 4rem, calc(var(--gaga-content-width) + 12rem));
+    margin-inline: auto;
+    position: relative;
+  }
+
+  .gaga-media-image--bleed {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .gaga-media-image__wrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: var(--aspect-ratio, 16/9);
+    border-radius: var(--gaga-radius-md);
+    overflow: hidden;
+    background: var(--gaga-surface-subtle);
+    border: 1px solid var(--gaga-line);
+  }
+
+  .gaga-media-image__element {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .gaga-media-image__fallback {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    position: relative;
+    background: linear-gradient(135deg, var(--gaga-surface-subtle) 0%, var(--gaga-surface-elevated) 100%);
+  }
+
+  .gaga-media-image__fallback-mesh {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(var(--gaga-line) 1px, transparent 1px);
+    background-size: 20px 20px;
+    opacity: 0.4;
+  }
+
+  .gaga-media-image__fallback-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--gaga-muted);
+    padding: 1.5rem;
+    text-align: center;
+  }
+
+  .gaga-media-image__fallback-title {
+    font-size: var(--gaga-type-label-size);
+    font-family: var(--gaga-font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    max-width: 24rem;
+  }
+
+  .gaga-media-image__zoom-btn {
+    position: absolute;
+    inset-block-end: 0.75rem;
+    inset-inline-end: 0.75rem;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: var(--gaga-radius-sm);
+    background: color-mix(in srgb, var(--gaga-bg) 80%, transparent);
+    backdrop-filter: blur(8px);
+    color: var(--gaga-ink);
+    border: 1px solid var(--gaga-line);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.15s ease, background 0.15s ease;
+  }
+
+  .gaga-media-image__wrapper:hover .gaga-media-image__zoom-btn,
+  .gaga-media-image__zoom-btn:focus-visible {
+    opacity: 1;
+  }
+
+  .gaga-media-image__zoom-btn:hover {
+    background: var(--gaga-blue);
+    color: var(--gaga-bg);
+  }
+
+  .gaga-media-image__caption {
+    margin-top: 0.6rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: baseline;
+    font-size: var(--gaga-type-caption-size);
+    color: var(--gaga-muted);
+    line-height: var(--gaga-type-caption-line-height);
+  }
+
+  .gaga-media-image__caption-text {
+    font-style: italic;
+  }
+
+  .gaga-media-image__credit {
+    font-family: var(--gaga-font-mono);
+    font-size: 0.72rem;
+  }
+
+  /* Dialog Lightbox */
+  .gaga-media-dialog {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    max-width: 95vw;
+    max-height: 95vh;
+    border-radius: var(--gaga-radius-md);
+    overflow: hidden;
+  }
+
+  .gaga-media-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(10px);
+  }
+
+  .gaga-media-dialog__backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+  }
+
+  .gaga-media-dialog__content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    background: var(--gaga-surface-elevated);
+    border: 1px solid var(--gaga-line-strong);
+    border-radius: var(--gaga-radius-md);
+    overflow: hidden;
+  }
+
+  .gaga-media-dialog__body {
+    max-width: 90vw;
+    max-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: black;
+  }
+
+  .gaga-media-dialog__img {
+    max-width: 100%;
+    max-height: 80vh;
+    object-fit: contain;
+  }
+
+  .gaga-media-dialog__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.8rem 1.2rem;
+    background: var(--gaga-surface);
+    border-top: 1px solid var(--gaga-line);
+  }
+
+  .gaga-media-dialog__caption {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--gaga-ink);
+  }
+
+  .gaga-media-dialog__close {
+    border: 0;
+    background: transparent;
+    color: var(--gaga-muted);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    padding: 0.35rem;
+    border-radius: var(--gaga-radius-sm);
+  }
+
+  .gaga-media-dialog__close:hover {
+    color: var(--gaga-ink);
+    background: var(--gaga-blue-soft);
+  }
+</style>

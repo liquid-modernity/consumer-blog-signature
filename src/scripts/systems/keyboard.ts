@@ -63,7 +63,21 @@ export function initKeyboard() {
   if (initialized) return;
   initialized = true;
   document.addEventListener('keydown', (event) => {
-    handleGraphNodeKeydown(event);
+    if (handleGraphNodeKeydown(event)) return;
+
+    // Check if target is editable
+    const target = event.target as HTMLElement;
+    if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+      return;
+    }
+
+    if (event.key === '[' && !event.metaKey && !event.ctrlKey) {
+      event.preventDefault();
+      runSiteCommand('toggle-left-rail', { source: 'keyboard' });
+    } else if (event.key === ']' && !event.metaKey && !event.ctrlKey) {
+      event.preventDefault();
+      runSiteCommand('toggle-right-rail', { source: 'keyboard' });
+    }
   });
 
   createKeyboardCapability<GagaAction>({

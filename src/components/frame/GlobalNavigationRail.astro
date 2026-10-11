@@ -1,7 +1,9 @@
 ---
 import Icon from '../ui/Icon.astro';
 import { normalizeSitePath } from '../../lib/url-semantics';
+
 const currentPath = normalizeSitePath(Astro.url.pathname);
+
 const items = [
   { id: 'home', label: 'Home', href: '/', icon: 'home' },
   { id: 'search', label: 'Search', href: '/search', icon: 'search' },
@@ -9,18 +11,156 @@ const items = [
   { id: 'library', label: 'Library', href: '/library', icon: 'bookmark' },
   { id: 'archive', label: 'Archive', href: '/archive', icon: 'inventory_2' }
 ];
+
+const infoLinks = [
+  { id: 'about', label: 'About', href: '/about', icon: 'article', desc: 'Editorial mission & vision' },
+  { id: 'support', label: 'Support', href: '/support', icon: 'help', desc: 'Reader help & assistance' },
+  { id: 'authors', label: 'Authors', href: '/authors', icon: 'person', desc: 'Contributors & team' },
+  { id: 'legal', label: 'Legal', href: '/disclaimer', icon: 'policy', desc: 'Disclaimers & disclosures' },
+  { id: 'privacy', label: 'Privacy', href: '/privacy', icon: 'shield', desc: 'Data & confidentiality' },
+  { id: 'terms', label: 'Terms', href: '/terms', icon: 'contract', desc: 'Conditions of use' },
+  { id: 'sitemap', label: 'Sitemap', href: '/sitemap', icon: 'lan', desc: 'Taxonomy & structure' },
+  { id: 'rss', label: 'RSS Feed', href: '/rss', icon: 'rss_feed', desc: 'Syndication feeds' }
+];
+
 const isCurrent = (href: string) => href === '/' ? currentPath === '/' : currentPath === href || currentPath.startsWith(`${href}/`);
+const isInfoActive = infoLinks.some((l) => isCurrent(l.href));
 ---
 <nav class="gaga-global-nav" data-gaga-global-nav aria-label="Global navigation">
   <a class="gaga-global-nav__brand" href="/landing" aria-label="Consumer Blog Signature" data-gaga-tooltip="Signature">G</a>
   <div class="gaga-global-nav__items">
     {items.map((item) => (
-      <a class="gaga-global-nav__item" href={item.href} aria-label={item.label} aria-current={isCurrent(item.href) ? 'page' : undefined} data-gaga-tooltip={item.label}>
+      <a
+        class="gaga-global-nav__item"
+        href={item.href}
+        aria-label={item.label}
+        aria-current={isCurrent(item.href) ? 'page' : undefined}
+        data-gaga-tooltip={item.label}
+      >
         <Icon name={item.icon} />
       </a>
     ))}
+
+    <div class="gaga-global-nav__info-wrapper" data-gaga-info-wrapper>
+      <button
+        class={`gaga-global-nav__item gaga-global-nav__info-trigger ${isInfoActive ? 'gaga-is-current' : ''}`}
+        type="button"
+        aria-label="Information"
+        aria-expanded="false"
+        aria-haspopup="dialog"
+        data-gaga-info-trigger
+        data-gaga-tooltip="Information"
+      >
+        <Icon name="info" />
+      </button>
+
+      <!-- Contextual surface for Information -->
+      <div
+        class="gaga-global-nav__info-flyout"
+        role="dialog"
+        aria-label="Information & Publication Surface"
+        data-gaga-info-flyout
+        hidden
+      >
+        <div class="gaga-global-nav__info-head">
+          <div>
+            <span class="gaga-global-nav__info-kicker">KNOWLEDGE & POLICIES</span>
+            <h3 class="gaga-global-nav__info-title">Information</h3>
+          </div>
+          <button
+            class="gaga-global-nav__info-close"
+            type="button"
+            aria-label="Close information"
+            data-gaga-info-close
+          >
+            <Icon name="close" />
+          </button>
+        </div>
+        <div class="gaga-global-nav__info-grid">
+          {infoLinks.map((link) => (
+            <a
+              href={link.href}
+              class={`gaga-global-nav__info-link ${isCurrent(link.href) ? 'gaga-is-current' : ''}`}
+            >
+              <div class="gaga-global-nav__info-link-icon">
+                <Icon name={link.icon} />
+              </div>
+              <div class="gaga-global-nav__info-link-body">
+                <span class="gaga-global-nav__info-link-label">{link.label}</span>
+                <span class="gaga-global-nav__info-link-desc">{link.desc}</span>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
   </div>
-  <button class="gaga-global-nav__item gaga-global-nav__settings" type="button" aria-label="Personalize" data-gaga-action="toggle-reader-preferences" data-gaga-tooltip="Personalize">
+
+  <button
+    class="gaga-global-nav__item gaga-global-nav__settings"
+    type="button"
+    aria-label="Personalize"
+    data-gaga-action="toggle-reader-preferences"
+    data-gaga-tooltip="Personalize"
+  >
     <Icon name="settings" />
   </button>
 </nav>
+
+<script>
+  // Interactive behaviour for Information contextual surface
+  function setupInfoSurface() {
+    const trigger = document.querySelector<HTMLButtonElement>('[data-gaga-info-trigger]');
+    const flyout = document.querySelector<HTMLElement>('[data-gaga-info-flyout]');
+    const closeBtn = document.querySelector<HTMLButtonElement>('[data-gaga-info-close]');
+    if (!trigger || !flyout) return;
+
+    function openFlyout() {
+      if (!flyout || !trigger) return;
+      flyout.removeAttribute('hidden');
+      trigger.setAttribute('aria-expanded', 'true');
+    }
+
+    function closeFlyout() {
+      if (!flyout || !trigger) return;
+      flyout.setAttribute('hidden', '');
+      trigger.setAttribute('aria-expanded', 'false');
+    }
+
+    function toggleFlyout(e: Event) {
+      e.stopPropagation();
+      if (!flyout) return;
+      if (flyout.hasAttribute('hidden')) {
+        openFlyout();
+      } else {
+        closeFlyout();
+      }
+    }
+
+    trigger.addEventListener('click', toggleFlyout);
+    closeBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      closeFlyout();
+    });
+
+    document.addEventListener('click', (e) => {
+      const target = e.target as Node;
+      if (!flyout.contains(target) && !trigger.contains(target)) {
+        closeFlyout();
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !flyout.hasAttribute('hidden')) {
+        closeFlyout();
+        trigger.focus();
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupInfoSurface);
+  } else {
+    setupInfoSurface();
+  }
+</script>

@@ -3,6 +3,7 @@ import MobileDock from './MobileDock.astro';
 import GlobalNavigationRail from './GlobalNavigationRail.astro';
 import ReaderPreferences from '../reader/ReaderPreferences.astro';
 import ContextSurfaceTrigger from './ContextSurfaceTrigger.astro';
+import ActionRuntime from './ActionRuntime.astro';
 import SkipLink from '../ui/SkipLink.astro';
 import type { AppShellInput } from './component-inputs';
 import { designContract } from '../../config/design';
@@ -24,6 +25,20 @@ const {
   mainElement = 'main',
   shell
 } = Astro.props;
+
+const showActionRuntime = pageId !== 'landing';
+
+const pathname = Astro.url.pathname;
+let runtimeContext: 'article' | 'archive' | 'graph' | 'topic' | 'default' = 'default';
+if (contentKind === 'article' || contentClass === 'article-flagship' || pathname.includes('/article')) {
+  runtimeContext = 'article';
+} else if (pageId === 'archive' || pathname.includes('/archive')) {
+  runtimeContext = 'archive';
+} else if (pageId === 'graph' || pathname.includes('/graph')) {
+  runtimeContext = 'graph';
+} else if (contentKind === 'topic' || pageId.includes('topic') || pathname.includes('/topics')) {
+  runtimeContext = 'topic';
+}
 ---
 <SkipLink />
 <div
@@ -39,11 +54,13 @@ const {
   <slot name="before-main" />
   {mainElement === 'main' ? (
     <main class="gaga-main-region" data-gaga-main-region>
+      {showActionRuntime && <ActionRuntime context={runtimeContext} />}
       <slot />
       <slot name="after-content" />
     </main>
   ) : (
     <div class="gaga-main-region" data-gaga-main-region>
+      {showActionRuntime && <ActionRuntime context={runtimeContext} />}
       <slot />
       <slot name="after-content" />
     </div>

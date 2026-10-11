@@ -1,0 +1,334 @@
+---
+import Icon from '../ui/Icon.astro';
+
+interface Props {
+  src?: string;
+  title: string;
+  caption?: string;
+  aspectRatio?: '16/9' | '4/3' | '1/1' | '21/9';
+  fallbackUrl?: string;
+  id?: string;
+}
+
+const {
+  src,
+  title,
+  caption,
+  aspectRatio = '16/9',
+  fallbackUrl,
+  id = `embed-${Math.random().toString(36).substring(2, 9)}`
+} = Astro.props;
+---
+<figure class="gaga-media-embed" data-gaga-media="embed" id={id} aria-label={title}>
+  <div class="gaga-media-embed__frame" style={`--aspect-ratio: ${aspectRatio};`}>
+    <div class="gaga-media-embed__toolbar">
+      <span class="gaga-media-embed__title"><Icon name="terminal" /> {title}</span>
+      <div class="gaga-media-embed__actions">
+        {fallbackUrl && (
+          <a href={fallbackUrl} target="_blank" rel="noopener noreferrer" class="gaga-media-embed__btn" aria-label="Open in new window">
+            <Icon name="social" />
+          </a>
+        )}
+        <button type="button" class="gaga-media-embed__btn" data-gaga-embed-fullscreen aria-label="Toggle fullscreen">
+          <Icon name="width_full" />
+        </button>
+      </div>
+    </div>
+
+    <div class="gaga-media-embed__viewport" data-gaga-embed-viewport>
+      {src ? (
+        <iframe
+          src={src}
+          title={title}
+          loading="lazy"
+          sandbox="allow-scripts allow-same-origin allow-popups"
+          class="gaga-media-embed__iframe"
+        ></iframe>
+      ) : (
+        <div class="gaga-media-embed__interactive-sim" data-gaga-embed-sim>
+          <div class="gaga-media-embed__sim-canvas">
+            <div class="gaga-media-embed__sim-header">
+              <span class="gaga-media-embed__sim-dot"></span>
+              <span class="gaga-media-embed__sim-dot"></span>
+              <span class="gaga-media-embed__sim-dot"></span>
+              <span class="gaga-media-embed__sim-label">INTERACTIVE KNOWLEDGE MATRIX</span>
+            </div>
+            <div class="gaga-media-embed__sim-body">
+              <div class="gaga-media-embed__sim-metric">
+                <span class="gaga-media-embed__sim-val" data-gaga-embed-count>1,248</span>
+                <span class="gaga-media-embed__sim-desc">Knowledge Nodes Indexed</span>
+              </div>
+              <div class="gaga-media-embed__sim-bars">
+                <div class="gaga-media-embed__sim-bar" style="height: 65%;"></div>
+                <div class="gaga-media-embed__sim-bar" style="height: 85%;"></div>
+                <div class="gaga-media-embed__sim-bar" style="height: 45%;"></div>
+                <div class="gaga-media-embed__sim-bar" style="height: 95%;"></div>
+                <div class="gaga-media-embed__sim-bar" style="height: 75%;"></div>
+              </div>
+              <button type="button" class="gaga-media-embed__sim-action" data-gaga-embed-sim-btn>
+                Recalibrate Surface
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <!-- Click to interact barrier (prevent scroll capture until clicked) -->
+      <div class="gaga-media-embed__barrier" data-gaga-embed-barrier>
+        <button type="button" class="gaga-media-embed__activate-btn" data-gaga-embed-activate>
+          <Icon name="touch_app" /> Click to Interact
+        </button>
+      </div>
+    </div>
+  </div>
+
+  {caption && (
+    <figcaption class="gaga-media-embed__caption">
+      <span>{caption}</span>
+    </figcaption>
+  )}
+</figure>
+
+<script>
+  function setupEmbeds() {
+    document.querySelectorAll<HTMLElement>('[data-gaga-media="embed"]').forEach((embed) => {
+      if (embed.dataset.wired) return;
+      embed.dataset.wired = 'true';
+
+      const frame = embed.querySelector<HTMLElement>('.gaga-media-embed__frame');
+      const barrier = embed.querySelector<HTMLElement>('[data-gaga-embed-barrier]');
+      const activateBtn = embed.querySelector<HTMLButtonElement>('[data-gaga-embed-activate]');
+      const fsBtn = embed.querySelector<HTMLButtonElement>('[data-gaga-embed-fullscreen]');
+      const simBtn = embed.querySelector<HTMLButtonElement>('[data-gaga-embed-sim-btn]');
+      const countEl = embed.querySelector<HTMLElement>('[data-gaga-embed-count]');
+
+      activateBtn?.addEventListener('click', () => {
+        if (barrier) barrier.style.display = 'none';
+      });
+
+      fsBtn?.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+          frame?.requestFullscreen().catch(() => {});
+        } else {
+          document.exitFullscreen().catch(() => {});
+        }
+      });
+
+      simBtn?.addEventListener('click', () => {
+        if (countEl) {
+          const current = parseInt(countEl.textContent?.replace(/,/g, '') || '1248', 10);
+          countEl.textContent = (current + Math.floor(Math.random() * 42) + 5).toLocaleString();
+        }
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupEmbeds);
+  } else {
+    setupEmbeds();
+  }
+</script>
+
+<style>
+  .gaga-media-embed {
+    margin: 2.5rem 0;
+    width: 100%;
+  }
+
+  .gaga-media-embed__frame {
+    border-radius: var(--gaga-radius-md);
+    overflow: hidden;
+    background: var(--gaga-surface);
+    border: 1px solid var(--gaga-line);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .gaga-media-embed__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 1rem;
+    background: var(--gaga-surface-subtle);
+    border-bottom: 1px solid var(--gaga-line);
+  }
+
+  .gaga-media-embed__title {
+    font-family: var(--gaga-font-mono);
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--gaga-ink);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .gaga-media-embed__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .gaga-media-embed__btn {
+    border: 0;
+    background: transparent;
+    color: var(--gaga-muted);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    padding: 0.25rem;
+    border-radius: var(--gaga-radius-sm);
+    text-decoration: none;
+  }
+
+  .gaga-media-embed__btn:hover {
+    color: var(--gaga-ink);
+    background: var(--gaga-blue-soft);
+  }
+
+  .gaga-media-embed__viewport {
+    position: relative;
+    width: 100%;
+    aspect-ratio: var(--aspect-ratio, 16/9);
+    background: var(--gaga-bg);
+  }
+
+  .gaga-media-embed__iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  .gaga-media-embed__interactive-sim {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    padding: 2rem;
+    box-sizing: border-box;
+  }
+
+  .gaga-media-embed__sim-canvas {
+    width: 100%;
+    max-width: 28rem;
+    border: 1px solid var(--gaga-line);
+    border-radius: var(--gaga-radius-md);
+    background: var(--gaga-surface-elevated);
+    overflow: hidden;
+  }
+
+  .gaga-media-embed__sim-header {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.6rem 0.8rem;
+    background: var(--gaga-surface-subtle);
+    border-bottom: 1px solid var(--gaga-line);
+  }
+
+  .gaga-media-embed__sim-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--gaga-line-strong);
+  }
+
+  .gaga-media-embed__sim-label {
+    margin-left: auto;
+    font-family: var(--gaga-font-mono);
+    font-size: 0.65rem;
+    color: var(--gaga-blue);
+    font-weight: 700;
+  }
+
+  .gaga-media-embed__sim-body {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.25rem;
+  }
+
+  .gaga-media-embed__sim-metric {
+    text-align: center;
+  }
+
+  .gaga-media-embed__sim-val {
+    display: block;
+    font-size: 2rem;
+    font-weight: 800;
+    font-family: var(--gaga-font-mono);
+    color: var(--gaga-ink);
+  }
+
+  .gaga-media-embed__sim-desc {
+    font-size: 0.8rem;
+    color: var(--gaga-muted);
+  }
+
+  .gaga-media-embed__sim-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.8rem;
+    height: 4rem;
+    width: 12rem;
+    border-bottom: 1px solid var(--gaga-line);
+    padding-bottom: 0.2rem;
+  }
+
+  .gaga-media-embed__sim-bar {
+    flex: 1;
+    background: var(--gaga-blue);
+    border-radius: 2px 2px 0 0;
+    opacity: 0.8;
+  }
+
+  .gaga-media-embed__sim-action {
+    padding: 0.5rem 1.2rem;
+    border-radius: var(--gaga-radius-sm);
+    background: var(--gaga-surface-subtle);
+    border: 1px solid var(--gaga-line);
+    color: var(--gaga-ink);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .gaga-media-embed__sim-action:hover {
+    background: var(--gaga-blue);
+    color: var(--gaga-bg);
+  }
+
+  .gaga-media-embed__barrier {
+    position: absolute;
+    inset: 0;
+    background: color-mix(in srgb, var(--gaga-bg) 75%, transparent);
+    backdrop-filter: blur(2px);
+    display: grid;
+    place-items: center;
+    z-index: 2;
+  }
+
+  .gaga-media-embed__activate-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.4rem;
+    border-radius: 999px;
+    background: var(--gaga-ink);
+    color: var(--gaga-bg);
+    border: 0;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+  }
+
+  .gaga-media-embed__caption {
+    margin-top: 0.6rem;
+    font-size: 0.85rem;
+    color: var(--gaga-muted);
+  }
+</style>
