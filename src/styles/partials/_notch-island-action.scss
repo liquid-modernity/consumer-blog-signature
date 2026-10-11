@@ -1,0 +1,171 @@
+@use 'breakpoints' as bp;
+
+// =============================================================================
+// HARDWARE-AWARE NOTCH & DYNAMIC ISLAND ACTION BAR (.gaga-notch-island-action)
+// =============================================================================
+// Menghemat vertical space dengan menempatkan floating action controls langsung
+// pada physical safe-area notch / dynamic island di mobile portrait & tablet mini,
+// lalu bertransisi menjadi inline header navigasi di desktop / tablet large.
+// =============================================================================
+
+:root {
+  --gaga-notch-action-height: 2.75rem;
+  --gaga-notch-safe-inset-top: env(safe-area-inset-top, 0px);
+  --gaga-notch-safe-inset-left: env(safe-area-inset-left, 0px);
+  --gaga-notch-safe-inset-right: env(safe-area-inset-right, 0px);
+  --gaga-notch-hitbox-min-height: 44px;
+}
+
+/// Mixin khusus untuk targeting Mobile Portrait & Tablet Mini
+@mixin gaga-mobile-notch-view {
+  @media (max-width: bp.$tablet-mini-max) and (orientation: portrait) {
+    @content;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// 1. DESKTOP & TABLET LARGE DEFAULT: Standard Inline Header Nav
+// -----------------------------------------------------------------------------
+.gaga-notch-island-action {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: var(--gaga-notch-action-height);
+  padding: 0.5rem 1.25rem;
+  box-sizing: border-box;
+  background: var(--gaga-surface-elevated, var(--gaga-surface, #ffffff));
+  border-bottom: 1px solid var(--gaga-line, rgba(0, 0, 0, 0.08));
+  color: var(--gaga-ink, #111827);
+  pointer-events: auto;
+  z-index: var(--gaga-z-bar, 30);
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+
+  // Sub-kontainer internal di desktop
+  .gaga-notch-island-action__wing-left,
+  .gaga-notch-island-action__wing-right {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    pointer-events: auto;
+  }
+
+  .gaga-notch-island-action__island-center {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    pointer-events: auto;
+  }
+
+  // Tombol aksi interaktif
+  .gaga-notch-island-action__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: var(--gaga-notch-hitbox-min-height);
+    min-height: var(--gaga-notch-hitbox-min-height);
+    padding: 0.35rem 0.65rem;
+    border-radius: var(--gaga-radius-sm, 8px);
+    border: 1px solid transparent;
+    background: transparent;
+    color: currentColor;
+    font-size: 0.875rem;
+    font-family: inherit;
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+    text-decoration: none;
+    transition: background 0.15s ease, transform 0.1s ease, color 0.15s ease;
+
+    &:hover {
+      background: var(--gaga-surface-subtle, rgba(0, 0, 0, 0.04));
+      color: var(--gaga-color-interactive-hover, #2563eb);
+    }
+
+    &:active {
+      transform: scale(0.96);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--gaga-blue, #2563eb);
+      outline-offset: 2px;
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // 2. MOBILE PORTRAIT & TABLET MINI: Notch / Dynamic Island Safe-Area Aware
+  // ---------------------------------------------------------------------------
+  @include gaga-mobile-notch-view {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    // Tinggi mencakup safe-area hardware notch/island tanpa memakan konten baca
+    height: calc(var(--gaga-notch-safe-inset-top) + var(--gaga-notch-action-height));
+    padding-top: var(--gaga-notch-safe-inset-top);
+    padding-left: max(0.5rem, var(--gaga-notch-safe-inset-left));
+    padding-right: max(0.5rem, var(--gaga-notch-safe-inset-right));
+    padding-bottom: 0;
+    
+    // Hilangkan background dan border agar tidak memakan ruang visual halaman
+    background: transparent;
+    border-bottom: 0 none;
+    box-shadow: none;
+
+    // CRITICAL GUARDRAIL: Wrapper transparan tidak memblokir sentuhan hardware notch
+    pointer-events: none;
+    z-index: calc(var(--gaga-z-bar, 30) + 10);
+
+    // Kapsul sayap kiri & kanan menempel di samping notch fisik
+    .gaga-notch-island-action__wing-left,
+    .gaga-notch-island-action__wing-right {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      pointer-events: auto; // Child tetap interaktif
+    }
+
+    // Dynamic Island Center Capsule (Floating chip atau subtle pill)
+    .gaga-notch-island-action__island-center {
+      position: absolute;
+      left: 50%;
+      top: calc(var(--gaga-notch-safe-inset-top) + 0.25rem);
+      transform: translateX(-50%);
+      pointer-events: auto; // Child tetap interaktif
+      max-width: 60%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 0.75rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+      background: var(--gaga-surface-elevated, rgba(255, 255, 255, 0.85));
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 0 0 1px var(--gaga-line, rgba(0, 0, 0, 0.05));
+    }
+
+    // Tombol-tombol berbentuk tactile micro-capsule
+    .gaga-notch-island-action__btn {
+      pointer-events: auto;
+      border-radius: 9999px;
+      min-width: 36px;
+      min-height: 36px;
+      padding: 0.25rem;
+      background: var(--gaga-surface-elevated, rgba(255, 255, 255, 0.85));
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 0 0 1px var(--gaga-line, rgba(0, 0, 0, 0.05));
+
+      &:active {
+        transform: scale(0.92);
+      }
+    }
+  }
+}

@@ -573,12 +573,40 @@ const { primary, secondary } = getActionsForContext(context);
     background: rgba(255, 255, 255, 0.25);
   }
 
+  @media (max-width: 1023px) and (orientation: portrait) {
+    .gaga-action-runtime-container {
+      position: fixed;
+      top: env(safe-area-inset-top, 0px);
+      left: 0;
+      right: 0;
+      width: 100%;
+      margin: 0;
+      padding: 0.25rem max(0.5rem, env(safe-area-inset-right, 0px)) 0.25rem max(0.5rem, env(safe-area-inset-left, 0px));
+      box-sizing: border-box;
+      pointer-events: none; /* Prevents center notch deadzone block */
+      z-index: 50;
+      justify-content: flex-end; /* Parks action pills gracefully away from notch center */
+    }
+
+    .gaga-action-runtime {
+      pointer-events: auto; /* Re-enables interaction for buttons */
+    }
+
+    .gaga-action-runtime__bar {
+      padding: 0.25rem 0.4rem;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+    }
+  }
+
   @media (max-width: 680px) {
     .gaga-action-runtime__label {
       display: none;
     }
     .gaga-action-runtime__btn {
       padding: 0.45rem 0.55rem;
+      min-height: 2rem;
     }
   }
 </style>

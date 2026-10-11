@@ -1,4 +1,7 @@
-export {};
+import { initRouteNormalize } from './systems/route-normalize';
+import { initLayoutContext } from './systems/layout-context';
+import { initTheme } from './systems/theme';
+import { initReturnNavigation } from './systems/return-navigation';
 
 type IdleTask = () => Promise<void>;
 
@@ -25,44 +28,36 @@ function onIdle(task: IdleTask, timeout = 1400) {
 }
 
 async function boot() {
-  const [
-    routeNormalize,
-    layoutContext,
-    theme,
-    returnNavigation
-  ] = await Promise.all([
-    import('./systems/route-normalize'),
-    import('./systems/layout-context'),
-    import('./systems/theme'),
-    import('./systems/return-navigation')
-  ]);
-
-  routeNormalize.initRouteNormalize();
-  layoutContext.initLayoutContext();
-  theme.initTheme();
-  returnNavigation.initReturnNavigation();
+  try {
+    initRouteNormalize();
+    initLayoutContext();
+    initTheme();
+    initReturnNavigation();
+  } catch (err) {
+    console.warn('[GAGA] Core systems boot warning:', err);
+  }
 
   await Promise.all([
     hasCapability('[data-gaga-left-rail]')
-      ? import('./systems/left-rail-state').then(({ initLeftRailState }) => initLeftRailState())
+      ? import('./systems/left-rail-state').then(({ initLeftRailState }) => initLeftRailState()).catch(err => console.warn('[GAGA] Left rail state init failed:', err))
       : Promise.resolve(),
     hasCapability('[data-gaga-right-rail]')
-      ? import('./systems/right-rail-state').then(({ initRightRailState }) => initRightRailState())
+      ? import('./systems/right-rail-state').then(({ initRightRailState }) => initRightRailState()).catch(err => console.warn('[GAGA] Right rail state init failed:', err))
       : Promise.resolve()
   ]);
 
   await Promise.all([
     hasCapability('[data-gaga-right-rail]')
-      ? import('./systems/context-surface').then(({ initContextSurface }) => initContextSurface())
+      ? import('./systems/context-surface').then(({ initContextSurface }) => initContextSurface()).catch(err => console.warn('[GAGA] Context surface init failed:', err))
       : Promise.resolve(),
     hasCapability('[data-gaga-outline-peek]')
-      ? import('./systems/outline-peek').then(({ initOutlinePeek }) => initOutlinePeek())
+      ? import('./systems/outline-peek').then(({ initOutlinePeek }) => initOutlinePeek()).catch(err => console.warn('[GAGA] Outline peek init failed:', err))
       : Promise.resolve(),
     hasCapability('[data-gaga-nav-child-panel]')
-      ? import('./systems/collapsed-nav').then(({ initCollapsedNav }) => initCollapsedNav())
+      ? import('./systems/collapsed-nav').then(({ initCollapsedNav }) => initCollapsedNav()).catch(err => console.warn('[GAGA] Collapsed nav init failed:', err))
       : Promise.resolve(),
     hasCapability('[data-gaga-toc-block] a[href^="#"]')
-      ? import('./systems/toc-spy').then(({ initTocSpy }) => initTocSpy())
+      ? import('./systems/toc-spy').then(({ initTocSpy }) => initTocSpy()).catch(err => console.warn('[GAGA] Toc spy init failed:', err))
       : Promise.resolve()
   ]);
 
@@ -83,62 +78,62 @@ async function boot() {
     readingBehaviour,
     diagnosticHud
   ] = await Promise.all([
-    import('./systems/input-mode'),
-    import('./systems/mobile-dock'),
-    import('./systems/toast'),
-    import('./systems/reader-preferences'),
-    import('./systems/saved-reading'),
+    import('./systems/input-mode').catch(() => null),
+    import('./systems/mobile-dock').catch(() => null),
+    import('./systems/toast').catch(() => null),
+    import('./systems/reader-preferences').catch(() => null),
+    import('./systems/saved-reading').catch(() => null),
     hasCapability('[data-gaga-continuity-current], [data-gaga-saved-page]')
-      ? import('./systems/reading-continuity')
+      ? import('./systems/reading-continuity').catch(() => null)
       : Promise.resolve(null),
-    import('./systems/quick-actions-state'),
-    import('./systems/i18n'),
-    import('./systems/surface-coordinator'),
-    import('./systems/keyboard'),
+    import('./systems/quick-actions-state').catch(() => null),
+    import('./systems/i18n').catch(() => null),
+    import('./systems/surface-coordinator').catch(() => null),
+    import('./systems/keyboard').catch(() => null),
     hasCapability('[data-gaga-action="toggle-focus-mode"]')
-      ? import('./systems/focus-mode')
+      ? import('./systems/focus-mode').catch(() => null)
       : Promise.resolve(null),
     hasCapability('[data-gaga-entity-tabs]')
-      ? import('./systems/entity-tabs')
+      ? import('./systems/entity-tabs').catch(() => null)
       : Promise.resolve(null),
     hasCapability('[data-gaga-article-shell], .gaga-flagship-article, [data-gaga-reading-surface]')
-      ? import('./systems/reader-enhancements')
+      ? import('./systems/reader-enhancements').catch(() => null)
       : Promise.resolve(null),
-    import('./systems/reading-behaviour'),
-    import('./systems/diagnostic-hud')
+    import('./systems/reading-behaviour').catch(() => null),
+    import('./systems/diagnostic-hud').catch(() => null)
   ]);
 
-  inputMode.initInputMode();
-  mobileDock.initMobileDock();
-  toast.initToast();
-  readerPreferences.initReaderPreferences();
-  savedReading.initSavedReading();
+  inputMode?.initInputMode();
+  mobileDock?.initMobileDock();
+  toast?.initToast();
+  readerPreferences?.initReaderPreferences();
+  savedReading?.initSavedReading();
   readingContinuity?.initReadingContinuity();
-  quickActionsState.initQuickActionsState();
-  i18n.initI18n();
+  quickActionsState?.initQuickActionsState();
+  i18n?.initI18n();
   focusMode?.initFocusMode();
   entityTabs?.initEntityTabs();
   readerEnhancements?.initReaderEnhancements();
-  surfaceCoordinator.initSurfaceCoordinator();
-  keyboard.initKeyboard();
-  readingBehaviour.initReadingBehavior();
-  diagnosticHud.initDiagnosticHud();
+  surfaceCoordinator?.initSurfaceCoordinator();
+  keyboard?.initKeyboard();
+  readingBehaviour?.initReadingBehavior();
+  diagnosticHud?.initDiagnosticHud();
   document.documentElement.dataset.gagaRuntime = 'ready';
 
   onIdle(async () => {
     const [motion, sfx, informationSurface, pwa] = await Promise.all([
-      import('./systems/motion'),
-      import('./systems/sfx'),
+      import('./systems/motion').catch(() => null),
+      import('./systems/sfx').catch(() => null),
       hasInformationSurfaceCapability()
-        ? import('./systems/information-surface')
+        ? import('./systems/information-surface').catch(() => null)
         : Promise.resolve(null),
-      import('./systems/pwa')
+      import('./systems/pwa').catch(() => null)
     ]);
 
-    motion.initMotion();
-    sfx.initSfx();
+    motion?.initMotion();
+    sfx?.initSfx();
     informationSurface?.initInformationSurface();
-    pwa.initPwa();
+    pwa?.initPwa();
   });
 }
 
