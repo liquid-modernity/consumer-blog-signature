@@ -21,7 +21,6 @@ export function initOutlinePeek() {
   initialized = true;
 
   const stack = sheet.closest<HTMLElement>('[data-gaga-outline-stack]');
-  const preview = stack?.querySelector<HTMLButtonElement>('[data-gaga-outline-peek-preview]') ?? null;
   const currentIndex = stack?.querySelector<HTMLElement>('[data-gaga-outline-current-index]') ?? null;
   const currentLabel = stack?.querySelector<HTMLElement>('[data-gaga-outline-current-label]') ?? null;
   const sheetCurrentIndex = stack?.querySelector<HTMLElement>('[data-gaga-outline-sheet-current-index]') ?? null;
