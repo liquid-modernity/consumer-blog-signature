@@ -1,24 +1,33 @@
 ---
-import { getCollection, render } from 'astro:content';
-import '../styles/tokens.css';
-import '../styles/signature.scss';
+import { getCollection } from 'astro:content';
 import PageFrame from '../components/starlight/PageFrame.astro';
+import MarkdownContent from '../components/starlight/MarkdownContent.astro';
 
-const route = Astro.locals.gagaRoute;
-const docs = await getCollection('docs');
+export const prerender = true;
 
-const entry = docs.find((item) => {
-  if (!route?.id) return false;
-  return item.id === route.id;
-});
+export async function getStaticPaths() {
+  const docs = await getCollection('docs').catch(() => []);
 
-if (!entry) {
-  return Astro.redirect('/404');
+  return docs.map((entry) => ({
+    params: {
+      slug: entry.slug
+    },
+    props: {
+      entry
+    }
+  }));
 }
 
-const { Content } = await render(entry);
+const { entry } = Astro.props;
+
+const metadata = entry?.data ?? {};
+
 ---
 
-<PageFrame>
-  <Content />
+<PageFrame
+  metadata={metadata}
+>
+  <MarkdownContent
+    entry={entry}
+  />
 </PageFrame>
