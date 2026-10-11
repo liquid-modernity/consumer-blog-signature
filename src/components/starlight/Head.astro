@@ -2,9 +2,9 @@
 import SeoHead from '../seo/SeoHead.astro';
 import { resolveAuthorRefs } from '../../lib/content';
 import { normalizeContentMetadata } from '@gaga/engine/content';
-import { extractStarlightHeadTitle, filterStarlightHeadEntries, normalizeStarlightRouteContext } from '@gaga/engine-starlight';
+import { extractGagaHeadTitle, filterGagaHeadEntries, normalizeGagaRouteContext } from '../../gaga/content/runtime-route';
 
-const route = normalizeStarlightRouteContext(Astro.locals.starlightRoute);
+const route = normalizeGagaRouteContext(Astro.locals.gagaRoute);
 const rawData = route.entryData as Record<string, unknown>;
 const authorRefs = Array.isArray(rawData.authorRefs)
   ? rawData.authorRefs.filter((ref): ref is string => typeof ref === 'string')
@@ -14,10 +14,10 @@ const data = normalizeContentMetadata({
   ...rawData,
   ...(resolvedAuthors[0] ? { author: resolvedAuthors[0].title } : {})
 });
-const { title, socialTitle } = extractStarlightHeadTitle(route.head);
+const { title, socialTitle } = extractGagaHeadTitle(route.head);
 const shouldNoindex = data.noindex === true || Astro.url.pathname === '/404' || Astro.url.pathname === '/offline.html';
 
-const renderedHead = filterStarlightHeadEntries(route.head, {
+const renderedHead = filterGagaHeadEntries(route.head, {
   replacedMetaNames: ['gaga:summary', 'gaga:search-index', 'gaga:llms']
 });
 ---

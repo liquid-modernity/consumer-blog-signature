@@ -1,7 +1,7 @@
 ---
 import { normalizeContentMetadata } from '@gaga/engine/content';
 
-const route = Astro.locals.starlightRoute;
+const route = Astro.locals.gagaRoute;
 const metadata = normalizeContentMetadata(route?.entry?.data ?? {});
 const isArticle = metadata.contentKind === 'article';
 ---

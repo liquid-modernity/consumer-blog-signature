@@ -429,7 +429,7 @@ function initSelectionIntelligence(article: HTMLElement) {
 
       // Ensure selection is inside readable content and not inside buttons/inputs
       const readingSurface = element?.closest(
-        '[data-gaga-article-shell], .gaga-flagship-article__prose, .sl-markdown-content, [data-gaga-reading-surface]'
+        '[data-gaga-article-shell], .gaga-flagship-article__prose, .gaga-markdown-content, [data-gaga-reading-surface]'
       );
       if (!readingSurface) {
         closeSelectionMenu();
@@ -681,7 +681,7 @@ function copyTextToClipboard(text: string, contextElement: HTMLElement) {
 
 function getSpeakableBlocks(article: HTMLElement): HTMLElement[] {
   const prose = article.querySelector<HTMLElement>(
-    '.gaga-flagship-article__prose, .sl-markdown-content, [data-gaga-reading-surface]'
+    '.gaga-flagship-article__prose, .gaga-markdown-content, [data-gaga-reading-surface]'
   ) || article;
   return Array.from(prose.querySelectorAll<HTMLElement>('h2, h3, p, blockquote, li'))
     .filter((el) => el.innerText.trim().length > 0);

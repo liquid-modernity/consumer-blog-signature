@@ -108,7 +108,7 @@ a:hover {
   transform: translateX(-50%);
 }
 @media (max-width: 1023px) {
-  .gaga-app-frame[data-gaga-content-kind='article'] .sl-markdown-content :where(.gaga-media, .gaga-rich-media)[data-presentation='bleed'] {
+  .gaga-app-frame[data-gaga-content-kind='article'] .gaga-markdown-content :where(.gaga-media, .gaga-rich-media)[data-presentation='bleed'] {
     inline-size: 100vw;
     margin-inline: 50%;
     transform: translateX(-50%);

@@ -3,7 +3,7 @@ import { getArticles, groupArticlesByMonth, toArticlePreview } from '../../lib/c
 import { contentDefaults } from '../../config/content';
 import { normalizeContentMetadata, resolveContentDateLocale } from '@gaga/engine/content';
 const articles = await getArticles();
-const route = Astro.locals.starlightRoute;
+const route = Astro.locals.gagaRoute;
 const metadata = normalizeContentMetadata(route?.entry?.data ?? {});
 const surfaceLocale = resolveContentDateLocale(metadata.language ?? route?.lang ?? contentDefaults.defaultLanguage, contentDefaults.dateLocale);
 const groups = groupArticlesByMonth(articles, surfaceLocale);

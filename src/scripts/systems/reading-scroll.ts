@@ -26,7 +26,7 @@ function readingElement(): HTMLElement | null {
   return (
     document.querySelector<HTMLElement>('.gaga-article-scroll__inner') ??
     document.querySelector<HTMLElement>('.gaga-flagship-article__prose') ??
-    document.querySelector<HTMLElement>('.sl-markdown-content') ??
+    document.querySelector<HTMLElement>('.gaga-markdown-content') ??
     document.querySelector<HTMLElement>('[data-gaga-article-shell]') ??
     mainScrollOwner() ??
     document.body

@@ -52,7 +52,7 @@ function getActiveScrollY(): number {
 
 function calculateVisibleWords(): number {
   const articleContent = document.querySelector<HTMLElement>(
-    '.gaga-flagship-article__prose, .sl-markdown-content, [data-gaga-article-shell]'
+    '.gaga-flagship-article__prose, .gaga-markdown-content, [data-gaga-article-shell]'
   );
   if (!articleContent) return 0;
 

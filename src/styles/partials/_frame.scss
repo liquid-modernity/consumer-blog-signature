@@ -50,7 +50,7 @@ body:has(.gaga-app-frame) {
 .sl-container,
 .gaga-main-region .main-pane,
 .content-panel,
-.sl-markdown-content {
+.gaga-markdown-content {
   min-width: 0;
   max-width: var(--gaga-content-width);
 }
@@ -58,7 +58,7 @@ body:has(.gaga-app-frame) {
 .gaga-main-region .main-pane,
 .sl-container,
 .content-panel,
-.sl-markdown-content {
+.gaga-markdown-content {
   margin-inline: auto;
 }
 
@@ -69,15 +69,15 @@ body:has(.gaga-app-frame) {
   min-height: 0;
 }
 
-.sl-markdown-content :where(pre, table, .gaga-rich-media, .gaga-media-embed, .expressive-code) {
+.gaga-markdown-content :where(pre, table, .gaga-rich-media, .gaga-media-embed, .expressive-code) {
   max-inline-size: 100%;
 }
 
-.sl-markdown-content :where(pre, .gaga-rich-media, .gaga-media-embed, .expressive-code) {
+.gaga-markdown-content :where(pre, .gaga-rich-media, .gaga-media-embed, .expressive-code) {
   overflow-x: auto;
 }
 
-.sl-markdown-content :where(table) {
+.gaga-markdown-content :where(table) {
   display: block;
   overflow-x: auto;
 }

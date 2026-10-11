@@ -1,5 +1,4 @@
 ---
-import '@astrojs/starlight/style/markdown.css';
 import ArticleShell from './ArticleShell.astro';
 import AuthorArticleIndex from '../reader/AuthorArticleIndex.astro';
 import TopicArticleIndex from '../reader/TopicArticleIndex.astro';
@@ -12,7 +11,7 @@ import { getScreenInfo } from '../../lib/screen-info';
 import type { BreadcrumbItem } from '../../lib/page-context';
 import { normalizeContentMetadata } from '@gaga/engine/content';
 
-const route = Astro.locals.starlightRoute;
+const route = Astro.locals.gagaRoute;
 const metadata = normalizeContentMetadata((route?.entry?.data ?? {}) as Record<string, unknown>);
 const isArticle = metadata.contentKind === 'article';
 const isAuthor = metadata.contentKind === 'author';
@@ -67,7 +66,7 @@ const entityParentHref = isAuthor ? '/authors/' : '/topics/';
     missingTitleSource={missingTitleSource}
     breadcrumbs={breadcrumbs}
   >
-    <div class="gaga-article-body sl-markdown-content" data-gaga-article-body><slot /></div>
+    <div class="gaga-article-body gaga-markdown-content" data-gaga-article-body><slot /></div>
   </ArticleShell>
 ) : (
   isEntity ? (
@@ -137,7 +136,7 @@ const entityParentHref = isAuthor ? '/authors/' : '/topics/';
           data-gaga-legacy-fragment="gaga-entity-profile"
         >
           <div
-            class:list={['sl-markdown-content', isAuthor && 'gaga-author-profile']}
+            class:list={['gaga-markdown-content', isAuthor && 'gaga-author-profile']}
             data-gaga-author-profile={isAuthor ? '' : undefined}
             data-gaga-entity-profile-content
           >
@@ -157,7 +156,7 @@ const entityParentHref = isAuthor ? '/authors/' : '/topics/';
       </div>
     </section>
   ) : (
-    <div class="sl-markdown-content">
+    <div class="gaga-markdown-content">
       <slot />
     </div>
   )

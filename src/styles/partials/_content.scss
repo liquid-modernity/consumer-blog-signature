@@ -1,26 +1,26 @@
 @use 'breakpoints' as bp;
 
-.sl-markdown-content,
+.gaga-markdown-content,
 .main-pane {
   color: var(--gaga-ink);
 }
 
-.sl-markdown-content h1,
-.sl-markdown-content h2,
-.sl-markdown-content h3,
+.gaga-markdown-content h1,
+.gaga-markdown-content h2,
+.gaga-markdown-content h3,
 .hero h1 {
   font-family: var(--gaga-font-display);
   letter-spacing: var(--gaga-type-display-tracking);
 }
 
-.sl-markdown-content h1,
+.gaga-markdown-content h1,
 .hero h1 {
   font-size: var(--gaga-type-display-size);
   line-height: var(--gaga-type-display-line-height);
   text-align: center;
 }
 
-.sl-markdown-content h2 {
+.gaga-markdown-content h2 {
   border-block-start:0;
   padding-block-start:0;
 }
@@ -124,7 +124,7 @@
   --gaga-content-width: min(68rem, calc(100vw - 2rem));
 }
 
-.gaga-app-frame[data-gaga-page-id='search'] .sl-markdown-content > .sl-heading-wrapper:first-child {
+.gaga-app-frame[data-gaga-page-id='search'] .gaga-markdown-content > .sl-heading-wrapper:first-child {
   display: none;
 }
 
@@ -145,7 +145,7 @@
   border: 0;
 }
 
-.gaga-app-frame[data-gaga-page-id='search']:has(.gaga-search-page[data-gaga-search-state='active']) .sl-markdown-content > p:first-of-type {
+.gaga-app-frame[data-gaga-page-id='search']:has(.gaga-search-page[data-gaga-search-state='active']) .gaga-markdown-content > p:first-of-type {
   display: none;
 }
 
@@ -453,21 +453,21 @@ button.gaga-search-card {
    The frame decides the reading rhythm from frontmatter contentKind/contentClass,
    so article pages do not inherit the oversized index display treatment. */
 .gaga-app-frame .hero,
-.gaga-app-frame .sl-markdown-content,
+.gaga-app-frame .gaga-markdown-content,
 .gaga-app-frame .main-pane {
   color: var(--gaga-ink);
 }
 
 .gaga-app-frame .hero h1,
-.gaga-app-frame .sl-markdown-content h1,
-.gaga-app-frame .sl-markdown-content h2,
-.gaga-app-frame .sl-markdown-content h3,
-.gaga-app-frame .sl-markdown-content h4 {
+.gaga-app-frame .gaga-markdown-content h1,
+.gaga-app-frame .gaga-markdown-content h2,
+.gaga-app-frame .gaga-markdown-content h3,
+.gaga-app-frame .gaga-markdown-content h4 {
   color: var(--gaga-ink) !important;
 }
 
 .gaga-app-frame .hero h1,
-.gaga-app-frame .sl-markdown-content h1 {
+.gaga-app-frame .gaga-markdown-content h1 {
   font-family: var(--gaga-font-display);
   font-size: var(--gaga-type-page-title-size);
   line-height: var(--gaga-type-page-title-line-height);
@@ -481,7 +481,7 @@ button.gaga-search-card {
 }
 
 .gaga-app-frame[data-gaga-content-kind='index'] .hero h1,
-.gaga-app-frame[data-gaga-content-kind='index'] .sl-markdown-content h1 {
+.gaga-app-frame[data-gaga-content-kind='index'] .gaga-markdown-content h1 {
   font-size: var(--gaga-type-page-title-size);
   line-height: var(--gaga-type-page-title-line-height);
   text-align: center;
@@ -492,7 +492,7 @@ button.gaga-search-card {
   padding-block: clamp(2rem, 6vw, 4rem) 1rem;
 }
 
-.gaga-app-frame[data-gaga-content-kind='article'] .sl-markdown-content h1 {
+.gaga-app-frame[data-gaga-content-kind='article'] .gaga-markdown-content h1 {
   margin-block: 2rem 1rem;
 }
 
@@ -807,7 +807,7 @@ button.gaga-search-card {
 }
 
 
-.gaga-app-frame[data-gaga-content-kind='article'] .sl-markdown-content h2 {
+.gaga-app-frame[data-gaga-content-kind='article'] .gaga-markdown-content h2 {
   max-width: min(34rem, var(--gaga-article-measure, 40.5rem));
   margin-block-start: 2.8rem;
   border-block-start:0;
@@ -816,18 +816,18 @@ button.gaga-search-card {
   line-height: var(--gaga-type-section-heading-line-height);
 }
 
-.gaga-app-frame[data-gaga-content-kind='article'] .sl-markdown-content p,
-.gaga-app-frame[data-gaga-content-kind='article'] .sl-markdown-content li {
+.gaga-app-frame[data-gaga-content-kind='article'] .gaga-markdown-content p,
+.gaga-app-frame[data-gaga-content-kind='article'] .gaga-markdown-content li {
   max-width: var(--gaga-article-measure, 40.5rem);
   font-size: var(--gaga-article-font-size, 1.04rem);
   line-height: var(--gaga-article-line-height, 1.72);
 }
 
-.gaga-app-frame[data-gaga-content-kind='article'] .sl-markdown-content :where(blockquote, figure, table, pre, audio, video, iframe) {
+.gaga-app-frame[data-gaga-content-kind='article'] .gaga-markdown-content :where(blockquote, figure, table, pre, audio, video, iframe) {
   max-width: var(--gaga-content-width);
 }
 
-.gaga-app-frame[data-gaga-content-kind='article'] .sl-markdown-content blockquote {
+.gaga-app-frame[data-gaga-content-kind='article'] .gaga-markdown-content blockquote {
   position: relative;
   margin: 1.35rem 0;
   padding: .9rem 1rem .9rem 1.25rem;
@@ -836,11 +836,11 @@ button.gaga-search-card {
   background: var(--gaga-surface-subtle, var(--gaga-surface-2));
 }
 
-.gaga-app-frame[data-gaga-content-kind='article'] .sl-markdown-content blockquote p {
+.gaga-app-frame[data-gaga-content-kind='article'] .gaga-markdown-content blockquote p {
   margin-block: .35rem;
 }
 
-.gaga-app-frame[data-gaga-content-kind='article'] .sl-markdown-content .starlight-aside {
+.gaga-app-frame[data-gaga-content-kind='article'] .gaga-markdown-content .gaga-aside {
   --gaga-aside-accent: var(--gaga-blue);
   --sl-color-asides-border: var(--gaga-aside-accent);
   --sl-color-asides-text-accent: var(--gaga-aside-accent);
@@ -850,27 +850,27 @@ button.gaga-search-card {
   background: var(--gaga-surface-subtle, var(--gaga-surface-2));
 }
 
-.gaga-app-frame[data-gaga-content-kind='article'] .sl-markdown-content .starlight-aside--tip {
+.gaga-app-frame[data-gaga-content-kind='article'] .gaga-markdown-content .gaga-aside--tip {
   --gaga-aside-accent: var(--gaga-color-success);
 }
 
-.gaga-app-frame[data-gaga-content-kind='article'] .sl-markdown-content .starlight-aside--caution {
+.gaga-app-frame[data-gaga-content-kind='article'] .gaga-markdown-content .gaga-aside--caution {
   --gaga-aside-accent: var(--gaga-color-warning);
 }
 
-.gaga-app-frame[data-gaga-content-kind='article'] .sl-markdown-content .starlight-aside--danger {
+.gaga-app-frame[data-gaga-content-kind='article'] .gaga-markdown-content .gaga-aside--danger {
   --gaga-aside-accent: var(--gaga-color-danger);
 }
 
-.gaga-app-frame[data-gaga-content-kind='article'] .sl-markdown-content .starlight-aside__title {
+.gaga-app-frame[data-gaga-content-kind='article'] .gaga-markdown-content .gaga-aside__title {
   color: var(--gaga-ink);
 }
 
-.gaga-app-frame[data-gaga-content-kind='article'] .sl-markdown-content .starlight-aside__icon {
+.gaga-app-frame[data-gaga-content-kind='article'] .gaga-markdown-content .gaga-aside__icon {
   color: var(--gaga-aside-accent);
 }
 
-.gaga-app-frame[data-gaga-content-kind='article'] .sl-markdown-content .starlight-aside :where(p, li) {
+.gaga-app-frame[data-gaga-content-kind='article'] .gaga-markdown-content .gaga-aside :where(p, li) {
   color: var(--gaga-ink);
 }
 
@@ -989,13 +989,13 @@ button.gaga-search-card {
   }
 }
 
-.gaga-app-frame[data-gaga-content-kind='article'] .sl-markdown-content .starlight-aside code {
+.gaga-app-frame[data-gaga-content-kind='article'] .gaga-markdown-content .gaga-aside code {
   border-color: color-mix(in srgb, var(--gaga-aside-accent) 42%, var(--gaga-line));
   background: color-mix(in srgb, var(--gaga-aside-accent) 16%, var(--gaga-surface));
   color: var(--gaga-ink);
 }
 
-.gaga-app-frame[data-gaga-content-kind='article'] .sl-markdown-content :where(table) {
+.gaga-app-frame[data-gaga-content-kind='article'] .gaga-markdown-content :where(table) {
   display: block;
   width: max-content;
   max-width: 100%;
@@ -1005,14 +1005,14 @@ button.gaga-search-card {
   background: var(--gaga-surface);
 }
 
-.gaga-app-frame[data-gaga-content-kind='article'] .sl-markdown-content :where(th, td) {
+.gaga-app-frame[data-gaga-content-kind='article'] .gaga-markdown-content :where(th, td) {
   padding: .62rem .72rem;
   border-block-end: 0;
   border-inline-end: 0;
   vertical-align: top;
 }
 
-.gaga-app-frame[data-gaga-content-kind='article'] .sl-markdown-content th {
+.gaga-app-frame[data-gaga-content-kind='article'] .gaga-markdown-content th {
   color: var(--gaga-blue);
   background: var(--gaga-blue-soft);
   font-family: var(--gaga-font-mono);
@@ -1021,47 +1021,47 @@ button.gaga-search-card {
   text-transform: uppercase;
 }
 
-.gaga-app-frame[data-gaga-content-kind='article'] .sl-markdown-content :where(pre, .expressive-code figure) {
+.gaga-app-frame[data-gaga-content-kind='article'] .gaga-markdown-content :where(pre, .expressive-code figure) {
   border: 0;
   background: var(--gaga-surface-subtle, var(--gaga-surface-2));
 }
 
-.gaga-app-frame[data-gaga-content-kind='article'] .sl-markdown-content :not(pre) > code {
+.gaga-app-frame[data-gaga-content-kind='article'] .gaga-markdown-content :not(pre) > code {
   padding: .12rem .32rem;
   border: 0;
   background: var(--gaga-blue-soft);
   color: var(--gaga-ink);
 }
 
-.gaga-app-frame[data-gaga-content-kind='article'] .sl-markdown-content :where(img, video, iframe) {
+.gaga-app-frame[data-gaga-content-kind='article'] .gaga-markdown-content :where(img, video, iframe) {
   max-width: 100%;
   border: 0;
   background: var(--gaga-surface-subtle, var(--gaga-surface-2));
 }
 
-.gaga-app-frame[data-gaga-content-kind='article'] .sl-markdown-content :where(img, video) {
+.gaga-app-frame[data-gaga-content-kind='article'] .gaga-markdown-content :where(img, video) {
   height: auto;
 }
 
-.gaga-app-frame[data-gaga-content-kind='article'] .sl-markdown-content figcaption {
+.gaga-app-frame[data-gaga-content-kind='article'] .gaga-markdown-content figcaption {
   color: var(--gaga-muted);
   font-family: var(--gaga-font-mono);
   font-size: var(--gaga-type-caption-size);
   line-height: var(--gaga-type-caption-line-height);
 }
 
-.gaga-app-frame[data-gaga-content-kind='article'] .sl-markdown-content .gaga-media {
+.gaga-app-frame[data-gaga-content-kind='article'] .gaga-markdown-content .gaga-media {
   display: grid;
   gap: .55rem;
   inline-size: 100%;
   margin-block: 1.35rem;
 }
 
-.gaga-app-frame[data-gaga-content-kind='article'] .sl-markdown-content .gaga-media :where(audio, iframe) {
+.gaga-app-frame[data-gaga-content-kind='article'] .gaga-markdown-content .gaga-media :where(audio, iframe) {
   inline-size: 100%;
 }
 
-.gaga-app-frame[data-gaga-content-kind='article'] .sl-markdown-content .gaga-media iframe {
+.gaga-app-frame[data-gaga-content-kind='article'] .gaga-markdown-content .gaga-media iframe {
   aspect-ratio: 16 / 9;
   block-size: auto;
 }

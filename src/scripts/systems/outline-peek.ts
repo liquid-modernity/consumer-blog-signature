@@ -11,7 +11,7 @@ function hasUsableTableOfContents(sheet: HTMLElement) {
 function tableOfContentsAllowed(sheet: HTMLElement) { return !outlinePeekRequiresTableOfContents() || hasUsableTableOfContents(sheet); }
 function decodeHash(hash: string) { const value = hash.replace(/^#/, ''); try { return decodeURIComponent(value); } catch { return value; } }
 function currentHashTarget() { const id = decodeHash(window.location.hash); return id ? document.getElementById(id) : null; }
-function readingFocusTarget() { return currentHashTarget() ?? document.querySelector<HTMLElement>('.sl-markdown-content') ?? document.querySelector<HTMLElement>('[data-gaga-main-region]') ?? document.querySelector<HTMLElement>('main'); }
+function readingFocusTarget() { return currentHashTarget() ?? document.querySelector<HTMLElement>('.gaga-markdown-content') ?? document.querySelector<HTMLElement>('[data-gaga-main-region]') ?? document.querySelector<HTMLElement>('main'); }
 function normalizeHash(value: string) { return decodeHash(value); }
 
 export function initOutlinePeek() {

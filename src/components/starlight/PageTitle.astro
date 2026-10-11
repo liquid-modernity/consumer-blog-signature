@@ -2,7 +2,7 @@
 import { normalizeContentMetadata } from '@gaga/engine/content';
 import { i18nText, resolveLocale } from '../../config/i18n';
 
-const route = Astro.locals.starlightRoute;
+const route = Astro.locals.gagaRoute;
 const metadata = normalizeContentMetadata(route?.entry?.data ?? {});
 const isArticle = metadata.contentKind === 'article';
 const isEntity = metadata.contentKind === 'author' || metadata.contentKind === 'topic';
