@@ -1,0 +1,89 @@
+---
+const article = {
+  title: 'Building a Publishing Experience OS: From Content Pages to Knowledge Spaces',
+  author: 'Gaga Editorial Lab',
+  topic: 'Product Architecture',
+  reading: '8 min read'
+};
+---
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{article.title}</title>
+  <style is:global>
+    :root { --ink:#141414; --bg:#faf8f3; --card:#fff; --line:#ddd6ca; --accent:#2554d7; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--bg); color:var(--ink); font-family: Inter, ui-sans-serif, system-ui; }
+    button { font:inherit; }
+    .os-shell { min-height:100vh; display:grid; grid-template-columns:72px 1fr; }
+    .global { position:sticky; top:0; height:100vh; border-right:1px solid var(--line); padding:18px 10px; display:flex; flex-direction:column; gap:14px; background:#fff; }
+    .global button { border:0; background:none; border-radius:14px; padding:12px 4px; cursor:pointer; }
+    .global button:hover,.global button:focus { background:#eee8dd; }
+    .workspace { display:grid; grid-template-columns:minmax(0,820px) 300px; gap:28px; justify-content:center; padding:40px 36px; }
+    .article { background:var(--card); border:1px solid var(--line); border-radius:28px; padding:48px; }
+    .hero { width:100%; aspect-ratio:16/8; border-radius:22px; background:linear-gradient(135deg,#202b4d,#8fa4ff); margin:28px 0; }
+    .meta { color:#68645c; display:flex; gap:14px; font-size:.95rem; }
+    h1 { font-size:clamp(2.2rem,5vw,4.2rem); line-height:1.02; margin:20px 0; letter-spacing:-.04em; }
+    .body { font-size:1.15rem; line-height:1.8; }
+    .body mark { background:#ffe98b; }
+    .actions { display:flex; gap:10px; position:sticky; top:20px; margin-bottom:20px; flex-wrap:wrap; }
+    .actions button { border:1px solid var(--line); background:white; border-radius:999px; padding:10px 16px; cursor:pointer; }
+    .rail { border-left:1px solid var(--line); padding-left:24px; }
+    .rail section { background:white; border:1px solid var(--line); border-radius:20px; padding:18px; margin-bottom:16px; }
+    .progress { position:fixed; top:0; left:72px; height:4px; background:var(--accent); width:0; z-index:5; }
+    .toast { position:fixed; bottom:24px; right:24px; background:#111; color:#fff; padding:12px 18px; border-radius:999px; opacity:0; transform:translateY(10px); transition:.2s; }
+    .toast.show { opacity:1; transform:none; }
+    .focus .rail { display:none; }
+    .focus .workspace { grid-template-columns:minmax(0,820px); }
+    @media(max-width:900px){ .os-shell{display:block}.global{height:auto;position:sticky;flex-direction:row}.workspace{display:block;padding:16px}.rail{display:none}.article{padding:24px}.progress{left:0} }
+  </style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="os-shell" id="app">
+  <nav class="global" aria-label="Global navigation">
+    {['⌂','⌕','◫','▣','◴'].map((i)=><button title="Navigation">{i}</button>)}
+    <button id="personalize" title="Personalize">◉</button>
+  </nav>
+  <div class="workspace">
+    <main class="article" id="reader">
+      <div class="actions" aria-label="Action runtime">
+        <button data-action="back">Smart Back</button>
+        <button data-action="share">Smart Share</button>
+        <button data-action="focus">Focus Mode</button>
+        <button data-action="highlight">Highlight</button>
+        <button data-action="speak">Speak</button>
+      </div>
+      <div class="meta"><span>{article.author}</span><span>{article.topic}</span><span>{article.reading}</span></div>
+      <h1>{article.title}</h1>
+      <div class="hero" role="img" aria-label="Immersive article media"></div>
+      <article class="body" id="content">
+        <p>Publishing products should not only display information. They should help readers discover context, build understanding, and continue exploration.</p>
+        <p>The article canvas becomes a workspace where content, intelligence, and interaction meet. Readers receive the right information at the right moment.</p>
+        <p>Experience quality is proven through visible behaviour. A button, rail, or capability only matters when it changes what users can do.</p>
+      </article>
+    </main>
+    <aside class="rail" aria-label="Intelligence rail">
+      <section><strong>What should I know?</strong><p>Related concepts: publishing systems, knowledge graph, reader experience.</p></section>
+      <section><strong>Outline</strong><p>01 Experience OS<br/>02 Runtime behaviour<br/>03 Future knowledge surface</p></section>
+      <section><strong>Source</strong><p>Editorial knowledge object</p></section>
+    </aside>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const toast=document.querySelector('#toast'); const app=document.querySelector('#app');
+const notify=(m)=>{toast.textContent=m;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),1800)};
+document.querySelectorAll('[data-action]').forEach(b=>b.onclick=()=>{
+ const a=b.dataset.action;
+ if(a==='focus'){app.classList.toggle('focus');notify('Focus mode changed')}
+ if(a==='share'){navigator.share?.({title:document.title,url:location.href});notify('Share action ready')}
+ if(a==='back'){history.back()}
+ if(a==='highlight'){const s=getSelection(); if(s?.toString()) {const r=s.getRangeAt(0);const m=document.createElement('mark');r.surroundContents(m);notify('Highlight saved locally')}}
+ if(a==='speak'){speechSynthesis.speak(new SpeechSynthesisUtterance(document.querySelector('#content').innerText));notify('Narration started')}
+});
+window.addEventListener('scroll',()=>{const h=document.documentElement;document.querySelector('#progress').style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%'})
+</script>
+</body>
+</html>
