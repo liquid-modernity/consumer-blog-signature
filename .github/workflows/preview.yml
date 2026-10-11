@@ -23,7 +23,7 @@ jobs:
           PUBLIC_GIT_SHA: ${{ github.sha }}
           PUBLIC_BUILD_TIME: ${{ github.event.pull_request.updated_at }}
       - name: Deploy preview worker
-        if: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
+        if: github.event.pull_request.head.repo.full_name == github.repository
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
