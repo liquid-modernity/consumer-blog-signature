@@ -1,6 +1,5 @@
 import { defineCollection } from 'astro:content';
 import { z } from 'astro/zod';
-import { gagaContentLoader } from './gaga/content/loader';
 import { gagaDocumentSchema } from './gaga/content/schema';
 
 const dateField = z.union([z.string(), z.date()]).optional().transform((value) => (
@@ -77,7 +76,6 @@ const consumerFrontmatter = z.object({
 
 export const collections = {
   docs: defineCollection({
-    loader: gagaContentLoader(),
     schema: gagaDocumentSchema.merge(consumerFrontmatter)
   })
 };
