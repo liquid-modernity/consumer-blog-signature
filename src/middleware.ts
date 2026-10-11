@@ -5,7 +5,7 @@ export const onRequest = defineMiddleware(
   async ({ locals }, next) => {
     locals.gagaRoute = normalizeGagaRouteContext({
       id: '',
-      lang: undefined,
+      lang: 'id',
       entry: {
         data: {}
       },

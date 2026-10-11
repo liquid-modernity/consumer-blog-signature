@@ -1,5 +1,13 @@
+export interface GagaRouteTocItem {
+  depth: number;
+  text: string;
+  slug: string;
+}
+
 export interface GagaRouteContext {
   id: string;
+
+  lang?: string;
 
   entryData?: Record<string, unknown>;
 
@@ -8,7 +16,7 @@ export interface GagaRouteContext {
   };
 
   toc: {
-    items: Array<unknown>;
+    items: GagaRouteTocItem[];
   };
 
   head: Array<{
@@ -24,6 +32,8 @@ export function normalizeGagaRouteContext(
 ): GagaRouteContext {
   return {
     id: route?.id ?? '',
+
+    lang: route?.lang,
 
     entryData:
       route?.entryData ??
@@ -47,9 +57,12 @@ export function normalizeGagaRouteContext(
 
 
 export function extractGagaHeadTitle(
-  route?: GagaRouteContext | null
+  input?: GagaRouteContext | GagaRouteContext['head'] | null
 ) {
-  const data = route?.entryData ?? {};
+  const data =
+    Array.isArray(input)
+      ? {}
+      : input?.entryData ?? {};
 
   return {
     title: data.title as string | undefined,
@@ -65,7 +78,10 @@ export function filterGagaHeadEntries(
     replacedMetaNames?: string[];
   }
 ) {
-  if (!options?.replacedMetaNames?.length) {
+  const replacedMetaNames =
+    options?.replacedMetaNames ?? [];
+
+  if (!replacedMetaNames.length) {
     return entries.filter(Boolean);
   }
 
@@ -74,7 +90,7 @@ export function filterGagaHeadEntries(
 
     return !(
       name &&
-      options.replacedMetaNames.includes(name)
+      replacedMetaNames.includes(name)
     );
   });
 }
