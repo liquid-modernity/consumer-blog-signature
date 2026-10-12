@@ -2,6 +2,7 @@ import { defineCollection } from 'astro:content';
 import { z } from 'astro/zod';
 import { gagaDocumentSchema } from './gaga/content/schema';
 import { gagaContentLoader } from './gaga/content/loader';
+import { editorialRoleValues, storyFormatValues, editorialPriorityMin, editorialPriorityMax } from './config/editorial-schema';
 
 const dateField = z.union([z.string(), z.date()]).optional().transform((value) => (
   value instanceof Date ? value.toISOString().slice(0, 10) : value
@@ -14,6 +15,16 @@ const consumerFrontmatter = z.object({
   draft: z.boolean().default(false),
   featured: z.boolean().default(false),
   noindex: z.boolean().default(false),
+
+  /** Editorial/newsroom projection. Optional so ordinary blogs remain lightweight. */
+  section: z.string().optional(),
+  sectionRefs: z.array(z.string()).default([]),
+  kicker: z.string().optional(),
+  storyFormat: z.enum(storyFormatValues).default('standard'),
+  editorialRole: z.enum(editorialRoleValues).default('standard'),
+  editorialPriority: z.number().int().min(editorialPriorityMin).max(editorialPriorityMax).default(0),
+  breaking: z.boolean().default(false),
+  live: z.boolean().default(false),
 
   /** Canonical publishing metadata. */
   schemaVersion: z.union([z.string(), z.number()]).optional(),

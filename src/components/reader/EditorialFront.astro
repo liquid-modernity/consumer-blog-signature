@@ -1,0 +1,164 @@
+---
+import { contentDefaults } from '../../config/content';
+import { getEditorialFront } from '../../lib/editorial';
+import { toArticlePreview } from '../../lib/content';
+import { normalizeContentMetadata, resolveContentDateLocale } from '@gaga/engine/content';
+
+const projection = await getEditorialFront();
+const route = Astro.locals.gagaRoute;
+const metadata = normalizeContentMetadata(route?.entry?.data ?? {});
+const surfaceLocale = resolveContentDateLocale(
+  metadata.language ?? route?.lang ?? contentDefaults.defaultLanguage,
+  contentDefaults.dateLocale
+);
+const leadPreview = projection.lead
+  ? toArticlePreview(projection.lead.article, surfaceLocale, contentDefaults.preview)
+  : undefined;
+---
+
+<section class="gaga-editorial-front" aria-labelledby="editorial-front-title">
+  <header class="gaga-editorial-front__head">
+    <div>
+      <p class="gaga-editorial-front__eyebrow">Editorial Front</p>
+      <h2 id="editorial-front-title">Latest</h2>
+    </div>
+    <p>{projection.total} articles</p>
+  </header>
+
+  {projection.lead && leadPreview && (
+    <article
+      class="gaga-editorial-lead"
+      data-gaga-editorial-role={projection.lead.role}
+      data-gaga-story-format={projection.lead.format}
+      data-gaga-breaking={String(projection.lead.breaking)}
+      data-gaga-live={String(projection.lead.live)}
+    >
+      <div class="gaga-editorial-story__labels" aria-label="Story context">
+        {projection.lead.breaking && <span>Breaking</span>}
+        {projection.lead.live && <span>Live</span>}
+        {projection.lead.kicker && <span>{projection.lead.kicker}</span>}
+        {!projection.lead.kicker && projection.lead.section && <span>{projection.lead.section}</span>}
+      </div>
+      <h3>
+        <a
+          href={leadPreview.href}
+          data-gaga-preview
+          data-gaga-preview-title={leadPreview.title}
+          data-gaga-preview-href={leadPreview.href}
+          data-gaga-preview-snippet={leadPreview.snippet}
+          data-gaga-preview-topics={leadPreview.topics}
+          data-gaga-preview-tags={leadPreview.tags}
+          data-gaga-preview-read-time={leadPreview.readTime}
+          data-gaga-preview-date={leadPreview.date}
+          data-gaga-preview-updated={leadPreview.updated}
+          data-gaga-preview-author={leadPreview.author}
+        >{leadPreview.title}</a>
+      </h3>
+      {leadPreview.snippet && <p class="gaga-editorial-lead__summary">{leadPreview.snippet}</p>}
+      <p class="gaga-editorial-story__meta">
+        {[leadPreview.author, leadPreview.date, leadPreview.readTime].filter(Boolean).join(' · ')}
+      </p>
+    </article>
+  )}
+
+  {projection.highlights.length > 0 && (
+    <section class="gaga-editorial-block" aria-labelledby="editorial-highlights-title">
+      <div class="gaga-editorial-block__head">
+        <h3 id="editorial-highlights-title">Highlights</h3>
+        <span>{projection.highlights.length}</span>
+      </div>
+      <div class="gaga-editorial-grid" data-gaga-preview-scope>
+        {projection.highlights.map((story) => {
+          const preview = toArticlePreview(story.article, surfaceLocale, contentDefaults.preview);
+          return (
+            <article
+              class="gaga-editorial-card"
+              data-gaga-editorial-role={story.role}
+              data-gaga-story-format={story.format}
+            >
+              <div class="gaga-editorial-story__labels">
+                {story.breaking && <span>Breaking</span>}
+                {story.live && <span>Live</span>}
+                {story.kicker && <span>{story.kicker}</span>}
+                {!story.kicker && story.section && <span>{story.section}</span>}
+              </div>
+              <h4>
+                <a
+                  href={preview.href}
+                  data-gaga-preview
+                  data-gaga-preview-title={preview.title}
+                  data-gaga-preview-href={preview.href}
+                  data-gaga-preview-snippet={preview.snippet}
+                  data-gaga-preview-topics={preview.topics}
+                  data-gaga-preview-tags={preview.tags}
+                  data-gaga-preview-read-time={preview.readTime}
+                  data-gaga-preview-date={preview.date}
+                  data-gaga-preview-updated={preview.updated}
+                  data-gaga-preview-author={preview.author}
+                >{preview.title}</a>
+              </h4>
+              {preview.snippet && <p>{preview.snippet}</p>}
+            </article>
+          );
+        })}
+      </div>
+    </section>
+  )}
+
+  {projection.latest.length > 0 && (
+    <section class="gaga-editorial-block" aria-labelledby="editorial-latest-title">
+      <div class="gaga-editorial-block__head">
+        <h3 id="editorial-latest-title">More stories</h3>
+        <span>{projection.latest.length}</span>
+      </div>
+      <ol class="gaga-editorial-latest" data-gaga-preview-scope>
+        {projection.latest.map((story, index) => {
+          const preview = toArticlePreview(story.article, surfaceLocale, contentDefaults.preview);
+          return (
+            <li>
+              <span class="gaga-editorial-latest__index">{String(index + 1).padStart(2, '0')}</span>
+              <div>
+                <div class="gaga-editorial-story__labels">
+                  {story.kicker && <span>{story.kicker}</span>}
+                  {!story.kicker && story.section && <span>{story.section}</span>}
+                </div>
+                <a
+                  href={preview.href}
+                  data-gaga-preview
+                  data-gaga-preview-title={preview.title}
+                  data-gaga-preview-href={preview.href}
+                  data-gaga-preview-snippet={preview.snippet}
+                  data-gaga-preview-topics={preview.topics}
+                  data-gaga-preview-tags={preview.tags}
+                  data-gaga-preview-read-time={preview.readTime}
+                  data-gaga-preview-date={preview.date}
+                  data-gaga-preview-updated={preview.updated}
+                  data-gaga-preview-author={preview.author}
+                >{preview.title}</a>
+              </div>
+            </li>
+          );
+        })}
+      </ol>
+    </section>
+  )}
+
+  {projection.sections.length > 0 && (
+    <section class="gaga-editorial-sections" aria-label="Publication sections">
+      {projection.sections.map((section) => (
+        <section class="gaga-editorial-section" aria-labelledby={`section-${section.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}>
+          <div class="gaga-editorial-block__head">
+            <h3 id={`section-${section.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}>{section.name}</h3>
+            <span>{section.stories.length}</span>
+          </div>
+          <ul>
+            {section.stories.map((story) => {
+              const preview = toArticlePreview(story.article, surfaceLocale, contentDefaults.preview);
+              return <li><a href={preview.href}>{preview.title}</a></li>;
+            })}
+          </ul>
+        </section>
+      ))}
+    </section>
+  )}
+</section>

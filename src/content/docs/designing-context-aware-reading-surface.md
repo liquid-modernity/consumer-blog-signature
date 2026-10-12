@@ -14,6 +14,15 @@ topics: [Reader Experience]
 topicRefs: [consumer.topic.experience]
 tags: [design, accessibility, interaction]
 relatedRefs: [consumer.article.softcoded-systems]
+featured: true
+section: Experience
+sectionRefs: [consumer.section.experience]
+kicker: Reader Experience
+storyFormat: analysis
+editorialRole: lead
+editorialPriority: 100
+breaking: false
+live: false
 
 status: published
 visibility: public

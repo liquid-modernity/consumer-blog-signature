@@ -25,6 +25,15 @@ export interface GagaDiscoveryRecord {
   volatility?: string;
   lastReviewed?: string;
   reviewAfter?: string;
+  editorial?: {
+    section?: string;
+    role: string;
+    priority: number;
+    format: string;
+    featured: boolean;
+    breaking: boolean;
+    live: boolean;
+  };
 }
 
 export interface LegacyArticleSearchItem {
@@ -129,7 +138,16 @@ export async function buildPublicDiscoveryRecords(): Promise<GagaDiscoveryRecord
       freshnessStatus: freshness.status,
       volatility: freshness.volatility,
       ...(freshness.lastReviewed ? { lastReviewed: freshness.lastReviewed } : {}),
-      ...(freshness.reviewAfter ? { reviewAfter: freshness.reviewAfter } : {})
+      ...(freshness.reviewAfter ? { reviewAfter: freshness.reviewAfter } : {}),
+      editorial: {
+        ...(article.section ? { section: article.section } : {}),
+        role: article.editorialRole,
+        priority: article.editorialPriority,
+        format: article.storyFormat,
+        featured: article.featured,
+        breaking: article.breaking,
+        live: article.live
+      }
     });
   }
 

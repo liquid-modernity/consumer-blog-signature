@@ -14,6 +14,15 @@ topics: [Publishing Systems]
 topicRefs: [consumer.topic.publishing]
 tags: [architecture, tokens, configuration]
 relatedRefs: [consumer.article.context-aware-reading]
+featured: true
+section: Systems
+sectionRefs: [consumer.section.systems]
+kicker: Publishing Systems
+storyFormat: explainer
+editorialRole: major
+editorialPriority: 80
+breaking: false
+live: false
 
 status: published
 visibility: public

@@ -36,7 +36,12 @@ const required = [
   'architecture/local-development-policy.json',
   'scripts/local-env.sh',
   'preview_local.command',
-  'tools/audit-local-dx-source.mjs'
+  'tools/audit-local-dx-source.mjs',
+  'architecture/editorial-projection-policy.json',
+  'src/config/editorial-schema.ts',
+  'src/lib/editorial.ts',
+  'src/components/reader/EditorialFront.astro',
+  'tools/audit-editorial-projection.mjs'
 ];
 
 const missing = required.filter((file) => !fs.existsSync(file));
@@ -139,6 +144,11 @@ if (continuityFreshnessAudit.status !== 0) {
 const localDxAudit = spawnSync(process.execPath, ['tools/audit-local-dx-source.mjs'], { stdio: 'inherit' });
 if (localDxAudit.status !== 0) {
   process.exit(localDxAudit.status ?? 1);
+}
+
+const editorialAudit = spawnSync(process.execPath, ['tools/audit-editorial-projection.mjs'], { stdio: 'inherit' });
+if (editorialAudit.status !== 0) {
+  process.exit(editorialAudit.status ?? 1);
 }
 
 console.log('Signature contract OK');

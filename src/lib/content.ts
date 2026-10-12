@@ -9,6 +9,7 @@ import {
   type ArticleRecord
 } from '@gaga/engine/content';
 import { entryToHref, screenSlug } from './slug';
+import type { EditorialRole, StoryFormat } from '../config/editorial-schema';
 
 export { toArticlePreview };
 export type { ArticleMonthGroup, ArticlePreview, ArticlePreviewOptions, ArticleRecord };
@@ -26,6 +27,15 @@ export type ConsumerArticleRecord = ArticleRecord & {
   lastReviewed?: string;
   reviewAfter?: string;
   volatility?: string;
+  section?: string;
+  sectionRefs: string[];
+  kicker?: string;
+  storyFormat: StoryFormat;
+  editorialRole: EditorialRole;
+  editorialPriority: number;
+  featured: boolean;
+  breaking: boolean;
+  live: boolean;
 };
 
 export type ContentRelationKind = 'article' | 'topic' | 'author';
@@ -181,7 +191,16 @@ export async function getArticles(): Promise<ConsumerArticleRecord[]> {
           imageAlt: typeof doc.data.imageAlt === 'string' ? doc.data.imageAlt : undefined,
           lastReviewed: typeof doc.data.lastReviewed === 'string' ? doc.data.lastReviewed : undefined,
           reviewAfter: typeof doc.data.reviewAfter === 'string' ? doc.data.reviewAfter : undefined,
-          volatility: typeof doc.data.volatility === 'string' ? doc.data.volatility : undefined
+          volatility: typeof doc.data.volatility === 'string' ? doc.data.volatility : undefined,
+          section: typeof doc.data.section === 'string' ? doc.data.section : undefined,
+          sectionRefs: stringArray((doc.data as { sectionRefs?: unknown }).sectionRefs),
+          kicker: typeof doc.data.kicker === 'string' ? doc.data.kicker : undefined,
+          storyFormat: doc.data.storyFormat,
+          editorialRole: doc.data.editorialRole,
+          editorialPriority: doc.data.editorialPriority,
+          featured: doc.data.featured === true,
+          breaking: doc.data.breaking === true,
+          live: doc.data.live === true
         };
       })
       .sort((a, b) => timestamp(b.metadata.publishedAt) - timestamp(a.metadata.publishedAt));

@@ -1,0 +1,44 @@
+{
+  "schema": "gaga.editorial-projection-policy.v1",
+  "version": "0.0.40.0",
+  "principles": {
+    "canonicalContentRemainsAuthority": true,
+    "editorialFrontIsProjection": true,
+    "ordinaryBlogMetadataRemainsOptional": true,
+    "deterministicFallbackLead": true,
+    "breakingIsEditorialPresentationFlag": true,
+    "liveIsCoverageModeFlag": true,
+    "breakingOrLiveDoesNotAssertFactualCorrectness": true
+  },
+  "priority": {
+    "min": 0,
+    "max": 100
+  },
+  "roles": [
+    "lead",
+    "major",
+    "standard",
+    "brief"
+  ],
+  "formats": [
+    "standard",
+    "analysis",
+    "explainer",
+    "brief",
+    "opinion",
+    "interview",
+    "review",
+    "live"
+  ],
+  "projection": {
+    "leadSelection": [
+      "explicit-lead",
+      "breaking",
+      "featured",
+      "latest"
+    ],
+    "highlightLimit": 4,
+    "latestLimit": 12,
+    "sectionStoryLimit": 6
+  }
+}
