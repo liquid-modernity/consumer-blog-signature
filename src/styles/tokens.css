@@ -38,11 +38,11 @@
   --gaga-tooltip-ink: var(--gaga-bg);
 
   --gaga-global-nav-width: 3.5rem;
-  --gaga-left-rail-width: 15.75rem;
-  --gaga-left-rail-collapsed: 3.5rem;
+  --gaga-left-rail-width: 13.75rem;
+  --gaga-left-rail-collapsed: 3rem;
   --gaga-nav-child-panel-width: 13.75rem;
-  --gaga-right-rail-width: 16.75rem;
-  --gaga-right-rail-collapsed: 3.5rem;
+  --gaga-right-rail-width: 15.5rem;
+  --gaga-right-rail-collapsed: 3rem;
   --gaga-content-width: 42rem;
   --gaga-grid-size: 22px;
 

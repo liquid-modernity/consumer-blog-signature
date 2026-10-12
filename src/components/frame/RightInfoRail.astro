@@ -16,6 +16,8 @@ interface Props {
 const { rail, workspaceId, contextRole, contextPriority } = Astro.props;
 const hasDiscovery = (rail.discovery?.length ?? 0) > 0;
 const hasSummary = Boolean(rail.snippet);
+const contextSignalCount = (rail.facts?.length ?? 0) + (rail.discovery?.length ?? 0) + (hasSummary ? 1 : 0) + (rail.cta ? 1 : 0);
+const contextRichness = contextSignalCount >= 5 ? 'rich' : contextSignalCount >= 2 ? 'standard' : 'minimal';
 ---
 
 <button
@@ -41,6 +43,7 @@ const hasSummary = Boolean(rail.snippet);
   data-gaga-workspace={workspaceId}
   data-gaga-context-role={contextRole}
   data-gaga-context-priority={contextPriority}
+  data-gaga-context-richness={contextRichness}
   aria-label={rail.labels.railLabel.id}
   data-gaga-i18n-key={rail.labels.railLabel.key}
   data-gaga-i18n-id={rail.labels.railLabel.id}

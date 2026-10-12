@@ -55,7 +55,11 @@ const required = [
   'src/config/context-rails.ts',
   'src/config/signature-surfaces.ts',
   'src/gaga/extraction/signature-surface-contract.ts',
-  'tools/audit-context-aware-surfaces.mjs'
+  'tools/audit-context-aware-surfaces.mjs',
+  'architecture/rail-interaction-policy.json',
+  'src/scripts/systems/rail-preview.ts',
+  'src/styles/partials/_rail-polish.scss',
+  'tools/audit-rail-interaction.mjs'
 ];
 
 const missing = required.filter((file) => !fs.existsSync(file));
@@ -178,6 +182,11 @@ if (coverageAudit.status !== 0) {
 const contextSurfaceAudit = spawnSync(process.execPath, ['tools/audit-context-aware-surfaces.mjs'], { stdio: 'inherit' });
 if (contextSurfaceAudit.status !== 0) {
   process.exit(contextSurfaceAudit.status ?? 1);
+}
+
+const railInteractionAudit = spawnSync(process.execPath, ['tools/audit-rail-interaction.mjs'], { stdio: 'inherit' });
+if (railInteractionAudit.status !== 0) {
+  process.exit(railInteractionAudit.status ?? 1);
 }
 
 console.log('Signature contract OK');

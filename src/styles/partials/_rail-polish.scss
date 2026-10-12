@@ -1,0 +1,156 @@
+@use 'breakpoints' as bp;
+
+:root {
+  --gaga-rail-motion-duration: 180ms;
+  --gaga-rail-motion-ease: cubic-bezier(.2, .8, .2, 1);
+}
+
+.gaga-left-rail,
+.gaga-right-rail,
+.gaga-main-region {
+  transition-duration: var(--gaga-rail-motion-duration);
+  transition-timing-function: var(--gaga-rail-motion-ease);
+}
+
+.gaga-rail-toggle {
+  inline-size: 2.75rem;
+  min-inline-size: 2.75rem;
+  block-size: 2.75rem;
+  min-block-size: 2.75rem;
+  padding: 0;
+  border-radius: var(--gaga-radius-sm);
+}
+
+.gaga-rail-toggle:is(:focus-visible, [aria-expanded='true']) {
+  outline: 2px solid var(--gaga-focus-ring);
+  outline-offset: -2px;
+}
+
+@media (min-width: bp.$tablet-large-min) {
+  .gaga-left-rail,
+  .gaga-right-rail {
+    border-color: color-mix(in srgb, var(--gaga-line) 74%, transparent);
+  }
+
+  .gaga-left-rail[data-gaga-state='collapsed'] .gaga-left-rail__context-icon {
+    display: none;
+  }
+
+  .gaga-left-rail[data-gaga-state='collapsed'] .gaga-left-rail__context-head {
+    justify-content: center;
+    padding: .35rem .125rem 0;
+  }
+
+  .gaga-left-rail[data-gaga-state='collapsed'][data-gaga-hover-expanded='true'] .gaga-left-rail__context-icon {
+    display: grid;
+  }
+
+  .gaga-left-rail[data-gaga-state='collapsed'][data-gaga-hover-expanded='true'] .gaga-left-rail__context-head {
+    justify-content: space-between;
+    padding-inline: .55rem;
+  }
+
+  .gaga-right-rail[data-gaga-state='collapsed'] .gaga-right-rail__body,
+  .gaga-right-rail[data-gaga-state='collapsed'] .gaga-right-rail__foot,
+  .gaga-right-rail[data-gaga-state='collapsed'] .gaga-right-rail__identity,
+  .gaga-right-rail[data-gaga-state='collapsed'] .gaga-right-rail__cta {
+    display: none;
+  }
+
+  .gaga-right-rail[data-gaga-state='collapsed'] .gaga-right-rail__head {
+    justify-content: center;
+    padding: .35rem .125rem 0;
+  }
+
+  .gaga-right-rail[data-gaga-state='collapsed'][data-gaga-hover-expanded='true'] .gaga-right-rail__body {
+    display: block;
+  }
+
+  .gaga-right-rail[data-gaga-state='collapsed'][data-gaga-hover-expanded='true'] .gaga-right-rail__foot,
+  .gaga-right-rail[data-gaga-state='collapsed'][data-gaga-hover-expanded='true'] .gaga-right-rail__identity {
+    display: grid;
+  }
+
+  .gaga-right-rail[data-gaga-state='collapsed'][data-gaga-hover-expanded='true'] .gaga-right-rail__cta {
+    display: block;
+  }
+
+  .gaga-right-rail[data-gaga-state='collapsed'][data-gaga-hover-expanded='true'] .gaga-right-rail__head {
+    justify-content: space-between;
+    padding-inline: .55rem;
+  }
+
+  .gaga-left-rail[data-gaga-hover-expanded='true'],
+  .gaga-right-rail[data-gaga-hover-expanded='true'] {
+    border-color: var(--gaga-line-strong);
+    background: var(--gaga-surface-elevated);
+  }
+
+  .gaga-right-rail[data-gaga-context-richness='minimal'][data-gaga-state='expanded'] {
+    --gaga-right-rail-width: 13.5rem;
+  }
+
+  .gaga-app-frame[data-gaga-workspace-mode='reading'] .gaga-main-region {
+    --gaga-content-width: 48rem;
+  }
+}
+
+/* Tablet large: rails stay compact and never consume both sides as full panels. */
+@media (min-width: bp.$tablet-large-min) and (max-width: bp.$tablet-large-max) {
+  .gaga-left-rail,
+  .gaga-right-rail {
+    --gaga-left-rail-width: var(--gaga-left-rail-collapsed);
+    --gaga-right-rail-width: var(--gaga-right-rail-collapsed);
+  }
+}
+
+/* Tablet-mini context inspector becomes a side sheet. */
+@media (min-width: bp.$tablet-mini-min) and (max-width: bp.$compact-max) {
+  html[data-gaga-runtime='ready'] .gaga-right-rail {
+    inset: 0 0 0 auto;
+    inline-size: min(26rem, 78vw);
+    max-block-size: 100svh;
+    max-block-size: 100dvh;
+    block-size: 100svh;
+    block-size: 100dvh;
+    transform: none;
+    border-block: 0;
+    border-inline-end: 0;
+  }
+
+  .gaga-left-rail {
+    width: min(19rem, 72vw);
+  }
+}
+
+/* Mobile context inspector becomes a bottom sheet instead of a centered modal. */
+@media (max-width: bp.$mobile-max) {
+  html[data-gaga-runtime='ready'] .gaga-right-rail {
+    inset: auto 0 0 0;
+    inline-size: 100%;
+    max-block-size: min(74svh, 38rem);
+    max-block-size: min(74dvh, 38rem);
+    transform: none;
+    border-inline: 0;
+    border-block-end: 0;
+  }
+
+  html[data-gaga-runtime='ready'] .gaga-right-rail__head {
+    position: sticky;
+    inset-block-start: 0;
+    z-index: 1;
+    background: var(--gaga-surface-elevated);
+  }
+
+  .gaga-left-rail {
+    width: min(19rem, calc(100vw - 3rem));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gaga-left-rail,
+  .gaga-right-rail,
+  .gaga-main-region {
+    transition-duration: 0.001ms;
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "schema": "gaga.rail-interaction-policy.v1",
+  "version": "0.0.41.1",
+  "geometry": {
+    "leftExpandedRem": 13.75,
+    "leftCollapsedRem": 3,
+    "rightExpandedRem": 15.5,
+    "rightCollapsedRem": 3
+  },
+  "desktop": {
+    "hoverPreviewFinePointerOnly": true,
+    "hoverOpenDelayMs": 120,
+    "hoverCloseDelayMs": 220,
+    "escapeClosesHoverPreview": true,
+    "focusPreviewImmediate": true,
+    "dynamicNotchContextTriggerTogglesRightRail": true
+  },
+  "tabletLarge": {
+    "leftRail": "collapsed",
+    "rightRail": "collapsed"
+  },
+  "compact": {
+    "leftRail": "drawer",
+    "tabletMiniRightContext": "side-sheet",
+    "mobileRightContext": "bottom-sheet",
+    "modalIsolation": true,
+    "restoreFocus": true
+  },
+  "ownership": {
+    "dynamicGlobalNavigation": "global-navigation",
+    "dynamicNotchIsland": "context-trigger",
+    "dynamicOutlinePeek": "article-outline",
+    "leftRail": "route-local-context",
+    "rightRail": "context-intelligence"
+  }
+}

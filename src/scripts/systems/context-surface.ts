@@ -1,4 +1,4 @@
-import { onRuntimeEvent, requestLeftRail, requestOutline, requestReaderPanel } from '@gaga/engine-web/runtime/events';
+import { onRuntimeEvent, requestLeftRail, requestOutline, requestReaderPanel, requestRightRail } from '@gaga/engine-web/runtime/events';
 import { supportsGagaDock } from '../../config/systems';
 import { activateModalIsolation, clearModalIsolation } from './modal-isolation';
 import { registerSiteCommand, runSiteCommand } from './site-commands';
@@ -16,6 +16,22 @@ function scrim() {
 
 function compactMode() {
   return supportsGagaDock(document.documentElement.dataset.gagaLayout);
+}
+
+function desktopContextExpanded() {
+  const surface = rail();
+  return !compactMode() && (
+    surface?.dataset.gagaState === 'expanded'
+    || surface?.dataset.gagaHoverExpanded === 'true'
+  );
+}
+
+function syncTriggerState() {
+  const expanded = compactMode() ? contextSurfaceIsOpen() : desktopContextExpanded();
+  document.querySelectorAll<HTMLElement>('[data-gaga-action="toggle-context-surface"]').forEach((control) => {
+    control.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    control.dataset.gagaActive = expanded ? 'true' : 'false';
+  });
 }
 
 export function contextSurfaceIsOpen() {
@@ -70,7 +86,15 @@ function openContextSurface(trigger?: HTMLElement | null) {
 }
 
 function toggleContextSurface(trigger?: HTMLElement | null) {
-  if (!compactMode()) return false;
+  if (!compactMode()) {
+    const surface = rail();
+    if (!surface) return false;
+    const action = surface.dataset.gagaState === 'expanded' ? 'collapse' : 'open';
+    requestRightRail({ action, source: 'context-surface-toggle' });
+    window.requestAnimationFrame(syncTriggerState);
+    return true;
+  }
+
   if (contextSurfaceIsOpen()) {
     closeContextSurface();
     return true;
@@ -89,9 +113,11 @@ function syncLayout() {
     surface.removeAttribute('inert');
     scrim()?.setAttribute('hidden', '');
     clearModalIsolation('context-surface');
+    syncTriggerState();
     return;
   }
   closeContextSurface({ restoreFocus: false });
+  syncTriggerState();
 }
 
 export function initContextSurface() {
@@ -117,6 +143,15 @@ export function initContextSurface() {
     }
   });
 
+  const surface = rail();
+  if (surface) {
+    new MutationObserver(syncTriggerState).observe(surface, {
+      attributes: true,
+      attributeFilter: ['data-gaga-state', 'data-gaga-context-surface-state', 'data-gaga-hover-expanded']
+    });
+  }
+
   onRuntimeEvent('layoutChanged', syncLayout);
   syncLayout();
+  syncTriggerState();
 }
