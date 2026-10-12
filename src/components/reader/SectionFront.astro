@@ -2,6 +2,7 @@
 import { contentDefaults } from '../../config/content';
 import { toArticlePreview } from '../../lib/content';
 import type { EditorialFrontProjection, EditorialSectionSummary } from '../../lib/editorial';
+import { resolveContentDateLocale } from '@gaga/engine/content';
 
 interface Props {
   section: EditorialSectionSummary;
@@ -9,9 +10,12 @@ interface Props {
 }
 
 const { section, projection } = Astro.props;
-const locale = contentDefaults.dateLocale;
+const surfaceLocale = resolveContentDateLocale(
+  contentDefaults.defaultLanguage,
+  contentDefaults.dateLocale
+);
 const lead = projection.lead
-  ? toArticlePreview(projection.lead.article, locale, contentDefaults.preview)
+  ? toArticlePreview(projection.lead.article, surfaceLocale, contentDefaults.preview)
   : undefined;
 ---
 
@@ -47,7 +51,7 @@ const lead = projection.lead
       </div>
       <div class="gaga-editorial-grid" data-gaga-preview-scope>
         {projection.highlights.map((story) => {
-          const preview = toArticlePreview(story.article, locale, contentDefaults.preview);
+          const preview = toArticlePreview(story.article, surfaceLocale, contentDefaults.preview);
           return (
             <article class="gaga-editorial-card" data-gaga-editorial-role={story.role}>
               <div class="gaga-editorial-story__labels">
@@ -72,7 +76,7 @@ const lead = projection.lead
       </div>
       <ol class="gaga-editorial-latest">
         {projection.latest.map((story, index) => {
-          const preview = toArticlePreview(story.article, locale, contentDefaults.preview);
+          const preview = toArticlePreview(story.article, surfaceLocale, contentDefaults.preview);
           return (
             <li>
               <span class="gaga-editorial-latest__index">{String(index + 1).padStart(2, '0')}</span>

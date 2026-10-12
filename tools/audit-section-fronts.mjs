@@ -49,6 +49,26 @@ if (!discovery.includes("'section'") || !discovery.includes('getEditorialSection
   fail('sections missing from machine/search discovery');
 }
 
+
+for (const component of [
+  'src/components/reader/SectionIndex.astro',
+  'src/components/reader/SectionFront.astro'
+]) {
+  const source = read(component);
+
+  if (!source.includes('resolveContentDateLocale')) {
+    fail(`${component}: section previews must resolve ContentDateLocaleConfig into Intl.LocalesArgument`);
+  }
+
+  if (source.includes('toArticlePreview(section.lead.article, contentDefaults.dateLocale')) {
+    fail(`${component}: do not pass contentDefaults.dateLocale directly to toArticlePreview`);
+  }
+
+  if (/toArticlePreview\([^)]*,\s*locale\s*,/.test(source)) {
+    fail(`${component}: unresolved locale object passed to toArticlePreview`);
+  }
+}
+
 if (failures.length) {
   console.error('GAGA section front audit FAILED');
   for (const failure of failures) console.error(`✗ ${failure}`);

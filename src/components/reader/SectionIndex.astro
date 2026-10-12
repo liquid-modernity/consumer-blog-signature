@@ -2,8 +2,13 @@
 import { getEditorialSections } from '../../lib/editorial';
 import { toArticlePreview } from '../../lib/content';
 import { contentDefaults } from '../../config/content';
+import { resolveContentDateLocale } from '@gaga/engine/content';
 
 const sections = await getEditorialSections();
+const surfaceLocale = resolveContentDateLocale(
+  contentDefaults.defaultLanguage,
+  contentDefaults.dateLocale
+);
 ---
 
 <section class="gaga-section-index" aria-labelledby="gaga-section-index-title">
@@ -18,7 +23,7 @@ const sections = await getEditorialSections();
   <div class="gaga-section-index__grid">
     {sections.map((section) => {
       const lead = section.lead
-        ? toArticlePreview(section.lead.article, contentDefaults.dateLocale, contentDefaults.preview)
+        ? toArticlePreview(section.lead.article, surfaceLocale, contentDefaults.preview)
         : undefined;
 
       return (
