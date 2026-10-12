@@ -1,6 +1,6 @@
 import { defineConfig } from 'astro/config';
+import mdx from '@astrojs/mdx';
 import { rehypeTaskListAccessibility } from '@gaga/engine/content/task-list-accessibility';
-import { toStarlightSidebar } from './src/config/nav.ts';
 import { remarkObsidianBridge } from './src/lib/remark-obsidian.mjs';
 
 export default defineConfig({
@@ -14,6 +14,7 @@ export default defineConfig({
     remarkPlugins: [remarkObsidianBridge],
     rehypePlugins: [rehypeTaskListAccessibility]
   },
+  integrations: [mdx()],
   vite: {
     optimizeDeps: {
       include: [

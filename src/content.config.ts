@@ -78,6 +78,6 @@ const consumerFrontmatter = z.object({
 export const collections = {
   docs: defineCollection({
     loader: gagaContentLoader(),
-    schema: gagaDocumentSchema.merge(consumerFrontmatter)
+    schema: gagaDocumentSchema.extend(consumerFrontmatter.shape)
   })
 };

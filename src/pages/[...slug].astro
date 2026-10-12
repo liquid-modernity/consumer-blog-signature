@@ -4,17 +4,33 @@ import PageFrame from '../components/starlight/PageFrame.astro';
 
 export const prerender = true;
 
+function toRouteSlug(id: string): string | undefined {
+  let slug = id
+    .replace(/\.(md|mdx)$/i, '')
+    .replace(/^\/+|\/+$/g, '');
+
+  if (slug === 'index') return undefined;
+  if (slug.endsWith('/index')) slug = slug.slice(0, -'/index'.length);
+
+  return slug || undefined;
+}
+
 export async function getStaticPaths() {
   const entries = await getCollection('docs');
-
-  return entries.map((entry) => ({
+  const paths = entries.map((entry) => ({
     params: {
-      slug: entry.id
+      slug: toRouteSlug(entry.id)
     },
     props: {
       entry
     }
   }));
+
+  if (!paths.some((path) => path.params.slug === undefined)) {
+    throw new Error('[GAGA] Root content route is missing. Expected src/content/docs/index.md or index.mdx.');
+  }
+
+  return paths;
 }
 
 const { entry } = Astro.props;
