@@ -2,7 +2,7 @@ import { getCollection } from 'astro:content';
 import { normalizeGagaRouteContext } from './runtime-route';
 
 function normalizePathname(value: string) {
-  const normalized = `/${value}`
+  const normalized = `/${String(value ?? '').replace(/^\/+/, '')}`
     .replace(/^\/docs\//, '/')
     .replace(/^\/site-owned\//, '/')
     .replace(/\.(md|mdx)$/i, '')
