@@ -16,6 +16,9 @@ export default defineConfig({
   },
   integrations: [mdx()],
   vite: {
+    build: {
+      cssMinify: 'esbuild'
+    },
     optimizeDeps: {
       include: [
         '@gaga/engine',

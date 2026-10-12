@@ -5,7 +5,8 @@
   "type": "module",
   "description": "Universal, configurable high-end enterprise blog/knowledge publishing bootstrap powered by Astro and Gaga Engine.",
   "engines": {
-    "node": ">=22.0.0"
+    "node": ">=22.13.0 <23",
+    "npm": ">=10 <11"
   },
   "scripts": {
     "dev": "astro dev --host 0.0.0.0 --port 3000",
@@ -16,7 +17,10 @@
     "verify": "npm run validate:signature && npm run check && npm run build",
     "review": "./run_local.command",
     "validate:signature": "node tools/validate-signature.mjs",
-    "test": "node tools/validate-signature.mjs && node --test tools/hardening.test.mjs"
+    "test": "node tools/validate-signature.mjs && node --test tools/hardening.test.mjs",
+    "verify:toolchain": "node scripts/verify-local-toolchain.mjs",
+    "verify:full": "npm run verify:toolchain && npm run verify",
+    "bootstrap:catalina": "bash scripts/bootstrap-catalina.sh"
   },
   "dependencies": {
     "@astrojs/mdx": "7.0.8",
@@ -30,6 +34,12 @@
   },
   "devDependencies": {
     "@astrojs/check": "0.9.10",
-    "wrangler": "4.45.0"
+    "wrangler": "4.45.0",
+    "esbuild": "0.28.2",
+    "rolldown": "1.2.12"
+  },
+  "packageManager": "npm@10.9.3",
+  "overrides": {
+    "rolldown": "1.2.12"
   }
 }

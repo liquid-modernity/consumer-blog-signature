@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "iteration": "0.0.39.0",
+  "target": {
+    "platform": "darwin",
+    "arch": "x64",
+    "macosMaxMajor": 10,
+    "node": "22.19.0",
+    "nodeRange": ">=22.13.0 <23",
+    "npm": "10.9.3",
+    "go": "1.22.x"
+  },
+  "canonical": {
+    "astro": "7.2.9",
+    "astroMdx": "7.0.8",
+    "gagaEngine": "0.1.6",
+    "gagaEngineWeb": "0.1.6",
+    "gagaEngineAstro": "0.1.6",
+    "gagaEngineObsidian": "0.1.6",
+    "sass": "1.89.2",
+    "typescript": "5.8.3"
+  },
+  "resolvedCompatibility": {
+    "esbuild": "0.28.2",
+    "astroCompilerBinding": "0.4.1",
+    "rolldown": "1.2.12",
+    "napiRsWasmRuntime": "1.2.4",
+    "astroEmnapiCore": "1.11.3",
+    "astroEmnapiRuntime": "1.11.3",
+    "astroEmnapiWasiThreads": "1.2.3",
+    "rolldownEmnapiCore": "2.0.0-alpha.5",
+    "rolldownEmnapiRuntime": "2.0.0-alpha.5"
+  },
+  "policy": {
+    "allowAutomaticCoreUpgrade": false,
+    "allowNpmAuditFixForce": false,
+    "bootstrapOnceThenReuse": true,
+    "compatibilityIsolation": "nested-package-runtime",
+    "dailyRunnerMayInstall": false,
+    "packageLockReconciledByBootstrap": true
+  },
+  "buildPolicy": {
+    "cssMinifier": "esbuild",
+    "cssMinifierVersion": "0.28.2",
+    "lightningCssRequired": false,
+    "reason": "Use one deterministic Vite CSS minifier across Catalina and modern environments; avoid unsupported native CSS binaries on macOS 10.15."
+  }
+}

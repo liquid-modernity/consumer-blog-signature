@@ -22,3 +22,6 @@ Thumbs.db
 .env.production
 .env.local
 .env.*.local
+
+# Catalina compatibility runtime
+.compat/
