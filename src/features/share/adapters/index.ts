@@ -1,4 +1,3 @@
-export interface ShareAdapter {
-  name: string;
-  publish(payload: unknown): Promise<void>;
-}
+export * from "./types";
+export * from "./contracts";
+export * from "./resolver";
