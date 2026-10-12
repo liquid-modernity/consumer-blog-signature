@@ -16,6 +16,13 @@ interface Props {
   contentClass?: string;
   mainElement?: 'main' | 'div';
   shell: AppShellInput;
+  workspaceId?: string;
+  workspaceMode?: string;
+  contextIntent?: string;
+  leftContextRole?: string;
+  rightContextRole?: string;
+  mobileContextMode?: string;
+  contextPriority?: string;
 }
 
 const {
@@ -24,7 +31,14 @@ const {
   contentKind = 'page',
   contentClass = contentKind,
   mainElement = 'main',
-  shell
+  shell,
+  workspaceId = 'page',
+  workspaceMode = 'reference',
+  contextIntent = 'reference',
+  leftContextRole = 'navigation',
+  rightContextRole = 'reference',
+  mobileContextMode = 'navigation-and-context',
+  contextPriority = 'metadata'
 } = Astro.props;
 
 const showActionRuntime = pageId !== 'landing';
@@ -48,6 +62,13 @@ const showContextTrigger = runtimeContext !== 'article';
   data-gaga-content-kind={contentKind}
   data-gaga-content-class={contentClass}
   data-gaga-design-language={designContract.language}
+  data-gaga-workspace={workspaceId}
+  data-gaga-workspace-mode={workspaceMode}
+  data-gaga-context-intent={contextIntent}
+  data-gaga-context-left={leftContextRole}
+  data-gaga-context-right={rightContextRole}
+  data-gaga-context-mobile={mobileContextMode}
+  data-gaga-context-priority={contextPriority}
 >
   <GlobalNavigationRail />
   <slot name="before-main" />

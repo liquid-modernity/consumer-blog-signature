@@ -29,6 +29,7 @@ const hasContextFacts = (rail.facts?.length ?? 0) > 0;
   id="gaga-right-rail"
   class="gaga-right-rail"
   data-gaga-right-rail
+  data-gaga-context-inspector
   data-gaga-state="collapsed"
   data-gaga-context-surface-state="closed"
   data-gaga-right-rail-mode={rail.mode}
@@ -38,6 +39,7 @@ const hasContextFacts = (rail.facts?.length ?? 0) > 0;
   data-gaga-i18n-en={rail.labels.railLabel.en}
   data-gaga-i18n-target="aria"
   data-gaga-info-kind={rail.kind}
+  aria-live="off"
 >
   <div class="gaga-right-rail__head">
     <p data-gaga-i18n-key={rail.labels.railLabel.key} data-gaga-i18n-id={rail.labels.railLabel.id} data-gaga-i18n-en={rail.labels.railLabel.en}>{rail.labels.railLabel.id}</p>

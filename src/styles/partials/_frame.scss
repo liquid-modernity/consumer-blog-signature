@@ -197,3 +197,18 @@ body:has(.gaga-app-frame) {
     --gaga-content-width: 52rem;
   }
 }
+
+
+/* GAGA 0.0.38.2 shell-context contract.
+   Context identity is declarative; runtime controls presentation state. */
+:root[data-gaga-context-intent='reading'] .gaga-main-region,
+.gaga-app-frame[data-gaga-context-intent='reading'] .gaga-main-region {
+  scroll-padding-block-start: 1rem;
+}
+
+@media (max-width: bp.$compact-max) {
+  :root[data-gaga-context-mobile='navigation-only'] .gaga-context-trigger,
+  .gaga-app-frame[data-gaga-context-mobile='navigation-only'] .gaga-context-trigger {
+    display: none;
+  }
+}

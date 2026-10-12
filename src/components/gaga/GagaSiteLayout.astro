@@ -9,6 +9,7 @@ import ContentPanel from './ContentPanel.astro';
 import PageTitle from './PageTitle.astro';
 import MarkdownContent from './MarkdownContent.astro';
 import { resolveGagaWorkspace } from '../../config/workspaces';
+import { resolveGagaShellContext } from '../../config/shell-context';
 import {
   normalizeGagaRouteContext,
   type GagaRouteContext
@@ -35,6 +36,7 @@ const route = normalizeGagaRouteContext({
 });
 const language = metadata.language === 'en' ? 'en' : 'id-ID';
 const workspace = resolveGagaWorkspace(Astro.url.pathname, metadata.contentKind);
+const shellContext = resolveGagaShellContext(workspace);
 ---
 
 <!doctype html>
@@ -43,6 +45,11 @@ const workspace = resolveGagaWorkspace(Astro.url.pathname, metadata.contentKind)
   data-gaga-publishing-shell="native"
   data-gaga-workspace={workspace.id}
   data-gaga-workspace-mode={workspace.mode}
+  data-gaga-context-intent={shellContext.intent}
+  data-gaga-context-left={shellContext.left}
+  data-gaga-context-right={shellContext.right}
+  data-gaga-context-mobile={shellContext.mobile}
+  data-gaga-context-priority={shellContext.rightPriority}
 >
   <head>
     <meta charset="utf-8" />
@@ -50,7 +57,19 @@ const workspace = resolveGagaWorkspace(Astro.url.pathname, metadata.contentKind)
     <Head entryData={entryData} routeContext={route} />
   </head>
   <body>
-    <PageFrame entryData={entryData} routeContext={route}>
+    <div
+      class="gaga-visually-hidden"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+      data-gaga-context-status
+    ></div>
+    <PageFrame
+      entryData={entryData}
+      routeContext={route}
+      workspace={workspace}
+      shellContext={shellContext}
+    >
       <Fragment slot="sidebar">
         <Sidebar />
       </Fragment>

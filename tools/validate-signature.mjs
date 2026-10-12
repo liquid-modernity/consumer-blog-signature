@@ -15,7 +15,8 @@ const required = [
   'src/components/gaga/PageFrame.astro',
   'src/components/gaga/MarkdownContent.astro',
   'src/config/experience.ts',
-  'src/config/workspaces.ts'
+  'src/config/workspaces.ts',
+  'src/config/shell-context.ts'
 ];
 
 const missing = required.filter((file) => !fs.existsSync(file));
@@ -74,6 +75,28 @@ const nativeLayout = fs.readFileSync('src/components/gaga/GagaSiteLayout.astro',
 for (const marker of ['data-gaga-publishing-shell="native"', 'data-gaga-workspace=', 'resolveGagaWorkspace']) {
   if (!nativeLayout.includes(marker)) {
     console.error(`Native publishing shell workspace contract missing: ${marker}`);
+    process.exit(1);
+  }
+}
+
+
+const shellContext = fs.readFileSync('src/config/shell-context.ts', 'utf8');
+for (const marker of ['resolveGagaShellContext', 'context-first', 'rightPriority']) {
+  if (!shellContext.includes(marker)) {
+    console.error(`Shell context contract missing: ${marker}`);
+    process.exit(1);
+  }
+}
+
+for (const marker of [
+  'data-gaga-context-intent=',
+  'data-gaga-context-left=',
+  'data-gaga-context-right=',
+  'data-gaga-context-mobile=',
+  'data-gaga-context-priority='
+]) {
+  if (!nativeLayout.includes(marker)) {
+    console.error(`Native layout context projection missing: ${marker}`);
     process.exit(1);
   }
 }

@@ -8,15 +8,21 @@ import { getScreenInfo } from '../../lib/screen-info';
 import { createAppShellInput, createRightRailInput, normalizeCurrentPath } from '../frame/site-composition';
 import { normalizeContentMetadata } from '@gaga/engine/content';
 import { normalizeGagaRouteContext, type GagaRouteContext } from '../../gaga/content/runtime-route';
+import type { GagaWorkspaceDefinition } from '../../config/workspaces';
+import type { GagaShellContextContract } from '../../config/shell-context';
 
 interface Props {
   entryData: Record<string, unknown>;
   routeContext?: GagaRouteContext | null;
+  workspace: GagaWorkspaceDefinition;
+  shellContext: GagaShellContextContract;
 }
 
 const {
   entryData,
-  routeContext = Astro.locals.gagaRoute
+  routeContext = Astro.locals.gagaRoute,
+  workspace,
+  shellContext
 } = Astro.props;
 const route = normalizeGagaRouteContext({
   ...normalizeGagaRouteContext(routeContext),
@@ -55,6 +61,13 @@ const articleOutline = contentKind === 'article' && rightRail.outlineItems.lengt
   contentClass={contentClass}
   mainElement="div"
   shell={shell}
+  workspaceId={workspace.id}
+  workspaceMode={workspace.mode}
+  contextIntent={shellContext.intent}
+  leftContextRole={shellContext.left}
+  rightContextRole={shellContext.right}
+  mobileContextMode={shellContext.mobile}
+  contextPriority={shellContext.rightPriority}
 >
   <Fragment slot="before-main">
     <slot name="header" />
