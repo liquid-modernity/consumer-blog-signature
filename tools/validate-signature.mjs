@@ -59,7 +59,10 @@ const required = [
   'architecture/rail-interaction-policy.json',
   'src/scripts/systems/rail-preview.ts',
   'src/styles/partials/_rail-polish.scss',
-  'tools/audit-rail-interaction.mjs'
+  'tools/audit-rail-interaction.mjs',
+  'architecture/visual-surface-policy.json',
+  'src/styles/partials/_visual-polish.scss',
+  'tools/audit-visual-surfaces.mjs'
 ];
 
 const missing = required.filter((file) => !fs.existsSync(file));
@@ -187,6 +190,11 @@ if (contextSurfaceAudit.status !== 0) {
 const railInteractionAudit = spawnSync(process.execPath, ['tools/audit-rail-interaction.mjs'], { stdio: 'inherit' });
 if (railInteractionAudit.status !== 0) {
   process.exit(railInteractionAudit.status ?? 1);
+}
+
+const visualSurfaceAudit = spawnSync(process.execPath, ['tools/audit-visual-surfaces.mjs'], { stdio: 'inherit' });
+if (visualSurfaceAudit.status !== 0) {
+  process.exit(visualSurfaceAudit.status ?? 1);
 }
 
 console.log('Signature contract OK');

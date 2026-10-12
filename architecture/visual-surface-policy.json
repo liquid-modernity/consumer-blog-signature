@@ -1,0 +1,36 @@
+{
+  "schema": "gaga.visual-surface-policy.v1",
+  "version": "0.0.42.0",
+  "scope": "presentation-only",
+  "principles": {
+    "readingHierarchyBeforeDecoration": true,
+    "editorialDensityBeforeCardChrome": true,
+    "readerPreferencesMustNotConstrainDiscoveryCards": true,
+    "focusStatesRemainVisible": true,
+    "reducedMotionRespected": true,
+    "noRouteOrContentAuthorityChanges": true,
+    "signatureSurfaceOwnershipFrozen": true
+  },
+  "reviewMatrix": {
+    "workspaces": [
+      "latest",
+      "article",
+      "sections",
+      "topics",
+      "tags",
+      "authors",
+      "archive",
+      "library",
+      "search",
+      "reference",
+      "system"
+    ],
+    "viewports": [
+      "desktop-wide",
+      "desktop-laptop",
+      "tablet-large",
+      "tablet-mini",
+      "mobile"
+    ]
+  }
+}
