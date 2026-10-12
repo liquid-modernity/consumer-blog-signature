@@ -151,7 +151,9 @@ export const localeDictionary = {
     'continuity.kindBookmark': 'Markah',
     'continuity.savedBookmarkMeta': 'Disimpan di perangkat ini',
     'continuity.localBrowser': 'Perangkat ini',
-    'continuity.readSuffix': 'dibaca'
+    'continuity.readSuffix': 'dibaca',
+    'continuity.clearHistory': 'Hapus riwayat baca',
+    'continuity.historyCleared': 'Riwayat baca di perangkat ini telah dihapus'
   },
   en: {
     'navigation.home': 'Home',
@@ -296,7 +298,9 @@ export const localeDictionary = {
     'continuity.kindBookmark': 'Bookmark',
     'continuity.savedBookmarkMeta': 'Saved on this device',
     'continuity.localBrowser': 'This device',
-    'continuity.readSuffix': 'read'
+    'continuity.readSuffix': 'read',
+    'continuity.clearHistory': 'Clear reading history',
+    'continuity.historyCleared': 'Reading history on this device has been cleared'
   }
 } as const;
 

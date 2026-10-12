@@ -23,6 +23,9 @@ export type ConsumerArticleRecord = ArticleRecord & {
   relatedRefs: string[];
   image?: string;
   imageAlt?: string;
+  lastReviewed?: string;
+  reviewAfter?: string;
+  volatility?: string;
 };
 
 export type ContentRelationKind = 'article' | 'topic' | 'author';
@@ -175,7 +178,10 @@ export async function getArticles(): Promise<ConsumerArticleRecord[]> {
           tags: stringArray(doc.data.tags),
           relatedRefs: stringArray(doc.data.relatedRefs),
           image: typeof doc.data.image === 'string' ? doc.data.image : undefined,
-          imageAlt: typeof doc.data.imageAlt === 'string' ? doc.data.imageAlt : undefined
+          imageAlt: typeof doc.data.imageAlt === 'string' ? doc.data.imageAlt : undefined,
+          lastReviewed: typeof doc.data.lastReviewed === 'string' ? doc.data.lastReviewed : undefined,
+          reviewAfter: typeof doc.data.reviewAfter === 'string' ? doc.data.reviewAfter : undefined,
+          volatility: typeof doc.data.volatility === 'string' ? doc.data.volatility : undefined
         };
       })
       .sort((a, b) => timestamp(b.metadata.publishedAt) - timestamp(a.metadata.publishedAt));
@@ -240,7 +246,10 @@ export async function getAuthors(): Promise<AuthorRecord[]> {
           tags: stringArray(doc.data.tags),
           relatedRefs: stringArray(doc.data.relatedRefs),
           image: typeof doc.data.image === 'string' ? doc.data.image : undefined,
-          imageAlt: typeof doc.data.imageAlt === 'string' ? doc.data.imageAlt : undefined
+          imageAlt: typeof doc.data.imageAlt === 'string' ? doc.data.imageAlt : undefined,
+          lastReviewed: typeof doc.data.lastReviewed === 'string' ? doc.data.lastReviewed : undefined,
+          reviewAfter: typeof doc.data.reviewAfter === 'string' ? doc.data.reviewAfter : undefined,
+          volatility: typeof doc.data.volatility === 'string' ? doc.data.volatility : undefined
         };
       })
       .sort((a, b) => a.title.localeCompare(b.title));
@@ -293,6 +302,9 @@ export async function getTopicGroups(): Promise<TopicGroup[]> {
           summary: metadata.summary ?? metadata.description,
           image: typeof doc.data.image === 'string' ? doc.data.image : undefined,
           imageAlt: typeof doc.data.imageAlt === 'string' ? doc.data.imageAlt : undefined,
+          lastReviewed: typeof doc.data.lastReviewed === 'string' ? doc.data.lastReviewed : undefined,
+          reviewAfter: typeof doc.data.reviewAfter === 'string' ? doc.data.reviewAfter : undefined,
+          volatility: typeof doc.data.volatility === 'string' ? doc.data.volatility : undefined,
           articles: memberArticles,
           count: memberArticles.length
         };

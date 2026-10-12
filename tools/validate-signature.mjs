@@ -28,7 +28,11 @@ const required = [
   'src/pages/agent.json.ts',
   'src/pages/llms.txt.ts',
   'architecture/discovery-policy.json',
-  'tools/audit-discovery-source.mjs'
+  'tools/audit-discovery-source.mjs',
+  'architecture/reading-continuity-policy.json',
+  'architecture/freshness-policy.json',
+  'src/config/freshness.ts',
+  'tools/audit-continuity-freshness-source.mjs'
 ];
 
 const missing = required.filter((file) => !fs.existsSync(file));
@@ -121,6 +125,11 @@ if (policyAudit.status !== 0) {
 const discoveryAudit = spawnSync(process.execPath, ['tools/audit-discovery-source.mjs'], { stdio: 'inherit' });
 if (discoveryAudit.status !== 0) {
   process.exit(discoveryAudit.status ?? 1);
+}
+
+const continuityFreshnessAudit = spawnSync(process.execPath, ['tools/audit-continuity-freshness-source.mjs'], { stdio: 'inherit' });
+if (continuityFreshnessAudit.status !== 0) {
+  process.exit(continuityFreshnessAudit.status ?? 1);
 }
 
 console.log('Signature contract OK');

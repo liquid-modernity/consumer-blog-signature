@@ -68,6 +68,7 @@ function nowIso() {
 function currentArticle() {
   const frame = document.querySelector<HTMLElement>('[data-gaga-app-frame]');
   if (!frame || frame.dataset.gagaContentKind !== 'article') return null;
+  if (frame.dataset.gagaContinuityEligible !== 'true') return null;
   return {
     id: frame.dataset.gagaPageId ?? location.pathname,
     href: location.pathname,
@@ -559,6 +560,16 @@ function wireClicks() {
     if (savedRemove) {
       const itemRoot = savedRemove.closest<HTMLElement>('[data-gaga-continuity-item]');
       if (itemRoot?.dataset.gagaContinuityId) removeSavedBookmark(itemRoot.dataset.gagaContinuityId);
+      return;
+    }
+
+    const clearHistory = target?.closest<HTMLElement>('[data-gaga-continuity-clear-history]');
+    if (clearHistory) {
+      writeContinuityState([], undefined);
+      latestHeading = null;
+      renderArticleControls();
+      renderSavedScreen();
+      requestToast({ message: i18nText('continuity.historyCleared', currentReaderLanguage()), tone: 'info' });
       return;
     }
 

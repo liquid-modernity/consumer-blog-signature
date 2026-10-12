@@ -2,6 +2,7 @@
 import SeoHead from '../seo/SeoHead.astro';
 import { resolveAuthorRefs } from '../../lib/content';
 import { normalizeContentMetadata } from '@gaga/engine/content';
+import { resolveFreshnessAuthority } from '../../config/freshness';
 import {
   extractGagaHeadTitle,
   filterGagaHeadEntries,
@@ -32,9 +33,10 @@ const data = normalizeContentMetadata({
   ...(resolvedAuthors[0] ? { author: resolvedAuthors[0].title } : {})
 });
 const { title, socialTitle } = extractGagaHeadTitle(route);
+const freshness = resolveFreshnessAuthority(entryData);
 const shouldNoindex = data.noindex === true || Astro.url.pathname === '/404' || Astro.url.pathname === '/offline.html';
 const renderedHead = filterGagaHeadEntries(route.head, {
-  replacedMetaNames: ['gaga:summary', 'gaga:search-index', 'gaga:machine-index', 'gaga:agent', 'gaga:llms']
+  replacedMetaNames: ['gaga:summary', 'gaga:search-index', 'gaga:machine-index', 'gaga:agent', 'gaga:llms', 'gaga:freshness-status', 'gaga:freshness-volatility', 'gaga:last-reviewed', 'gaga:review-after']
 });
 ---
 
@@ -46,3 +48,8 @@ const renderedHead = filterGagaHeadEntries(route.head, {
   noindex={shouldNoindex}
   locale={route.lang === 'en' ? 'en' : 'id-ID'}
 />
+
+<meta name="gaga:freshness-status" content={freshness.status} />
+<meta name="gaga:freshness-volatility" content={freshness.volatility} />
+{freshness.lastReviewed && <meta name="gaga:last-reviewed" content={freshness.lastReviewed} />}
+{freshness.reviewAfter && <meta name="gaga:review-after" content={freshness.reviewAfter} />}

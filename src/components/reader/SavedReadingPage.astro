@@ -17,7 +17,8 @@ const copy = {
   noBookmarks: i18nLabel('continuity.noBookmarks'),
   noBookmarksHint: i18nLabel('continuity.noBookmarksHint'),
   noProgress: i18nLabel('continuity.noProgress'),
-  noProgressHint: i18nLabel('continuity.noProgressHint')
+  noProgressHint: i18nLabel('continuity.noProgressHint'),
+  clearHistory: i18nLabel('continuity.clearHistory')
 };
 ---
 <section class="gaga-saved-screen" data-gaga-saved-page aria-labelledby="saved-title">
@@ -152,6 +153,14 @@ const copy = {
     <div class="gaga-saved-section__head">
       <h3 id="gaga-saved-status-title">Riwayat Baca & Progres</h3>
       <p>Jejak pembacaan dan kontinuitas posisi baca Anda di seluruh artikel.</p>
+      <button
+        type="button"
+        class="gaga-btn gaga-btn--sm gaga-btn--ghost"
+        data-gaga-continuity-clear-history
+        data-gaga-i18n-key={copy.clearHistory.key}
+        data-gaga-i18n-id={copy.clearHistory.id}
+        data-gaga-i18n-en={copy.clearHistory.en}
+      >{copy.clearHistory.id}</button>
     </div>
     <div class="gaga-saved-inventory" data-gaga-continuity-status-inventory data-gaga-preview-scope aria-live="polite">
       <div class="gaga-empty-inventory">

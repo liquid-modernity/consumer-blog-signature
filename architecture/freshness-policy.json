@@ -1,0 +1,25 @@
+{
+  "schema": "gaga.freshness-policy.v1",
+  "version": "0.0.38.5",
+  "fields": {
+    "lastReviewed": "ISO-compatible date of the last editorial review",
+    "reviewAfter": "ISO-compatible date after which review is due",
+    "volatility": [
+      "low",
+      "medium",
+      "high"
+    ]
+  },
+  "states": [
+    "unknown",
+    "reviewed",
+    "current",
+    "review-due"
+  ],
+  "authority": "frontmatter-owned, projected by GAGA",
+  "claims": {
+    "unknownDoesNotMeanStale": true,
+    "reviewDueDoesNotMeanIncorrect": true,
+    "freshnessSignalsDoNotReplaceEditorialJudgment": true
+  }
+}

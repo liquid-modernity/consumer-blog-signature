@@ -4,6 +4,7 @@ import { discoveryConfig } from '../config/discovery';
 import { seoConfig } from '../config/seo';
 import { siteConfig } from '../config/site';
 import { GAGA_WORKSPACES } from '../config/workspaces';
+import { resolveFreshnessAuthority } from '../config/freshness';
 import { getArticles, getAuthors, getTagGroups, getTopicGroups } from './content';
 
 export type GagaDiscoveryKind = 'article' | 'author' | 'topic' | 'tag' | 'workspace';
@@ -20,6 +21,10 @@ export interface GagaDiscoveryRecord {
   topics?: string[];
   publishedAt?: string;
   updatedAt?: string;
+  freshnessStatus?: string;
+  volatility?: string;
+  lastReviewed?: string;
+  reviewAfter?: string;
 }
 
 export interface LegacyArticleSearchItem {
@@ -104,6 +109,11 @@ export async function buildPublicDiscoveryRecords(): Promise<GagaDiscoveryRecord
   for (const article of articles) {
     const title = article.metadata.title;
     const description = article.metadata.summary ?? article.metadata.description;
+    const freshness = resolveFreshnessAuthority({
+      lastReviewed: article.lastReviewed,
+      reviewAfter: article.reviewAfter,
+      volatility: article.volatility
+    });
     records.push({
       id: article.contentId ?? `article:${article.id}`,
       kind: 'article',
@@ -115,7 +125,11 @@ export async function buildPublicDiscoveryRecords(): Promise<GagaDiscoveryRecord
       tags: article.metadata.tags,
       topics: article.metadata.topics,
       ...(article.metadata.publishedAt ? { publishedAt: article.metadata.publishedAt } : {}),
-      ...(article.metadata.updatedAt ? { updatedAt: article.metadata.updatedAt } : {})
+      ...(article.metadata.updatedAt ? { updatedAt: article.metadata.updatedAt } : {}),
+      freshnessStatus: freshness.status,
+      volatility: freshness.volatility,
+      ...(freshness.lastReviewed ? { lastReviewed: freshness.lastReviewed } : {}),
+      ...(freshness.reviewAfter ? { reviewAfter: freshness.reviewAfter } : {})
     });
   }
 

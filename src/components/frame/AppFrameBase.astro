@@ -23,6 +23,11 @@ interface Props {
   rightContextRole?: string;
   mobileContextMode?: string;
   contextPriority?: string;
+  continuityEligible?: boolean;
+  freshnessStatus?: string;
+  freshnessVolatility?: string;
+  lastReviewed?: string;
+  reviewAfter?: string;
 }
 
 const {
@@ -38,7 +43,12 @@ const {
   leftContextRole = 'navigation',
   rightContextRole = 'reference',
   mobileContextMode = 'navigation-and-context',
-  contextPriority = 'metadata'
+  contextPriority = 'metadata',
+  continuityEligible = false,
+  freshnessStatus = 'unknown',
+  freshnessVolatility = 'unknown',
+  lastReviewed,
+  reviewAfter
 } = Astro.props;
 
 const showActionRuntime = pageId !== 'landing';
@@ -69,6 +79,11 @@ const showContextTrigger = runtimeContext !== 'article';
   data-gaga-context-right={rightContextRole}
   data-gaga-context-mobile={mobileContextMode}
   data-gaga-context-priority={contextPriority}
+  data-gaga-continuity-eligible={String(continuityEligible)}
+  data-gaga-freshness-status={freshnessStatus}
+  data-gaga-freshness-volatility={freshnessVolatility}
+  data-gaga-last-reviewed={lastReviewed}
+  data-gaga-review-after={reviewAfter}
 >
   <GlobalNavigationRail />
   <slot name="before-main" />

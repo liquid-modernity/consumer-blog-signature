@@ -1,0 +1,23 @@
+{
+  "schema": "gaga.reading-continuity-policy.v1",
+  "version": "0.0.38.5",
+  "storage": {
+    "key": "gaga:continuity:v1",
+    "scope": "browser-local",
+    "maxItems": 40,
+    "retentionDays": 180,
+    "userResettable": true
+  },
+  "eligibility": {
+    "contentKind": "article",
+    "requiresPublished": true,
+    "requiresPublicVisibility": true,
+    "excludeDraft": true,
+    "excludeNoindex": true
+  },
+  "privacy": {
+    "serverSync": false,
+    "crossSiteTracking": false,
+    "thirdPartyStorage": false
+  }
+}
