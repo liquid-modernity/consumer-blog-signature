@@ -1,0 +1,42 @@
+---
+import { normalizeContentMetadata } from '@gaga/engine/content';
+
+interface Props {
+  entryData: Record<string, unknown>;
+}
+
+const { entryData } = Astro.props;
+const metadata = normalizeContentMetadata(entryData);
+const isArticle = metadata.contentKind === 'article';
+---
+{isArticle ? (
+  <slot />
+) : (
+  <div class="content-panel">
+    <div class="gaga-content-container"><slot /></div>
+  </div>
+)}
+
+<style>
+  @layer gaga.core {
+    .content-panel {
+      padding: 1.5rem var(--gaga-space-4);
+    }
+    .content-panel + .content-panel {
+      border-top: 1px solid var(--gaga-line);
+    }
+    .gaga-content-container {
+      max-width: var(--gaga-content-width);
+    }
+
+    .gaga-content-container > :global(* + *) {
+      margin-top: 1.5rem;
+    }
+
+    @media (min-width: 72rem) {
+      .gaga-content-container {
+        margin-inline: auto;
+      }
+    }
+  }
+</style>

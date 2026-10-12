@@ -7,12 +7,24 @@ import { getArticles, getAuthors, getTagGroups, getTopicGroups } from '../../lib
 import { getScreenInfo } from '../../lib/screen-info';
 import { createAppShellInput, createRightRailInput, normalizeCurrentPath } from '../frame/site-composition';
 import { normalizeContentMetadata } from '@gaga/engine/content';
-import { normalizeGagaRouteContext } from '../../gaga/content/runtime-route';
+import { normalizeGagaRouteContext, type GagaRouteContext } from '../../gaga/content/runtime-route';
 
-const gagaRoute = Astro.locals.gagaRoute;
-const route = normalizeGagaRouteContext(gagaRoute);
-const metadata = normalizeContentMetadata(route.entryData as Record<string, unknown>);
-const pageId = gagaRoute?.id ?? Astro.url.pathname;
+interface Props {
+  entryData: Record<string, unknown>;
+  routeContext?: GagaRouteContext | null;
+}
+
+const {
+  entryData,
+  routeContext = Astro.locals.gagaRoute
+} = Astro.props;
+const route = normalizeGagaRouteContext({
+  ...normalizeGagaRouteContext(routeContext),
+  entryData,
+  entry: { data: entryData }
+});
+const metadata = normalizeContentMetadata(entryData);
+const pageId = route.id || Astro.url.pathname;
 const pageTitle = metadata.title ?? 'Consumer Blog Signature';
 const contentKind = metadata.contentKind ?? 'page';
 const contentClass = metadata.contentClass ?? contentKind;
@@ -26,9 +38,9 @@ const [articles, authors, topicGroups, tagGroups] = await Promise.all([
 const rightRail = createRightRailInput(getScreenInfo({
   pathname: Astro.url.pathname,
   data: metadata,
-  language: route?.lang,
+  language: route.lang,
   defaults: contentDefaults,
-  tocItems: gagaRoute?.toc?.items ?? [],
+  tocItems: route.toc.items,
   articles,
   authors,
   topicGroups,

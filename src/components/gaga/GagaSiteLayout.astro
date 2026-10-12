@@ -1,0 +1,63 @@
+---
+import '../../styles/tokens.css';
+import '../../styles/signature.scss';
+import { normalizeContentMetadata } from '@gaga/engine/content';
+import Head from './Head.astro';
+import PageFrame from './PageFrame.astro';
+import Sidebar from './Sidebar.astro';
+import ContentPanel from './ContentPanel.astro';
+import PageTitle from './PageTitle.astro';
+import MarkdownContent from './MarkdownContent.astro';
+import {
+  normalizeGagaRouteContext,
+  type GagaRouteContext
+} from '../../gaga/content/runtime-route';
+
+interface Props {
+  entryData: Record<string, unknown>;
+  routeContext?: GagaRouteContext | null;
+}
+
+const {
+  entryData,
+  routeContext = Astro.locals.gagaRoute
+} = Astro.props;
+
+const metadata = normalizeContentMetadata(entryData);
+const baseRoute = normalizeGagaRouteContext(routeContext);
+const route = normalizeGagaRouteContext({
+  ...baseRoute,
+  id: baseRoute.id || Astro.url.pathname,
+  lang: baseRoute.lang ?? metadata.language,
+  entryData,
+  entry: { data: entryData }
+});
+const language = metadata.language === 'en' ? 'en' : 'id-ID';
+---
+
+<!doctype html>
+<html lang={language} data-gaga-publishing-shell="native">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <Head entryData={entryData} routeContext={route} />
+  </head>
+  <body>
+    <PageFrame entryData={entryData} routeContext={route}>
+      <Fragment slot="sidebar">
+        <Sidebar />
+      </Fragment>
+
+      <div class="main-pane">
+        <ContentPanel entryData={entryData}>
+          <PageTitle entryData={entryData} routeId={route.id} />
+        </ContentPanel>
+        <ContentPanel entryData={entryData}>
+          <MarkdownContent entryData={entryData} routeContext={route}>
+            <slot />
+          </MarkdownContent>
+        </ContentPanel>
+      </div>
+    </PageFrame>
+  </body>
+</html>

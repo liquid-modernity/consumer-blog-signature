@@ -1,14 +1,6 @@
 ---
-import '../styles/tokens.css';
-import '../styles/signature.scss';
 import { getCollection, render } from 'astro:content';
-import Head from '../components/starlight/Head.astro';
-import PageFrame from '../components/starlight/PageFrame.astro';
-import Sidebar from '../components/starlight/Sidebar.astro';
-import ContentPanel from '../components/starlight/ContentPanel.astro';
-import PageTitle from '../components/starlight/PageTitle.astro';
-import MarkdownContent from '../components/starlight/MarkdownContent.astro';
-import { normalizeContentMetadata } from '@gaga/engine/content';
+import GagaSiteLayout from '../components/gaga/GagaSiteLayout.astro';
 
 export const prerender = true;
 
@@ -48,32 +40,9 @@ if (!entry) {
 }
 
 const { Content } = await render(entry);
-const metadata = normalizeContentMetadata(entry.data as Record<string, unknown>);
-const language = metadata.language === 'en' ? 'en' : 'id-ID';
+const entryData = entry.data as Record<string, unknown>;
 ---
 
-<html lang={language}>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <Head />
-  </head>
-  <body>
-    <PageFrame>
-      <Fragment slot="sidebar">
-        <Sidebar />
-      </Fragment>
-
-      <div class="main-pane">
-        <ContentPanel>
-          <PageTitle />
-        </ContentPanel>
-        <ContentPanel>
-          <MarkdownContent>
-            <Content />
-          </MarkdownContent>
-        </ContentPanel>
-      </div>
-    </PageFrame>
-  </body>
-</html>
+<GagaSiteLayout entryData={entryData} routeContext={Astro.locals.gagaRoute}>
+  <Content />
+</GagaSiteLayout>

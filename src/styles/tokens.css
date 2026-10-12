@@ -63,17 +63,6 @@
   --gaga-z-sheet: 50;
   --gaga-z-panel: 60;
 
-  --sl-color-accent-low: var(--gaga-blue-soft);
-  --sl-color-accent: var(--gaga-blue);
-  --sl-color-accent-high: var(--gaga-ink);
-  --sl-color-white: var(--gaga-bg);
-  --sl-color-gray-1: var(--gaga-ink);
-  --sl-color-gray-2: var(--gaga-tertiary);
-  --sl-color-gray-3: var(--gaga-muted);
-  --sl-color-gray-4: var(--gaga-tertiary);
-  --sl-color-gray-5: var(--gaga-surface-2);
-  --sl-color-gray-6: var(--gaga-surface);
-  --sl-color-black: var(--gaga-ink);
 
   --gaga-font-display: Helvetica, "Helvetica", sans-serif;
   --gaga-font-ui: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -112,10 +101,6 @@
   --gaga-type-caption-size: 0.76rem;
   --gaga-type-caption-line-height: 1.45;
   --gaga-type-code-size: 0.92em;
-  --sl-font: var(--gaga-font-ui);
-  --sl-font-mono: var(--gaga-font-mono);
-  --sl-content-width: var(--gaga-content-width);
-  --sl-sidebar-width: var(--gaga-left-rail-width);
 }
 
 :root[data-gaga-theme='dark'],
@@ -207,15 +192,4 @@ body[data-gaga-theme='sepia'] {
   --gaga-blue: var(--gaga-color-interactive);
   --gaga-blue-soft: var(--gaga-color-interactive-active);
   --gaga-focus-ring: var(--gaga-color-focus);
-  --sl-color-white: var(--gaga-ink);
-  --sl-color-black: var(--gaga-bg);
-  --sl-color-text: var(--gaga-muted);
-  --sl-color-text-accent: var(--gaga-blue);
-  --sl-color-bg: var(--gaga-bg);
-  --sl-color-bg-nav: var(--gaga-surface);
-  --sl-color-bg-sidebar: var(--gaga-surface);
-  --sl-color-bg-inline-code: var(--gaga-surface-2);
-  --sl-color-hairline-light: var(--gaga-line);
-  --sl-color-hairline: var(--gaga-line);
-  --sl-color-hairline-shade: var(--gaga-line-strong);
 }

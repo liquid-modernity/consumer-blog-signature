@@ -47,7 +47,7 @@ body:has(.gaga-app-frame) {
   padding-inline-end: 0;
 }
 
-.sl-container,
+.gaga-content-container,
 .gaga-main-region .main-pane,
 .content-panel,
 .gaga-markdown-content {
@@ -56,7 +56,7 @@ body:has(.gaga-app-frame) {
 }
 
 .gaga-main-region .main-pane,
-.sl-container,
+.gaga-content-container,
 .content-panel,
 .gaga-markdown-content {
   margin-inline: auto;
@@ -159,11 +159,6 @@ body:has(.gaga-app-frame) {
     padding-inline: var(--gaga-left-rail-collapsed) var(--gaga-right-rail-collapsed);
   }
 }
-/* Stable Starlight wrapper overrides. Avoid .astro-* hashes; these classes are emitted by Starlight. */
-.gaga-main-region .lg\:sl-flex {
-  display: block !important;
-}
-
 .gaga-main-region .content-panel {
   padding: 0.5rem 0;
 }

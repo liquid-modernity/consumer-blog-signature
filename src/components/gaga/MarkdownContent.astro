@@ -10,9 +10,23 @@ import { getArticles, getAuthorBySlug, getAuthors, getTagGroups, getTopicGroups 
 import { getScreenInfo } from '../../lib/screen-info';
 import type { BreadcrumbItem } from '../../lib/page-context';
 import { normalizeContentMetadata } from '@gaga/engine/content';
+import { normalizeGagaRouteContext, type GagaRouteContext } from '../../gaga/content/runtime-route';
 
-const route = Astro.locals.gagaRoute;
-const metadata = normalizeContentMetadata((route?.entry?.data ?? {}) as Record<string, unknown>);
+interface Props {
+  entryData: Record<string, unknown>;
+  routeContext?: GagaRouteContext | null;
+}
+
+const {
+  entryData,
+  routeContext = Astro.locals.gagaRoute
+} = Astro.props;
+const route = normalizeGagaRouteContext({
+  ...normalizeGagaRouteContext(routeContext),
+  entryData,
+  entry: { data: entryData }
+});
+const metadata = normalizeContentMetadata(entryData);
 const isArticle = metadata.contentKind === 'article';
 const isAuthor = metadata.contentKind === 'author';
 const isTopic = metadata.contentKind === 'topic';

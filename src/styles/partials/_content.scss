@@ -124,10 +124,6 @@
   --gaga-content-width: min(68rem, calc(100vw - 2rem));
 }
 
-.gaga-app-frame[data-gaga-page-id='search'] .gaga-markdown-content > .sl-heading-wrapper:first-child {
-  display: none;
-}
-
 .gaga-app-frame[data-gaga-page-id='search'] :where(.right-sidebar, .gaga-right-rail) {
   display: none;
 }
@@ -449,7 +445,7 @@ button.gaga-search-card {
   }
 }
 
-/* Context-aware Starlight content tuning.
+/* Context-aware GAGA content tuning.
    The frame decides the reading rhythm from frontmatter contentKind/contentClass,
    so article pages do not inherit the oversized index display treatment. */
 .gaga-app-frame .hero,
@@ -842,8 +838,6 @@ button.gaga-search-card {
 
 .gaga-app-frame[data-gaga-content-kind='article'] .gaga-markdown-content .gaga-aside {
   --gaga-aside-accent: var(--gaga-blue);
-  --sl-color-asides-border: var(--gaga-aside-accent);
-  --sl-color-asides-text-accent: var(--gaga-aside-accent);
   color: var(--gaga-ink);
   border: 0;
   border-inline-start-width: .25rem;
@@ -882,7 +876,6 @@ button.gaga-search-card {
     overflow: hidden;
   }
 
-  .gaga-app-frame[data-gaga-content-kind='article'] .gaga-main-region > .lg\:sl-flex,
   .gaga-app-frame[data-gaga-content-kind='article'] .gaga-main-region .main-pane {
     block-size: 100%;
     min-block-size: 0;

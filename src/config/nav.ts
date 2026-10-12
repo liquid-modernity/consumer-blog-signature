@@ -75,13 +75,3 @@ export const navGroups: NavGroup[] = [
     item('rss', 'navigation.rss', '/rss.xml', 'rss_feed')
   ]),
 ];
-
-export function toStarlightSidebar() {
-  return [
-    ...primaryNav.map((navItem) => ({ label: navItem.label, link: navItem.href })),
-    ...navGroups.map((navGroup) => ({
-      label: navGroup.label,
-      items: navGroup.items.map((navItem) => ({ label: navItem.label, link: navItem.href }))
-    }))
-  ];
-}
