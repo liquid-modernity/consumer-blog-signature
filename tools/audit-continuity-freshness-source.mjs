@@ -52,6 +52,45 @@ for (const marker of ['gaga:freshness-status', 'gaga:freshness-volatility']) {
   if (!head.includes(marker)) fail(`head freshness projection missing: ${marker}`);
 }
 
+
+const contentSource = read('src/lib/content.ts');
+
+function sectionBetween(startMarker, endMarker) {
+  const start = contentSource.indexOf(startMarker);
+  const end = contentSource.indexOf(endMarker, start);
+  return start >= 0 && end > start ? contentSource.slice(start, end) : '';
+}
+
+const articleProjection = sectionBetween(
+  'export async function getArticles()',
+  'export function groupArticlesByMonth'
+);
+const authorProjection = sectionBetween(
+  'export async function getAuthors()',
+  'export async function getAuthorByRef'
+);
+const topicProjection = sectionBetween(
+  'export async function getTopicGroups()',
+  'export async function getTagGroups()'
+);
+
+for (const field of ['lastReviewed:', 'reviewAfter:', 'volatility:']) {
+  if (!articleProjection.includes(field)) {
+    fail(`ConsumerArticleRecord projection missing freshness field ${field}`);
+  }
+}
+
+for (const [label, projection] of [
+  ['AuthorRecord', authorProjection],
+  ['TopicGroup', topicProjection]
+]) {
+  for (const field of ['lastReviewed:', 'reviewAfter:', 'volatility:']) {
+    if (projection.includes(field)) {
+      fail(`${label} projection must not receive article freshness field ${field}`);
+    }
+  }
+}
+
 if (failures.length) {
   console.error('GAGA continuity/freshness source audit FAILED');
   for (const failure of failures) console.error(`✗ ${failure}`);
