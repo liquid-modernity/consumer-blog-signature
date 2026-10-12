@@ -34,7 +34,7 @@ const data = normalizeContentMetadata({
 const { title, socialTitle } = extractGagaHeadTitle(route);
 const shouldNoindex = data.noindex === true || Astro.url.pathname === '/404' || Astro.url.pathname === '/offline.html';
 const renderedHead = filterGagaHeadEntries(route.head, {
-  replacedMetaNames: ['gaga:summary', 'gaga:search-index', 'gaga:llms']
+  replacedMetaNames: ['gaga:summary', 'gaga:search-index', 'gaga:machine-index', 'gaga:agent', 'gaga:llms']
 });
 ---
 

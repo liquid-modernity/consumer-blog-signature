@@ -21,7 +21,14 @@ const required = [
   'architecture/performance-budget.json',
   'architecture/accessibility-policy.json',
   'architecture/security-privacy-policy.json',
-  'tools/audit-policy-source.mjs'
+  'tools/audit-policy-source.mjs',
+  'src/config/discovery.ts',
+  'src/lib/discovery.ts',
+  'src/pages/machine.json.ts',
+  'src/pages/agent.json.ts',
+  'src/pages/llms.txt.ts',
+  'architecture/discovery-policy.json',
+  'tools/audit-discovery-source.mjs'
 ];
 
 const missing = required.filter((file) => !fs.existsSync(file));
@@ -109,6 +116,11 @@ for (const marker of [
 const policyAudit = spawnSync(process.execPath, ['tools/audit-policy-source.mjs'], { stdio: 'inherit' });
 if (policyAudit.status !== 0) {
   process.exit(policyAudit.status ?? 1);
+}
+
+const discoveryAudit = spawnSync(process.execPath, ['tools/audit-discovery-source.mjs'], { stdio: 'inherit' });
+if (discoveryAudit.status !== 0) {
+  process.exit(discoveryAudit.status ?? 1);
 }
 
 console.log('Signature contract OK');

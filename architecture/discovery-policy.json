@@ -1,0 +1,32 @@
+{
+  "schema": "gaga.discovery-policy.v1",
+  "version": "0.0.38.4",
+  "status": "SOURCE_ENFORCED_LIVE_EVIDENCE_PENDING",
+  "principles": {
+    "publicContentOnly": true,
+    "machineSurfacesAreDiscoveryProjections": true,
+    "hiddenEditorialClaimsAllowed": false,
+    "agentDescriptionIsAWebStandard": false,
+    "llmsTextIsAWebStandard": false,
+    "autonomousPublishingAllowed": false,
+    "autonomousEditingAllowed": false,
+    "autonomousConsequentialActionsAllowed": false
+  },
+  "requiredEndpoints": [
+    "/search-index.json",
+    "/machine.json",
+    "/agent.json",
+    "/llms.txt",
+    "/rss.xml",
+    "/sitemap-index.xml"
+  ],
+  "searchCompatibility": {
+    "legacyItemsRequired": true,
+    "richRecordsRequired": true,
+    "clientMayMigrateToRichRecordsIncrementally": true
+  },
+  "evidence": {
+    "liveEndpointVerificationRequired": true,
+    "machineClaimsMustResolveToPublicCanonicalContent": true
+  }
+}
