@@ -4,18 +4,18 @@ import PageFrame from '../components/starlight/PageFrame.astro';
 
 export const prerender = true;
 
-function toRouteSlug(id: string): string | undefined {
-  let slug = id
-    .replace(/\.(md|mdx)$/i, '')
-    .replace(/^\/+|\/+$/g, '');
-
-  if (slug === 'index') return undefined;
-  if (slug.endsWith('/index')) slug = slug.slice(0, -'/index'.length);
-
-  return slug || undefined;
-}
-
 export async function getStaticPaths() {
+  const toRouteSlug = (id: string): string | undefined => {
+    let slug = id
+      .replace(/\.(md|mdx)$/i, '')
+      .replace(/^\/+|\/+$/g, '');
+
+    if (slug === 'index') return undefined;
+    if (slug.endsWith('/index')) slug = slug.slice(0, -'/index'.length);
+
+    return slug || undefined;
+  };
+
   const entries = await getCollection('docs');
   const paths = entries.map((entry) => ({
     params: {
