@@ -1,0 +1,41 @@
+---
+import { getEditorialSections } from '../../lib/editorial';
+import { toArticlePreview } from '../../lib/content';
+import { contentDefaults } from '../../config/content';
+
+const sections = await getEditorialSections();
+---
+
+<section class="gaga-section-index" aria-labelledby="gaga-section-index-title">
+  <header class="gaga-section-index__head">
+    <div>
+      <p class="gaga-section-index__eyebrow">Publication Structure</p>
+      <h2 id="gaga-section-index-title">Sections</h2>
+    </div>
+    <p>{sections.length} sections</p>
+  </header>
+
+  <div class="gaga-section-index__grid">
+    {sections.map((section) => {
+      const lead = section.lead
+        ? toArticlePreview(section.lead.article, contentDefaults.dateLocale, contentDefaults.preview)
+        : undefined;
+
+      return (
+        <article class="gaga-section-tile">
+          <div class="gaga-section-tile__meta">
+            <span>{section.count} stories</span>
+            {section.lead?.role && <span>{section.lead.role}</span>}
+          </div>
+          <h3><a href={section.href}>{section.name}</a></h3>
+          {lead && (
+            <p>
+              <span>Lead:</span>{' '}
+              <a href={lead.href}>{lead.title}</a>
+            </p>
+          )}
+        </article>
+      );
+    })}
+  </div>
+</section>

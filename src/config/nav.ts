@@ -53,6 +53,7 @@ function group(id: string, key: I18nMessageKey, icon: string, items: NavItem[]):
 export const primaryNav: NavItem[] = [
   item('latest', 'navigation.latest', '/', 'newsmode'),
   item('topics', 'navigation.topics', '/topics', 'grid_view'),
+  item('sections', 'navigation.sections', '/sections', 'view_quilt'),
   item('archive', 'navigation.archive', '/archive', 'inventory_2'),
   item('library', 'navigation.saved', '/library', 'bookmark')
 ];

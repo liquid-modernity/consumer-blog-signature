@@ -1,6 +1,7 @@
 export type GagaWorkspaceId =
   | 'latest'
   | 'topics'
+  | 'sections'
   | 'series'
   | 'library'
   | 'authors'
@@ -21,6 +22,7 @@ export interface GagaWorkspaceDefinition {
 export const GAGA_WORKSPACES: readonly GagaWorkspaceDefinition[] = Object.freeze([
   { id: 'latest', href: '/', label: 'Latest', shortLabel: 'Latest', icon: 'newsmode', mode: 'discovery' },
   { id: 'topics', href: '/topics', label: 'Topics', shortLabel: 'Topics', icon: 'grid_view', mode: 'discovery' },
+  { id: 'sections', href: '/sections', label: 'Sections', shortLabel: 'Sections', icon: 'view_quilt', mode: 'discovery' },
   { id: 'series', href: '/series', label: 'Series', shortLabel: 'Series', icon: 'view_carousel', mode: 'discovery' },
   { id: 'library', href: '/library', label: 'Library', shortLabel: 'Library', icon: 'bookmark', mode: 'reference' },
   { id: 'authors', href: '/authors', label: 'Authors', shortLabel: 'Authors', icon: 'person', mode: 'reference' },

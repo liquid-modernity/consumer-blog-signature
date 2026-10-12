@@ -1,6 +1,7 @@
 import type { ConsumerArticleRecord } from './content';
 import { getArticles } from './content';
 import type { EditorialRole, StoryFormat } from '../config/editorial-schema';
+import { screenSlug } from './slug';
 
 export interface EditorialStory {
   article: ConsumerArticleRecord;
@@ -135,4 +136,64 @@ export function projectEditorialFront(
 
 export async function getEditorialFront() {
   return projectEditorialFront(await getArticles());
+}
+
+
+export interface EditorialSectionSummary {
+  name: string;
+  slug: string;
+  href: string;
+  count: number;
+  lead?: EditorialStory;
+}
+
+export function deriveEditorialSections(
+  articles: ConsumerArticleRecord[]
+): EditorialSectionSummary[] {
+  const groups = new Map<string, { name: string; articles: ConsumerArticleRecord[] }>();
+
+  for (const article of articles) {
+    const name = article.section?.trim();
+    if (!name) continue;
+    const slug = screenSlug(name);
+    if (!slug) continue;
+    const current = groups.get(slug) ?? { name, articles: [] };
+    current.articles.push(article);
+    groups.set(slug, current);
+  }
+
+  return [...groups.entries()]
+    .map(([slug, group]) => {
+      const projection = projectEditorialFront(group.articles);
+      return {
+        name: group.name,
+        slug,
+        href: `/sections/${slug}`,
+        count: group.articles.length,
+        lead: projection.lead
+      };
+    })
+    .sort((left, right) => (
+      right.count - left.count
+      || left.name.localeCompare(right.name)
+    ));
+}
+
+export async function getEditorialSections() {
+  return deriveEditorialSections(await getArticles());
+}
+
+export async function getEditorialSectionFront(slug: string) {
+  const articles = await getArticles();
+  const section = deriveEditorialSections(articles).find((item) => item.slug === slug);
+  if (!section) return undefined;
+
+  const sectionArticles = articles.filter((article) => (
+    article.section?.trim() && screenSlug(article.section) === slug
+  ));
+
+  return {
+    section,
+    projection: projectEditorialFront(sectionArticles)
+  };
 }

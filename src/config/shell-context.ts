@@ -29,6 +29,13 @@ const byWorkspace: Partial<Record<GagaWorkspaceId, GagaShellContextContract>> = 
     mobile: 'navigation-and-context',
     rightPriority: 'discovery'
   },
+  sections: {
+    intent: 'discovery',
+    left: 'navigation',
+    right: 'discovery',
+    mobile: 'navigation-and-context',
+    rightPriority: 'discovery'
+  },
   series: {
     intent: 'discovery',
     left: 'navigation',

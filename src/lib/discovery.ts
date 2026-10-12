@@ -4,10 +4,11 @@ import { discoveryConfig } from '../config/discovery';
 import { seoConfig } from '../config/seo';
 import { siteConfig } from '../config/site';
 import { GAGA_WORKSPACES } from '../config/workspaces';
+import { getEditorialSections } from './editorial';
 import { resolveFreshnessAuthority } from '../config/freshness';
 import { getArticles, getAuthors, getTagGroups, getTopicGroups } from './content';
 
-export type GagaDiscoveryKind = 'article' | 'author' | 'topic' | 'tag' | 'workspace';
+export type GagaDiscoveryKind = 'article' | 'author' | 'topic' | 'tag' | 'section' | 'workspace';
 
 export interface GagaDiscoveryRecord {
   id: string;
@@ -106,11 +107,12 @@ export async function buildLegacyArticleSearchItems(): Promise<LegacyArticleSear
 }
 
 export async function buildPublicDiscoveryRecords(): Promise<GagaDiscoveryRecord[]> {
-  const [articles, authors, topics, tags] = await Promise.all([
+  const [articles, authors, topics, tags, sections] = await Promise.all([
     getArticles(),
     getAuthors(),
     getTopicGroups(),
-    getTagGroups()
+    getTagGroups(),
+    getEditorialSections()
   ]);
 
   const records: GagaDiscoveryRecord[] = [];
@@ -187,6 +189,18 @@ export async function buildPublicDiscoveryRecords(): Promise<GagaDiscoveryRecord
       href: absoluteUrl(tag.href, seoConfig.canonical),
       language: contentDefaults.defaultLanguage,
       searchText: searchable(tag.tag, tag.href)
+    });
+  }
+
+  for (const section of sections) {
+    records.push({
+      id: `section:${section.slug}`,
+      kind: 'section',
+      title: section.name,
+      description: `${section.count} published item${section.count === 1 ? '' : 's'} in this editorial section.`,
+      href: absoluteUrl(section.href, seoConfig.canonical),
+      language: contentDefaults.defaultLanguage,
+      searchText: searchable(section.name, section.slug, section.href)
     });
   }
 

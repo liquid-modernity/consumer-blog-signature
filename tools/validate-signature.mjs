@@ -41,7 +41,11 @@ const required = [
   'src/config/editorial-schema.ts',
   'src/lib/editorial.ts',
   'src/components/reader/EditorialFront.astro',
-  'tools/audit-editorial-projection.mjs'
+  'tools/audit-editorial-projection.mjs',
+  'architecture/section-front-policy.json',
+  'src/components/reader/SectionFront.astro',
+  'src/pages/sections/[slug].astro',
+  'tools/audit-section-fronts.mjs'
 ];
 
 const missing = required.filter((file) => !fs.existsSync(file));
@@ -149,6 +153,11 @@ if (localDxAudit.status !== 0) {
 const editorialAudit = spawnSync(process.execPath, ['tools/audit-editorial-projection.mjs'], { stdio: 'inherit' });
 if (editorialAudit.status !== 0) {
   process.exit(editorialAudit.status ?? 1);
+}
+
+const sectionFrontAudit = spawnSync(process.execPath, ['tools/audit-section-fronts.mjs'], { stdio: 'inherit' });
+if (sectionFrontAudit.status !== 0) {
+  process.exit(sectionFrontAudit.status ?? 1);
 }
 
 console.log('Signature contract OK');

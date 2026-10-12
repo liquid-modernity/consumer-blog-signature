@@ -1,0 +1,23 @@
+---
+import GagaSiteLayout from '../../components/gaga/GagaSiteLayout.astro';
+import SectionIndex from '../../components/reader/SectionIndex.astro';
+
+export const prerender = true;
+
+const entryData = {
+  title: 'Sections',
+  description: 'Browse editorial sections in this publication.',
+  summary: 'Editorial section discovery surface.',
+  contentKind: 'index',
+  contentClass: 'section',
+  language: 'id',
+  status: 'published',
+  visibility: 'public',
+  draft: false,
+  noindex: false
+};
+---
+
+<GagaSiteLayout entryData={entryData}>
+  <SectionIndex />
+</GagaSiteLayout>

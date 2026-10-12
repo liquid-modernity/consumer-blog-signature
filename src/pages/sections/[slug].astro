@@ -1,0 +1,39 @@
+---
+import GagaSiteLayout from '../../components/gaga/GagaSiteLayout.astro';
+import SectionFront from '../../components/reader/SectionFront.astro';
+import { getEditorialSectionFront, getEditorialSections } from '../../lib/editorial';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const sections = await getEditorialSections();
+  return sections.map((section) => ({
+    params: { slug: section.slug },
+    props: { slug: section.slug }
+  }));
+}
+
+const { slug } = Astro.props;
+const resolved = await getEditorialSectionFront(slug);
+
+if (!resolved) {
+  return Astro.redirect('/404');
+}
+
+const entryData = {
+  title: resolved.section.name,
+  description: `Latest editorial coverage in ${resolved.section.name}.`,
+  summary: `${resolved.section.count} published stories in ${resolved.section.name}.`,
+  contentKind: 'index',
+  contentClass: 'section',
+  language: 'id',
+  status: 'published',
+  visibility: 'public',
+  draft: false,
+  noindex: false
+};
+---
+
+<GagaSiteLayout entryData={entryData}>
+  <SectionFront section={resolved.section} projection={resolved.projection} />
+</GagaSiteLayout>
