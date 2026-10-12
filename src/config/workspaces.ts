@@ -2,6 +2,8 @@ export type GagaWorkspaceId =
   | 'latest'
   | 'topics'
   | 'sections'
+  | 'tags'
+  | 'search'
   | 'series'
   | 'library'
   | 'authors'
@@ -23,6 +25,8 @@ export const GAGA_WORKSPACES: readonly GagaWorkspaceDefinition[] = Object.freeze
   { id: 'latest', href: '/', label: 'Latest', shortLabel: 'Latest', icon: 'newsmode', mode: 'discovery' },
   { id: 'topics', href: '/topics', label: 'Topics', shortLabel: 'Topics', icon: 'grid_view', mode: 'discovery' },
   { id: 'sections', href: '/sections', label: 'Sections', shortLabel: 'Sections', icon: 'view_quilt', mode: 'discovery' },
+  { id: 'tags', href: '/tags', label: 'Tags', shortLabel: 'Tags', icon: 'sell', mode: 'discovery' },
+  { id: 'search', href: '/search', label: 'Search', shortLabel: 'Search', icon: 'search', mode: 'discovery' },
   { id: 'series', href: '/series', label: 'Series', shortLabel: 'Series', icon: 'view_carousel', mode: 'discovery' },
   { id: 'library', href: '/library', label: 'Library', shortLabel: 'Library', icon: 'bookmark', mode: 'reference' },
   { id: 'authors', href: '/authors', label: 'Authors', shortLabel: 'Authors', icon: 'person', mode: 'reference' },
@@ -61,9 +65,10 @@ export function resolveGagaWorkspace(
   if (direct) return direct;
 
   if (
+    contentKind === 'system' ||
     path.startsWith('/graphs') ||
     path.startsWith('/console') ||
-    path.startsWith('/search') ||
+    path === '/404' ||
     path.startsWith('/sitemap') ||
     path.startsWith('/rss')
   ) {

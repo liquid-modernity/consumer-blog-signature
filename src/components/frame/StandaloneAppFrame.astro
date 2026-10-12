@@ -1,5 +1,10 @@
 ---
 import type { ScreenInfo } from '../../lib/screen-info';
+import { getArticles, getAuthors, getTagGroups, getTopicGroups } from '../../lib/content';
+import { getEditorialSections } from '../../lib/editorial';
+import { resolveGagaWorkspace } from '../../config/workspaces';
+import { resolveGagaShellContext } from '../../config/shell-context';
+import { projectContextRail } from '../../config/context-rails';
 import AppFrameBase from './AppFrameBase.astro';
 import LeftRail from './LeftRail.astro';
 import RightInfoRail from './RightInfoRail.astro';
@@ -27,8 +32,26 @@ const {
   info
 } = Astro.props;
 const currentPath = normalizeCurrentPath(Astro.url.pathname);
+const workspace = resolveGagaWorkspace(currentPath, contentKind);
+const shellContext = resolveGagaShellContext(workspace);
 const shell = createAppShellInput(currentPath);
-const rail = createLeftRailInput(currentPath);
+const [articles, authors, topicGroups, tagGroups, editorialSections] = await Promise.all([
+  getArticles(),
+  getAuthors(),
+  getTopicGroups(),
+  getTagGroups(),
+  getEditorialSections()
+]);
+const rail = createLeftRailInput(currentPath, projectContextRail({
+  currentPath,
+  workspace,
+  info,
+  articles,
+  authors,
+  topicGroups,
+  tagGroups,
+  sections: editorialSections
+}));
 const rightRail = createRightRailInput(info);
 const articleOutline = contentKind === 'article' && rightRail.outlineItems.length > 0;
 ---
@@ -38,9 +61,16 @@ const articleOutline = contentKind === 'article' && rightRail.outlineItems.lengt
   contentKind={contentKind}
   contentClass={contentClass}
   shell={shell}
+  workspaceId={workspace.id}
+  workspaceMode={workspace.mode}
+  contextIntent={shellContext.intent}
+  leftContextRole={shellContext.left}
+  rightContextRole={shellContext.right}
+  mobileContextMode={shellContext.mobile}
+  contextPriority={shellContext.rightPriority}
 >
   <Fragment slot="before-main">
-    <LeftRail rail={rail} />
+    <LeftRail rail={rail} workspaceId={workspace.id} contextRole={shellContext.left} />
   </Fragment>
 
   <div class="main-pane">
@@ -50,7 +80,12 @@ const articleOutline = contentKind === 'article' && rightRail.outlineItems.lengt
   </div>
 
   <Fragment slot="after-main">
-    <RightInfoRail rail={rightRail} />
+    <RightInfoRail
+      rail={rightRail}
+      workspaceId={workspace.id}
+      contextRole={shellContext.right}
+      contextPriority={shellContext.rightPriority}
+    />
     {articleOutline ? <ArticleOutlinePeek rail={rightRail} /> : null}
   </Fragment>
 </AppFrameBase>

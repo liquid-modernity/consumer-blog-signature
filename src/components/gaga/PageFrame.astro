@@ -2,10 +2,11 @@
 import AppFrameBase from '../frame/AppFrameBase.astro';
 import ArticleOutlinePeek from '../frame/ArticleOutlinePeek.astro';
 import RightInfoRail from '../frame/RightInfoRail.astro';
+import LeftRail from '../frame/LeftRail.astro';
 import { contentDefaults } from '../../config/content';
 import { getArticles, getAuthors, getTagGroups, getTopicGroups } from '../../lib/content';
 import { getScreenInfo } from '../../lib/screen-info';
-import { createAppShellInput, createRightRailInput, normalizeCurrentPath } from '../frame/site-composition';
+import { createAppShellInput, createLeftRailInput, createRightRailInput, normalizeCurrentPath } from '../frame/site-composition';
 import { normalizeContentMetadata } from '@gaga/engine/content';
 import { normalizeGagaRouteContext, type GagaRouteContext } from '../../gaga/content/runtime-route';
 import type { GagaWorkspaceDefinition } from '../../config/workspaces';
@@ -14,6 +15,8 @@ import { isContinuityEligibleContent, resolveFreshnessAuthority } from '../../co
 import { resolveCoverageAuthority } from '../../config/coverage';
 import { selectCoveragePromotion } from '../../lib/coverage';
 import CoverageStrip from '../coverage/CoverageStrip.astro';
+import { projectContextRail } from '../../config/context-rails';
+import { getEditorialSections } from '../../lib/editorial';
 
 interface Props {
   entryData: Record<string, unknown>;
@@ -42,13 +45,14 @@ const continuityEligible = isContinuityEligibleContent(entryData, contentKind);
 const freshness = resolveFreshnessAuthority(entryData);
 const currentCoverage = resolveCoverageAuthority(entryData);
 const shell = createAppShellInput(normalizeCurrentPath(Astro.url.pathname));
-const [articles, authors, topicGroups, tagGroups] = await Promise.all([
+const [articles, authors, topicGroups, tagGroups, editorialSections] = await Promise.all([
   getArticles(),
   getAuthors(),
   getTopicGroups(),
-  getTagGroups()
+  getTagGroups(),
+  getEditorialSections()
 ]);
-const rightRail = createRightRailInput(getScreenInfo({
+const screenInfo = getScreenInfo({
   pathname: Astro.url.pathname,
   data: metadata,
   language: route.lang,
@@ -58,10 +62,22 @@ const rightRail = createRightRailInput(getScreenInfo({
   authors,
   topicGroups,
   tagGroups
-}));
+});
+const rightRail = createRightRailInput(screenInfo);
+const currentPath = normalizeCurrentPath(Astro.url.pathname);
+const leftRailProjection = projectContextRail({
+  currentPath,
+  workspace,
+  info: screenInfo,
+  articles,
+  authors,
+  topicGroups,
+  tagGroups,
+  sections: editorialSections
+});
+const leftRail = createLeftRailInput(currentPath, leftRailProjection);
 const articleOutline = contentKind === 'article' && rightRail.outlineItems.length > 0;
 const coveragePromotion = selectCoveragePromotion(articles);
-const currentPath = normalizeCurrentPath(Astro.url.pathname);
 const showCoveragePromotion = coveragePromotion
   && normalizeCurrentPath(coveragePromotion.article.href) !== currentPath;
 ---
@@ -91,7 +107,11 @@ const showCoveragePromotion = coveragePromotion
 >
   <Fragment slot="before-main">
     <slot name="header" />
-    <slot name="sidebar" />
+    <LeftRail
+      rail={leftRail}
+      workspaceId={workspace.id}
+      contextRole={shellContext.left}
+    />
   </Fragment>
 
   {showCoveragePromotion && coveragePromotion
@@ -99,7 +119,12 @@ const showCoveragePromotion = coveragePromotion
     : null}
   <slot />
   <Fragment slot="after-content">
-    <RightInfoRail rail={rightRail} />
+    <RightInfoRail
+      rail={rightRail}
+      workspaceId={workspace.id}
+      contextRole={shellContext.right}
+      contextPriority={shellContext.rightPriority}
+    />
   </Fragment>
   <Fragment slot="after-main">
     {articleOutline ? <ArticleOutlinePeek rail={rightRail} /> : null}

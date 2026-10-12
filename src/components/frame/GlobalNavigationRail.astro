@@ -1,33 +1,32 @@
 ---
 import Icon from '../ui/Icon.astro';
 import { normalizeSitePath } from '../../lib/url-semantics';
+import { globalNavigationProjection } from '../../config/context-rails';
 
 const currentPath = normalizeSitePath(Astro.url.pathname);
+const global = globalNavigationProjection();
+const items = global.items;
+const infoGroups = global.groups;
 
-const items = [
-  { id: 'home', label: 'Home', href: '/', icon: 'home' },
-  { id: 'search', label: 'Search', href: '/search', icon: 'search' },
-  { id: 'topics', label: 'Topics', href: '/topics', icon: 'grid_view' },
-  { id: 'library', label: 'Library', href: '/library', icon: 'bookmark' },
-  { id: 'archive', label: 'Archive', href: '/archive', icon: 'inventory_2' }
-];
+const isCurrent = (href: string) => href === '/'
+  ? currentPath === '/'
+  : currentPath === href || currentPath.startsWith(`${href}/`);
 
-const infoLinks = [
-  { id: 'about', label: 'About', href: '/about', icon: 'article', desc: 'Editorial mission & vision' },
-  { id: 'support', label: 'Support', href: '/support', icon: 'help', desc: 'Reader help & assistance' },
-  { id: 'authors', label: 'Authors', href: '/authors', icon: 'person', desc: 'Contributors & team' },
-  { id: 'legal', label: 'Legal', href: '/disclaimer', icon: 'policy', desc: 'Disclaimers & disclosures' },
-  { id: 'privacy', label: 'Privacy', href: '/privacy', icon: 'shield', desc: 'Data & confidentiality' },
-  { id: 'terms', label: 'Terms', href: '/terms', icon: 'contract', desc: 'Conditions of use' },
-  { id: 'sitemap', label: 'Sitemap', href: '/sitemap', icon: 'lan', desc: 'Taxonomy & structure' },
-  { id: 'rss', label: 'RSS Feed', href: '/rss', icon: 'rss_feed', desc: 'Syndication feeds' }
-];
-
-const isCurrent = (href: string) => href === '/' ? currentPath === '/' : currentPath === href || currentPath.startsWith(`${href}/`);
-const isInfoActive = infoLinks.some((l) => isCurrent(l.href));
+const isInfoActive = infoGroups.some((group) => group.items.some((item) => isCurrent(item.href)));
 ---
-<nav class="gaga-global-nav" data-gaga-global-nav aria-label="Global navigation">
-  <a class="gaga-global-nav__brand" href="/landing" aria-label="Consumer Blog Signature" data-gaga-tooltip="Signature">G</a>
+<nav
+  class="gaga-global-nav"
+  data-gaga-global-nav
+  data-gaga-signature-surface="dynamic-global-navigation"
+  aria-label="Global navigation"
+>
+  <a
+    class="gaga-global-nav__brand"
+    href="/landing"
+    aria-label="Consumer Blog Signature"
+    data-gaga-tooltip="Signature"
+  >G</a>
+
   <div class="gaga-global-nav__items">
     {items.map((item) => (
       <a
@@ -36,6 +35,7 @@ const isInfoActive = infoLinks.some((l) => isCurrent(l.href));
         aria-label={item.label}
         aria-current={isCurrent(item.href) ? 'page' : undefined}
         data-gaga-tooltip={item.label}
+        data-gaga-global-destination={item.id}
       >
         <Icon name={item.icon} />
       </a>
@@ -43,7 +43,7 @@ const isInfoActive = infoLinks.some((l) => isCurrent(l.href));
 
     <div class="gaga-global-nav__info-wrapper" data-gaga-info-wrapper>
       <button
-        class={`gaga-global-nav__item gaga-global-nav__info-trigger ${isInfoActive ? 'gaga-is-current' : ''}`}
+        class:list={['gaga-global-nav__item', 'gaga-global-nav__info-trigger', isInfoActive && 'gaga-is-current']}
         type="button"
         aria-label="Information"
         aria-expanded="false"
@@ -54,17 +54,16 @@ const isInfoActive = infoLinks.some((l) => isCurrent(l.href));
         <Icon name="info" />
       </button>
 
-      <!-- Contextual surface for Information -->
       <div
         class="gaga-global-nav__info-flyout"
         role="dialog"
-        aria-label="Information & Publication Surface"
+        aria-label="Information & publication surface"
         data-gaga-info-flyout
         hidden
       >
         <div class="gaga-global-nav__info-head">
           <div>
-            <span class="gaga-global-nav__info-kicker">KNOWLEDGE & POLICIES</span>
+            <span class="gaga-global-nav__info-kicker">PUBLICATION</span>
             <h3 class="gaga-global-nav__info-title">Information</h3>
           </div>
           <button
@@ -76,20 +75,25 @@ const isInfoActive = infoLinks.some((l) => isCurrent(l.href));
             <Icon name="close" />
           </button>
         </div>
-        <div class="gaga-global-nav__info-grid">
-          {infoLinks.map((link) => (
-            <a
-              href={link.href}
-              class={`gaga-global-nav__info-link ${isCurrent(link.href) ? 'gaga-is-current' : ''}`}
-            >
-              <div class="gaga-global-nav__info-link-icon">
-                <Icon name={link.icon} />
+
+        <div class="gaga-global-nav__info-groups">
+          {infoGroups.map((group) => (
+            <section class="gaga-global-nav__info-group">
+              <p>{group.label}</p>
+              <div class="gaga-global-nav__info-grid">
+                {group.items.map((link) => (
+                  <a
+                    href={link.href}
+                    class:list={['gaga-global-nav__info-link', isCurrent(link.href) && 'gaga-is-current']}
+                  >
+                    <div class="gaga-global-nav__info-link-icon"><Icon name={link.icon} /></div>
+                    <div class="gaga-global-nav__info-link-body">
+                      <span class="gaga-global-nav__info-link-label">{link.label}</span>
+                    </div>
+                  </a>
+                ))}
               </div>
-              <div class="gaga-global-nav__info-link-body">
-                <span class="gaga-global-nav__info-link-label">{link.label}</span>
-                <span class="gaga-global-nav__info-link-desc">{link.desc}</span>
-              </div>
-            </a>
+            </section>
           ))}
         </div>
       </div>
@@ -108,58 +112,45 @@ const isInfoActive = infoLinks.some((l) => isCurrent(l.href));
 </nav>
 
 <script>
-  // Interactive behaviour for Information contextual surface
   function setupInfoSurface() {
     const trigger = document.querySelector<HTMLButtonElement>('[data-gaga-info-trigger]');
     const flyout = document.querySelector<HTMLElement>('[data-gaga-info-flyout]');
     const closeBtn = document.querySelector<HTMLButtonElement>('[data-gaga-info-close]');
-    if (!trigger || !flyout) return;
+    if (!trigger || !flyout || trigger.dataset.gagaWired === 'true') return;
 
-    function openFlyout() {
-      if (!flyout || !trigger) return;
-      flyout.removeAttribute('hidden');
-      trigger.setAttribute('aria-expanded', 'true');
-    }
+    trigger.dataset.gagaWired = 'true';
 
-    function closeFlyout() {
-      if (!flyout || !trigger) return;
-      flyout.setAttribute('hidden', '');
-      trigger.setAttribute('aria-expanded', 'false');
-    }
+    const setOpen = (open: boolean) => {
+      flyout.toggleAttribute('hidden', !open);
+      trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+    };
 
-    function toggleFlyout(e: Event) {
-      e.stopPropagation();
-      if (!flyout) return;
-      if (flyout.hasAttribute('hidden')) {
-        openFlyout();
-      } else {
-        closeFlyout();
-      }
-    }
-
-    trigger.addEventListener('click', toggleFlyout);
-    closeBtn?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      closeFlyout();
+    trigger.addEventListener('click', (event) => {
+      event.stopPropagation();
+      setOpen(flyout.hasAttribute('hidden'));
     });
 
-    document.addEventListener('click', (e) => {
-      const target = e.target as Node;
-      if (!flyout.contains(target) && !trigger.contains(target)) {
-        closeFlyout();
-      }
+    closeBtn?.addEventListener('click', (event) => {
+      event.stopPropagation();
+      setOpen(false);
+      trigger.focus();
     });
 
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && !flyout.hasAttribute('hidden')) {
-        closeFlyout();
+    document.addEventListener('click', (event) => {
+      const target = event.target as Node;
+      if (!flyout.contains(target) && !trigger.contains(target)) setOpen(false);
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !flyout.hasAttribute('hidden')) {
+        setOpen(false);
         trigger.focus();
       }
     });
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', setupInfoSurface);
+    document.addEventListener('DOMContentLoaded', setupInfoSurface, { once: true });
   } else {
     setupInfoSurface();
   }

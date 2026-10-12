@@ -1,19 +1,23 @@
 ---
 import RailToggle from '../navigation/RailToggle.astro';
-import MetaBlock from '../information/MetaBlock.astro';
 import SummaryBlock from '../information/SummaryBlock.astro';
-import ContextFactBlock from '../information/ContextFactBlock.astro';
 import ContextDiscoveryBlock from '../information/ContextDiscoveryBlock.astro';
 import Icon from '../ui/Icon.astro';
+import RightRailMeta from './RightRailMeta.astro';
 import type { RightRailInput } from './component-inputs';
 
 interface Props {
   rail: RightRailInput;
+  workspaceId: string;
+  contextRole: string;
+  contextPriority: 'discovery' | 'metadata' | 'system';
 }
 
-const { rail } = Astro.props;
-const hasContextFacts = (rail.facts?.length ?? 0) > 0;
+const { rail, workspaceId, contextRole, contextPriority } = Astro.props;
+const hasDiscovery = (rail.discovery?.length ?? 0) > 0;
+const hasSummary = Boolean(rail.snippet);
 ---
+
 <button
   class="gaga-context-surface__scrim"
   type="button"
@@ -25,6 +29,7 @@ const hasContextFacts = (rail.facts?.length ?? 0) > 0;
   data-gaga-context-surface-scrim
   hidden
 ></button>
+
 <aside
   id="gaga-right-rail"
   class="gaga-right-rail"
@@ -32,7 +37,10 @@ const hasContextFacts = (rail.facts?.length ?? 0) > 0;
   data-gaga-context-inspector
   data-gaga-state="collapsed"
   data-gaga-context-surface-state="closed"
-  data-gaga-right-rail-mode={rail.mode}
+  data-gaga-signature-surface="context-right-rail"
+  data-gaga-workspace={workspaceId}
+  data-gaga-context-role={contextRole}
+  data-gaga-context-priority={contextPriority}
   aria-label={rail.labels.railLabel.id}
   data-gaga-i18n-key={rail.labels.railLabel.key}
   data-gaga-i18n-id={rail.labels.railLabel.id}
@@ -42,8 +50,19 @@ const hasContextFacts = (rail.facts?.length ?? 0) > 0;
   aria-live="off"
 >
   <div class="gaga-right-rail__head">
-    <p data-gaga-i18n-key={rail.labels.railLabel.key} data-gaga-i18n-id={rail.labels.railLabel.id} data-gaga-i18n-en={rail.labels.railLabel.en}>{rail.labels.railLabel.id}</p>
+    <div class="gaga-right-rail__identity">
+      <p
+        data-gaga-i18n-key={rail.labels.railLabel.key}
+        data-gaga-i18n-id={rail.labels.railLabel.id}
+        data-gaga-i18n-en={rail.labels.railLabel.en}
+      >
+        {rail.labels.railLabel.id}
+      </p>
+      <span>{contextRole}</span>
+    </div>
+
     <RailToggle action={rail.railToggle} />
+
     <button
       class="gaga-context-surface__close"
       type="button"
@@ -57,29 +76,69 @@ const hasContextFacts = (rail.facts?.length ?? 0) > 0;
       <Icon name="close" />
     </button>
   </div>
+
   <div class="gaga-right-rail__body">
-    <div class="gaga-right-rail__section gaga-right-rail__section--summary" data-gaga-right-rail-section="summary">
-      <SummaryBlock description={rail.snippet} title={rail.labels.articleSnippet.id} titleEn={rail.labels.articleSnippet.en} />
-    </div>
-    <div class="gaga-right-rail__section gaga-right-rail__section--meta" data-gaga-right-rail-section="meta">
-      {hasContextFacts ? rail.facts?.map((fact) => <ContextFactBlock fact={fact} />) : (
-        <>
-          <MetaBlock icon="calendar_today" title={rail.labels.articlePublished.id} titleEn={rail.labels.articlePublished.en} value={rail.publishedDate} field="publishedDate" />
-          <MetaBlock icon="update" title={rail.labels.articleUpdated.id} titleEn={rail.labels.articleUpdated.en} value={rail.updatedAtDisplay} field="updatedDate" />
-          <MetaBlock icon="author" title={rail.labels.articleAuthor.id} titleEn={rail.labels.articleAuthor.en} value={rail.author} field="author" />
-          <MetaBlock icon="clock" title={rail.labels.articleReadTime.id} titleEn={rail.labels.articleReadTime.en} value={rail.readTime} field="readTime" />
-          <MetaBlock icon="topics" title={rail.labels.articleTopics.id} titleEn={rail.labels.articleTopics.en} value={rail.topics} field="topics" />
-          <MetaBlock icon="tag" title={rail.labels.articleTags.id} titleEn={rail.labels.articleTags.en} value={rail.tags} field="tags" />
-        </>
-      )}
-    </div>
-    <ContextDiscoveryBlock items={rail.discovery} title={rail.labels.explore} />
+    {contextPriority === 'discovery' ? (
+      <>
+        {hasDiscovery ? (
+          <ContextDiscoveryBlock items={rail.discovery} title={rail.labels.explore} />
+        ) : null}
+
+        {hasSummary ? (
+          <div class="gaga-right-rail__section gaga-right-rail__section--summary">
+            <SummaryBlock
+              description={rail.snippet}
+              title={rail.labels.articleSnippet.id}
+              titleEn={rail.labels.articleSnippet.en}
+            />
+          </div>
+        ) : null}
+
+        <RightRailMeta rail={rail} />
+      </>
+    ) : contextPriority === 'system' ? (
+      <>
+        {hasSummary ? (
+          <div class="gaga-right-rail__section gaga-right-rail__section--summary">
+            <SummaryBlock
+              description={rail.snippet}
+              title={rail.labels.articleSnippet.id}
+              titleEn={rail.labels.articleSnippet.en}
+            />
+          </div>
+        ) : null}
+
+        <RightRailMeta rail={rail} />
+      </>
+    ) : (
+      <>
+        <RightRailMeta rail={rail} />
+
+        {hasSummary ? (
+          <div class="gaga-right-rail__section gaga-right-rail__section--summary">
+            <SummaryBlock
+              description={rail.snippet}
+              title={rail.labels.articleSnippet.id}
+              titleEn={rail.labels.articleSnippet.en}
+            />
+          </div>
+        ) : null}
+
+        {hasDiscovery ? (
+          <ContextDiscoveryBlock items={rail.discovery} title={rail.labels.explore} />
+        ) : null}
+      </>
+    )}
   </div>
+
   {rail.cta ? (
     <div class="gaga-right-rail__cta" data-gaga-right-rail-section="cta">
-      <a href={rail.cta.href} data-gaga-read-cta data-gaga-info-cta>{rail.cta.label}</a>
+      <a href={rail.cta.href} data-gaga-read-cta data-gaga-info-cta>
+        {rail.cta.label}
+      </a>
     </div>
   ) : null}
+
   <footer class="gaga-right-rail__foot" data-gaga-right-rail-section="footer">
     {rail.footer.map((item) => <p>{item}</p>)}
   </footer>

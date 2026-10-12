@@ -4,7 +4,6 @@ import '../../styles/signature.scss';
 import { normalizeContentMetadata } from '@gaga/engine/content';
 import Head from './Head.astro';
 import PageFrame from './PageFrame.astro';
-import Sidebar from './Sidebar.astro';
 import ContentPanel from './ContentPanel.astro';
 import PageTitle from './PageTitle.astro';
 import MarkdownContent from './MarkdownContent.astro';
@@ -70,11 +69,7 @@ const shellContext = resolveGagaShellContext(workspace);
       workspace={workspace}
       shellContext={shellContext}
     >
-      <Fragment slot="sidebar">
-        <Sidebar />
-      </Fragment>
-
-      <div class="main-pane">
+<div class="main-pane">
         <ContentPanel entryData={entryData}>
           <PageTitle entryData={entryData} routeId={route.id} />
         </ContentPanel>

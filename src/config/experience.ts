@@ -25,32 +25,32 @@ export const experienceConfig = {
   labels: { mouse: 'hover', keyboard: 'focus', touch: 'contextual' },
   surfaces: {
     article: {
-      notchActionIds: ['smart-back', 'share', 'save', 'focusmode', 'speak', 'context-info', 'info-rail', 'settings'],
+      notchActionIds: ['smart-back', 'share', 'save', 'focusmode', 'speak', 'context-info', 'settings'],
       dockActionIds: [],
       dockMode: 'hidden'
     },
     archive: {
-      notchActionIds: ['smart-back', 'search', 'settings'],
+      notchActionIds: ['smart-back', 'search', 'context-info', 'settings'],
       dockActionIds: ['search', 'library', 'settings', 'menu'],
       dockMode: 'workspace'
     },
     graph: {
-      notchActionIds: ['smart-back', 'graph-reset', 'settings'],
+      notchActionIds: ['smart-back', 'graph-reset', 'context-info', 'settings'],
       dockActionIds: ['search', 'library', 'settings', 'menu'],
       dockMode: 'workspace'
     },
     topic: {
-      notchActionIds: ['smart-back', 'search', 'settings'],
+      notchActionIds: ['smart-back', 'search', 'context-info', 'settings'],
       dockActionIds: ['search', 'library', 'settings', 'menu'],
       dockMode: 'workspace'
     },
     library: {
-      notchActionIds: ['smart-back', 'search', 'settings'],
+      notchActionIds: ['smart-back', 'search', 'context-info', 'settings'],
       dockActionIds: ['search', 'settings', 'menu'],
       dockMode: 'workspace'
     },
     default: {
-      notchActionIds: ['smart-back', 'search', 'settings'],
+      notchActionIds: ['smart-back', 'search', 'context-info', 'settings'],
       dockActionIds: ['search', 'library', 'settings', 'menu'],
       dockMode: 'workspace'
     }

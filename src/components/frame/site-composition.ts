@@ -12,7 +12,6 @@ import {
 import { gagaDockActionIds } from '../../config/dock';
 import { resolveExperienceContext, type ExperienceContext } from '../../config/experience';
 import { i18nLabel, i18nText } from '../../config/i18n';
-import { navGroups, primaryNav } from '../../config/nav';
 import {
   defaultReaderLanguage,
   defaultReaderPreset,
@@ -32,8 +31,7 @@ import type {
   QuickActionInput,
   RailToggleInput,
   ReaderPreferencesInput,
-  RightRailInput,
-  SearchBoxInput
+  RightRailInput
 } from './component-inputs';
 
 const readerFontLabels = {
@@ -92,20 +90,6 @@ export function createRailToggleInput(side: 'left' | 'right'): RailToggleInput {
   };
 }
 
-export function createSearchBoxInput(): SearchBoxInput {
-  const action = actionById('search');
-  const projection = 'search-trigger';
-  const aria = ariaForProjection(action, projection);
-  return {
-    href: action.href ?? '/search',
-    label: action.label,
-    ariaLabel: aria.label ?? action.description,
-    tooltip: tooltipForProjection(action, projection),
-    icon: iconForProjection(action, projection),
-    shortcutDisplay: action.shortcuts?.find((item) => item.id === 'command-search')?.display
-  };
-}
-
 export function createArticleWorkspaceActionsInput(): ArticleWorkspaceActionsInput {
   return {
     readingUtilitiesLabel: i18nLabel('reading.utilities'),
@@ -123,19 +107,28 @@ export function createArticleWorkspaceActionsInput(): ArticleWorkspaceActionsInp
   };
 }
 
-export function createLeftRailInput(currentPath: string): LeftRailInput {
+export function createLeftRailInput(
+  currentPath: string,
+  projection: {
+    title: string;
+    subtitle: string;
+    icon: string;
+    groups: LeftRailInput['groups'];
+    globalItems: LeftRailInput['globalItems'];
+    globalGroups: LeftRailInput['globalGroups'];
+  }
+): LeftRailInput {
   return {
     ariaLabel: i18nLabel('navigation.publication'),
-    primaryNavLabel: i18nLabel('navigation.primary'),
-    brand: {
-      href: '/landing',
-      label: 'Signature'
-    },
-    primaryNav,
-    navGroups,
+    title: projection.title,
+    subtitle: projection.subtitle,
+    icon: projection.icon,
+    groups: projection.groups,
+    globalProjectionLabel: i18nLabel('navigation.primary'),
+    globalItems: projection.globalItems,
+    globalGroups: projection.globalGroups,
     currentPath,
-    railToggle: createRailToggleInput('left'),
-    search: createSearchBoxInput()
+    railToggle: createRailToggleInput('left')
   };
 }
 

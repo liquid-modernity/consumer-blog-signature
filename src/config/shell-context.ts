@@ -4,7 +4,7 @@ export type GagaContextIntent = 'discovery' | 'reading' | 'reference' | 'system'
 export type GagaLeftContextRole = 'navigation' | 'reading-navigation' | 'system-navigation';
 export type GagaRightContextRole = 'discovery' | 'reading' | 'reference' | 'system';
 export type GagaMobileContextMode = 'navigation-and-context' | 'context-first' | 'navigation-only';
-export type GagaRightContextPriority = 'discovery' | 'outline' | 'metadata' | 'system';
+export type GagaRightContextPriority = 'discovery' | 'metadata' | 'system';
 
 export interface GagaShellContextContract {
   intent: GagaContextIntent;
@@ -30,6 +30,20 @@ const byWorkspace: Partial<Record<GagaWorkspaceId, GagaShellContextContract>> = 
     rightPriority: 'discovery'
   },
   sections: {
+    intent: 'discovery',
+    left: 'navigation',
+    right: 'discovery',
+    mobile: 'navigation-and-context',
+    rightPriority: 'discovery'
+  },
+  tags: {
+    intent: 'discovery',
+    left: 'navigation',
+    right: 'discovery',
+    mobile: 'navigation-and-context',
+    rightPriority: 'discovery'
+  },
+  search: {
     intent: 'discovery',
     left: 'navigation',
     right: 'discovery',
@@ -69,7 +83,7 @@ const byWorkspace: Partial<Record<GagaWorkspaceId, GagaShellContextContract>> = 
     left: 'reading-navigation',
     right: 'reading',
     mobile: 'context-first',
-    rightPriority: 'outline'
+    rightPriority: 'metadata'
   },
   system: {
     intent: 'system',

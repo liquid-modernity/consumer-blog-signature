@@ -177,9 +177,12 @@ body:has(.gaga-app-frame) {
    These rules deliberately tune measure without changing the rail runtime. */
 :root[data-gaga-workspace='latest'],
 :root[data-gaga-workspace='topics'],
+:root[data-gaga-workspace='sections'],
+:root[data-gaga-workspace='tags'],
+:root[data-gaga-workspace='search'],
 :root[data-gaga-workspace='series'],
 :root[data-gaga-workspace='archive'] {
-  --gaga-content-width: 48rem;
+  --gaga-content-width: 58rem;
 }
 
 :root[data-gaga-workspace='library'],
@@ -194,7 +197,11 @@ body:has(.gaga-app-frame) {
 
 @media (min-width: 90rem) {
   :root[data-gaga-workspace-mode='discovery'] {
-    --gaga-content-width: 52rem;
+    --gaga-content-width: 68rem;
+  }
+
+  .gaga-app-frame[data-gaga-workspace-mode='reading'] {
+    --gaga-content-width: 48rem;
   }
 }
 
@@ -204,11 +211,4 @@ body:has(.gaga-app-frame) {
 :root[data-gaga-context-intent='reading'] .gaga-main-region,
 .gaga-app-frame[data-gaga-context-intent='reading'] .gaga-main-region {
   scroll-padding-block-start: 1rem;
-}
-
-@media (max-width: bp.$compact-max) {
-  :root[data-gaga-context-mobile='navigation-only'] .gaga-context-trigger,
-  .gaga-app-frame[data-gaga-context-mobile='navigation-only'] .gaga-context-trigger {
-    display: none;
-  }
 }

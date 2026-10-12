@@ -1,0 +1,27 @@
+{
+  "schema": "gaga.context-aware-surfaces-policy.v1",
+  "version": "0.0.41.0",
+  "principles": {
+    "allRoutesResolveWorkspace": true,
+    "globalNavigationOwnsGlobalDestinations": true,
+    "leftRailIsContextOnlyOnDesktop": true,
+    "compactLeftRailMayProjectGlobalNavigation": true,
+    "dynamicNotchOwnsContextSurfaceTrigger": true,
+    "dynamicOutlinePeekOwnsArticleOutline": true,
+    "rightRailOwnsContextIntelligenceNotOutline": true,
+    "dockOwnsCompactQuickActions": true,
+    "signatureContractsPreparedForEngineExtraction": true
+  },
+  "duplicateCapabilitiesRemoved": [
+    "left-rail-global-brand",
+    "left-rail-global-search",
+    "floating-context-surface-trigger",
+    "notch-info-rail-duplicate",
+    "right-rail-outline-priority"
+  ],
+  "routeCoverage": {
+    "nativeContentRoutes": "PageFrame",
+    "standaloneRoutes": "StandaloneAppFrame",
+    "workspaceResolver": "resolveGagaWorkspace"
+  }
+}

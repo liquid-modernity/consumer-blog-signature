@@ -50,7 +50,12 @@ const required = [
   'src/config/coverage.ts',
   'src/lib/coverage.ts',
   'src/components/coverage/CoverageTimeline.astro',
-  'tools/audit-coverage-foundation.mjs'
+  'tools/audit-coverage-foundation.mjs',
+  'architecture/context-aware-surfaces-policy.json',
+  'src/config/context-rails.ts',
+  'src/config/signature-surfaces.ts',
+  'src/gaga/extraction/signature-surface-contract.ts',
+  'tools/audit-context-aware-surfaces.mjs'
 ];
 
 const missing = required.filter((file) => !fs.existsSync(file));
@@ -168,6 +173,11 @@ if (sectionFrontAudit.status !== 0) {
 const coverageAudit = spawnSync(process.execPath, ['tools/audit-coverage-foundation.mjs'], { stdio: 'inherit' });
 if (coverageAudit.status !== 0) {
   process.exit(coverageAudit.status ?? 1);
+}
+
+const contextSurfaceAudit = spawnSync(process.execPath, ['tools/audit-context-aware-surfaces.mjs'], { stdio: 'inherit' });
+if (contextSurfaceAudit.status !== 0) {
+  process.exit(contextSurfaceAudit.status ?? 1);
 }
 
 console.log('Signature contract OK');

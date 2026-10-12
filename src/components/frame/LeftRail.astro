@@ -2,27 +2,53 @@
 import NavItem from '../navigation/NavItem.astro';
 import NavGroup from '../navigation/NavGroup.astro';
 import RailToggle from '../navigation/RailToggle.astro';
-import SearchBox from '../navigation/SearchBox.astro';
+import Icon from '../ui/Icon.astro';
 import type { LeftRailInput } from './component-inputs';
 
 interface Props {
   rail: LeftRailInput;
+  workspaceId: string;
+  contextRole: string;
 }
 
-const { rail } = Astro.props;
+const { rail, workspaceId, contextRole } = Astro.props;
 ---
-<aside id="gaga-left-rail" class="gaga-left-rail" data-gaga-left-rail data-gaga-state="collapsed" aria-label={rail.ariaLabel.id} data-gaga-i18n-key={rail.ariaLabel.key} data-gaga-i18n-id={rail.ariaLabel.id} data-gaga-i18n-en={rail.ariaLabel.en} data-gaga-i18n-target="aria">
-  <div class="gaga-left-rail__brand">
-    <a href={rail.brand.href} class="gaga-brand"><span class="gaga-brand__dot" aria-hidden="true"></span>{rail.brand.label}</a>
+<aside
+  id="gaga-left-rail"
+  class="gaga-left-rail"
+  data-gaga-left-rail
+  data-gaga-state="collapsed"
+  data-gaga-signature-surface="context-left-rail"
+  data-gaga-workspace={workspaceId}
+  data-gaga-context-role={contextRole}
+  aria-label={rail.ariaLabel.id}
+  data-gaga-i18n-key={rail.ariaLabel.key}
+  data-gaga-i18n-id={rail.ariaLabel.id}
+  data-gaga-i18n-en={rail.ariaLabel.en}
+  data-gaga-i18n-target="aria"
+>
+  <div class="gaga-left-rail__context-head">
+    <span class="gaga-left-rail__context-icon" aria-hidden="true"><Icon name={rail.icon} /></span>
+    <div class="gaga-left-rail__context-copy">
+      <strong>{rail.title}</strong>
+      <span>{rail.subtitle}</span>
+    </div>
     <RailToggle action={rail.railToggle} />
   </div>
-  <SearchBox action={rail.search} currentPath={rail.currentPath} />
-  <nav id="gaga-left-rail-nav" class="gaga-left-rail__nav" aria-label={rail.primaryNavLabel.id} data-gaga-i18n-key={rail.primaryNavLabel.key} data-gaga-i18n-id={rail.primaryNavLabel.id} data-gaga-i18n-en={rail.primaryNavLabel.en} data-gaga-i18n-target="aria">
-    <div class="gaga-nav-primary">
-      {rail.primaryNav.map((item) => <NavItem {...item} currentPath={rail.currentPath} />)}
+
+  <nav class="gaga-left-rail__nav" aria-label={`${rail.title} context navigation`}>
+    <div class="gaga-nav-groups gaga-left-rail__context-groups">
+      {rail.groups.map((group) => <NavGroup {...group} currentPath={rail.currentPath} />)}
     </div>
-    <div class="gaga-nav-groups">
-      {rail.navGroups.map((group) => <NavGroup {...group} currentPath={rail.currentPath} />)}
+
+    <div class="gaga-left-rail__global-projection" data-gaga-global-navigation-projection>
+      <p class="gaga-left-rail__projection-label">{rail.globalProjectionLabel.id}</p>
+      <div class="gaga-nav-primary">
+        {rail.globalItems.map((item) => <NavItem {...item} currentPath={rail.currentPath} />)}
+      </div>
+      <div class="gaga-nav-groups">
+        {rail.globalGroups.map((group) => <NavGroup {...group} currentPath={rail.currentPath} />)}
+      </div>
     </div>
   </nav>
 </aside>

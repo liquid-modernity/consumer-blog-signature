@@ -1,0 +1,66 @@
+---
+import MetaBlock from '../information/MetaBlock.astro';
+import ContextFactBlock from '../information/ContextFactBlock.astro';
+import type { RightRailInput } from './component-inputs';
+
+interface Props {
+  rail: RightRailInput;
+}
+
+const { rail } = Astro.props;
+const facts = rail.facts ?? [];
+---
+
+<div
+  class="gaga-right-rail__section gaga-right-rail__section--meta"
+  data-gaga-right-rail-section="meta"
+>
+  {facts.length > 0 ? (
+    facts.map((fact) => <ContextFactBlock fact={fact} />)
+  ) : (
+    <>
+      <MetaBlock
+        icon="calendar_today"
+        title={rail.labels.articlePublished.id}
+        titleEn={rail.labels.articlePublished.en}
+        value={rail.publishedDate}
+        field="publishedDate"
+      />
+      <MetaBlock
+        icon="update"
+        title={rail.labels.articleUpdated.id}
+        titleEn={rail.labels.articleUpdated.en}
+        value={rail.updatedAtDisplay}
+        field="updatedDate"
+      />
+      <MetaBlock
+        icon="author"
+        title={rail.labels.articleAuthor.id}
+        titleEn={rail.labels.articleAuthor.en}
+        value={rail.author}
+        field="author"
+      />
+      <MetaBlock
+        icon="clock"
+        title={rail.labels.articleReadTime.id}
+        titleEn={rail.labels.articleReadTime.en}
+        value={rail.readTime}
+        field="readTime"
+      />
+      <MetaBlock
+        icon="topics"
+        title={rail.labels.articleTopics.id}
+        titleEn={rail.labels.articleTopics.en}
+        value={rail.topics}
+        field="topics"
+      />
+      <MetaBlock
+        icon="tag"
+        title={rail.labels.articleTags.id}
+        titleEn={rail.labels.articleTags.en}
+        value={rail.tags}
+        field="tags"
+      />
+    </>
+  )}
+</div>

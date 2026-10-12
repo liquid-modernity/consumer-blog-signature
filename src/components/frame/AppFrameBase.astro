@@ -2,7 +2,6 @@
 import GagaDock from './GagaDock.astro';
 import GlobalNavigationRail from './GlobalNavigationRail.astro';
 import ReaderPreferences from '../reader/ReaderPreferences.astro';
-import ContextSurfaceTrigger from './ContextSurfaceTrigger.astro';
 import ActionRuntime from './ActionRuntime.astro';
 import SkipLink from '../ui/SkipLink.astro';
 import type { AppShellInput } from './component-inputs';
@@ -69,7 +68,6 @@ const runtimeContext = resolveExperienceContext({
 });
 const surfaceProfile = experienceSurfaceProfile(runtimeContext);
 const showGagaDock = surfaceProfile.dockMode === 'workspace';
-const showContextTrigger = runtimeContext !== 'article';
 ---
 <SkipLink />
 <div
@@ -112,7 +110,6 @@ const showContextTrigger = runtimeContext !== 'article';
       <slot name="after-content" />
     </div>
   )}
-  {showContextTrigger ? <ContextSurfaceTrigger action={shell.contextTrigger} /> : null}
   <slot name="after-main" />
   {showGagaDock ? <GagaDock dock={shell.gagaDock} /> : null}
   <ReaderPreferences preferences={shell.readerPreferences} />

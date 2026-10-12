@@ -28,15 +28,6 @@ export type RailToggleInput = {
   icon?: string;
 };
 
-export type SearchBoxInput = {
-  href: string;
-  label: GagaComponentLabel;
-  ariaLabel: GagaComponentLabel;
-  tooltip: GagaComponentLabel;
-  icon?: string;
-  shortcutDisplay?: string;
-};
-
 export type InformationDateInput = {
   datetime: string;
   text: string;
@@ -76,18 +67,26 @@ export type NavGroupInput = {
   items: NavItemInput[];
 };
 
+export type SearchBoxInput = {
+  href: string;
+  label: GagaComponentLabel;
+  ariaLabel: GagaComponentLabel;
+  tooltip: GagaComponentLabel;
+  icon?: string;
+  shortcutDisplay?: string;
+};
+
 export type LeftRailInput = {
   ariaLabel: GagaComponentLabel;
-  primaryNavLabel: GagaComponentLabel;
-  brand: {
-    href: string;
-    label: string;
-  };
-  primaryNav: NavItemInput[];
-  navGroups: NavGroupInput[];
+  title: string;
+  subtitle: string;
+  icon: string;
+  groups: NavGroupInput[];
+  globalProjectionLabel: GagaComponentLabel;
+  globalItems: NavItemInput[];
+  globalGroups: NavGroupInput[];
   currentPath: string;
   railToggle: RailToggleInput;
-  search: SearchBoxInput;
 };
 
 export type GagaDockInput = {
@@ -167,7 +166,7 @@ export type RightRailOutlineItemInput = {
   children?: RightRailOutlineItemInput[];
 };
 
-export type RightRailMode = 'outline' | 'summary';
+export type RightRailMode = 'summary';
 
 export type RightRailInput = {
   mode: RightRailMode;
