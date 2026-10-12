@@ -1,0 +1,30 @@
+{
+  "schema": "gaga.accessibility-policy.v1",
+  "version": "0.0.38.3",
+  "target": "WCAG 2.2 Level AA",
+  "status": "SOURCE_ENFORCED_BROWSER_EVIDENCE_PENDING",
+  "principles": [
+    "semantic HTML before ARIA",
+    "keyboard-operable controls",
+    "visible focus",
+    "focus not obscured",
+    "language semantics",
+    "reduced motion respected",
+    "no accessibility score claim without browser evidence"
+  ],
+  "source": {
+    "requiredMainId": "gaga-main",
+    "requiredSkipHref": "#gaga-main",
+    "minimumTargetCssPx": 24,
+    "minimumTextContrast": 4.5,
+    "minimumLargeTextContrast": 3.0,
+    "requireImageAltAttribute": true
+  },
+  "browserEvidence": {
+    "lighthouseAccessibilityTarget": 100,
+    "greenMinimum": 90,
+    "manualKeyboardReviewRequired": true,
+    "screenReaderSpotCheckRequired": true,
+    "zoomReflowSpotCheckRequired": true
+  }
+}

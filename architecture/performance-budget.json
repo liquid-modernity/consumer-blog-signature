@@ -1,0 +1,30 @@
+{
+  "schema": "gaga.performance-budget.v1",
+  "version": "0.0.38.3",
+  "status": "SOURCE_ENFORCED_GENERATED_BASELINE_PENDING",
+  "targets": {
+    "lcpMs": 1800,
+    "cls": 0.05,
+    "inpMs": 200,
+    "lighthousePerformanceTarget": 100,
+    "lighthouseGreenMinimum": 90
+  },
+  "source": {
+    "maxTotalRuntimeSourceBytes": 262144,
+    "maxLargestRuntimeModuleBytes": 49152,
+    "maxTotalStyleSourceBytes": 196608,
+    "allowClientHydrationDirectives": false,
+    "allowRemoteStylesheets": false,
+    "allowAutoplayMedia": false,
+    "allowVideoPreloadAuto": false
+  },
+  "generated": {
+    "maxSourceMapFiles": 0,
+    "coreThirdPartyRuntimeOrigins": 0,
+    "status": "BASELINE_REQUIRED_BEFORE_HARD_BYTE_GATES"
+  },
+  "measurement": {
+    "browserMetricsRequireMeasuredEvidence": true,
+    "publicPerformanceClaimsRequireMeasuredEvidence": true
+  }
+}

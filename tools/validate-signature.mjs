@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
 
 const required = [
   'src/config/capabilities.ts',
@@ -16,7 +17,11 @@ const required = [
   'src/components/gaga/MarkdownContent.astro',
   'src/config/experience.ts',
   'src/config/workspaces.ts',
-  'src/config/shell-context.ts'
+  'src/config/shell-context.ts',
+  'architecture/performance-budget.json',
+  'architecture/accessibility-policy.json',
+  'architecture/security-privacy-policy.json',
+  'tools/audit-policy-source.mjs'
 ];
 
 const missing = required.filter((file) => !fs.existsSync(file));
@@ -99,6 +104,11 @@ for (const marker of [
     console.error(`Native layout context projection missing: ${marker}`);
     process.exit(1);
   }
+}
+
+const policyAudit = spawnSync(process.execPath, ['tools/audit-policy-source.mjs'], { stdio: 'inherit' });
+if (policyAudit.status !== 0) {
+  process.exit(policyAudit.status ?? 1);
 }
 
 console.log('Signature contract OK');

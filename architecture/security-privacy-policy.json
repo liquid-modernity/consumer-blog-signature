@@ -1,0 +1,54 @@
+{
+  "schema": "gaga.security-privacy-policy.v1",
+  "version": "0.0.38.3",
+  "status": "SOURCE_ENFORCED_DEPLOYMENT_EVIDENCE_PENDING",
+  "source": {
+    "allowEval": false,
+    "allowNewFunction": false,
+    "allowDocumentWrite": false,
+    "allowInlineEventHandlers": false,
+    "allowJavascriptUrls": false,
+    "allowUnrestrictedIframes": false
+  },
+  "browserStorage": {
+    "cookieUseAllowed": false,
+    "directStorageNewFilesAllowed": false,
+    "transitionalAllowlist": [
+      "src/components/seo/SeoHead.astro",
+      "src/runtime/gaga-preference-runtime.ts",
+      "src/scripts/rail/rail-controller.ts",
+      "src/scripts/rail/rail-events.ts",
+      "src/scripts/systems/reading-knowledge.ts",
+      "src/scripts/systems/theme.ts"
+    ],
+    "migrationGoal": "Route browser persistence through one GAGA storage authority without expanding the allowlist."
+  },
+  "domMutation": {
+    "innerHtmlNewFilesAllowed": false,
+    "transitionalAllowlist": [
+      "src/components/media/MediaGallery.astro",
+      "src/scripts/systems/diagnostic-hud.ts",
+      "src/scripts/systems/reader-enhancements.ts",
+      "src/scripts/systems/reading-continuity.ts"
+    ],
+    "migrationGoal": "Replace string HTML construction with bounded DOM/template authorities where practical."
+  },
+  "embeds": {
+    "allowedIframeFiles": [
+      "src/components/media/InteractiveEmbed.astro"
+    ],
+    "requireSandbox": true,
+    "requireLazyLoading": true,
+    "requireTitle": true
+  },
+  "deploymentHeaders": {
+    "status": "LIVE_DEPLOYMENT_REQUIRED",
+    "requiredAtEdge": [
+      "Content-Security-Policy",
+      "Permissions-Policy",
+      "Referrer-Policy",
+      "X-Content-Type-Options",
+      "Strict-Transport-Security"
+    ]
+  }
+}
