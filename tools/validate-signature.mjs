@@ -14,7 +14,8 @@ const required = [
   'src/components/gaga/GagaSiteLayout.astro',
   'src/components/gaga/PageFrame.astro',
   'src/components/gaga/MarkdownContent.astro',
-  'src/config/experience.ts'
+  'src/config/experience.ts',
+  'src/config/workspaces.ts'
 ];
 
 const missing = required.filter((file) => !fs.existsSync(file));
@@ -66,6 +67,15 @@ for (const file of sourceFiles('src')) {
 if (legacyHits.length) {
   console.error('Legacy Starlight surface remains in active source:', legacyHits);
   process.exit(1);
+}
+
+
+const nativeLayout = fs.readFileSync('src/components/gaga/GagaSiteLayout.astro', 'utf8');
+for (const marker of ['data-gaga-publishing-shell="native"', 'data-gaga-workspace=', 'resolveGagaWorkspace']) {
+  if (!nativeLayout.includes(marker)) {
+    console.error(`Native publishing shell workspace contract missing: ${marker}`);
+    process.exit(1);
+  }
 }
 
 console.log('Signature contract OK');

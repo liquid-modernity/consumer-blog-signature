@@ -170,3 +170,30 @@ body:has(.gaga-app-frame) {
 .gaga-main-region :where(main) {
   padding: 0;
 }
+
+
+/* GAGA 0.0.38.1 workspace calibration.
+   Workspace identity is resolved at the native publishing-shell boundary.
+   These rules deliberately tune measure without changing the rail runtime. */
+:root[data-gaga-workspace='latest'],
+:root[data-gaga-workspace='topics'],
+:root[data-gaga-workspace='series'],
+:root[data-gaga-workspace='archive'] {
+  --gaga-content-width: 48rem;
+}
+
+:root[data-gaga-workspace='library'],
+:root[data-gaga-workspace='authors'],
+:root[data-gaga-workspace='page'] {
+  --gaga-content-width: 44rem;
+}
+
+:root[data-gaga-workspace='article'] {
+  --gaga-content-width: 46rem;
+}
+
+@media (min-width: 90rem) {
+  :root[data-gaga-workspace-mode='discovery'] {
+    --gaga-content-width: 52rem;
+  }
+}

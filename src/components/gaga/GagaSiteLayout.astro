@@ -8,6 +8,7 @@ import Sidebar from './Sidebar.astro';
 import ContentPanel from './ContentPanel.astro';
 import PageTitle from './PageTitle.astro';
 import MarkdownContent from './MarkdownContent.astro';
+import { resolveGagaWorkspace } from '../../config/workspaces';
 import {
   normalizeGagaRouteContext,
   type GagaRouteContext
@@ -33,10 +34,16 @@ const route = normalizeGagaRouteContext({
   entry: { data: entryData }
 });
 const language = metadata.language === 'en' ? 'en' : 'id-ID';
+const workspace = resolveGagaWorkspace(Astro.url.pathname, metadata.contentKind);
 ---
 
 <!doctype html>
-<html lang={language} data-gaga-publishing-shell="native">
+<html
+  lang={language}
+  data-gaga-publishing-shell="native"
+  data-gaga-workspace={workspace.id}
+  data-gaga-workspace-mode={workspace.mode}
+>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
