@@ -2,11 +2,26 @@ import { defineCollection } from 'astro:content';
 import { z } from 'astro/zod';
 import { gagaDocumentSchema } from './gaga/content/schema';
 import { gagaContentLoader } from './gaga/content/loader';
-import { editorialRoleValues, storyFormatValues, editorialPriorityMin, editorialPriorityMax } from './config/editorial-schema';
+import {
+  coverageModeValues,
+  coverageStatusValues,
+  editorialRoleValues,
+  storyFormatValues,
+  editorialPriorityMin,
+  editorialPriorityMax
+} from './config/editorial-schema';
 
 const dateField = z.union([z.string(), z.date()]).optional().transform((value) => (
   value instanceof Date ? value.toISOString().slice(0, 10) : value
 ));
+
+const coverageUpdateSchema = z.object({
+  id: z.string().optional(),
+  timestamp: z.string(),
+  title: z.string(),
+  summary: z.string().optional(),
+  href: z.string().optional()
+});
 
 const consumerFrontmatter = z.object({
   /** Screen/content routing. Keep this small so non-coders can author from Obsidian. */
@@ -25,6 +40,16 @@ const consumerFrontmatter = z.object({
   editorialPriority: z.number().int().min(editorialPriorityMin).max(editorialPriorityMax).default(0),
   breaking: z.boolean().default(false),
   live: z.boolean().default(false),
+
+  /** Breaking/live coverage authority. `breaking` and `live` remain compatibility aliases. */
+  coverageMode: z.enum(coverageModeValues).optional(),
+  coverageStatus: z.enum(coverageStatusValues).optional(),
+  coverageLabel: z.string().optional(),
+  coverageSummary: z.string().optional(),
+  coverageStartedAt: z.string().optional(),
+  coverageUpdatedAt: z.string().optional(),
+  coverageEndedAt: z.string().optional(),
+  coverageUpdates: z.array(coverageUpdateSchema).default([]),
 
   /** Canonical publishing metadata. */
   schemaVersion: z.union([z.string(), z.number()]).optional(),

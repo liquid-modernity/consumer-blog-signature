@@ -1,0 +1,44 @@
+{
+  "schema": "gaga.coverage-policy.v1",
+  "version": "0.0.40.2",
+  "principles": {
+    "canonicalArticleRemainsAuthority": true,
+    "coverageUpdatesAreEditorialMetadata": true,
+    "breakingAndLiveLegacyFlagsRemainCompatible": true,
+    "activePromotionRequiresPublicIndexableArticle": true,
+    "staticFirstNoRealtimeTransportClaim": true,
+    "liveModeDoesNotImplyContinuousNetworkStreaming": true,
+    "breakingModeDoesNotAssertIndependentFactualVerification": true
+  },
+  "modes": [
+    "standard",
+    "breaking",
+    "live"
+  ],
+  "statuses": [
+    "inactive",
+    "active",
+    "paused",
+    "ended"
+  ],
+  "promotion": {
+    "maxGlobalPromotions": 1,
+    "priority": [
+      "breaking",
+      "live"
+    ],
+    "excludeCurrentArticleFromGlobalStrip": true
+  },
+  "timeline": {
+    "sort": "newest-first",
+    "requiredUpdateFields": [
+      "timestamp",
+      "title"
+    ],
+    "latestTimestampResolution": [
+      "coverageUpdatedAt",
+      "latestCoverageUpdate.timestamp",
+      "coverageStartedAt"
+    ]
+  }
+}

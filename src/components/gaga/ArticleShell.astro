@@ -3,6 +3,8 @@ import type { CanonicalContentMetadata } from '@gaga/engine/content';
 import Icon from '../ui/Icon.astro';
 import type { ArticleWorkspaceActionsInput } from '../frame/component-inputs';
 import type { BreadcrumbItem } from '../../lib/page-context';
+import type { CoverageAuthority } from '../../config/coverage';
+import CoverageTimeline from '../coverage/CoverageTimeline.astro';
 
 interface Props {
   identity: CanonicalContentMetadata;
@@ -11,6 +13,7 @@ interface Props {
   routeIdentity: string;
   missingTitleSource: string;
   breadcrumbs?: BreadcrumbItem[];
+  coverage: CoverageAuthority;
 }
 
 const {
@@ -19,7 +22,8 @@ const {
   actions,
   routeIdentity,
   missingTitleSource,
-  breadcrumbs = []
+  breadcrumbs = [],
+  coverage
 } = Astro.props;
 const title = identity.title;
 if (!title) throw new Error(`Article title is required for ${missingTitleSource}.`);
@@ -71,6 +75,7 @@ const articleTitleId = '_top';
           <p class="gaga-article-header__dek" data-gaga-article-dek>{identity.subtitle}</p>
         ) : null}
       </header>
+      <CoverageTimeline coverage={coverage} language={language} />
       <section class="gaga-continuity-resume" data-gaga-continuity-resume hidden aria-labelledby="gaga-continuity-resume-title">
         <p id="gaga-continuity-resume-title" data-gaga-i18n-key={actions.continuityResumeTitle.key} data-gaga-i18n-id={actions.continuityResumeTitle.id} data-gaga-i18n-en={actions.continuityResumeTitle.en}>{actions.continuityResumeTitle.id}</p>
         <a href="#_top" data-gaga-continuity-resume-link>

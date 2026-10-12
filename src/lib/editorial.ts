@@ -1,6 +1,7 @@
 import type { ConsumerArticleRecord } from './content';
 import { getArticles } from './content';
 import type { EditorialRole, StoryFormat } from '../config/editorial-schema';
+import type { CoverageAuthority } from '../config/coverage';
 import { screenSlug } from './slug';
 
 export interface EditorialStory {
@@ -13,6 +14,7 @@ export interface EditorialStory {
   featured: boolean;
   breaking: boolean;
   live: boolean;
+  coverage: CoverageAuthority;
 }
 
 export interface EditorialSection {
@@ -52,7 +54,8 @@ function asStory(article: ConsumerArticleRecord): EditorialStory {
     priority: article.editorialPriority,
     featured: article.featured,
     breaking: article.breaking,
-    live: article.live
+    live: article.live,
+    coverage: article.coverage
   };
 }
 

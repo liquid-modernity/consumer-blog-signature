@@ -3,6 +3,7 @@ import SeoHead from '../seo/SeoHead.astro';
 import { resolveAuthorRefs } from '../../lib/content';
 import { normalizeContentMetadata } from '@gaga/engine/content';
 import { resolveFreshnessAuthority } from '../../config/freshness';
+import { resolveCoverageAuthority } from '../../config/coverage';
 import {
   extractGagaHeadTitle,
   filterGagaHeadEntries,
@@ -34,9 +35,10 @@ const data = normalizeContentMetadata({
 });
 const { title, socialTitle } = extractGagaHeadTitle(route);
 const freshness = resolveFreshnessAuthority(entryData);
+const coverage = resolveCoverageAuthority(entryData);
 const shouldNoindex = data.noindex === true || Astro.url.pathname === '/404' || Astro.url.pathname === '/offline.html';
 const renderedHead = filterGagaHeadEntries(route.head, {
-  replacedMetaNames: ['gaga:summary', 'gaga:search-index', 'gaga:machine-index', 'gaga:agent', 'gaga:llms', 'gaga:freshness-status', 'gaga:freshness-volatility', 'gaga:last-reviewed', 'gaga:review-after']
+  replacedMetaNames: ['gaga:summary', 'gaga:search-index', 'gaga:machine-index', 'gaga:agent', 'gaga:llms', 'gaga:freshness-status', 'gaga:freshness-volatility', 'gaga:last-reviewed', 'gaga:review-after', 'gaga:coverage-mode', 'gaga:coverage-status', 'gaga:coverage-updated-at']
 });
 ---
 
@@ -53,3 +55,7 @@ const renderedHead = filterGagaHeadEntries(route.head, {
 <meta name="gaga:freshness-volatility" content={freshness.volatility} />
 {freshness.lastReviewed && <meta name="gaga:last-reviewed" content={freshness.lastReviewed} />}
 {freshness.reviewAfter && <meta name="gaga:review-after" content={freshness.reviewAfter} />}
+
+<meta name="gaga:coverage-mode" content={coverage.mode} />
+<meta name="gaga:coverage-status" content={coverage.status} />
+{coverage.updatedAt && <meta name="gaga:coverage-updated-at" content={coverage.updatedAt} />}

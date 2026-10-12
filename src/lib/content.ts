@@ -10,6 +10,7 @@ import {
 } from '@gaga/engine/content';
 import { entryToHref, screenSlug } from './slug';
 import type { EditorialRole, StoryFormat } from '../config/editorial-schema';
+import { resolveCoverageAuthority, type CoverageAuthority } from '../config/coverage';
 
 export { toArticlePreview };
 export type { ArticleMonthGroup, ArticlePreview, ArticlePreviewOptions, ArticleRecord };
@@ -36,6 +37,7 @@ export type ConsumerArticleRecord = ArticleRecord & {
   featured: boolean;
   breaking: boolean;
   live: boolean;
+  coverage: CoverageAuthority;
 };
 
 export type ContentRelationKind = 'article' | 'topic' | 'author';
@@ -176,6 +178,7 @@ export async function getArticles(): Promise<ConsumerArticleRecord[]> {
     return docs
       .map((doc): ConsumerArticleRecord => {
         const metadata = normalizeContentMetadata(doc.data);
+        const coverage = resolveCoverageAuthority(doc.data);
         return {
           id: doc.id,
           href: entryToHref(doc),
@@ -199,8 +202,9 @@ export async function getArticles(): Promise<ConsumerArticleRecord[]> {
           editorialRole: doc.data.editorialRole,
           editorialPriority: doc.data.editorialPriority,
           featured: doc.data.featured === true,
-          breaking: doc.data.breaking === true,
-          live: doc.data.live === true
+          breaking: coverage.mode === 'breaking',
+          live: coverage.mode === 'live',
+          coverage
         };
       })
       .sort((a, b) => timestamp(b.metadata.publishedAt) - timestamp(a.metadata.publishedAt));

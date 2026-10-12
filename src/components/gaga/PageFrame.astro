@@ -11,6 +11,9 @@ import { normalizeGagaRouteContext, type GagaRouteContext } from '../../gaga/con
 import type { GagaWorkspaceDefinition } from '../../config/workspaces';
 import type { GagaShellContextContract } from '../../config/shell-context';
 import { isContinuityEligibleContent, resolveFreshnessAuthority } from '../../config/freshness';
+import { resolveCoverageAuthority } from '../../config/coverage';
+import { selectCoveragePromotion } from '../../lib/coverage';
+import CoverageStrip from '../coverage/CoverageStrip.astro';
 
 interface Props {
   entryData: Record<string, unknown>;
@@ -37,6 +40,7 @@ const contentKind = metadata.contentKind ?? 'page';
 const contentClass = metadata.contentClass ?? contentKind;
 const continuityEligible = isContinuityEligibleContent(entryData, contentKind);
 const freshness = resolveFreshnessAuthority(entryData);
+const currentCoverage = resolveCoverageAuthority(entryData);
 const shell = createAppShellInput(normalizeCurrentPath(Astro.url.pathname));
 const [articles, authors, topicGroups, tagGroups] = await Promise.all([
   getArticles(),
@@ -56,6 +60,10 @@ const rightRail = createRightRailInput(getScreenInfo({
   tagGroups
 }));
 const articleOutline = contentKind === 'article' && rightRail.outlineItems.length > 0;
+const coveragePromotion = selectCoveragePromotion(articles);
+const currentPath = normalizeCurrentPath(Astro.url.pathname);
+const showCoveragePromotion = coveragePromotion
+  && normalizeCurrentPath(coveragePromotion.article.href) !== currentPath;
 ---
 <AppFrameBase
   pageId={pageId}
@@ -76,12 +84,19 @@ const articleOutline = contentKind === 'article' && rightRail.outlineItems.lengt
   freshnessVolatility={freshness.volatility}
   lastReviewed={freshness.lastReviewed}
   reviewAfter={freshness.reviewAfter}
+  coverageMode={currentCoverage.mode}
+  coverageStatus={currentCoverage.status}
+  coverageActive={currentCoverage.active}
+  coverageUpdatedAt={currentCoverage.updatedAt}
 >
   <Fragment slot="before-main">
     <slot name="header" />
     <slot name="sidebar" />
   </Fragment>
 
+  {showCoveragePromotion && coveragePromotion
+    ? <CoverageStrip promotion={coveragePromotion} />
+    : null}
   <slot />
   <Fragment slot="after-content">
     <RightInfoRail rail={rightRail} />

@@ -45,7 +45,12 @@ const required = [
   'architecture/section-front-policy.json',
   'src/components/reader/SectionFront.astro',
   'src/pages/sections/[slug].astro',
-  'tools/audit-section-fronts.mjs'
+  'tools/audit-section-fronts.mjs',
+  'architecture/coverage-policy.json',
+  'src/config/coverage.ts',
+  'src/lib/coverage.ts',
+  'src/components/coverage/CoverageTimeline.astro',
+  'tools/audit-coverage-foundation.mjs'
 ];
 
 const missing = required.filter((file) => !fs.existsSync(file));
@@ -158,6 +163,11 @@ if (editorialAudit.status !== 0) {
 const sectionFrontAudit = spawnSync(process.execPath, ['tools/audit-section-fronts.mjs'], { stdio: 'inherit' });
 if (sectionFrontAudit.status !== 0) {
   process.exit(sectionFrontAudit.status ?? 1);
+}
+
+const coverageAudit = spawnSync(process.execPath, ['tools/audit-coverage-foundation.mjs'], { stdio: 'inherit' });
+if (coverageAudit.status !== 0) {
+  process.exit(coverageAudit.status ?? 1);
 }
 
 console.log('Signature contract OK');

@@ -1,0 +1,67 @@
+---
+import type { CoverageAuthority } from '../../config/coverage';
+import { contentDefaults } from '../../config/content';
+import { resolveContentDateLocale } from '@gaga/engine/content';
+
+interface Props {
+  coverage: CoverageAuthority;
+  language?: string;
+}
+
+const { coverage, language } = Astro.props;
+const locale = resolveContentDateLocale(
+  language ?? contentDefaults.defaultLanguage,
+  contentDefaults.dateLocale
+);
+
+const formatTimestamp = (value: string) => new Intl.DateTimeFormat(locale, {
+  dateStyle: 'medium',
+  timeStyle: 'short'
+}).format(new Date(value));
+
+const visible = coverage.mode !== 'standard' || coverage.updates.length > 0;
+---
+
+{visible && (
+  <section
+    class:list={['gaga-coverage-panel', `gaga-coverage-panel--${coverage.mode}`]}
+    data-gaga-coverage-panel
+    data-gaga-coverage-mode={coverage.mode}
+    data-gaga-coverage-status={coverage.status}
+    aria-labelledby="gaga-coverage-panel-title"
+  >
+    <header class="gaga-coverage-panel__head">
+      <div class="gaga-coverage-panel__state">
+        <span class="gaga-coverage-panel__indicator" aria-hidden="true"></span>
+        <p>{coverage.label}</p>
+      </div>
+      <h2 id="gaga-coverage-panel-title">Coverage updates</h2>
+      {coverage.summary && <p class="gaga-coverage-panel__summary">{coverage.summary}</p>}
+      {coverage.updatedAt && (
+        <p class="gaga-coverage-panel__updated">
+          Latest update:
+          {' '}
+          <time datetime={coverage.updatedAt}>{formatTimestamp(coverage.updatedAt)}</time>
+        </p>
+      )}
+    </header>
+
+    {coverage.updates.length > 0 && (
+      <ol class="gaga-coverage-timeline">
+        {coverage.updates.map((update) => (
+          <li id={`coverage-${update.id}`} class="gaga-coverage-update">
+            <time datetime={update.timestamp}>{formatTimestamp(update.timestamp)}</time>
+            <div>
+              <h3>
+                {update.href
+                  ? <a href={update.href}>{update.title}</a>
+                  : update.title}
+              </h3>
+              {update.summary && <p>{update.summary}</p>}
+            </div>
+          </li>
+        ))}
+      </ol>
+    )}
+  </section>
+)}

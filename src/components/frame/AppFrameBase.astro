@@ -28,6 +28,10 @@ interface Props {
   freshnessVolatility?: string;
   lastReviewed?: string;
   reviewAfter?: string;
+  coverageMode?: string;
+  coverageStatus?: string;
+  coverageActive?: boolean;
+  coverageUpdatedAt?: string;
 }
 
 const {
@@ -48,7 +52,11 @@ const {
   freshnessStatus = 'unknown',
   freshnessVolatility = 'unknown',
   lastReviewed,
-  reviewAfter
+  reviewAfter,
+  coverageMode = 'standard',
+  coverageStatus = 'inactive',
+  coverageActive = false,
+  coverageUpdatedAt
 } = Astro.props;
 
 const showActionRuntime = pageId !== 'landing';
@@ -84,6 +92,10 @@ const showContextTrigger = runtimeContext !== 'article';
   data-gaga-freshness-volatility={freshnessVolatility}
   data-gaga-last-reviewed={lastReviewed}
   data-gaga-review-after={reviewAfter}
+  data-gaga-coverage-mode={coverageMode}
+  data-gaga-coverage-status={coverageStatus}
+  data-gaga-coverage-active={String(coverageActive)}
+  data-gaga-coverage-updated-at={coverageUpdatedAt}
 >
   <GlobalNavigationRail />
   <slot name="before-main" />

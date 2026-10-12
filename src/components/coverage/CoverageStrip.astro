@@ -1,0 +1,48 @@
+---
+import type { CoveragePromotion } from '../../lib/coverage';
+import { contentDefaults } from '../../config/content';
+import { resolveContentDateLocale } from '@gaga/engine/content';
+
+interface Props {
+  promotion: CoveragePromotion;
+}
+
+const { promotion } = Astro.props;
+const { article, coverage } = promotion;
+const title = article.metadata.title;
+const locale = resolveContentDateLocale(
+  article.metadata.language ?? contentDefaults.defaultLanguage,
+  contentDefaults.dateLocale
+);
+
+const updatedLabel = coverage.updatedAt
+  ? new Intl.DateTimeFormat(locale, {
+      dateStyle: 'medium',
+      timeStyle: 'short'
+    }).format(new Date(coverage.updatedAt))
+  : undefined;
+---
+
+<aside
+  class:list={['gaga-coverage-strip', `gaga-coverage-strip--${coverage.mode}`]}
+  data-gaga-coverage-strip
+  data-gaga-coverage-mode={coverage.mode}
+  data-gaga-coverage-status={coverage.status}
+  aria-labelledby="gaga-coverage-strip-title"
+>
+  <div class="gaga-coverage-strip__state">
+    <span class="gaga-coverage-strip__indicator" aria-hidden="true"></span>
+    <strong>{coverage.label}</strong>
+  </div>
+
+  <div class="gaga-coverage-strip__body">
+    <a id="gaga-coverage-strip-title" href={article.href}>{title}</a>
+    {coverage.summary && <span>{coverage.summary}</span>}
+  </div>
+
+  {updatedLabel && (
+    <time datetime={coverage.updatedAt} class="gaga-coverage-strip__time">
+      Updated {updatedLabel}
+    </time>
+  )}
+</aside>

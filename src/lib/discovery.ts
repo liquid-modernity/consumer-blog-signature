@@ -35,6 +35,14 @@ export interface GagaDiscoveryRecord {
     breaking: boolean;
     live: boolean;
   };
+  coverage?: {
+    mode: string;
+    status: string;
+    active: boolean;
+    label: string;
+    updatedAt?: string;
+    updateCount: number;
+  };
 }
 
 export interface LegacyArticleSearchItem {
@@ -149,6 +157,14 @@ export async function buildPublicDiscoveryRecords(): Promise<GagaDiscoveryRecord
         featured: article.featured,
         breaking: article.breaking,
         live: article.live
+      },
+      coverage: {
+        mode: article.coverage.mode,
+        status: article.coverage.status,
+        active: article.coverage.active,
+        label: article.coverage.label,
+        ...(article.coverage.updatedAt ? { updatedAt: article.coverage.updatedAt } : {}),
+        updateCount: article.coverage.updates.length
       }
     });
   }

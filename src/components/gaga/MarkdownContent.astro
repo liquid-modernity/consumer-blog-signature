@@ -10,6 +10,7 @@ import { getArticles, getAuthorBySlug, getAuthors, getTagGroups, getTopicGroups 
 import { getScreenInfo } from '../../lib/screen-info';
 import type { BreadcrumbItem } from '../../lib/page-context';
 import { normalizeContentMetadata } from '@gaga/engine/content';
+import { resolveCoverageAuthority } from '../../config/coverage';
 import { normalizeGagaRouteContext, type GagaRouteContext } from '../../gaga/content/runtime-route';
 
 interface Props {
@@ -34,6 +35,7 @@ const language = metadata.language ?? route?.lang;
 const routeIdentity = metadata.canonical ?? route?.id ?? Astro.url.pathname;
 const missingTitleSource = route?.id ?? Astro.url.pathname;
 const articleActions = createArticleWorkspaceActionsInput();
+const coverage = resolveCoverageAuthority(entryData);
 let breadcrumbs: BreadcrumbItem[] = [];
 
 if (isArticle) {
@@ -79,6 +81,7 @@ const entityParentHref = isAuthor ? '/authors/' : '/topics/';
     routeIdentity={routeIdentity}
     missingTitleSource={missingTitleSource}
     breadcrumbs={breadcrumbs}
+    coverage={coverage}
   >
     <div class="gaga-article-body gaga-markdown-content" data-gaga-article-body><slot /></div>
   </ArticleShell>
