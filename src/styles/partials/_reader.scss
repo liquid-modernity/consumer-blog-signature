@@ -187,35 +187,28 @@ body {
   --gaga-article-font-family: var(--gaga-font-sans, system-ui, -apple-system, sans-serif);
 }
 
-/* Font Scales */
 body[data-gaga-reader-font='sm'] { --gaga-article-font-size: clamp(.92rem, calc(.88rem + .2vw), .98rem); }
 body[data-gaga-reader-font='md'] { --gaga-article-font-size: clamp(1rem, calc(.96rem + .2vw), var(--gaga-type-body-size)); }
 body[data-gaga-reader-font='lg'] { --gaga-article-font-size: clamp(1.1rem, calc(1.02rem + .45vw), 1.2rem); }
 body[data-gaga-reader-font='xl'] { --gaga-article-font-size: clamp(1.24rem, calc(1.15rem + .6vw), 1.38rem); }
 
-/* Font Family Selection */
 body[data-gaga-reader-font-family='sans'] {
   --gaga-article-font-family: var(--gaga-font-sans, system-ui, -apple-system, sans-serif);
-  font-family: var(--gaga-font-sans, system-ui, -apple-system, sans-serif);
 }
 body[data-gaga-reader-font-family='serif'] {
   --gaga-article-font-family: var(--gaga-font-serif, "Lora", Georgia, serif);
-  font-family: var(--gaga-font-serif, "Lora", Georgia, serif);
 }
 body[data-gaga-reader-font-family='mono'] {
   --gaga-article-font-family: var(--gaga-font-mono, "JetBrains Mono", monospace);
 }
 
-/* Line Height */
 body[data-gaga-reader-line-height='normal'] { --gaga-article-line-height: 1.6; }
 body[data-gaga-reader-line-height='relaxed'] { --gaga-article-line-height: 1.8; }
 body[data-gaga-reader-line-height='loose'] { --gaga-article-line-height: 2.05; }
 
-/* Letter Spacing (Tracking) */
 body[data-gaga-reader-letter-spacing='normal'] { --gaga-article-letter-spacing: 0; }
 body[data-gaga-reader-letter-spacing='wide'] { --gaga-article-letter-spacing: 0.035em; }
 
-/* Density */
 body[data-gaga-reader-density='compact'] {
   --gaga-article-line-height: 1.52;
   --gaga-reading-paragraph-gap: 1.15rem;
@@ -230,12 +223,10 @@ body[data-gaga-reader-density='wide'] {
   --gaga-article-measure: 48rem;
 }
 
-/* Reading Width Measure */
 body[data-gaga-reader-measure='standard'] { --gaga-article-measure: 38rem; }
 body[data-gaga-reader-measure='comfortable'] { --gaga-article-measure: 44rem; }
 body[data-gaga-reader-measure='wide'] { --gaga-article-measure: 52rem; }
 
-/* Contrast Mode */
 body[data-gaga-reader-contrast='high'] {
   --gaga-ink: #000000 !important;
   --gaga-surface: #ffffff !important;
@@ -249,7 +240,6 @@ body[data-gaga-theme='dark'][data-gaga-reader-contrast='high'] {
   --gaga-muted: #e2e8f0 !important;
 }
 
-/* Reduced Motion Preference */
 body[data-gaga-reader-motion='reduced'],
 body[data-gaga-reader-motion='reduced'] * {
   animation-duration: 0.001ms !important;
@@ -258,23 +248,15 @@ body[data-gaga-reader-motion='reduced'] * {
   scroll-behavior: auto !important;
 }
 
-/* Link Underlines Control */
-body[data-gaga-reader-links='plain'] article a,
-body[data-gaga-reader-links='plain'] .gaga-flagship-article a {
+body[data-gaga-reader-links='plain'] :is([data-gaga-article-shell], [data-gaga-reading-surface], .gaga-flagship-article) a {
   text-decoration: none !important;
 }
-body[data-gaga-reader-links='underlined'] article a,
-body[data-gaga-reader-links='underlined'] .gaga-flagship-article a {
+body[data-gaga-reader-links='underlined'] :is([data-gaga-article-shell], [data-gaga-reading-surface], .gaga-flagship-article) a {
   text-decoration: underline !important;
   text-underline-offset: 3px !important;
 }
 
-/* Apply across article, topic, archive, library, and search surfaces */
-article,
-.gaga-flagship-article,
-.gaga-flagship-article__prose,
-[data-gaga-article-shell],
-[data-gaga-reading-surface] {
+:is(.gaga-flagship-article, .gaga-flagship-article__prose, [data-gaga-article-shell], [data-gaga-reading-surface]) {
   font-family: var(--gaga-article-font-family, inherit);
   font-size: var(--gaga-article-font-size, 1.05rem);
   line-height: var(--gaga-article-line-height, 1.75);
@@ -282,7 +264,6 @@ article,
   max-width: var(--gaga-article-measure, 44rem);
 }
 
-/* Icon-only close control: accessible name is the source for the visual tooltip. */
 .gaga-reader-panel__head [data-gaga-tooltip] {
   position: relative;
 }
@@ -313,10 +294,6 @@ article,
   opacity: 1;
   visibility: visible;
 }
-
-/* =========================================================================
-   READING INTELLIGENCE: HIGHLIGHTS & ANNOTATION CONTINUITY
-   ========================================================================= */
 
 mark.gaga-highlight-mark,
 .gaga-highlight-mark {
@@ -360,10 +337,6 @@ mark.gaga-highlight-mark,
     box-shadow: 0 0 16px rgba(234, 179, 8, 0.8);
   }
 }
-
-/* =========================================================================
-   UNIVERSAL FLOATING SELECTION ACTION MENU
-   ========================================================================= */
 
 .gaga-selection-menu {
   position: absolute;
@@ -468,10 +441,6 @@ mark.gaga-highlight-mark,
   }
 }
 
-/* =========================================================================
-   HIGHLIGHT CONTEXTUAL POPUP
-   ========================================================================= */
-
 .gaga-highlight-popup {
   position: absolute;
   z-index: 100;
@@ -567,10 +536,6 @@ mark.gaga-highlight-mark,
   gap: 0.35rem;
   margin-top: 0.4rem;
 }
-
-/* =========================================================================
-   SMART SPEAKER DOCK
-   ========================================================================= */
 
 .gaga-speech-dock {
   position: fixed;
@@ -705,10 +670,6 @@ mark.gaga-highlight-mark,
     color: var(--gaga-color-danger, #f87171);
   }
 }
-
-/* =========================================================================
-   LIBRARY KNOWLEDGE MEMORY HUB & SECTIONS
-   ========================================================================= */
 
 .gaga-library-head {
   display: flex;
@@ -924,7 +885,6 @@ mark.gaga-highlight-mark,
   align-items: center;
 }
 
-/* Button utility classes */
 .gaga-btn {
   display: inline-flex;
   align-items: center;
@@ -983,17 +943,12 @@ mark.gaga-highlight-mark,
   }
 }
 
-/* Active reading sentence indicator */
 .gaga-speech-active-sentence {
   background: rgba(37, 99, 235, 0.16) !important;
   border-radius: var(--gaga-radius-sm, 4px);
   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.22);
   transition: background-color 0.2s ease;
 }
-
-/* =========================================================================
-   REAL-TIME BEHAVIOURAL & RUNTIME DIAGNOSTIC HUD
-   ========================================================================= */
 
 .gaga-diagnostic-hud {
   position: fixed;
@@ -1189,5 +1144,3 @@ mark.gaga-highlight-mark,
   flex-wrap: wrap;
   gap: 0.35rem;
 }
-
-

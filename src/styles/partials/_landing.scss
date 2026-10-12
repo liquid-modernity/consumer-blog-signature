@@ -35,3 +35,17 @@
   color: var(--gaga-ink);
   text-decoration-color: var(--gaga-line-strong);
 }
+
+.gaga-landing-section__inner { inline-size: min(69rem, 100%); }
+.gaga-landing-kicker {
+  margin: 0 0 .8rem;
+  color: var(--gaga-blue) !important;
+  font-family: var(--gaga-font-mono);
+  font-size: var(--gaga-type-label-size) !important;
+  font-weight: var(--gaga-type-label-weight);
+  letter-spacing: var(--gaga-type-label-tracking);
+  line-height: var(--gaga-type-label-line-height) !important;
+  text-transform: uppercase;
+}
+.gaga-landing h1 { max-inline-size: 15ch; text-wrap: balance; }
+.gaga-landing-section__inner > p:not(.gaga-landing-kicker) { text-wrap: pretty; }

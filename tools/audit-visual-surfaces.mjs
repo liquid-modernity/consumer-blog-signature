@@ -32,8 +32,12 @@ for (const marker of [
   if (!styles.includes(marker)) fail(`visual surface marker missing: ${marker}`);
 }
 
-if (!styles.includes('.gaga-editorial-front,') || !styles.includes('article {')) {
-  fail('reader preference isolation for editorial/discovery articles missing');
+const reader = read('src/styles/partials/_reader.scss');
+if (/^article,\s*$/m.test(reader)) {
+  fail('reader typography must not target every generic article element');
+}
+if (!reader.includes(':is(.gaga-flagship-article, .gaga-flagship-article__prose, [data-gaga-article-shell], [data-gaga-reading-surface])')) {
+  fail('reader preference scope contract missing');
 }
 
 const signature = read('src/styles/signature.scss');

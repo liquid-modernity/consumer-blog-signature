@@ -62,7 +62,9 @@ const required = [
   'tools/audit-rail-interaction.mjs',
   'architecture/visual-surface-policy.json',
   'src/styles/partials/_visual-polish.scss',
-  'tools/audit-visual-surfaces.mjs'
+  'tools/audit-visual-surfaces.mjs',
+  'architecture/route-visual-review-policy.json',
+  'tools/audit-route-visual-closure.mjs'
 ];
 
 const missing = required.filter((file) => !fs.existsSync(file));
@@ -196,5 +198,8 @@ const visualSurfaceAudit = spawnSync(process.execPath, ['tools/audit-visual-surf
 if (visualSurfaceAudit.status !== 0) {
   process.exit(visualSurfaceAudit.status ?? 1);
 }
+
+const routeVisualAudit = spawnSync(process.execPath, ['tools/audit-route-visual-closure.mjs'], { stdio: 'inherit' });
+if (routeVisualAudit.status !== 0) process.exit(routeVisualAudit.status ?? 1);
 
 console.log('Signature contract OK');

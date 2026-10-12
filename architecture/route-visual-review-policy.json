@@ -1,0 +1,27 @@
+{
+  "schema": "gaga.route-visual-review-policy.v1",
+  "version": "0.0.42.1",
+  "principles": {
+    "readerPreferencesScopeToReadingSurfaces": true,
+    "applicationChromeMustNotInheritReaderFontChoice": true,
+    "articleCardsMustNotInheritReaderMeasure": true,
+    "routeSpecificPolishMustReuseExistingTokens": true,
+    "inlinePresentationStylesAreDisallowedOnReviewedRoutes": true,
+    "cssSourceMustKeepMaintenanceReserve": true
+  },
+  "reviewedSurfaces": [
+    "latest",
+    "article",
+    "sections",
+    "topics",
+    "tags",
+    "authors",
+    "archive",
+    "library",
+    "search",
+    "reference-pages",
+    "system-pages",
+    "landing"
+  ],
+  "cssSourceReserveBytes": 4096
+}

@@ -445,9 +445,6 @@ button.gaga-search-card {
   }
 }
 
-/* Context-aware GAGA content tuning.
-   The frame decides the reading rhythm from frontmatter contentKind/contentClass,
-   so article pages do not inherit the oversized index display treatment. */
 .gaga-app-frame .hero,
 .gaga-app-frame .gaga-markdown-content,
 .gaga-app-frame .main-pane {
@@ -653,7 +650,6 @@ button.gaga-search-card {
   gap: var(--gaga-space-2);
 }
 
-
 .gaga-article-utility {
   margin: 0 auto var(--gaga-space-4);
 }
@@ -690,7 +686,6 @@ button.gaga-search-card {
   white-space: normal;
 }
 
-/* Reader-space chrome is deliberately icon-only; accessible names remain on the controls. */
 .gaga-article-utility__label {
   position: absolute;
   width: 1px;
@@ -735,7 +730,6 @@ button.gaga-search-card {
   opacity: 1;
   visibility: visible;
 }
-
 
 .gaga-article-utility__action .gaga-icon {
   font-size: var(--gaga-type-body-size);
@@ -801,7 +795,6 @@ button.gaga-search-card {
   letter-spacing: 0;
   text-transform: none;
 }
-
 
 .gaga-app-frame[data-gaga-content-kind='article'] .gaga-markdown-content h2 {
   max-width: min(34rem, var(--gaga-article-measure, 40.5rem));
@@ -955,7 +948,6 @@ button.gaga-search-card {
     transition: transform .16s ease-out;
   }
 
-
   .gaga-article-utility__actions {
     gap: var(--gaga-space-1);
   }
@@ -1085,7 +1077,6 @@ a.gaga-wikilink:focus-visible {
   color: var(--gaga-muted);
 }
 
-/* ===== Consumer Signature center-screen language: mission index / archive log / saved inventory ===== */
 .gaga-app-frame[data-gaga-content-class='archive'] .hero,
 .gaga-app-frame[data-gaga-content-class='saved'] .hero {
   display: none;
@@ -1489,7 +1480,6 @@ a.gaga-wikilink:focus-visible {
   }
 }
 
-/* ===== System screen: 404 / lost coordinate ===== */
 .gaga-system-screen {
   max-width: 42rem;
   margin-block: clamp(1rem, 4vw, 2.5rem);
