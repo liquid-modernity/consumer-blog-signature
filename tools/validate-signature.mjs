@@ -32,7 +32,11 @@ const required = [
   'architecture/reading-continuity-policy.json',
   'architecture/freshness-policy.json',
   'src/config/freshness.ts',
-  'tools/audit-continuity-freshness-source.mjs'
+  'tools/audit-continuity-freshness-source.mjs',
+  'architecture/local-development-policy.json',
+  'scripts/local-env.sh',
+  'preview_local.command',
+  'tools/audit-local-dx-source.mjs'
 ];
 
 const missing = required.filter((file) => !fs.existsSync(file));
@@ -130,6 +134,11 @@ if (discoveryAudit.status !== 0) {
 const continuityFreshnessAudit = spawnSync(process.execPath, ['tools/audit-continuity-freshness-source.mjs'], { stdio: 'inherit' });
 if (continuityFreshnessAudit.status !== 0) {
   process.exit(continuityFreshnessAudit.status ?? 1);
+}
+
+const localDxAudit = spawnSync(process.execPath, ['tools/audit-local-dx-source.mjs'], { stdio: 'inherit' });
+if (localDxAudit.status !== 0) {
+  process.exit(localDxAudit.status ?? 1);
 }
 
 console.log('Signature contract OK');

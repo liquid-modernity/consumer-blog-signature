@@ -3,13 +3,13 @@ set -euo pipefail
 cd "$(dirname "$0")"
 
 # shellcheck source=/dev/null
-. scripts/catalina-common.sh
-require_node
+. scripts/local-env.sh
+prepare_local_gaga_env
+require_local_dependencies
 
-if is_catalina_or_older; then
-  [ -f "$READY_FILE" ] || fail "Catalina toolchain is not ready. Run ./bootstrap_catalina.command once."
-  # shellcheck source=/dev/null
-  . "$ENV_FILE"
-fi
-
+STARTED_AT="$(date +%s)"
 npm run verify:full
+ENDED_AT="$(date +%s)"
+
+echo
+echo "GAGA local verification complete in $((ENDED_AT - STARTED_AT))s."

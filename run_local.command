@@ -3,53 +3,63 @@ set -euo pipefail
 cd "$(dirname "$0")"
 
 REVIEW_URL="${CONSUMER_REVIEW_URL:-}"
-if [ -z "$REVIEW_URL" ] && [ -f .review-url ]; then REVIEW_URL="$(tr -d '\r\n ' < .review-url)"; fi
+if [ -z "$REVIEW_URL" ] && [ -f .review-url ]; then
+  REVIEW_URL="$(tr -d '\r\n ' < .review-url)"
+fi
 
 open_url() {
   local url="$1"
   echo "Opening review surface: $url"
-  if command -v open >/dev/null 2>&1; then open "$url"; elif command -v xdg-open >/dev/null 2>&1; then xdg-open "$url"; else echo "$url"; fi
+  if command -v open >/dev/null 2>&1; then
+    open "$url"
+  elif command -v xdg-open >/dev/null 2>&1; then
+    xdg-open "$url"
+  else
+    echo "$url"
+  fi
 }
 
 # shellcheck source=/dev/null
-. scripts/catalina-common.sh
-require_node
+. scripts/local-env.sh
+prepare_local_gaga_env
 
-if is_catalina_or_older; then
-  if [ -f "$READY_FILE" ]; then
-    # shellcheck source=/dev/null
-    . "$ENV_FILE"
-    npm run verify:toolchain
-    echo "Starting local GAGA dev server with Catalina compatibility runtime."
-    npm run dev -- --host 127.0.0.1 &
-    PID=$!
-    trap 'kill $PID 2>/dev/null || true' EXIT
-    sleep 4
-    open_url "http://127.0.0.1:3000"
-    wait $PID
-    exit 0
-  fi
-
+if ! [ -x "$PROJECT_ROOT/node_modules/.bin/astro" ]; then
   if [ -n "$REVIEW_URL" ]; then
-    echo "Catalina compatibility runtime is not bootstrapped yet; using configured remote review URL."
+    echo "Local dependencies are not ready; using configured remote review URL."
     open_url "$REVIEW_URL"
     exit 0
   fi
-
-  echo "Catalina detected and local runtime is not ready."
-  echo "Run ./bootstrap_catalina.command once, then rerun ./run_local.command."
-  exit 2
+  require_local_dependencies
 fi
 
-if [ -n "$REVIEW_URL" ]; then
-  open_url "$REVIEW_URL"
-  exit 0
-fi
+npm run verify:toolchain
 
-npm install --no-audit
-npm run dev -- --host 127.0.0.1 &
+LOG_FILE="$COMPAT_DIR/dev-server.log"
+PID_FILE="$COMPAT_DIR/dev-server.pid"
+URL="http://127.0.0.1:3000"
+
+rm -f "$PID_FILE"
+: > "$LOG_FILE"
+
+echo "Starting GAGA local dev server at $URL"
+npm run dev -- --host 127.0.0.1 --port 3000 >"$LOG_FILE" 2>&1 &
 PID=$!
-trap 'kill $PID 2>/dev/null || true' EXIT
-sleep 4
-open_url "http://127.0.0.1:3000"
-wait $PID
+printf '%s\n' "$PID" > "$PID_FILE"
+
+cleanup() {
+  kill "$PID" 2>/dev/null || true
+  rm -f "$PID_FILE"
+}
+trap cleanup EXIT INT TERM
+
+if ! wait_for_http "$URL" 60 0.25; then
+  echo "Local server did not become ready."
+  echo "===== DEV SERVER LOG ====="
+  tail -80 "$LOG_FILE" || true
+  exit 1
+fi
+
+echo "GAGA local server READY."
+open_url "$URL"
+echo "Log: $LOG_FILE"
+wait "$PID"

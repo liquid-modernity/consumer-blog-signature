@@ -1,0 +1,24 @@
+{
+  "schema": "gaga.local-development-policy.v1",
+  "version": "0.0.39.1",
+  "principles": {
+    "dailyRunnerMayInstall": false,
+    "dailyRunnerMayMutateLockfile": false,
+    "bootstrapOwnsCompatibilityInstallation": true,
+    "localServerMustReportReadinessBeforeBrowserOpen": true,
+    "localServerHost": "127.0.0.1",
+    "localServerPort": 3000,
+    "suppressOnlyExperimentalWasiNoise": true,
+    "remoteReviewFallbackAllowed": true
+  },
+  "commands": {
+    "bootstrap": "./bootstrap_catalina.command",
+    "develop": "./run_local.command",
+    "verify": "./verify_local.command",
+    "preview": "./preview_local.command"
+  },
+  "discoveryHygiene": {
+    "singleLlmsTxtAuthority": "src/pages/llms.txt.ts",
+    "publicLlmsTxtDuplicateAllowed": false
+  }
+}
