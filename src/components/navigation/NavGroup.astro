@@ -30,13 +30,13 @@ const normalizedCurrentPath = normalizePath(currentPath);
 const hasActiveChild = items.some((item) => !item.external && normalizePath(item.href) === normalizedCurrentPath);
 ---
 <div class:list={['gaga-nav-group', hasActiveChild && 'gaga-is-current']} data-gaga-nav-group={id} data-gaga-current={hasActiveChild ? 'true' : undefined}>
-  <details class="gaga-nav-group__details" open={hasActiveChild ? true : undefined}>
+  <details class="gaga-nav-group__details" open>
     <summary class:list={['gaga-nav-group__summary', hasActiveChild && 'gaga-is-current']} aria-label={label} data-gaga-i18n-key={labelKey} data-gaga-i18n-id={label} data-gaga-i18n-en={labelEn ?? label} data-gaga-i18n-target="aria">
       <Icon name={icon} />
       <span class="gaga-nav-label" data-gaga-i18n-key={labelKey} data-gaga-i18n-id={label} data-gaga-i18n-en={labelEn ?? label}>{label}</span>
-      <span class="gaga-nav-disclosure" aria-hidden="true">+</span>
+      <span class="gaga-nav-disclosure" aria-hidden="true">▾</span>
     </summary>
-    <div class="gaga-nav-group__items">
+    <div class="gaga-nav-group__items gaga-tree-branch">
       {items.map((item) => <NavItem {...item} currentPath={currentPath} externalDescriptionScope={`${id}-expanded`} />)}
     </div>
   </details>

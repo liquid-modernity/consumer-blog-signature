@@ -9,6 +9,7 @@ import AppFrameBase from './AppFrameBase.astro';
 import LeftRail from './LeftRail.astro';
 import RightInfoRail from './RightInfoRail.astro';
 import ArticleOutlinePeek from './ArticleOutlinePeek.astro';
+import PageMetadataTable from '../information/PageMetadataTable.astro';
 import {
   createAppShellInput,
   createLeftRailInput,
@@ -53,7 +54,7 @@ const rail = createLeftRailInput(currentPath, projectContextRail({
   sections: editorialSections
 }));
 const rightRail = createRightRailInput(info);
-const articleOutline = contentKind === 'article' && rightRail.outlineItems.length > 0;
+const articleOutline = currentPath !== '/' && rightRail.outlineItems.length > 0;
 ---
 <AppFrameBase
   pageId={pageId}
@@ -76,6 +77,7 @@ const articleOutline = contentKind === 'article' && rightRail.outlineItems.lengt
   <div class="main-pane">
     <div class="content-panel">
       <slot />
+      {currentPath !== '/' ? <PageMetadataTable rail={rightRail} /> : null}
     </div>
   </div>
 

@@ -150,3 +150,33 @@ test('Human Behaviour Algorithms & Algorithmic Self-Healing Diagnostic HUD', () 
   const scrollCode = fs.readFileSync('src/scripts/systems/reading-scroll.ts', 'utf8');
   assert.ok(scrollCode.includes('getUnifiedScrollMetrics'), 'Must provide unified scroll metrics');
 });
+
+test('PAKRPP Knowledge Publication System: Softcoded Registries, Invariants & Route Contract', () => {
+  const arch = fs.readFileSync('src/config/pakrpp-architecture.ts', 'utf8');
+  const routesConfig = fs.readFileSync('src/config/routes.ts', 'utf8');
+  const editorialFront = fs.readFileSync('src/components/reader/EditorialFront.astro', 'utf8');
+
+  assert.ok(arch.includes('publicationTypeRegistry'), 'Must define softcoded publicationTypeRegistry');
+  assert.ok(arch.includes('topicRegistry'), 'Must define softcoded topicRegistry');
+  assert.ok(arch.includes("id: 'pelaporan'") && arch.includes("id: 'teknologi'") && arch.includes("id: 'anomali'"), 'Must include canonical Pelaporan, Teknologi, and Anomali topics');
+  assert.ok(arch.includes('navigationConfig'), 'Must define softcoded navigationConfig');
+  assert.ok(arch.includes('featureFlags'), 'Must define softcoded featureFlags');
+  assert.ok(arch.includes('validatePublicationInvariant'), 'Must enforce Publication core invariants');
+  assert.ok(arch.includes('validateTopicInvariant'), 'Must enforce Topic core invariants');
+  assert.ok(arch.includes('ContentProviderAdapter'), 'Must define CMS-agnostic ContentProviderAdapter boundary');
+
+  assert.ok(routesConfig.includes("index: '/publications'"), 'Must define /publications route contract');
+  assert.ok(routesConfig.includes("latest: '/latest'"), 'Must define /latest discovery route contract');
+  assert.ok(routesConfig.includes("saved: '/saved'"), 'Must define /saved discovery route contract');
+  assert.ok(routesConfig.includes("graph: '/knowledge/graph'"), 'Must define /knowledge/graph route contract');
+  assert.ok(routesConfig.includes("index: '/knowledge/index'"), 'Must define /knowledge/index route contract');
+  assert.ok(routesConfig.includes("tags: '/knowledge/tags'"), 'Must define /knowledge/tags route contract');
+  assert.ok(routesConfig.includes("references: '/knowledge/references'"), 'Must define /knowledge/references route contract');
+  assert.ok(routesConfig.includes("sitemap: '/system/sitemap'"), 'Must define /system/sitemap human route contract');
+  assert.ok(routesConfig.includes("privacy: '/legal/privacy'"), 'Must define /legal/privacy route contract');
+  assert.ok(routesConfig.includes("license: '/legal/license'"), 'Must define /legal/license route contract');
+
+  assert.ok(editorialFront.includes('getEnabledRootSections'), 'Root index must read from softcoded navigation registry');
+  assert.ok(editorialFront.includes('01') && editorialFront.includes('02') && editorialFront.includes('03') && editorialFront.includes('04'), 'Root index must implement canonical 01-04 visual grouping');
+});
+

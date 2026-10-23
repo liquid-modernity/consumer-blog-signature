@@ -13,10 +13,10 @@
   "canonical": {
     "astro": "7.2.9",
     "astroMdx": "7.0.8",
-    "gagaEngine": "0.1.6",
-    "gagaEngineWeb": "0.1.6",
-    "gagaEngineAstro": "0.1.6",
-    "gagaEngineObsidian": "0.1.6",
+    "gagaEngine": "0.4.0",
+    "gagaEngineWeb": "0.4.0",
+    "gagaEngineAstro": "0.4.0",
+    "gagaEngineObsidian": "0.4.0",
     "sass": "1.89.2",
     "typescript": "5.8.3"
   },

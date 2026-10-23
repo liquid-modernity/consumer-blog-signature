@@ -3,12 +3,26 @@ import mdx from '@astrojs/mdx';
 import { rehypeTaskListAccessibility } from '@gaga/engine/content/task-list-accessibility';
 import { remarkObsidianBridge } from './src/lib/remark-obsidian.mjs';
 
+function resolveSiteUrl(raw) {
+  const trimmed = (raw || '').trim();
+  if (!trimmed) return 'https://example.com';
+  const candidate = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+  try {
+    return new URL(candidate).origin;
+  } catch {
+    return 'https://example.com';
+  }
+}
+
 export default defineConfig({
+  devToolbar: {
+    enabled: false
+  },
   server: {
     host: '0.0.0.0',
     port: 3000
   },
-  site: process.env.PUBLIC_SITE_URL || 'https://example.com',
+  site: resolveSiteUrl(process.env.PUBLIC_SITE_URL),
   trailingSlash: 'never',
   markdown: {
     remarkPlugins: [remarkObsidianBridge],
@@ -16,6 +30,9 @@ export default defineConfig({
   },
   integrations: [mdx()],
   vite: {
+    server: {
+      allowedHosts: true
+    },
     build: {
       cssMinify: 'esbuild'
     },

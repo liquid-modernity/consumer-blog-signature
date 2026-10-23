@@ -1,0 +1,99 @@
+---
+import GagaSiteLayout from '../../../components/gaga/GagaSiteLayout.astro';
+import {
+  referenceRegistry,
+  resolveCanonicalTopic
+} from '../../../config/pakrpp-architecture';
+import { toCanonicalPublications } from '../../../lib/pakrpp-content';
+import { routes } from '../../../config/routes';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  return referenceRegistry.map((ref) => ({
+    params: { slug: ref.slug },
+    props: { reference: ref }
+  }));
+}
+
+const { reference } = Astro.props;
+if (!reference) {
+  return Astro.redirect('/404');
+}
+
+const allPublications = await toCanonicalPublications();
+const citingPublications = allPublications.filter((pub) =>
+  reference.citedByPublications.includes(pub.slug)
+);
+
+const entryData = {
+  title: reference.title,
+  subtitle: `${reference.authors.join(', ')} (${reference.year}) · Objek Referensi Primer`,
+  description: reference.summary,
+  summary: reference.summary,
+  contentKind: 'page',
+  contentClass: 'reference-detail',
+  contentId: reference.id,
+  status: 'published',
+  visibility: 'public',
+  language: 'id'
+};
+---
+
+<GagaSiteLayout entryData={entryData}>
+  <section class="pakrpp-ref-detail" aria-label="Detail Objek Referensi">
+    <p class="pakrpp-ref-detail__nav">
+      <a href={routes.knowledge.references}>← Semua Referensi (/knowledge/references)</a>
+      <span aria-hidden="true">·</span>
+      <span>ID: {reference.id}</span>
+      <span aria-hidden="true">·</span>
+      <span>Tipe: {reference.sourceType.toUpperCase()}</span>
+    </p>
+
+    <p>{reference.summary}</p>
+
+    <p class="pakrpp-ref-detail__topics">
+      Topik terkait:
+      {reference.topics.map((t, i) => {
+        const topic = resolveCanonicalTopic(t);
+        return (
+          <>
+            {i > 0 && ' · '}
+            <a href={routes.topics.detail(topic?.slug ?? t)}>{topic?.label ?? t}</a>
+          </>
+        );
+      })}
+      {reference.externalUrl && (
+        <>
+          {' · '}
+          <a href={reference.externalUrl} target="_blank" rel="noopener noreferrer">
+            Sumber Eksternal ↗
+          </a>
+        </>
+      )}
+    </p>
+
+    <h2>Dirujuk oleh Publikasi ({citingPublications.length})</h2>
+    <ul>
+      {citingPublications.map((pub) => (
+        <li>
+          <a href={pub.canonicalHref}>{pub.title}</a> ({pub.publishedAt})
+        </li>
+      ))}
+    </ul>
+  </section>
+</GagaSiteLayout>
+
+<style>
+  .pakrpp-ref-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .pakrpp-ref-detail__nav,
+  .pakrpp-ref-detail__topics {
+    margin: 0;
+    font-size: 0.82rem;
+    opacity: 0.8;
+  }
+</style>

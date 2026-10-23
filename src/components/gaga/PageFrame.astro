@@ -76,7 +76,7 @@ const leftRailProjection = projectContextRail({
   sections: editorialSections
 });
 const leftRail = createLeftRailInput(currentPath, leftRailProjection);
-const articleOutline = contentKind === 'article' && rightRail.outlineItems.length > 0;
+const articleOutline = currentPath !== '/' && rightRail.outlineItems.length > 0;
 const coveragePromotion = selectCoveragePromotion(articles);
 const showCoveragePromotion = coveragePromotion
   && normalizeCurrentPath(coveragePromotion.article.href) !== currentPath;

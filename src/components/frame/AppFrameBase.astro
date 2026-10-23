@@ -1,6 +1,5 @@
 ---
 import GagaDock from './GagaDock.astro';
-import GlobalNavigationRail from './GlobalNavigationRail.astro';
 import ReaderPreferences from '../reader/ReaderPreferences.astro';
 import ActionRuntime from './ActionRuntime.astro';
 import SkipLink from '../ui/SkipLink.astro';
@@ -95,17 +94,16 @@ const showGagaDock = surfaceProfile.dockMode === 'workspace';
   data-gaga-coverage-active={String(coverageActive)}
   data-gaga-coverage-updated-at={coverageUpdatedAt}
 >
-  <GlobalNavigationRail />
   <slot name="before-main" />
   {mainElement === 'main' ? (
     <main id="gaga-main" class="gaga-main-region" data-gaga-main-region tabindex="-1">
-      {showActionRuntime && <ActionRuntime context={runtimeContext} />}
+      {showActionRuntime && <ActionRuntime context={runtimeContext} pageTitle={pageTitle} workspaceId={workspaceId} />}
       <slot />
       <slot name="after-content" />
     </main>
   ) : (
     <div id="gaga-main" class="gaga-main-region" data-gaga-main-region tabindex="-1">
-      {showActionRuntime && <ActionRuntime context={runtimeContext} />}
+      {showActionRuntime && <ActionRuntime context={runtimeContext} pageTitle={pageTitle} workspaceId={workspaceId} />}
       <slot />
       <slot name="after-content" />
     </div>

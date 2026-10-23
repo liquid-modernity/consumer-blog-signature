@@ -15,9 +15,9 @@ const { rail, workspaceId, contextRole } = Astro.props;
 ---
 <aside
   id="gaga-left-rail"
-  class="gaga-left-rail"
+  class="gaga-left-rail gaga-left-rail--tree"
   data-gaga-left-rail
-  data-gaga-state="collapsed"
+  data-gaga-state="expanded"
   data-gaga-signature-surface="context-left-rail"
   data-gaga-workspace={workspaceId}
   data-gaga-context-role={contextRole}
@@ -36,20 +36,58 @@ const { rail, workspaceId, contextRole } = Astro.props;
     <RailToggle action={rail.railToggle} />
   </div>
 
-  <nav class="gaga-left-rail__nav" aria-label={`${rail.title} context navigation`}>
-    <div class="gaga-nav-groups gaga-left-rail__context-groups">
-      {rail.groups.map((group) => <NavGroup {...group} currentPath={rail.currentPath} />)}
-    </div>
-
-    <div class="gaga-left-rail__global-projection" data-gaga-global-navigation-projection>
-      <p class="gaga-left-rail__projection-label">{rail.globalProjectionLabel.id}</p>
-      <div class="gaga-nav-primary">
-        {rail.globalItems.map((item) => <NavItem {...item} currentPath={rail.currentPath} />)}
-      </div>
-      <div class="gaga-nav-groups">
-        {rail.globalGroups.map((group) => <NavGroup {...group} currentPath={rail.currentPath} />)}
-      </div>
-    </div>
+  <nav class="gaga-left-rail__nav gaga-left-rail__tree-nav" aria-label={`${rail.title} context navigation`}>
+    <div class="gaga-nav-groups gaga-left-rail__context-groups"></div>
+    <div class="gaga-left-rail__global-projection" data-gaga-global-navigation-projection hidden></div>
   </nav>
 </aside>
 <div class="gaga-rail-scrim" data-gaga-left-rail-scrim data-gaga-action="toggle-left-rail"></div>
+
+<style is:global>
+  .gaga-left-rail--tree:not([data-gaga-state='collapsed']) .gaga-left-rail__global-projection {
+    display: block;
+    margin-block-start: 0.65rem;
+    padding-block-start: 0.55rem;
+    border-block-start: 1px solid var(--gaga-line);
+  }
+
+  .gaga-left-rail--tree:not([data-gaga-state='collapsed']) .gaga-nav-group__items {
+    position: relative;
+    margin-inline-start: 1.25rem;
+    padding-inline-start: 0.65rem;
+    padding-block: 0.15rem 0.45rem;
+    border-inline-start: 1px solid var(--gaga-line);
+  }
+
+  .gaga-left-rail--tree:not([data-gaga-state='collapsed']) .gaga-nav-group__items .gaga-nav-item {
+    position: relative;
+    min-height: 1.75rem;
+    padding: 0.25rem 0.4rem;
+    font-size: 0.76rem;
+    font-weight: 500;
+  }
+
+  .gaga-left-rail--tree:not([data-gaga-state='collapsed']) .gaga-nav-group__items .gaga-nav-item::before {
+    content: '';
+    position: absolute;
+    inset-inline-start: -0.65rem;
+    inset-block-start: 50%;
+    inline-size: 0.45rem;
+    block-size: 1px;
+    background: var(--gaga-line);
+  }
+
+  .gaga-left-rail--tree:not([data-gaga-state='collapsed']) .gaga-nav-group__items .gaga-nav-item .gaga-icon {
+    inline-size: 1.35rem;
+    min-inline-size: 1.35rem;
+    font-size: 0.95rem;
+  }
+
+  .gaga-left-rail--tree:not([data-gaga-state='collapsed']) .gaga-nav-group__details[open] .gaga-nav-disclosure {
+    transform: rotate(0deg);
+  }
+
+  .gaga-left-rail--tree:not([data-gaga-state='collapsed']) .gaga-nav-group__details:not([open]) .gaga-nav-disclosure {
+    transform: rotate(-90deg);
+  }
+</style>

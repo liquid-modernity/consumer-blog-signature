@@ -3,162 +3,753 @@ import { contentDefaults } from '../../config/content';
 import { getEditorialFront } from '../../lib/editorial';
 import { toArticlePreview } from '../../lib/content';
 import { normalizeContentMetadata, resolveContentDateLocale } from '@gaga/engine/content';
+import {
+  getEnabledRootSections,
+  navigationConfig,
+  resolveCanonicalTopic,
+  resolvePublicationType
+} from '../../config/pakrpp-architecture';
+import {
+  getArchiveYears,
+  getCanonicalTopicsWithCounts,
+  toCanonicalPublications
+} from '../../lib/pakrpp-content';
+import { routes } from '../../config/routes';
 
-const projection = await getEditorialFront();
 const route = Astro.locals.gagaRoute;
 const metadata = normalizeContentMetadata(route?.entry?.data ?? {});
 const surfaceLocale = resolveContentDateLocale(
   metadata.language ?? route?.lang ?? contentDefaults.defaultLanguage,
   contentDefaults.dateLocale
 );
-const leadPreview = projection.lead
-  ? toArticlePreview(projection.lead.article, surfaceLocale, contentDefaults.preview)
-  : undefined;
+
+const [projection, publications, topics, archiveYears] = await Promise.all([
+  getEditorialFront(),
+  toCanonicalPublications(),
+  getCanonicalTopicsWithCounts(),
+  getArchiveYears()
+]);
+
+const rootSections = getEnabledRootSections();
+const sectionById = new Map(rootSections.map((sec) => [sec.id, sec]));
+const latestPublications = publications.slice(0, navigationConfig.homepagePublicationLimit);
+const recentYears = archiveYears.slice(0, navigationConfig.archivePreviewYears.length);
+
+const latestSection = sectionById.get('latest');
+const savedSection = sectionById.get('saved');
+const topicsSection = sectionById.get('topics');
+const archiveSection = sectionById.get('archive');
+const knowledgeSection = sectionById.get('knowledge');
+const aboutSection = sectionById.get('about');
+const systemSection = sectionById.get('system');
+const legalSection = sectionById.get('legal');
+const socialSection = sectionById.get('social');
 ---
 
-<section class="gaga-editorial-front" aria-labelledby="editorial-front-title">
-  <header class="gaga-editorial-front__head">
-    <div>
-      <p class="gaga-editorial-front__eyebrow">Editorial Front</p>
-      <h2 id="editorial-front-title">Latest</h2>
-    </div>
-    <p>{projection.total} articles</p>
-  </header>
-
-  {projection.lead && leadPreview && (
-    <article
-      class="gaga-editorial-lead"
-      data-gaga-editorial-role={projection.lead.role}
-      data-gaga-story-format={projection.lead.format}
-      data-gaga-breaking={String(projection.lead.breaking)}
-      data-gaga-live={String(projection.lead.live)}
+<div class="gaga-editorial-front pakrpp-root-index" aria-labelledby="pakrpp-root-title" data-pakrpp-root-index>
+  {/* VIEWPORT STAGE 01: 01 TERBARU */}
+  {latestSection && (
+    <div
+      id="stage-01"
+      class="pakrpp-viewport-stage"
+      data-pakrpp-viewport-stage="01"
+      data-stage-badge="01 · TERBARU"
+      data-stage-title="01 Terbaru — Publikasi Pengetahuan"
+      data-stage-anchors="latest"
+      data-stage-meta={`${latestPublications.length} dari ${projection.total} publikasi · Kronologis`}
+      data-stage-topics={topics.map((t) => t.label).join(', ')}
+      data-stage-readtime={`${projection.total} objek`}
+      data-stage-snippet="Daftar publikasi pengetahuan terbaru PakRPP. Arahkan kursor pada judul untuk memeriksa klasifikasi dan ringkasan di panel kanan."
     >
-      <div class="gaga-editorial-story__labels" aria-label="Story context">
-        {projection.lead.breaking && <span>Breaking</span>}
-        {projection.lead.live && <span>Live</span>}
-        {projection.lead.kicker && <span>{projection.lead.kicker}</span>}
-        {!projection.lead.kicker && projection.lead.section && <span>{projection.lead.section}</span>}
-      </div>
-      <h3>
-        <a
-          href={leadPreview.href}
-          data-gaga-preview
-          data-gaga-preview-title={leadPreview.title}
-          data-gaga-preview-href={leadPreview.href}
-          data-gaga-preview-snippet={leadPreview.snippet}
-          data-gaga-preview-topics={leadPreview.topics}
-          data-gaga-preview-tags={leadPreview.tags}
-          data-gaga-preview-read-time={leadPreview.readTime}
-          data-gaga-preview-date={leadPreview.date}
-          data-gaga-preview-updated={leadPreview.updated}
-          data-gaga-preview-author={leadPreview.author}
-        >{leadPreview.title}</a>
-      </h3>
-      {leadPreview.snippet && <p class="gaga-editorial-lead__summary">{leadPreview.snippet}</p>}
-      <p class="gaga-editorial-story__meta">
-        {[leadPreview.author, leadPreview.date, leadPreview.readTime].filter(Boolean).join(' · ')}
-      </p>
-    </article>
-  )}
+      <div class="pakrpp-viewport-stage__inner">
+        <header class="pakrpp-root-header">
+          <h1 id="pakrpp-root-title" class="pakrpp-root-header__title">PakRPP</h1>
+        </header>
 
-  {projection.highlights.length > 0 && (
-    <section class="gaga-editorial-block" aria-labelledby="editorial-highlights-title">
-      <div class="gaga-editorial-block__head">
-        <h3 id="editorial-highlights-title">Highlights</h3>
-        <span>{projection.highlights.length}</span>
-      </div>
-      <div class="gaga-editorial-grid" data-gaga-preview-scope>
-        {projection.highlights.map((story) => {
-          const preview = toArticlePreview(story.article, surfaceLocale, contentDefaults.preview);
-          return (
-            <article
-              class="gaga-editorial-card"
-              data-gaga-editorial-role={story.role}
-              data-gaga-story-format={story.format}
-            >
-              <div class="gaga-editorial-story__labels">
-                {story.breaking && <span>Breaking</span>}
-                {story.live && <span>Live</span>}
-                {story.kicker && <span>{story.kicker}</span>}
-                {!story.kicker && story.section && <span>{story.section}</span>}
-              </div>
-              <h4>
-                <a
-                  href={preview.href}
-                  data-gaga-preview
-                  data-gaga-preview-title={preview.title}
-                  data-gaga-preview-href={preview.href}
-                  data-gaga-preview-snippet={preview.snippet}
-                  data-gaga-preview-topics={preview.topics}
-                  data-gaga-preview-tags={preview.tags}
-                  data-gaga-preview-read-time={preview.readTime}
-                  data-gaga-preview-date={preview.date}
-                  data-gaga-preview-updated={preview.updated}
-                  data-gaga-preview-author={preview.author}
-                >{preview.title}</a>
-              </h4>
-              {preview.snippet && <p>{preview.snippet}</p>}
-            </article>
-          );
-        })}
-      </div>
-    </section>
-  )}
+        <section id={latestSection.anchor} class="pakrpp-section pakrpp-section--latest">
+          <ol class="pakrpp-publication-list" data-gaga-preview-scope>
+            {latestPublications.map((pub, index) => {
+              const pubType = resolvePublicationType(pub.type);
+              const topicLabels = pub.topics
+                .map((topicId) => resolveCanonicalTopic(topicId)?.label ?? topicId)
+                .join(', ');
+              const contextLabel = [pubType.label, topicLabels, pub.readTime].filter(Boolean).join(' · ');
+              const sourceStory = projection.lead?.article.id === pub.id
+                ? projection.lead.article
+                : projection.highlights.find((h) => h.article.id === pub.id)?.article
+                  ?? projection.latest.find((l) => l.article.id === pub.id)?.article;
+              const preview = sourceStory
+                ? toArticlePreview(sourceStory, surfaceLocale, contentDefaults.preview)
+                : undefined;
 
-  {projection.latest.length > 0 && (
-    <section class="gaga-editorial-block" aria-labelledby="editorial-latest-title">
-      <div class="gaga-editorial-block__head">
-        <h3 id="editorial-latest-title">More stories</h3>
-        <span>{projection.latest.length}</span>
-      </div>
-      <ol class="gaga-editorial-latest" data-gaga-preview-scope>
-        {projection.latest.map((story, index) => {
-          const preview = toArticlePreview(story.article, surfaceLocale, contentDefaults.preview);
-          return (
-            <li>
-              <span class="gaga-editorial-latest__index">{String(index + 1).padStart(2, '0')}</span>
-              <div>
-                <div class="gaga-editorial-story__labels">
-                  {story.kicker && <span>{story.kicker}</span>}
-                  {!story.kicker && story.section && <span>{story.section}</span>}
-                </div>
-                <a
-                  href={preview.href}
-                  data-gaga-preview
-                  data-gaga-preview-title={preview.title}
-                  data-gaga-preview-href={preview.href}
-                  data-gaga-preview-snippet={preview.snippet}
-                  data-gaga-preview-topics={preview.topics}
-                  data-gaga-preview-tags={preview.tags}
-                  data-gaga-preview-read-time={preview.readTime}
-                  data-gaga-preview-date={preview.date}
-                  data-gaga-preview-updated={preview.updated}
-                  data-gaga-preview-author={preview.author}
-                >{preview.title}</a>
-              </div>
-            </li>
-          );
-        })}
-      </ol>
-    </section>
-  )}
-
-  {projection.sections.length > 0 && (
-    <section class="gaga-editorial-sections" aria-label="Publication sections">
-      {projection.sections.map((section) => (
-        <section class="gaga-editorial-section" aria-labelledby={`section-${section.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}>
-          <div class="gaga-editorial-block__head">
-            <h3 id={`section-${section.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}>{section.name}</h3>
-            <span>{section.stories.length}</span>
-          </div>
-          <ul>
-            {section.stories.map((story) => {
-              const preview = toArticlePreview(story.article, surfaceLocale, contentDefaults.preview);
-              return <li><a href={preview.href}>{preview.title}</a></li>;
+              return (
+                <li class="pakrpp-publication-row">
+                  <span class="pakrpp-publication-row__num">{String(index + 1).padStart(2, '0')}</span>
+                  <div class="pakrpp-publication-row__main">
+                    <a
+                      href={pub.canonicalHref}
+                      class="pakrpp-publication-row__title"
+                      data-gaga-preview
+                      data-gaga-preview-title={pub.title}
+                      data-gaga-preview-href={pub.canonicalHref}
+                      data-gaga-preview-snippet={pub.summary ?? preview?.snippet ?? ''}
+                      data-gaga-preview-meta={contextLabel}
+                      data-gaga-preview-type={pubType.label}
+                      data-gaga-preview-topics={topicLabels}
+                      data-gaga-preview-tags={pub.tags.join(', ')}
+                      data-gaga-preview-read-time={pub.readTime ?? ''}
+                      data-gaga-preview-date={pub.publishedAt ?? ''}
+                      data-gaga-preview-updated={pub.updatedAt ?? ''}
+                      data-gaga-preview-author={pub.authors.join(', ')}
+                    >
+                      {pub.title}
+                    </a>
+                  </div>
+                </li>
+              );
             })}
+          </ol>
+
+          {latestSection.moreLink && (
+            <div class="pakrpp-section__footer">
+              <a href={latestSection.moreLink.href} class="pakrpp-more-link">
+                {latestSection.moreLink.label} →
+              </a>
+              <span class="pakrpp-root-anchors__sep" aria-hidden="true">·</span>
+              <a href={routes.publications.index} class="pakrpp-more-link pakrpp-more-link--secondary">
+                Indeks Objek Publikasi →
+              </a>
+            </div>
+          )}
+        </section>
+      </div>
+    </div>
+  )}
+
+  {/* VIEWPORT STAGE 02: 02 TERSIMPAN · TOPIK · ARSIP · PENGETAHUAN */}
+  <div
+    id="stage-02"
+    class="pakrpp-viewport-stage"
+    data-pakrpp-viewport-stage="02"
+    data-stage-badge="02 · EKSPLORASI"
+    data-stage-title="02 Tersimpan · Topik · Arsip · Pengetahuan"
+    data-stage-anchors="saved,topics,archive,knowledge"
+    data-stage-meta={`${topics.length} Topik Kanonik · ${recentYears.length} Tahun Arsip · 4 Dimensi Pengetahuan`}
+    data-stage-topics={topics.map((t) => `${t.label} (${t.count})`).join(', ')}
+    data-stage-readtime="Eksplorasi Relasional"
+    data-stage-snippet="Babak 02 memetakan koleksi bacaan tersimpan di perangkat, 3 topik kanonik (Pelaporan, Teknologi, Anomali), arsip kronologis, serta struktur graf pengetahuan."
+    aria-label="02 Tersimpan, Topik, Arsip, dan Pengetahuan"
+  >
+    <div class="pakrpp-viewport-stage__inner">
+      <div class="pakrpp-index-grid pakrpp-index-grid--2col">
+        {/* #Tersimpan */}
+        {savedSection && (
+          <section id={savedSection.anchor} class="pakrpp-tree-section" aria-labelledby="section-saved-heading">
+            <div class="pakrpp-tree-section__head">
+              <h3 id="section-saved-heading">#{savedSection.label}</h3>
+            </div>
+            <ul class="pakrpp-tree-list" data-pakrpp-saved-root-list>
+              <li class="pakrpp-tree-list__empty" data-pakrpp-saved-empty>
+                Belum ada publikasi yang disimpan di browser ini. Gunakan aksi Simpan saat membaca artikel.
+              </li>
+            </ul>
+            {savedSection.moreLink && (
+              <div class="pakrpp-tree-section__foot">
+                <a href={savedSection.moreLink.href} class="pakrpp-more-link">
+                  {savedSection.moreLink.label} →
+                </a>
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* #Topik */}
+        {topicsSection && (
+          <section id={topicsSection.anchor} class="pakrpp-tree-section" aria-labelledby="section-topics-heading">
+            <div class="pakrpp-tree-section__head">
+              <h3 id="section-topics-heading">#{topicsSection.label}</h3>
+            </div>
+            <ul class="pakrpp-tree-list">
+              {topics.map((topic) => (
+                <li class="pakrpp-tree-item">
+                  <div class="pakrpp-tree-item__row">
+                    <a href={topic.href} class="pakrpp-tree-item__link">{topic.label}</a>
+                    <span class="pakrpp-tree-item__count">{topic.count} publikasi</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            {topicsSection.moreLink && (
+              <div class="pakrpp-tree-section__foot">
+                <a href={topicsSection.moreLink.href} class="pakrpp-more-link">
+                  {topicsSection.moreLink.label} →
+                </a>
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* #Arsip */}
+        {archiveSection && (
+          <section id={archiveSection.anchor} class="pakrpp-tree-section" aria-labelledby="section-archive-heading">
+            <div class="pakrpp-tree-section__head">
+              <h3 id="section-archive-heading">#{archiveSection.label}</h3>
+            </div>
+            <ul class="pakrpp-tree-list">
+              {recentYears.map((yr) => (
+                <li class="pakrpp-tree-item">
+                  <div class="pakrpp-tree-item__row">
+                    <a href={yr.href} class="pakrpp-tree-item__link">{yr.year}</a>
+                    <span class="pakrpp-tree-item__count">{yr.count} publikasi</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            {archiveSection.moreLink && (
+              <div class="pakrpp-tree-section__foot">
+                <a href={archiveSection.moreLink.href} class="pakrpp-more-link">
+                  {archiveSection.moreLink.label} →
+                </a>
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* #Pengetahuan */}
+        {knowledgeSection && (
+          <section id={knowledgeSection.anchor} class="pakrpp-tree-section" aria-labelledby="section-knowledge-heading">
+            <div class="pakrpp-tree-section__head">
+              <h3 id="section-knowledge-heading">#{knowledgeSection.label}</h3>
+            </div>
+            <ul class="pakrpp-tree-list">
+              {(knowledgeSection.items ?? []).map((item) => (
+                <li class="pakrpp-tree-item">
+                  <div class="pakrpp-tree-item__row">
+                    <a href={item.href} class="pakrpp-tree-item__link">{item.label}</a>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <div class="pakrpp-tree-section__foot">
+              <a href={routes.knowledge.root} class="pakrpp-more-link">
+                Ikhtisar Pengetahuan →
+              </a>
+            </div>
+          </section>
+        )}
+      </div>
+    </div>
+  </div>
+
+  {/* VIEWPORT STAGE 03: 03 TENTANG · SISTEM · LEGAL */}
+  <div
+    id="stage-03"
+    class="pakrpp-viewport-stage"
+    data-pakrpp-viewport-stage="03"
+    data-stage-badge="03 · SISTEM"
+    data-stage-title="03 Tentang · Sistem · Legal"
+    data-stage-anchors="about,system,legal"
+    data-stage-meta="Identitas Editorial · Infrastruktur Sitemap & RSS · Kebijakan & Lisensi"
+    data-stage-topics="Tentang, Sistem, Legal"
+    data-stage-readtime="Tata Kelola"
+    data-stage-snippet="Babak 03 mendokumentasikan profil penulis dan filosofi publikasi PakRPP, peta situs manusia/mesin, serta dokumen privasi, ketentuan, sanggahan, dan lisensi."
+    aria-label="03 Tentang, Sistem, dan Legal"
+  >
+    <div class="pakrpp-viewport-stage__inner">
+      <div class="pakrpp-index-grid pakrpp-index-grid--3col">
+        {aboutSection && (
+          <section id={aboutSection.anchor} class="pakrpp-tree-section" aria-labelledby="section-about-heading">
+            <div class="pakrpp-tree-section__head">
+              <h3 id="section-about-heading">#{aboutSection.label}</h3>
+            </div>
+            <ul class="pakrpp-tree-list">
+              {(aboutSection.items ?? []).map((item) => (
+                <li class="pakrpp-tree-item">
+                  <div class="pakrpp-tree-item__row">
+                    <a href={item.href} class="pakrpp-tree-item__link">{item.label}</a>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {systemSection && (
+          <section id={systemSection.anchor} class="pakrpp-tree-section" aria-labelledby="section-system-heading">
+            <div class="pakrpp-tree-section__head">
+              <h3 id="section-system-heading">#{systemSection.label}</h3>
+            </div>
+            <ul class="pakrpp-tree-list">
+              {(systemSection.items ?? []).map((item) => (
+                <li class="pakrpp-tree-item">
+                  <div class="pakrpp-tree-item__row">
+                    <a href={item.href} class="pakrpp-tree-item__link">{item.label}</a>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {legalSection && (
+          <section id={legalSection.anchor} class="pakrpp-tree-section" aria-labelledby="section-legal-heading">
+            <div class="pakrpp-tree-section__head">
+              <h3 id="section-legal-heading">#{legalSection.label}</h3>
+            </div>
+            <ul class="pakrpp-tree-list">
+              {(legalSection.items ?? []).map((item) => (
+                <li class="pakrpp-tree-item">
+                  <div class="pakrpp-tree-item__row">
+                    <a href={item.href} class="pakrpp-tree-item__link">{item.label}</a>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+      </div>
+    </div>
+  </div>
+
+  {/* VIEWPORT STAGE 04: 04 SOSIAL */}
+  {socialSection && (
+    <div
+      id="stage-04"
+      class="pakrpp-viewport-stage"
+      data-pakrpp-viewport-stage="04"
+      data-stage-badge="04 · SOSIAL"
+      data-stage-title="04 Sosial — Jaringan & Kanal Eksternal"
+      data-stage-anchors="social"
+      data-stage-meta={`${(socialSection.items ?? []).length} Kanal Terverifikasi · Distribusi Eksternal`}
+      data-stage-topics={(socialSection.items ?? []).map((i) => i.label).join(', ')}
+      data-stage-readtime="Tautan Luar"
+      data-stage-snippet="Babak 04 menghubungkan sistem publikasi PakRPP dengan kanal diskusi, repositori kode terbuka, dan jaringan penulis eksternal."
+      aria-label="04 Sosial"
+    >
+      <div class="pakrpp-viewport-stage__inner">
+        <section id={socialSection.anchor} class="pakrpp-tree-section pakrpp-tree-section--social" aria-labelledby="section-social-heading">
+          <div class="pakrpp-tree-section__head">
+            <h3 id="section-social-heading">#{socialSection.label}</h3>
+          </div>
+          <ul class="pakrpp-social-list">
+            {(socialSection.items ?? []).map((item) => (
+              <li class="pakrpp-social-item">
+                <a
+                  href={item.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="pakrpp-social-link"
+                >
+                  <span class="pakrpp-social-link__name">{item.label}</span>
+                  {item.meta && <span class="pakrpp-social-link__meta">{item.meta}</span>}
+                </a>
+              </li>
+            ))}
           </ul>
         </section>
-      ))}
-    </section>
+      </div>
+    </div>
   )}
-</section>
+</div>
+
+<script>
+  import { readArray } from '@gaga/engine-web/runtime/storage';
+  import { isSavedItem, type SavedItem } from '@gaga/engine-web/reader';
+
+  function syncSavedRootSection() {
+    const listEl = document.querySelector<HTMLUListElement>('[data-pakrpp-saved-root-list]');
+    if (!listEl) return;
+
+    const saved = readArray<SavedItem>('gaga:saved-items:v1', isSavedItem).slice(0, 5);
+    if (saved.length === 0) return;
+
+    const nodes = saved.map((entry) => {
+      const li = document.createElement('li');
+      li.className = 'pakrpp-tree-item';
+      const row = document.createElement('div');
+      row.className = 'pakrpp-tree-item__row';
+      const a = document.createElement('a');
+      a.className = 'pakrpp-tree-item__link';
+      a.href = entry.href;
+      a.textContent = entry.title || entry.href;
+      row.append(a);
+      li.appendChild(row);
+      return li;
+    });
+
+    listEl.replaceChildren(...nodes);
+  }
+
+  function initRootViewportSynchronizer() {
+    const stages = Array.from(document.querySelectorAll<HTMLElement>('[data-pakrpp-viewport-stage]'));
+    if (!stages.length) return;
+
+    const getField = (name: string) => document.querySelector<HTMLElement>(`[data-gaga-info-field="${name}"]`);
+    const initialRightRail = {
+      previewTitle: getField('previewTitle')?.textContent?.trim() ?? '',
+      contextMeta: getField('contextMeta')?.textContent?.trim() ?? '',
+      topics: getField('topics')?.textContent?.trim() ?? '',
+      readTime: getField('readTime')?.textContent?.trim() ?? '',
+      snippet: getField('snippet')?.textContent?.trim() ?? ''
+    };
+
+    function applyStageContext(stage: HTMLElement) {
+      const stageId = stage.dataset.pakrppViewportStage ?? '01';
+      const badge = stage.dataset.stageBadge ?? '01 · TERBARU';
+      const title = stage.dataset.stageTitle ?? 'PakRPP';
+      const anchors = (stage.dataset.stageAnchors ?? '')
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
+
+      // 1. Sync Gaga Dynamic Global Notch
+      const statusBadge = document.querySelector<HTMLElement>('[data-gaga-island-status-badge]');
+      const peekTitle = document.querySelector<HTMLElement>('[data-gaga-island-peek-title]');
+      const focusTitle = document.querySelector<HTMLElement>('[data-gaga-island-focus-title]');
+
+      if (statusBadge) {
+        statusBadge.textContent = badge;
+        statusBadge.dataset.gagaDefaultBadge = badge;
+      }
+      if (peekTitle) peekTitle.textContent = title;
+      if (focusTitle) focusTitle.textContent = title;
+
+      for (const pill of document.querySelectorAll<HTMLAnchorElement>('[data-gaga-island-anchor]')) {
+        const href = pill.getAttribute('href') ?? '';
+        const anchorName = href.replace(/^\/?#/, '');
+        const active = anchors.includes(anchorName);
+        pill.classList.toggle('gaga-is-current', active);
+      }
+
+      // 2. Sync Left Rail Tree active anchor items
+      const leftRailLinks = document.querySelectorAll<HTMLAnchorElement>('#gaga-left-rail a[href*="#"]');
+      for (const link of leftRailLinks) {
+        const href = link.getAttribute('href') ?? '';
+        const anchorName = href.split('#')[1] ?? '';
+        const active = anchors.includes(anchorName);
+        link.classList.toggle('gaga-is-current', active);
+        if (active) {
+          link.setAttribute('aria-current', 'location');
+        } else {
+          link.removeAttribute('aria-current');
+        }
+      }
+
+      // 3. Sync Right Info Rail (unless user is actively hovering an article preview)
+      const rightRail = document.querySelector<HTMLElement>('[data-gaga-right-rail]');
+      if (rightRail && !rightRail.hasAttribute('data-gaga-preview-state')) {
+        const titleEl = getField('previewTitle');
+        const metaEl = getField('contextMeta');
+        const topicsEl = getField('topics');
+        const readTimeEl = getField('readTime');
+        const snippetEl = getField('snippet');
+
+        if (stageId === '01') {
+          if (titleEl && initialRightRail.previewTitle) titleEl.textContent = initialRightRail.previewTitle;
+          if (metaEl && initialRightRail.contextMeta) metaEl.textContent = initialRightRail.contextMeta;
+          if (topicsEl && initialRightRail.topics) topicsEl.textContent = initialRightRail.topics;
+          if (readTimeEl && initialRightRail.readTime) readTimeEl.textContent = initialRightRail.readTime;
+          if (snippetEl && initialRightRail.snippet) snippetEl.textContent = initialRightRail.snippet;
+        } else {
+          if (titleEl && stage.dataset.stageTitle) titleEl.textContent = stage.dataset.stageTitle;
+          if (metaEl && stage.dataset.stageMeta) metaEl.textContent = stage.dataset.stageMeta;
+          if (topicsEl && stage.dataset.stageTopics) topicsEl.textContent = stage.dataset.stageTopics;
+          if (readTimeEl && stage.dataset.stageReadtime) readTimeEl.textContent = stage.dataset.stageReadtime;
+          if (snippetEl && stage.dataset.stageSnippet) snippetEl.textContent = stage.dataset.stageSnippet;
+        }
+      }
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        let bestEntry: IntersectionObserverEntry | null = null;
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          if (!bestEntry || entry.intersectionRatio > bestEntry.intersectionRatio) {
+            bestEntry = entry;
+          }
+        }
+        if (bestEntry && bestEntry.target instanceof HTMLElement) {
+          applyStageContext(bestEntry.target);
+        }
+      },
+      {
+        root: document.querySelector('[data-gaga-main-region]'),
+        threshold: [0.35, 0.6]
+      }
+    );
+
+    for (const stage of stages) {
+      observer.observe(stage);
+    }
+
+    // Smoothly scroll to the parent viewport stage when clicking root anchor links
+    document.addEventListener('click', (event) => {
+      const target = event.target instanceof Element ? event.target.closest<HTMLAnchorElement>('a[href*="#"]') : null;
+      if (!target) return;
+      const href = target.getAttribute('href') ?? '';
+      if (!href.startsWith('#') && !href.startsWith('/#')) return;
+      const id = href.replace(/^\/?#/, '');
+      if (!id) return;
+      const targetEl = document.getElementById(id);
+      if (!targetEl) return;
+      const stage = targetEl.closest<HTMLElement>('[data-pakrpp-viewport-stage]') ?? targetEl;
+      event.preventDefault();
+      stage.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      history.replaceState(null, '', `#${id}`);
+      if (stage.hasAttribute('data-pakrpp-viewport-stage')) {
+        applyStageContext(stage);
+      }
+    });
+  }
+
+  function bootRootIndex() {
+    syncSavedRootSection();
+    initRootViewportSynchronizer();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootRootIndex, { once: true });
+  } else {
+    bootRootIndex();
+  }
+</script>
+
+<style is:global>
+  .gaga-main-region:has([data-pakrpp-root-index]) {
+    scroll-snap-type: y proximity;
+    scroll-behavior: smooth;
+  }
+</style>
+
+<style>
+  .pakrpp-root-index {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding-block: 0;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .pakrpp-viewport-stage {
+    min-block-size: 100svh;
+    min-block-size: 100dvh;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1.5rem;
+    padding-block: 4.25rem 2rem;
+    box-sizing: border-box;
+    border-bottom: 1px solid var(--gaga-border-subtle, rgba(128, 128, 128, 0.18));
+  }
+
+  .pakrpp-viewport-stage:last-child {
+    border-bottom: 0;
+  }
+
+  .pakrpp-viewport-stage__inner {
+    margin-block: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 100%;
+  }
+
+  .pakrpp-root-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-bottom: 0.85rem;
+    border-bottom: 1px solid var(--gaga-border-subtle, rgba(128, 128, 128, 0.22));
+  }
+
+  .pakrpp-root-header__title {
+    margin: 0;
+    font-size: clamp(1.65rem, 2.6vw, 2.25rem);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  .pakrpp-root-anchors__sep {
+    opacity: 0.4;
+  }
+
+  .pakrpp-publication-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .pakrpp-publication-row {
+    display: grid;
+    grid-template-columns: 2.25rem 1fr;
+    align-items: baseline;
+    gap: 0.5rem;
+    padding: 0.8rem 0;
+    border-bottom: 1px solid var(--gaga-border-subtle, rgba(128, 128, 128, 0.14));
+  }
+
+  .pakrpp-publication-row__num {
+    font-family: var(--gaga-font-mono, monospace);
+    font-size: 0.8rem;
+    opacity: 0.58;
+  }
+
+  .pakrpp-publication-row__main {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .pakrpp-publication-row__title {
+    font-size: 1.02rem;
+    font-weight: 500;
+    color: inherit;
+    text-decoration: none;
+    line-height: 1.4;
+  }
+
+  .pakrpp-publication-row__title:hover {
+    text-decoration: underline;
+  }
+
+  .pakrpp-section__footer,
+  .pakrpp-tree-section__foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.65rem;
+    padding-top: 0.85rem;
+  }
+
+  .pakrpp-more-link {
+    font-size: 0.84rem;
+    font-weight: 500;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .pakrpp-more-link:hover {
+    text-decoration: underline;
+  }
+
+  .pakrpp-more-link--secondary {
+    opacity: 0.72;
+  }
+
+  .pakrpp-index-grid {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  @media (min-width: 768px) {
+    .pakrpp-index-grid--2col {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .pakrpp-index-grid--3col {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .pakrpp-tree-section {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--gaga-border-subtle, rgba(128, 128, 128, 0.16));
+  }
+
+  .pakrpp-tree-section__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.65rem;
+  }
+
+  .pakrpp-tree-section__head h3 {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+
+  .pakrpp-tree-list,
+  .pakrpp-social-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+  }
+
+  .pakrpp-tree-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding-left: 0.75rem;
+    border-left: 1px solid var(--gaga-border-subtle, rgba(128, 128, 128, 0.22));
+  }
+
+  .pakrpp-tree-item__row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .pakrpp-tree-item__link {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .pakrpp-tree-item__link:hover {
+    text-decoration: underline;
+  }
+
+  .pakrpp-tree-item__count {
+    font-family: var(--gaga-font-mono, monospace);
+    font-size: 0.74rem;
+    opacity: 0.58;
+  }
+
+  .pakrpp-tree-list__empty {
+    margin: 0;
+    font-size: 0.78rem;
+    opacity: 0.68;
+    line-height: 1.45;
+  }
+
+  .pakrpp-social-list {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+  }
+
+  .pakrpp-social-link {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.45rem;
+    text-decoration: none;
+    color: inherit;
+    font-size: 0.92rem;
+  }
+
+  .pakrpp-social-link__name {
+    font-weight: 500;
+  }
+
+  .pakrpp-social-link:hover .pakrpp-social-link__name {
+    text-decoration: underline;
+  }
+
+  .pakrpp-social-link__meta {
+    font-size: 0.75rem;
+    opacity: 0.6;
+  }
+</style>

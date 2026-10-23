@@ -1,0 +1,136 @@
+---
+import GagaSiteLayout from '../../components/gaga/GagaSiteLayout.astro';
+import {
+  getEnabledPublicationTypes,
+  resolveCanonicalTopic,
+  resolvePublicationType
+} from '../../config/pakrpp-architecture';
+import { toCanonicalPublications } from '../../lib/pakrpp-content';
+import { routes } from '../../config/routes';
+
+export const prerender = true;
+
+const publications = await toCanonicalPublications();
+const pubTypes = getEnabledPublicationTypes();
+
+const entryData = {
+  title: 'Publikasi',
+  subtitle: 'Objek konten utama lintas tipe: esai, analisis, catatan, riset, studi kasus, dan eksperimen.',
+  description: 'Daftar kanonik seluruh objek publikasi pada sistem PAKRPP.',
+  summary: 'Semua bentuk tulisan diperlakukan sebagai objek Publication dengan tipe yang terkonfigurasi melalui Publication Type Registry.',
+  contentKind: 'index',
+  contentClass: 'index',
+  contentId: 'pakrpp.publications.index',
+  status: 'published',
+  visibility: 'public',
+  language: 'id'
+};
+---
+
+<GagaSiteLayout entryData={entryData}>
+  <section class="pakrpp-page-section" aria-label="Registry Tipe Publikasi">
+    <div class="pakrpp-meta-strip">
+      <span>Total: <strong>{publications.length}</strong> publikasi</span>
+      <span aria-hidden="true">·</span>
+      <span>Tipe aktif: {pubTypes.map((t) => t.label).join(', ')}</span>
+      <span aria-hidden="true">·</span>
+      <a href={routes.discovery.latest}>Tampilan Terbaru (/latest) →</a>
+    </div>
+
+    <ol class="pakrpp-pub-table" data-gaga-preview-scope>
+      {publications.map((pub, idx) => {
+        const pubType = resolvePublicationType(pub.type);
+        const topicLabels = pub.topics
+          .map((t) => resolveCanonicalTopic(t)?.label ?? t)
+          .join(', ');
+        return (
+          <li class="pakrpp-pub-item">
+            <span class="pakrpp-pub-item__idx">{String(idx + 1).padStart(2, '0')}</span>
+            <div class="pakrpp-pub-item__body">
+              <div class="pakrpp-pub-item__head">
+                <a
+                  href={pub.canonicalHref}
+                  class="pakrpp-pub-item__title"
+                  data-gaga-preview
+                  data-gaga-preview-title={pub.title}
+                  data-gaga-preview-href={pub.canonicalHref}
+                  data-gaga-preview-snippet={pub.summary ?? ''}
+                  data-gaga-preview-topics={topicLabels}
+                  data-gaga-preview-tags={pub.tags.join(', ')}
+                  data-gaga-preview-read-time={pub.readTime ?? ''}
+                  data-gaga-preview-date={pub.publishedAt ?? ''}
+                >
+                  {pub.title}
+                </a>
+              </div>
+              {pub.summary && <p class="pakrpp-pub-item__summary">{pub.summary}</p>}
+              <p class="pakrpp-pub-item__meta">
+                {[
+                  `ID: ${pub.id}`,
+                  `Tipe: ${pubType.label}`,
+                  topicLabels ? `Topik: ${topicLabels}` : '',
+                  pub.publishedAt,
+                  pub.readTime
+                ].filter(Boolean).join(' · ')}
+              </p>
+            </div>
+          </li>
+        );
+      })}
+    </ol>
+  </section>
+</GagaSiteLayout>
+
+<style>
+  .pakrpp-page-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .pakrpp-meta-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+    opacity: 0.78;
+    padding-bottom: 0.85rem;
+    border-bottom: 1px solid var(--gaga-border-subtle, rgba(128, 128, 128, 0.22));
+  }
+  .pakrpp-pub-table {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .pakrpp-pub-item {
+    display: grid;
+    grid-template-columns: 2.25rem 1fr;
+    gap: 0.65rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--gaga-border-subtle, rgba(128, 128, 128, 0.16));
+  }
+  .pakrpp-pub-item__idx {
+    font-family: var(--gaga-font-mono, monospace);
+    font-size: 0.82rem;
+    opacity: 0.6;
+  }
+  .pakrpp-pub-item__title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: inherit;
+    text-decoration: none;
+  }
+  .pakrpp-pub-item__title:hover {
+    text-decoration: underline;
+  }
+  .pakrpp-pub-item__summary {
+    margin: 0.35rem 0;
+    font-size: 0.9rem;
+    opacity: 0.82;
+  }
+  .pakrpp-pub-item__meta {
+    margin: 0;
+    font-size: 0.78rem;
+    opacity: 0.65;
+  }
+</style>

@@ -5,7 +5,6 @@ import { normalizeContentMetadata } from '@gaga/engine/content';
 import Head from './Head.astro';
 import PageFrame from './PageFrame.astro';
 import ContentPanel from './ContentPanel.astro';
-import PageTitle from './PageTitle.astro';
 import MarkdownContent from './MarkdownContent.astro';
 import { resolveGagaWorkspace } from '../../config/workspaces';
 import { resolveGagaShellContext } from '../../config/shell-context';
@@ -69,10 +68,7 @@ const shellContext = resolveGagaShellContext(workspace);
       workspace={workspace}
       shellContext={shellContext}
     >
-<div class="main-pane">
-        <ContentPanel entryData={entryData}>
-          <PageTitle entryData={entryData} routeId={route.id} />
-        </ContentPanel>
+      <div class="main-pane">
         <ContentPanel entryData={entryData}>
           <MarkdownContent entryData={entryData} routeContext={route}>
             <slot />

@@ -2,8 +2,8 @@
 import ArticleShell from './ArticleShell.astro';
 import AuthorArticleIndex from '../reader/AuthorArticleIndex.astro';
 import TopicArticleIndex from '../reader/TopicArticleIndex.astro';
-import Icon from '../ui/Icon.astro';
-import { createArticleWorkspaceActionsInput } from '../frame/site-composition';
+import PageMetadataTable from '../information/PageMetadataTable.astro';
+import { createArticleWorkspaceActionsInput, createRightRailInput } from '../frame/site-composition';
 import { contentDefaults } from '../../config/content';
 import { i18nLabel } from '../../config/i18n';
 import { getArticles, getAuthorBySlug, getAuthors, getTagGroups, getTopicGroups } from '../../lib/content';
@@ -36,10 +36,13 @@ const routeIdentity = metadata.canonical ?? route?.id ?? Astro.url.pathname;
 const missingTitleSource = route?.id ?? Astro.url.pathname;
 const articleActions = createArticleWorkspaceActionsInput();
 const coverage = resolveCoverageAuthority(entryData);
+const cleanPath = Astro.url.pathname.replace(/\/$/, '') || '/';
+const isRootPage = cleanPath === '/';
 let breadcrumbs: BreadcrumbItem[] = [];
+let rightRail = null;
 
-if (isArticle) {
-  const [articles, authors, topicGroups, tagGroups] = await Promise.all([
+if (!isRootPage) {
+  const [articles, authors, topicGroupsAll, tagGroups] = await Promise.all([
     getArticles(),
     getAuthors(),
     getTopicGroups(),
@@ -53,25 +56,22 @@ if (isArticle) {
     tocItems: route?.toc?.items ?? [],
     articles,
     authors,
-    topicGroups,
+    topicGroups: topicGroupsAll,
     tagGroups
   });
   breadcrumbs = context.breadcrumbs ?? [];
+  rightRail = createRightRailInput(context);
 }
 
 const authorSlug = isAuthor ? Astro.url.pathname.split('/').filter(Boolean).at(-1) : undefined;
 const authorRef = authorSlug ? (await getAuthorBySlug(authorSlug))?.contentId : undefined;
 const topicGroups = isTopic ? await getTopicGroups() : [];
-const cleanPath = Astro.url.pathname.replace(/\/$/, '') || '/';
 const topicGroup = topicGroups.find((group) => group.href === cleanPath);
 const isEntity = isAuthor || isTopic;
 const entityTitle = isAuthor ? metadata.title : topicGroup?.topic ?? metadata.title;
-const entityKicker = i18nLabel(isAuthor ? 'entity.authorEyebrow' : 'entity.topicEyebrow');
 const entityProfileLabel = i18nLabel(isAuthor ? 'entity.profile' : 'entity.topicAbout');
 const entityWritingsLabel = i18nLabel('entity.writings');
 const entityNavigationLabel = i18nLabel(isAuthor ? 'entity.authorNavigation' : 'entity.topicNavigation');
-const entityBackLabel = i18nLabel('article.back');
-const entityParentHref = isAuthor ? '/authors/' : '/topics/';
 ---
 {isArticle ? (
   <ArticleShell
@@ -84,37 +84,12 @@ const entityParentHref = isAuthor ? '/authors/' : '/topics/';
     coverage={coverage}
   >
     <div class="gaga-article-body gaga-markdown-content" data-gaga-article-body><slot /></div>
+    {rightRail ? <PageMetadataTable rail={rightRail} /> : null}
   </ArticleShell>
 ) : (
   isEntity ? (
     <section class="gaga-entity-surface" data-gaga-entity-tabs data-gaga-entity-kind={isAuthor ? 'author' : 'topic'}>
       <header class="gaga-entity-header">
-        <div class="gaga-entity-header__bar">
-          <a
-            class="gaga-entity-back gaga-article-utility__action gaga-article-utility__back"
-            href={entityParentHref}
-            data-gaga-return-navigation
-            data-gaga-smart-back="fallback"
-            data-gaga-smart-back-context-label={entityBackLabel.id}
-            aria-label={entityBackLabel.id}
-            data-gaga-tooltip={entityBackLabel.id}
-          >
-            <Icon name="arrow_back" />
-            <span
-              class="gaga-article-utility__label"
-              data-gaga-smart-back-text
-              data-gaga-i18n-key={entityBackLabel.key}
-              data-gaga-i18n-id={entityBackLabel.id}
-              data-gaga-i18n-en={entityBackLabel.en}
-            >{entityBackLabel.id}</span>
-          </a>
-        </div>
-        <p
-          class="gaga-system-kicker"
-          data-gaga-i18n-key={entityKicker.key}
-          data-gaga-i18n-id={entityKicker.id}
-          data-gaga-i18n-en={entityKicker.en}
-        >{entityKicker.id}</p>
         <h1 id="_top">{entityTitle}</h1>
       </header>
 
@@ -171,10 +146,14 @@ const entityParentHref = isAuthor ? '/authors/' : '/topics/';
           {topicGroup ? <TopicArticleIndex group={topicGroup} language={metadata.language ?? route?.lang} /> : null}
         </section>
       </div>
+      {rightRail ? <PageMetadataTable rail={rightRail} /> : null}
     </section>
   ) : (
-    <div class="gaga-markdown-content">
-      <slot />
-    </div>
+    <>
+      <div class="gaga-markdown-content">
+        <slot />
+      </div>
+      {rightRail ? <PageMetadataTable rail={rightRail} /> : null}
+    </>
   )
 )}

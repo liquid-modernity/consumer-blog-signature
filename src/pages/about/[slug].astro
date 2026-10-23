@@ -1,0 +1,129 @@
+---
+import GagaSiteLayout from '../../components/gaga/GagaSiteLayout.astro';
+import ContactCard from '../../components/reader/ContactCard.astro';
+import { getAuthors } from '../../lib/content';
+import { toCanonicalPublications } from '../../lib/pakrpp-content';
+import { routes } from '../../config/routes';
+
+export const prerender = true;
+
+export function getStaticPaths() {
+  return [
+    { params: { slug: 'author' } },
+    { params: { slug: 'support' } },
+    { params: { slug: 'contact' } }
+  ];
+}
+
+const { slug } = Astro.params;
+const [authors, publications] = await Promise.all([
+  getAuthors(),
+  toCanonicalPublications()
+]);
+
+const pageMap: Record<string, { title: string; subtitle: string; summary: string }> = {
+  author: {
+    title: 'Penulis & Redaksi',
+    subtitle: 'Profil penulis, kontributor, dan mandat editorial sistem publikasi PAKRPP.',
+    summary: 'Daftar penulis dan kontributor aktif pada sistem pengetahuan PAKRPP.'
+  },
+  support: {
+    title: 'Dukungan Publikasi',
+    subtitle: 'Menjaga independensi riset, ketertelusuran bukti, dan akses terbuka.',
+    summary: 'Cara mendukung keberlanjutan sistem publikasi pengetahuan PAKRPP.'
+  },
+  contact: {
+    title: 'Kontak & Korespondensi',
+    subtitle: 'Saluran korespondensi editorial, koreksi bukti, dan diskusi substantif.',
+    summary: 'Hubungi redaksi PAKRPP untuk diskusi, koreksi data, atau kolaborasi riset.'
+  }
+};
+
+const current = pageMap[slug ?? 'author'] ?? pageMap.author;
+
+const entryData = {
+  title: current.title,
+  subtitle: current.subtitle,
+  description: current.summary,
+  summary: current.summary,
+  contentKind: 'page',
+  contentClass: 'page',
+  contentId: `pakrpp.about.${slug}`,
+  status: 'published',
+  visibility: 'public',
+  language: 'id'
+};
+---
+
+<GagaSiteLayout entryData={entryData}>
+  <nav class="pakrpp-subnav" aria-label="Navigasi Tentang">
+    <a href={routes.about.root}>Tentang (/about)</a>
+    <span aria-hidden="true">·</span>
+    <a href={routes.about.author}>Penulis (/about/author)</a>
+    <span aria-hidden="true">·</span>
+    <a href={routes.about.support}>Dukungan (/about/support)</a>
+    <span aria-hidden="true">·</span>
+    <a href={routes.about.contact}>Kontak (/about/contact)</a>
+  </nav>
+
+  {slug === 'author' && (
+    <section class="pakrpp-about-section">
+      <h2>Profil Penulis</h2>
+      <p>
+        <strong>PakRPP &amp; Tim Editorial</strong> mengelola publikasi pengetahuan lintas topik Pelaporan, Teknologi, dan Anomali dengan penekanan pada ketertelusuran argumen dan struktur sistem yang jernih.
+      </p>
+      <ul>
+        {authors.map((author) => (
+          <li>
+            <a href={author.href}><strong>{author.title}</strong></a> — {author.summary ?? 'Penulis & Kontributor'}
+          </li>
+        ))}
+      </ul>
+      <h3>Publikasi Terkait ({publications.length})</h3>
+      <ol>
+        {publications.map((pub) => (
+          <li>
+            <a href={pub.canonicalHref}>{pub.title}</a> ({pub.publishedAt})
+          </li>
+        ))}
+      </ol>
+    </section>
+  )}
+
+  {slug === 'support' && (
+    <section class="pakrpp-about-section">
+      <h2>Keberlanjutan Sistem Pengetahuan</h2>
+      <p>
+        PAKRPP dibangun sebagai sistem publikasi independen tanpa iklan intrusif dan tanpa kompromi terhadap integritas bukti. Anda dapat mendukung ekosistem ini melalui:
+      </p>
+      <ul>
+        <li><strong>Sitasi Terbuka</strong>: Mengutip publikasi dan objek referensi menggunakan URL kanonik (<code>/publications/:slug</code>).</li>
+        <li><strong>Uji Silang &amp; Koreksi</strong>: Mengirimkan catatan verifikasi atau sumber primer tambahan untuk memperkaya indeks pengetahuan.</li>
+        <li><strong>Distribusi Sindikasi</strong>: Berlangganan dan menyebarkan umpan terbuka melalui <a href={routes.system.rss}>/system/rss</a>.</li>
+      </ul>
+    </section>
+  )}
+
+  {slug === 'contact' && (
+    <section class="pakrpp-about-section">
+      <ContactCard />
+    </section>
+  )}
+</GagaSiteLayout>
+
+<style>
+  .pakrpp-subnav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+    padding-bottom: 0.85rem;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px solid var(--gaga-border-subtle, rgba(128, 128, 128, 0.22));
+  }
+  .pakrpp-about-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+</style>

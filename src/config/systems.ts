@@ -1,7 +1,7 @@
 import type { LayoutMode, LeftRailState, RightRailState } from '../lib/schema';
 
 export type RailPreference = 'expanded' | 'collapsed';
-export const defaultRailPreference: RailPreference = 'collapsed';
+export const defaultRailPreference: RailPreference = 'expanded';
 
 // SITE composition: responsive shell inventory and surface availability.
 export const responsiveShellConfig = {
@@ -29,16 +29,16 @@ export const responsiveShellConfig = {
       modeState: {
         mobile: 'hidden',
         'tablet-mini': 'hidden',
-        'tablet-large': 'collapsed',
-        desktop: 'collapsed'
+        'tablet-large': 'expanded',
+        desktop: 'expanded'
       }
     },
     rightRail: {
       modeState: {
         mobile: 'detached',
         'tablet-mini': 'detached',
-        'tablet-large': 'collapsed',
-        desktop: 'collapsed'
+        'tablet-large': 'expanded',
+        desktop: 'expanded'
       }
     }
   }
@@ -105,8 +105,8 @@ export const storageKeys = {
   sfx: 'gaga:sfx:v1',
   continuity: 'gaga:continuity:v1',
   saved: 'gaga:saved:v1',
-  leftRail: 'gaga:left-rail:v1',
-  rightRail: 'gaga:right-rail:v1',
+  leftRail: 'gaga:left-rail:v2',
+  rightRail: 'gaga:right-rail:v2',
   language: 'gaga:language:v1',
   returnContext: 'gaga:return-context:v1'
 } as const;

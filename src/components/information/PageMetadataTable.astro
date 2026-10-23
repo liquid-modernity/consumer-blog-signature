@@ -1,0 +1,294 @@
+---
+import type { RightRailInput } from '../frame/component-inputs';
+import type { PageContextValue } from '../../lib/page-context';
+
+interface Props {
+  rail: RightRailInput;
+}
+
+type SpecRow = {
+  id: string;
+  label: {
+    key?: string;
+    id: string;
+    en: string;
+  };
+  values: PageContextValue[];
+};
+
+const { rail } = Astro.props;
+
+const rows: SpecRow[] = [];
+const seenIds = new Set<string>();
+
+function addRow(id: string, label: { key?: string; id: string; en: string }, values: PageContextValue[]) {
+  if (!values.length || seenIds.has(id)) return;
+  seenIds.add(id);
+  rows.push({ id, label, values });
+}
+
+if (rail.snippet && rail.snippet.trim().length > 0) {
+  addRow(
+    'snippet',
+    {
+      key: rail.labels.articleSnippet.key,
+      id: rail.labels.articleSnippet.id,
+      en: rail.labels.articleSnippet.en
+    },
+    [{ text: rail.snippet.trim() }]
+  );
+}
+
+for (const fact of rail.facts ?? []) {
+  if (fact.values && fact.values.length > 0) {
+    addRow(fact.id, { id: fact.label.id, en: fact.label.en }, fact.values);
+  }
+}
+
+if (rail.publishedDate?.text) {
+  addRow(
+    'publishedDate',
+    {
+      key: rail.labels.articlePublished.key,
+      id: rail.labels.articlePublished.id,
+      en: rail.labels.articlePublished.en
+    },
+    [{ text: rail.publishedDate.text, datetime: rail.publishedDate.datetime }]
+  );
+}
+
+if (rail.updatedAtDisplay?.text) {
+  addRow(
+    'updatedDate',
+    {
+      key: rail.labels.articleUpdated.key,
+      id: rail.labels.articleUpdated.id,
+      en: rail.labels.articleUpdated.en
+    },
+    [{ text: rail.updatedAtDisplay.text, datetime: rail.updatedAtDisplay.datetime }]
+  );
+}
+
+if (rail.author) {
+  addRow(
+    'author',
+    {
+      key: rail.labels.articleAuthor.key,
+      id: rail.labels.articleAuthor.id,
+      en: rail.labels.articleAuthor.en
+    },
+    [{ text: rail.author }]
+  );
+}
+
+if (rail.readTime) {
+  addRow(
+    'readTime',
+    {
+      key: rail.labels.articleReadTime.key,
+      id: rail.labels.articleReadTime.id,
+      en: rail.labels.articleReadTime.en
+    },
+    [{ text: rail.readTime }]
+  );
+}
+
+if (rail.topics?.length && !seenIds.has('topic') && !seenIds.has('topics')) {
+  addRow(
+    'topics',
+    {
+      key: rail.labels.articleTopics.key,
+      id: rail.labels.articleTopics.id,
+      en: rail.labels.articleTopics.en
+    },
+    rail.topics.map((topic) => ({ text: topic }))
+  );
+}
+
+if (rail.tags?.length && !seenIds.has('tags')) {
+  addRow(
+    'tags',
+    {
+      key: rail.labels.articleTags.key,
+      id: rail.labels.articleTags.id,
+      en: rail.labels.articleTags.en
+    },
+    rail.tags.map((tag) => ({ text: tag }))
+  );
+}
+---
+
+{rows.length > 0 ? (
+  <section
+    class="gaga-page-metadata-spec"
+    data-gaga-page-metadata-table
+    aria-label="Spesifikasi & Metadata Halaman"
+  >
+    <div class="gaga-page-metadata-spec__table-wrap">
+      <table class="gaga-page-metadata-spec__table">
+        <colgroup>
+          <col class="gaga-page-metadata-spec__col-key" />
+          <col class="gaga-page-metadata-spec__col-val" />
+        </colgroup>
+        <thead>
+          <tr>
+            <th
+              scope="col"
+              data-gaga-i18n-id="ATRIBUT"
+              data-gaga-i18n-en="ATTRIBUTE"
+            >
+              ATRIBUT
+            </th>
+            <th
+              scope="col"
+              data-gaga-i18n-id="SPESIFIKASI & KONTEKS HALAMAN"
+              data-gaga-i18n-en="PAGE SPECIFICATION & CONTEXT"
+            >
+              SPESIFIKASI & KONTEKS HALAMAN
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr data-gaga-info-block={row.id}>
+              <th scope="row" class="gaga-page-metadata-spec__key">
+                <span
+                  data-gaga-i18n-key={row.label.key}
+                  data-gaga-i18n-id={row.label.id}
+                  data-gaga-i18n-en={row.label.en}
+                >
+                  {row.label.id}
+                </span>
+              </th>
+              <td class="gaga-page-metadata-spec__val" data-gaga-info-field={row.id}>
+                {row.values.map((item, index) => (
+                  <>
+                    {index > 0 ? (
+                      <span class="gaga-page-metadata-spec__sep" aria-hidden="true"> · </span>
+                    ) : null}
+                    {item.href ? (
+                      <a href={item.href}>{item.text}</a>
+                    ) : item.datetime ? (
+                      <time datetime={item.datetime}>{item.text}</time>
+                    ) : (
+                      <span>{item.text}</span>
+                    )}
+                  </>
+                ))}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+) : null}
+
+<style>
+  @layer gaga.core {
+    .gaga-page-metadata-spec {
+      margin-block: 3rem 1.5rem;
+      max-inline-size: var(--gaga-content-width, 44rem);
+      margin-inline: auto;
+      border-block-start: 2px solid var(--gaga-line-strong, var(--gaga-line));
+      padding-block-start: 1.25rem;
+      color: var(--gaga-ink);
+    }
+
+    .gaga-page-metadata-spec__table-wrap {
+      inline-size: 100%;
+      overflow-x: auto;
+      border: 1px solid var(--gaga-line);
+      background: var(--gaga-surface);
+    }
+
+    .gaga-page-metadata-spec__table {
+      inline-size: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: var(--gaga-type-meta-size, 0.875rem);
+      line-height: 1.5;
+    }
+
+    .gaga-page-metadata-spec__col-key {
+      inline-size: 32%;
+    }
+
+    .gaga-page-metadata-spec__col-val {
+      inline-size: 68%;
+    }
+
+    .gaga-page-metadata-spec__table thead th {
+      padding: 0.55rem 0.85rem;
+      border-block-end: 1px solid var(--gaga-line-strong, var(--gaga-line));
+      background: var(--gaga-surface-subtle, var(--gaga-surface-2));
+      color: var(--gaga-muted);
+      font-family: var(--gaga-font-mono);
+      font-size: var(--gaga-type-label-size, 0.7rem);
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-align: start;
+      text-transform: uppercase;
+    }
+
+    .gaga-page-metadata-spec__table thead th + th {
+      border-inline-start: 1px solid var(--gaga-line);
+    }
+
+    .gaga-page-metadata-spec__table tbody tr + tr {
+      border-block-start: 1px solid var(--gaga-line);
+    }
+
+    .gaga-page-metadata-spec__key,
+    .gaga-page-metadata-spec__val {
+      padding: 0.65rem 0.85rem;
+      vertical-align: top;
+      text-align: start;
+      overflow-wrap: anywhere;
+    }
+
+    .gaga-page-metadata-spec__key {
+      color: var(--gaga-muted);
+      font-family: var(--gaga-font-mono);
+      font-size: var(--gaga-type-label-size, 0.72rem);
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      background: color-mix(in srgb, var(--gaga-surface-subtle, var(--gaga-surface-2)) 55%, transparent);
+    }
+
+    .gaga-page-metadata-spec__val {
+      border-inline-start: 1px solid var(--gaga-line);
+      color: var(--gaga-ink);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .gaga-page-metadata-spec__val a {
+      color: var(--gaga-ink);
+      text-decoration: underline;
+      text-decoration-color: color-mix(in srgb, var(--gaga-blue) 58%, transparent);
+      text-underline-offset: 0.18em;
+    }
+
+    .gaga-page-metadata-spec__val a:is(:hover, :focus-visible) {
+      color: var(--gaga-blue);
+    }
+
+    .gaga-page-metadata-spec__sep {
+      color: var(--gaga-muted);
+    }
+
+    @media (max-width: 47.9375rem) {
+      .gaga-page-metadata-spec__col-key {
+        inline-size: 38%;
+      }
+      .gaga-page-metadata-spec__col-val {
+        inline-size: 62%;
+      }
+      .gaga-page-metadata-spec__key,
+      .gaga-page-metadata-spec__val {
+        padding: 0.55rem 0.65rem;
+      }
+    }
+  }
+</style>

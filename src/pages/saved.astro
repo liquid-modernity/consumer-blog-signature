@@ -1,0 +1,23 @@
+---
+import GagaSiteLayout from '../components/gaga/GagaSiteLayout.astro';
+import SavedReadingPage from '../components/reader/SavedReadingPage.astro';
+
+export const prerender = true;
+
+const entryData = {
+  title: 'Tersimpan',
+  subtitle: 'State pembaca personal: artikel tersimpan, sorotan kutipan, catatan, dan riwayat baca.',
+  description: 'Halaman daftar bacaan tersimpan (user state) pada browser perangkat ini.',
+  summary: 'Saved adalah state personal pembaca (dimulai dari penyimpanan peramban lokal dan siap diperluas ke sinkronisasi lintas perangkat), bukan taksonomi editorial.',
+  contentKind: 'page',
+  contentClass: 'page',
+  contentId: 'pakrpp.discovery.saved',
+  status: 'published',
+  visibility: 'public',
+  language: 'id'
+};
+---
+
+<GagaSiteLayout entryData={entryData}>
+  <SavedReadingPage />
+</GagaSiteLayout>

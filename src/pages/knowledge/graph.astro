@@ -1,0 +1,53 @@
+---
+import '../../styles/tokens.css';
+import '../../styles/signature.scss';
+import StandaloneAppFrame from '../../components/frame/StandaloneAppFrame.astro';
+import KnowledgeGraph from '../../components/graph/KnowledgeGraph.astro';
+import SeoHead from '../../components/seo/SeoHead.astro';
+import { normalizeContentMetadata } from '@gaga/engine/content';
+import { getPublicKnowledgeGraph } from '../../lib/knowledge-graph';
+import type { ScreenInfo } from '../../lib/screen-info';
+
+export const prerender = true;
+
+const title = 'Graf Pengetahuan • PAKRPP';
+const description = 'Tampilan relasional antar objek pengetahuan: Publikasi, Topik, Tag, Penulis, Seri, Koleksi, dan Referensi.';
+const graph = await getPublicKnowledgeGraph();
+const metadata = normalizeContentMetadata({
+  title,
+  seoTitle: title,
+  description,
+  summary: description,
+  language: 'id',
+  author: 'Editorial Team',
+  canonical: '/knowledge/graph',
+  contentKind: 'system',
+  contentClass: 'knowledge-graph'
+});
+const info: ScreenInfo = {
+  kind: 'system',
+  outlineItems: [{ slug: 'gaga-graph-title', text: 'Knowledge Graph' }],
+  snippet: 'Graf berasal dari data relasi nyata (belongsTo, taggedWith, writtenBy, partOfSeries, includedIn, references, relatedTo), bukan dekorasi visual.',
+  topics: ['Pelaporan', 'Teknologi', 'Anomali'],
+  tags: ['graph', 'relations', 'knowledge'],
+  author: 'Editorial Team'
+};
+---
+<html lang="id-ID">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <SeoHead metadata={metadata} pathname="/knowledge/graph" title={title} includeWebSiteSchema={false} />
+  </head>
+  <body>
+    <StandaloneAppFrame
+      pageId="knowledge-graph"
+      pageTitle="Graf Pengetahuan"
+      contentKind="system"
+      contentClass="knowledge-graph"
+      info={info}
+    >
+      <KnowledgeGraph graph={graph} />
+    </StandaloneAppFrame>
+  </body>
+</html>

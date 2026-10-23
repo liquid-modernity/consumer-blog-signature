@@ -1,0 +1,102 @@
+---
+import GagaSiteLayout from '../../components/gaga/GagaSiteLayout.astro';
+import { routes } from '../../config/routes';
+
+export const prerender = true;
+
+export function getStaticPaths() {
+  return [
+    { params: { slug: 'privacy' } },
+    { params: { slug: 'terms' } },
+    { params: { slug: 'disclaimer' } },
+    { params: { slug: 'license' } }
+  ];
+}
+
+const { slug } = Astro.params;
+
+const legalDocs: Record<string, { title: string; subtitle: string; paragraphs: string[] }> = {
+  privacy: {
+    title: 'Kebijakan Privasi',
+    subtitle: 'Prinsip minimisasi data dan penyimpanan state bacaan lokal.',
+    paragraphs: [
+      'PAKRPP dirancang dengan prinsip privasi sejak awal (privacy by design). Preferensi tampilan pembaca, daftar artikel tersimpan (/saved), sorotan kutipan, dan progres baca disimpan secara lokal di browser perangkat Anda.',
+      'Kami tidak menjual data pembaca kepada pihak ketiga dan tidak memasang pelacak perilaku lintas situs untuk kepentingan periklanan.'
+    ]
+  },
+  terms: {
+    title: 'Ketentuan Penggunaan',
+    subtitle: 'Pedoman akses, kutipan ilmiah, dan penggunaan wajar atas publikasi pengetahuan.',
+    paragraphs: [
+      'Seluruh publikasi pada sistem ini disediakan untuk tujuan literasi publik, diskusi kebijakan, kajian teknologi, dan telaah intelektual.',
+      'Pembaca diperkenankan mengutip sebagian isi publikasi dengan menyebutkan atribusi penulis (PakRPP) dan menyertakan tautan kanonik menuju /publications/:slug.'
+    ]
+  },
+  disclaimer: {
+    title: 'Penafian (Disclaimer)',
+    subtitle: 'Batas tanggung jawab atas analisis kebijakan, regulasi, dan teknologi.',
+    paragraphs: [
+      'Tulisan pada kategori Pelaporan, Teknologi, dan Anomali merupakan analisis editorial serta kajian konseptual, bukan nasihat hukum, audit resmi, ataupun rekomendasi investasi.',
+      'Verifikasi bukti primer dan keputusan operasional tetap menjadi tanggung jawab masing-masing institusi atau pembaca.'
+    ]
+  },
+  license: {
+    title: 'Lisensi Publikasi & Kode',
+    subtitle: 'Ketentuan hak cipta atas naskah publikasi dan arsitektur sistem.',
+    paragraphs: [
+      'Naskah esai, analisis, studi kasus, dan objek referensi dilindungi hak cipta penulis masing-masing dengan izin kutipan terbuka berdasar atribusi kanonik.',
+      'Arsitektur bootstrap pengetahuan memisahkan kontrak inti (strict core contract) dari konfigurasi produk (softcoded configuration) agar tetap terbuka untuk audit dan interoperabilitas.'
+    ]
+  }
+};
+
+const doc = legalDocs[slug ?? 'privacy'] ?? legalDocs.privacy;
+
+const entryData = {
+  title: doc.title,
+  subtitle: doc.subtitle,
+  description: doc.subtitle,
+  summary: doc.paragraphs[0],
+  contentKind: 'legal',
+  contentClass: 'legal',
+  contentId: `pakrpp.legal.${slug}`,
+  status: 'published',
+  visibility: 'public',
+  language: 'id'
+};
+---
+
+<GagaSiteLayout entryData={entryData}>
+  <nav class="pakrpp-legal-nav" aria-label="Navigasi Legal">
+    <a href={routes.legal.privacy}>Kebijakan Privasi</a>
+    <span aria-hidden="true">·</span>
+    <a href={routes.legal.terms}>Ketentuan Penggunaan</a>
+    <span aria-hidden="true">·</span>
+    <a href={routes.legal.disclaimer}>Penafian</a>
+    <span aria-hidden="true">·</span>
+    <a href={routes.legal.license}>Lisensi</a>
+  </nav>
+
+  <section class="pakrpp-legal-body">
+    {doc.paragraphs.map((p) => (
+      <p>{p}</p>
+    ))}
+  </section>
+</GagaSiteLayout>
+
+<style>
+  .pakrpp-legal-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+    padding-bottom: 0.85rem;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px solid var(--gaga-border-subtle, rgba(128, 128, 128, 0.22));
+  }
+  .pakrpp-legal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+</style>

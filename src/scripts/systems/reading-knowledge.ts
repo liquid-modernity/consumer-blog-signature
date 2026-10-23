@@ -135,20 +135,30 @@ export function readAllHighlights(): HighlightEntity[] {
   // Sync with engine annotation storage
   for (const eng of engineHighlights) {
     if (!idMap.has(eng.id)) {
+      const target = (eng.target ?? {}) as {
+        contentId?: string;
+        exactText?: string;
+        blockId?: string;
+        startOffset?: number;
+        endOffset?: number;
+        prefix?: string;
+        suffix?: string;
+      };
+      const exactText = String(target.exactText ?? '');
       const entity: HighlightEntity = {
         id: eng.id,
-        articleId: eng.target.contentId,
-        text: eng.target.exactText,
+        articleId: String(target.contentId ?? ''),
+        text: exactText,
         location: {
-          blockId: eng.target.blockId || '',
-          startOffset: eng.target.startOffset ?? 0,
-          endOffset: eng.target.endOffset ?? eng.target.exactText.length,
-          prefix: eng.target.prefix,
-          suffix: eng.target.suffix
+          blockId: target.blockId || '',
+          startOffset: target.startOffset ?? 0,
+          endOffset: target.endOffset ?? exactText.length,
+          prefix: target.prefix,
+          suffix: target.suffix
         },
-        createdAt: eng.createdAt || new Date().toISOString(),
+        createdAt: typeof eng.createdAt === 'string' && eng.createdAt ? eng.createdAt : new Date().toISOString(),
         tags: ['reading'],
-        note: eng.note
+        note: typeof eng.note === 'string' ? eng.note : undefined
       };
       idMap.set(entity.id, entity);
       updated = true;

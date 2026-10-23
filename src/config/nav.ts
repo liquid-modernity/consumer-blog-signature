@@ -55,24 +55,37 @@ export const primaryNav: NavItem[] = [
   item('topics', 'navigation.topics', '/topics', 'grid_view'),
   item('sections', 'navigation.sections', '/sections', 'view_quilt'),
   item('archive', 'navigation.archive', '/archive', 'inventory_2'),
-  item('library', 'navigation.saved', '/library', 'bookmark')
+  item('library', 'navigation.saved', '/saved', 'bookmark')
 ];
 
 export const navGroups: NavGroup[] = [
+  {
+    id: 'knowledge',
+    label: 'Pengetahuan',
+    labelEn: 'Knowledge',
+    icon: 'account_tree',
+    items: [
+      { id: 'knowledge-graph', label: 'Graf', labelEn: 'Graph', href: '/knowledge/graph', icon: 'account_tree' },
+      { id: 'knowledge-index', label: 'Indeks', labelEn: 'Index', href: '/knowledge/index', icon: 'view_quilt' },
+      { id: 'knowledge-tags', label: 'Tag', labelEn: 'Tags', href: '/knowledge/tags', icon: 'sell' },
+      { id: 'knowledge-references', label: 'Referensi', labelEn: 'References', href: '/knowledge/references', icon: 'article' }
+    ]
+  },
   group('pages', 'navigation.pages', 'folder_open', [
     item('about', 'navigation.about', '/about', 'article'),
-    item('authors', 'navigation.authors', '/authors', 'person'),
-    item('contact', 'navigation.contact', '/contact', 'mail'),
-    item('support', 'navigation.support', '/support', 'help')
+    item('authors', 'navigation.authors', '/about/author', 'person'),
+    item('support', 'navigation.support', '/about/support', 'help'),
+    item('contact', 'navigation.contact', '/about/contact', 'mail')
   ]),
   group('legal', 'navigation.legal', 'policy', [
-    item('privacy-policy', 'navigation.privacyPolicy', '/privacy', 'shield'),
-    item('terms-of-use', 'navigation.termsOfUse', '/terms', 'contract'),
-    item('disclaimer', 'navigation.disclaimer', '/disclaimer', 'info')
+    item('privacy-policy', 'navigation.privacyPolicy', '/legal/privacy', 'shield'),
+    item('terms-of-use', 'navigation.termsOfUse', '/legal/terms', 'contract'),
+    item('disclaimer', 'navigation.disclaimer', '/legal/disclaimer', 'info'),
+    { id: 'license', label: 'Lisensi', labelEn: 'License', href: '/legal/license', icon: 'contract' }
   ]),
   group('system', 'navigation.system', 'settings_applications', [
-    item('graphs', 'navigation.graphs', '/graphs', 'account_tree'),
-    item('sitemap', 'navigation.sitemap', '/sitemap-index.xml', 'lan'),
-    item('rss', 'navigation.rss', '/rss.xml', 'rss_feed')
+    item('sitemap', 'navigation.sitemap', '/system/sitemap', 'lan'),
+    item('rss', 'navigation.rss', '/system/rss', 'rss_feed'),
+    { id: 'status', label: 'Status', labelEn: 'Status', href: '/system/status', icon: 'terminal' }
   ]),
 ];

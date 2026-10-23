@@ -181,8 +181,18 @@ export function projectContextRail(input: ContextRailProjectionInput): ContextRa
     add(group('archive-periods', 'Archive', 'inventory_2', archiveItems(info)));
     add(group('archive-topics', 'Topics', 'grid_view', topicItems(topicGroups).slice(0, 8)));
   } else if (workspace.id === 'latest') {
-    add(group('latest-sections', 'Sections', 'view_quilt', sectionItems(sections).slice(0, 8)));
-    add(group('latest-topics', 'Topics', 'grid_view', topicItems(topicGroups).slice(0, 8)));
+    add(group('root-sections', 'Bagian Indeks', 'lan', [
+      item('root-latest', '#Terbaru', '/#latest', 'article'),
+      item('root-saved', '#Tersimpan', '/#saved', 'bookmark'),
+      item('root-topics', '#Topik', '/#topics', 'grid_view'),
+      item('root-archive', '#Arsip', '/#archive', 'inventory_2'),
+      item('root-knowledge', '#Pengetahuan', '/#knowledge', 'account_tree'),
+      item('root-about', '#Tentang', '/#about', 'person'),
+      item('root-system', '#Sistem', '/#system', 'terminal'),
+      item('root-legal', '#Legal', '/#legal', 'shield'),
+      item('root-social', '#Sosial', '/#social', 'share')
+    ]));
+    add(group('latest-topics', 'Topik Kanonik', 'grid_view', topicItems(topicGroups).slice(0, 8)));
   } else if (workspace.id === 'search') {
     add(group('search-sections', 'Search by section', 'view_quilt', sectionItems(sections).slice(0, 8)));
     add(group('search-topics', 'Search by topic', 'grid_view', topicItems(topicGroups).slice(0, 8)));

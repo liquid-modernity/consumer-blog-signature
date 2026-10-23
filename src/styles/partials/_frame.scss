@@ -163,10 +163,6 @@ body:has(.gaga-app-frame) {
   padding: 0.5rem 0;
 }
 
-.gaga-app-frame[data-gaga-content-kind='index'] .main-pane > .content-panel:first-child {
-  display: none;
-}
-
 .gaga-main-region :where(main) {
   padding: 0;
 }

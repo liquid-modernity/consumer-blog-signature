@@ -14,10 +14,15 @@ interface Props {
 }
 
 const { rail, workspaceId, contextRole, contextPriority } = Astro.props;
+const cleanCurrentPath = Astro.url.pathname.replace(/\/+$/, '') || '/';
+const isRootPage = cleanCurrentPath === '/';
 const hasDiscovery = (rail.discovery?.length ?? 0) > 0;
 const hasSummary = Boolean(rail.snippet);
+const outlineItems = rail.outlineItems ?? [];
 const contextSignalCount = (rail.facts?.length ?? 0) + (rail.discovery?.length ?? 0) + (hasSummary ? 1 : 0) + (rail.cta ? 1 : 0);
 const contextRichness = contextSignalCount >= 5 ? 'rich' : contextSignalCount >= 2 ? 'standard' : 'minimal';
+const railHeaderLabel = isRootPage ? rail.labels.railLabel : rail.labels.outlineTitle;
+const railHeaderRole = isRootPage ? contextRole : 'table-of-contents';
 ---
 
 <button
@@ -37,17 +42,17 @@ const contextRichness = contextSignalCount >= 5 ? 'rich' : contextSignalCount >=
   class="gaga-right-rail"
   data-gaga-right-rail
   data-gaga-context-inspector
-  data-gaga-state="collapsed"
+  data-gaga-state="expanded"
   data-gaga-context-surface-state="closed"
   data-gaga-signature-surface="context-right-rail"
   data-gaga-workspace={workspaceId}
-  data-gaga-context-role={contextRole}
+  data-gaga-context-role={railHeaderRole}
   data-gaga-context-priority={contextPriority}
   data-gaga-context-richness={contextRichness}
-  aria-label={rail.labels.railLabel.id}
-  data-gaga-i18n-key={rail.labels.railLabel.key}
-  data-gaga-i18n-id={rail.labels.railLabel.id}
-  data-gaga-i18n-en={rail.labels.railLabel.en}
+  aria-label={railHeaderLabel.id}
+  data-gaga-i18n-key={railHeaderLabel.key}
+  data-gaga-i18n-id={railHeaderLabel.id}
+  data-gaga-i18n-en={railHeaderLabel.en}
   data-gaga-i18n-target="aria"
   data-gaga-info-kind={rail.kind}
   aria-live="off"
@@ -55,13 +60,13 @@ const contextRichness = contextSignalCount >= 5 ? 'rich' : contextSignalCount >=
   <div class="gaga-right-rail__head">
     <div class="gaga-right-rail__identity">
       <p
-        data-gaga-i18n-key={rail.labels.railLabel.key}
-        data-gaga-i18n-id={rail.labels.railLabel.id}
-        data-gaga-i18n-en={rail.labels.railLabel.en}
+        data-gaga-i18n-key={railHeaderLabel.key}
+        data-gaga-i18n-id={railHeaderLabel.id}
+        data-gaga-i18n-en={railHeaderLabel.en}
       >
-        {rail.labels.railLabel.id}
+        {railHeaderLabel.id}
       </p>
-      <span>{contextRole}</span>
+      <span>{railHeaderRole}</span>
     </div>
 
     <RailToggle action={rail.railToggle} />
@@ -81,68 +86,39 @@ const contextRichness = contextSignalCount >= 5 ? 'rich' : contextSignalCount >=
   </div>
 
   <div class="gaga-right-rail__body">
-    {contextPriority === 'discovery' ? (
-      <>
-        {hasDiscovery ? (
-          <ContextDiscoveryBlock items={rail.discovery} title={rail.labels.explore} />
-        ) : null}
-
-        {hasSummary ? (
-          <div class="gaga-right-rail__section gaga-right-rail__section--summary">
-            <SummaryBlock
-              description={rail.snippet}
-              title={rail.labels.articleSnippet.id}
-              titleEn={rail.labels.articleSnippet.en}
-            />
-          </div>
-        ) : null}
-
-        <RightRailMeta rail={rail} />
-      </>
-    ) : contextPriority === 'system' ? (
-      <>
-        {hasSummary ? (
-          <div class="gaga-right-rail__section gaga-right-rail__section--summary">
-            <SummaryBlock
-              description={rail.snippet}
-              title={rail.labels.articleSnippet.id}
-              titleEn={rail.labels.articleSnippet.en}
-            />
-          </div>
-        ) : null}
-
-        <RightRailMeta rail={rail} />
-      </>
-    ) : (
-      <>
-        <RightRailMeta rail={rail} />
-
-        {hasSummary ? (
-          <div class="gaga-right-rail__section gaga-right-rail__section--summary">
-            <SummaryBlock
-              description={rail.snippet}
-              title={rail.labels.articleSnippet.id}
-              titleEn={rail.labels.articleSnippet.en}
-            />
-          </div>
-        ) : null}
-
-        {hasDiscovery ? (
-          <ContextDiscoveryBlock items={rail.discovery} title={rail.labels.explore} />
-        ) : null}
-      </>
-    )}
+    {!isRootPage && outlineItems.length > 0 ? (
+      <nav
+        class="gaga-info-block gaga-right-rail__outline"
+        aria-label={rail.labels.outlineTitle.id}
+        data-gaga-right-rail-outline
+      >
+        <h2>
+          <Icon name="outline" />
+          <span
+            data-gaga-i18n-key={rail.labels.outlineTitle.key}
+            data-gaga-i18n-id={rail.labels.outlineTitle.id}
+            data-gaga-i18n-en={rail.labels.outlineTitle.en}
+          >
+            {rail.labels.outlineTitle.id}
+          </span>
+        </h2>
+        <ol class="gaga-toc-list" data-gaga-info-field="outline">
+          {outlineItems.map((item) => (
+            <li>
+              <a href={`#${item.slug}`}>{item.text}</a>
+              {item.children?.length ? (
+                <ol>
+                  {item.children.map((child) => (
+                    <li>
+                      <a href={`#${child.slug}`}>{child.text}</a>
+                    </li>
+                  ))}
+                </ol>
+              ) : null}
+            </li>
+          ))}
+        </ol>
+      </nav>
+    ) : null}
   </div>
-
-  {rail.cta ? (
-    <div class="gaga-right-rail__cta" data-gaga-right-rail-section="cta">
-      <a href={rail.cta.href} data-gaga-read-cta data-gaga-info-cta>
-        {rail.cta.label}
-      </a>
-    </div>
-  ) : null}
-
-  <footer class="gaga-right-rail__foot" data-gaga-right-rail-section="footer">
-    {rail.footer.map((item) => <p>{item}</p>)}
-  </footer>
 </aside>

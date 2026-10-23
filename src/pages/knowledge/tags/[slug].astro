@@ -1,0 +1,110 @@
+---
+import GagaSiteLayout from '../../../components/gaga/GagaSiteLayout.astro';
+import { getTagGroups, toArticlePreview } from '../../../lib/content';
+import { contentDefaults } from '../../../config/content';
+import { resolveContentDateLocale } from '@gaga/engine/content';
+import { routes } from '../../../config/routes';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const tagGroups = await getTagGroups();
+  return tagGroups.map((group) => ({
+    params: { slug: group.slug },
+    props: { group }
+  }));
+}
+
+const { group } = Astro.props;
+if (!group) {
+  return Astro.redirect('/404');
+}
+
+const locale = resolveContentDateLocale(contentDefaults.defaultLanguage, contentDefaults.dateLocale);
+
+const entryData = {
+  title: `Tag: #${group.tag}`,
+  subtitle: `${group.count} publikasi yang ditandai dengan deskriptor #${group.tag}.`,
+  description: `Daftar publikasi dengan tag #${group.tag} di PAKRPP.`,
+  summary: `Deskriptor granular #${group.tag} lintas topik.`,
+  contentKind: 'page',
+  contentClass: 'tag-detail',
+  contentId: `pakrpp.knowledge.tag.${group.slug}`,
+  status: 'published',
+  visibility: 'public',
+  language: 'id'
+};
+---
+
+<GagaSiteLayout entryData={entryData}>
+  <section class="pakrpp-tag-detail" aria-label={`Publikasi dengan tag ${group.tag}`}>
+    <p class="pakrpp-tag-detail__nav">
+      <a href={routes.knowledge.tags}>← Semua Tag (/knowledge/tags)</a>
+      <span aria-hidden="true">·</span>
+      <span>{group.count} publikasi</span>
+    </p>
+    <ol class="pakrpp-tag-detail__list">
+      {group.articles.map((article, idx) => {
+        const preview = toArticlePreview(article, locale, contentDefaults.preview);
+        const slug = preview.href.replace(/^\/+|\/+$/g, '');
+        return (
+          <li class="pakrpp-tag-detail__item">
+            <span class="pakrpp-tag-detail__idx">{String(idx + 1).padStart(2, '0')}</span>
+            <div>
+              <a href={routes.publications.detail(slug)} class="pakrpp-tag-detail__title">{preview.title}</a>
+              <p class="pakrpp-tag-detail__meta">
+                {[preview.author, preview.date, preview.readTime].filter(Boolean).join(' · ')}
+              </p>
+            </div>
+          </li>
+        );
+      })}
+    </ol>
+  </section>
+</GagaSiteLayout>
+
+<style>
+  .pakrpp-tag-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .pakrpp-tag-detail__nav {
+    margin: 0;
+    font-size: 0.82rem;
+    opacity: 0.8;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--gaga-border-subtle, rgba(128, 128, 128, 0.2));
+  }
+  .pakrpp-tag-detail__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .pakrpp-tag-detail__item {
+    display: grid;
+    grid-template-columns: 2.25rem 1fr;
+    gap: 0.65rem;
+    padding: 0.85rem 0;
+    border-bottom: 1px solid var(--gaga-border-subtle, rgba(128, 128, 128, 0.15));
+  }
+  .pakrpp-tag-detail__idx {
+    font-family: var(--gaga-font-mono, monospace);
+    font-size: 0.8rem;
+    opacity: 0.6;
+  }
+  .pakrpp-tag-detail__title {
+    font-weight: 500;
+    color: inherit;
+    text-decoration: none;
+  }
+  .pakrpp-tag-detail__title:hover {
+    text-decoration: underline;
+  }
+  .pakrpp-tag-detail__meta {
+    margin: 0.2rem 0 0;
+    font-size: 0.78rem;
+    opacity: 0.65;
+  }
+</style>

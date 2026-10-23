@@ -57,3 +57,13 @@ const initialOutlineLabel = outlineItems[0]?.text ?? rail.labels.outlineFallback
     </section>
   </div>
 ) : null}
+
+<style>
+  @layer gaga.core {
+    @media (min-width: 64rem) {
+      .gaga-outline-stack {
+        display: none !important;
+      }
+    }
+  }
+</style>

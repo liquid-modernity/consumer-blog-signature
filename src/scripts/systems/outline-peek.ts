@@ -30,7 +30,7 @@ export function initOutlinePeek() {
   const capability = createOutlinePeekCapability({
     sheet,
     getLayoutMode: () => document.documentElement.dataset.gagaLayout,
-    isAvailable: ({ mode, sheet }) => supportsOutlinePeek(mode) && tableOfContentsAllowed(sheet) && articleReadingScopeIsActive(),
+    isAvailable: ({ mode, sheet }) => (mode === 'mobile' || mode === 'tablet-mini') && supportsOutlinePeek(mode) && tableOfContentsAllowed(sheet) && articleReadingScopeIsActive(),
     getAttachment: getOutlinePeekAttachment,
     getReadingFocusTarget: readingFocusTarget,
     beforeOpen: () => {

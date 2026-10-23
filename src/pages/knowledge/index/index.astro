@@ -1,0 +1,142 @@
+---
+import GagaSiteLayout from '../../../components/gaga/GagaSiteLayout.astro';
+import { getSystematicKnowledgeIndex } from '../../../lib/pakrpp-content';
+import { routes } from '../../../config/routes';
+
+export const prerender = true;
+
+const groups = await getSystematicKnowledgeIndex();
+const totalEntries = groups.reduce((sum, g) => sum + g.items.length, 0);
+
+const entryData = {
+  title: 'Indeks Pengetahuan Sistematis',
+  subtitle: 'Enumerasi alfabetis atas Publikasi, Topik, Objek Referensi, Seri, Koleksi, Tag, dan Penulis.',
+  description: 'Indeks sistematis dan alfabetis seluruh objek pengetahuan PAKRPP (/knowledge/index).',
+  summary: 'Indeks Pengetahuan ≠ Peta Situs. Indeks menginventarisasi entitas konsep dan objek pengetahuan secara alfabetis.',
+  contentKind: 'index',
+  contentClass: 'index',
+  contentId: 'pakrpp.knowledge.index',
+  status: 'published',
+  visibility: 'public',
+  language: 'id'
+};
+---
+
+<GagaSiteLayout entryData={entryData}>
+  <section class="pakrpp-kindex" aria-label="Indeks Pengetahuan Alfabetis">
+    <div class="pakrpp-kindex__bar">
+      <span>{totalEntries} objek pengetahuan terindeks</span>
+      <span aria-hidden="true">·</span>
+      <a href={routes.knowledge.root}>← Pengetahuan</a>
+      <span aria-hidden="true">·</span>
+      <a href={routes.system.sitemap}>Peta Situs (/system/sitemap) →</a>
+    </div>
+
+    <nav class="pakrpp-kindex__letters" aria-label="Lompat ke huruf">
+      {groups.map((g, idx) => (
+        <>
+          {idx > 0 && <span aria-hidden="true">·</span>}
+          <a href={`#letter-${g.letter}`}>{g.letter}</a>
+        </>
+      ))}
+    </nav>
+
+    <div class="pakrpp-kindex__groups">
+      {groups.map((group) => (
+        <section id={`letter-${group.letter}`} class="pakrpp-kindex__group" aria-labelledby={`heading-${group.letter}`}>
+          <div class="pakrpp-kindex__group-head">
+            <h2 id={`heading-${group.letter}`}>{group.letter}</h2>
+            <span>{group.items.length} entri</span>
+          </div>
+          <ul class="pakrpp-kindex__list">
+            {group.items.map((item) => (
+              <li class="pakrpp-kindex__item">
+                <div class="pakrpp-kindex__row">
+                  <a href={item.href} class="pakrpp-kindex__title">{item.title}</a>
+                  <span class="pakrpp-kindex__kind">{item.kindLabel}</span>
+                </div>
+                <span class="pakrpp-kindex__meta">{item.meta}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+    </div>
+  </section>
+</GagaSiteLayout>
+
+<style>
+  .pakrpp-kindex {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .pakrpp-kindex__bar,
+  .pakrpp-kindex__letters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+    opacity: 0.82;
+  }
+  .pakrpp-kindex__letters {
+    padding-bottom: 0.85rem;
+    border-bottom: 1px solid var(--gaga-border-subtle, rgba(128, 128, 128, 0.22));
+    font-family: var(--gaga-font-mono, monospace);
+  }
+  .pakrpp-kindex__group {
+    padding: 0.75rem 0;
+  }
+  .pakrpp-kindex__group-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--gaga-border-subtle, rgba(128, 128, 128, 0.2));
+  }
+  .pakrpp-kindex__group-head h2 {
+    margin: 0;
+    font-family: var(--gaga-font-mono, monospace);
+    font-size: 1rem;
+  }
+  .pakrpp-kindex__group-head span {
+    font-size: 0.76rem;
+    opacity: 0.6;
+  }
+  .pakrpp-kindex__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .pakrpp-kindex__item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: 0.65rem 0;
+    border-bottom: 1px solid var(--gaga-border-subtle, rgba(128, 128, 128, 0.12));
+  }
+  .pakrpp-kindex__row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+  .pakrpp-kindex__title {
+    font-weight: 500;
+    color: inherit;
+    text-decoration: none;
+  }
+  .pakrpp-kindex__title:hover {
+    text-decoration: underline;
+  }
+  .pakrpp-kindex__kind {
+    font-size: 0.76rem;
+    opacity: 0.65;
+    white-space: nowrap;
+  }
+  .pakrpp-kindex__meta {
+    font-size: 0.78rem;
+    opacity: 0.65;
+  }
+</style>

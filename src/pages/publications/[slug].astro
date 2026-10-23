@@ -1,0 +1,38 @@
+---
+import { getCollection, render } from 'astro:content';
+import GagaSiteLayout from '../../components/gaga/GagaSiteLayout.astro';
+import { toCanonicalPublications } from '../../lib/pakrpp-content';
+import { routes } from '../../config/routes';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const entries = await getCollection('docs', ({ data }) => data.contentKind === 'article' && !data.draft);
+  const publications = await toCanonicalPublications();
+
+  return entries.map((entry) => {
+    const cleanSlug = entry.id.replace(/\.(md|mdx)$/i, '').replace(/^\/+|\/+$/g, '');
+    const pub = publications.find((p) => p.slug === cleanSlug) ?? publications[0];
+    return {
+      params: { slug: cleanSlug },
+      props: { entry, publication: pub }
+    };
+  });
+}
+
+const { entry, publication } = Astro.props;
+if (!entry) {
+  return Astro.redirect('/404');
+}
+
+const { Content } = await render(entry);
+const entryData = {
+  ...(entry.data as Record<string, unknown>),
+  contentId: (entry.data as Record<string, unknown>).contentId ?? publication.id,
+  canonical: routes.publications.detail(publication.slug)
+};
+---
+
+<GagaSiteLayout entryData={entryData} routeContext={Astro.locals.gagaRoute}>
+  <Content />
+</GagaSiteLayout>

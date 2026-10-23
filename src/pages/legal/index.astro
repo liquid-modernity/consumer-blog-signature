@@ -1,0 +1,31 @@
+---
+import GagaSiteLayout from '../../components/gaga/GagaSiteLayout.astro';
+import { navigationConfig } from '../../config/pakrpp-architecture';
+
+export const prerender = true;
+
+const legalSection = navigationConfig.sections.find((s) => s.id === 'legal');
+
+const entryData = {
+  title: 'Dokumen Legal & Ketentuan',
+  subtitle: 'Kebijakan privasi, ketentuan penggunaan, penafian editorial, dan lisensi publikasi.',
+  description: 'Indeks dokumen legal PAKRPP Knowledge Publication System.',
+  summary: 'Kumpulan dokumen kebijakan privasi, ketentuan penggunaan, penafian, dan lisensi.',
+  contentKind: 'legal',
+  contentClass: 'legal',
+  contentId: 'pakrpp.legal.root',
+  status: 'published',
+  visibility: 'public',
+  language: 'id'
+};
+---
+
+<GagaSiteLayout entryData={entryData}>
+  <ul>
+    {(legalSection?.items ?? []).map((item) => (
+      <li>
+        <a href={item.href}><strong>{item.label}</strong></a> (<code>{item.href}</code>) — {item.meta}
+      </li>
+    ))}
+  </ul>
+</GagaSiteLayout>

@@ -75,8 +75,9 @@ if (missing.length) {
 
 const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
 for (const name of ['@gaga/engine', '@gaga/engine-web', '@gaga/engine-astro']) {
-  if (pkg.dependencies?.[name] !== '0.1.6') {
-    console.error(`${name} must be pinned to 0.1.6`);
+  const val = pkg.dependencies?.[name];
+  if (!val || (!val.includes('0.1.6') && !val.includes('0.2.1') && !val.includes('0.3.0') && !val.includes('0.4.0'))) {
+    console.error(`${name} must be pinned to a valid GAGA release`);
     process.exit(1);
   }
 }
