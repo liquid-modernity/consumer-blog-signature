@@ -39,13 +39,12 @@ const entryData = {
             <p class="pakrpp-refs__summary">{ref.summary}</p>
             <p class="pakrpp-refs__info">
               {[
-                `ID: ${ref.id}`,
-                `Tipe: ${ref.sourceType.toUpperCase()}`,
-                `Tahun: ${ref.year}`,
-                `Penulis: ${ref.authors.join(', ')}`,
-                `Topik: ${ref.topics.map((t) => resolveCanonicalTopic(t)?.label ?? t).join(', ')}`,
+                ref.sourceType.toUpperCase(),
+                String(ref.year),
+                ref.authors.join(', '),
+                ref.topics.map((t) => resolveCanonicalTopic(t)?.label ?? t).join(', '),
                 `Dirujuk oleh ${ref.citedByPublications.length} publikasi`
-              ].join(' · ')}
+              ].filter(Boolean).join(' · ')}
             </p>
           </div>
         </li>

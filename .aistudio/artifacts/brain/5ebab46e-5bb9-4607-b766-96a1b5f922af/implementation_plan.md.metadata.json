@@ -1,6 +1,6 @@
 {
-  "summary":  "Rencana implementasi penyederhanaan visual (Clean Minimalism & Rich Features) pada seluruh section di halaman beranda (EditorialFront.astro): menghapus semua header group divider bernomor, menghapus semua footer stage cue, serta membersihkan badge status dan teks path URL dekoratif sambil mempertahankan pembagian full-viewport stage dan seluruh fitur interaktif.",
-  "updatedAt":  "2026-10-23T21:40:56.462504932Z",
+  "summary":  "Rencana implementasi menyeluruh berdasarkan 4 gambar mockup: (1) Bingkai UI global dengan tema default Kertas (Paper), pill notch hitam PakRPP di tengah atas, tombol pemicu context-aware minimalis di sudut kiri/kanan atas yang saat ini kosong, serta pemindahan Daftar Isi (Table of Contents) dari sidebar kanan desktop/tablet ke pill bawah Gaga Dynamic Outline Peek di semua ukuran layar; (2) Tata letak Beranda (EditorialFront) 4 layar penuh terpisah dengan scroll-snap presisi sesuai keempat layar mockup.",
+  "updatedAt":  "2026-10-24T11:38:42.831209550Z",
   "requestFeedback":  true,
   "userFacing":  true
 }

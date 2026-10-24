@@ -11,7 +11,7 @@ const { preferences } = Astro.props;
 <section class="gaga-reader-panel" data-gaga-reader-panel data-gaga-state="closed" role="dialog" aria-modal="true" aria-labelledby="gaga-reader-panel-title" aria-hidden="true" inert>
   <div class="gaga-reader-panel__head">
     <h2 id="gaga-reader-panel-title"><Icon name={preferences.titleIcon} /> <span data-gaga-i18n-key={preferences.title.key} data-gaga-i18n-id={preferences.title.id} data-gaga-i18n-en={preferences.title.en}>{preferences.title.id}</span></h2>
-    <button type="button" data-gaga-action={preferences.closeAction.command} aria-label={preferences.closeAction.label.id} data-gaga-tooltip data-gaga-i18n-key={preferences.closeAction.label.key} data-gaga-i18n-id={preferences.closeAction.label.id} data-gaga-i18n-en={preferences.closeAction.label.en} data-gaga-i18n-target="aria">×</button>
+    <button type="button" data-gaga-reader-close data-gaga-action={preferences.closeAction.command} aria-label={preferences.closeAction.label.id} data-gaga-tooltip data-gaga-i18n-key={preferences.closeAction.label.key} data-gaga-i18n-id={preferences.closeAction.label.id} data-gaga-i18n-en={preferences.closeAction.label.en} data-gaga-i18n-target="aria">×</button>
   </div>
   <div class="gaga-reader-panel__grid">
     <fieldset class="gaga-reader-panel__presets" data-gaga-reader-presets-primary>
@@ -64,7 +64,7 @@ const { preferences } = Astro.props;
         </button>
       </div>
     </fieldset>
-    <details class="gaga-reader-panel__advanced" data-gaga-reader-advanced>
+    <details class="gaga-reader-panel__advanced" data-gaga-reader-advanced open>
       <summary data-gaga-i18n-key={preferences.advanced.summary.key} data-gaga-i18n-id={preferences.advanced.summary.id} data-gaga-i18n-en={preferences.advanced.summary.en}>{preferences.advanced.summary.id}</summary>
       <div class="gaga-reader-panel__advanced-grid">
         <fieldset>
@@ -80,11 +80,11 @@ const { preferences } = Astro.props;
           ))}
         </fieldset>
         <fieldset>
-          <legend>Design Identity</legend>
+          <legend data-gaga-i18n-id="Arketipe Desain" data-gaga-i18n-en="Design Archetype">Arketipe Desain</legend>
           <button type="button" data-gaga-reader-pref="identity" data-gaga-reader-value="editorial">Editorial</button>
           <button type="button" data-gaga-reader-pref="identity" data-gaga-reader-value="blueprintism">Blueprint</button>
           <button type="button" data-gaga-reader-pref="identity" data-gaga-reader-value="brutalism">Brutalism</button>
-          <button type="button" data-gaga-reader-pref="identity" data-gaga-reader-value="enterprise">Enterprise</button>
+          <button type="button" data-gaga-reader-pref="identity" data-gaga-reader-value="enterprise">Institusional</button>
         </fieldset>
         {preferences.fontFamily && (
           <fieldset>

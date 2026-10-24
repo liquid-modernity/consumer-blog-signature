@@ -18,11 +18,11 @@ const cleanCurrentPath = Astro.url.pathname.replace(/\/+$/, '') || '/';
 const isRootPage = cleanCurrentPath === '/';
 const hasDiscovery = (rail.discovery?.length ?? 0) > 0;
 const hasSummary = Boolean(rail.snippet);
-const outlineItems = rail.outlineItems ?? [];
+const hasOutline = false;
 const contextSignalCount = (rail.facts?.length ?? 0) + (rail.discovery?.length ?? 0) + (hasSummary ? 1 : 0) + (rail.cta ? 1 : 0);
 const contextRichness = contextSignalCount >= 5 ? 'rich' : contextSignalCount >= 2 ? 'standard' : 'minimal';
 const railHeaderLabel = isRootPage ? rail.labels.railLabel : rail.labels.outlineTitle;
-const railHeaderRole = isRootPage ? contextRole : 'table-of-contents';
+const railHeaderRole = contextRole;
 ---
 
 <button
@@ -42,7 +42,8 @@ const railHeaderRole = isRootPage ? contextRole : 'table-of-contents';
   class="gaga-right-rail"
   data-gaga-right-rail
   data-gaga-context-inspector
-  data-gaga-state="expanded"
+  data-gaga-state="collapsed"
+  data-gaga-has-outline={String(hasOutline)}
   data-gaga-context-surface-state="closed"
   data-gaga-signature-surface="context-right-rail"
   data-gaga-workspace={workspaceId}
@@ -85,40 +86,5 @@ const railHeaderRole = isRootPage ? contextRole : 'table-of-contents';
     </button>
   </div>
 
-  <div class="gaga-right-rail__body">
-    {!isRootPage && outlineItems.length > 0 ? (
-      <nav
-        class="gaga-info-block gaga-right-rail__outline"
-        aria-label={rail.labels.outlineTitle.id}
-        data-gaga-right-rail-outline
-      >
-        <h2>
-          <Icon name="outline" />
-          <span
-            data-gaga-i18n-key={rail.labels.outlineTitle.key}
-            data-gaga-i18n-id={rail.labels.outlineTitle.id}
-            data-gaga-i18n-en={rail.labels.outlineTitle.en}
-          >
-            {rail.labels.outlineTitle.id}
-          </span>
-        </h2>
-        <ol class="gaga-toc-list" data-gaga-info-field="outline">
-          {outlineItems.map((item) => (
-            <li>
-              <a href={`#${item.slug}`}>{item.text}</a>
-              {item.children?.length ? (
-                <ol>
-                  {item.children.map((child) => (
-                    <li>
-                      <a href={`#${child.slug}`}>{child.text}</a>
-                    </li>
-                  ))}
-                </ol>
-              ) : null}
-            </li>
-          ))}
-        </ol>
-      </nav>
-    ) : null}
-  </div>
+  <div class="gaga-right-rail__body"></div>
 </aside>

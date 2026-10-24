@@ -126,13 +126,19 @@
 
 .gaga-right-rail[data-gaga-state='collapsed'] {
   width: var(--gaga-right-rail-collapsed);
+  background: transparent;
+  box-shadow: none;
+  pointer-events: none;
+}
+
+.gaga-right-rail[data-gaga-state='collapsed'] .gaga-rail-toggle {
+  pointer-events: auto;
 }
 
 .gaga-right-rail[data-gaga-state='collapsed'] .gaga-right-rail__body,
 .gaga-right-rail[data-gaga-state='collapsed'] .gaga-right-rail__foot,
 .gaga-right-rail[data-gaga-state='collapsed'] .gaga-right-rail__identity {
-  display: grid;
-  gap: .08rem;
+  display: none;
 }
 
 .gaga-right-rail__identity > span {
@@ -394,9 +400,9 @@
 
 @media (min-width: bp.$tablet-large-min) and (max-width: bp.$tablet-large-max) {
   .gaga-right-rail[data-gaga-state='collapsed'] {
-    border-inline-start-color: color-mix(in srgb, var(--gaga-line) 74%, transparent);
-    background: var(--gaga-surface);
-    box-shadow: var(--gaga-shadow);
+    border-inline-start-color: transparent;
+    background: transparent;
+    box-shadow: none;
   }
 }
 

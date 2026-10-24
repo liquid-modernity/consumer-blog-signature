@@ -11,21 +11,39 @@ const { entryData, routeId = Astro.url.pathname } = Astro.props;
 const metadata = normalizeContentMetadata(entryData);
 const isArticle = metadata.contentKind === 'article';
 const isEntity = metadata.contentKind === 'author' || metadata.contentKind === 'topic';
-const displayTitle = Astro.url.pathname.replace(/\/+$/, '') === '/topics'
+const cleanPath = Astro.url.pathname.replace(/\/+$/, '') || '/';
+const isRootPage = cleanPath === '/';
+const displayTitle = cleanPath === '/topics'
   ? i18nText('navigation.topics', resolveLocale(metadata.language))
   : metadata.title;
 if (!metadata.title) throw new Error(`Page title is required for ${routeId}.`);
 ---
-{isArticle || isEntity ? null : <h1 id="_top">{displayTitle}</h1>}
+{isRootPage || isArticle || isEntity ? null : (
+  <header class="gaga-page-header" data-gaga-page-header>
+    <h1 id="_top" class="gaga-page-header__title">{displayTitle}</h1>
+  </header>
+)}
 
 <style>
   @layer gaga.core {
-    h1 {
-      margin-top: 1rem;
-      font-size: var(--gaga-type-page-title-size);
-      line-height: var(--gaga-type-page-title-line-height);
-      font-weight: var(--gaga-type-page-title-weight);
+    .gaga-page-header {
+      margin: 0 0 1.5rem;
+      padding-bottom: 0.85rem;
+      border-bottom: 1px solid var(--gaga-border-subtle, rgba(128, 128, 128, 0.22));
+    }
+
+    .gaga-page-header__title {
+      margin: 0;
+      font-size: clamp(1.5rem, 2.4vw, 2rem);
+      line-height: 1.2;
+      font-weight: 700;
+      letter-spacing: -0.02em;
       color: var(--gaga-ink);
+      text-wrap: balance;
+    }
+
+    :global(.gaga-page-header + .gaga-markdown-content > h1:first-child) {
+      display: none;
     }
   }
 </style>

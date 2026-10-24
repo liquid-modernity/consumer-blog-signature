@@ -1,46 +1,63 @@
-# Rencana Implementasi: Clean Minimalism & Rich Features pada Seluruh Section Beranda
+# Rencana Implementasi Mockup UI & Tata Letak 4 Babak Beranda
 
-## Tujuan & Arah Desain
-Menyederhanakan tampilan antarmuka halaman beranda (`EditorialFront.astro`) agar selaras dengan filosofi **Clean Minimalism, Rich Features**:
-- Bebas dari ornamen repetitif seperti pembatas grup bernomor (`02`, `03`, `04`), footer navigasi *stage cue* di bawah setiap *stage*, *badge* status sekunder, dan *path* URL dekoratif pada kartu.
-- Tetap mempertahankan pembagian tinggi layar penuh (*full-viewport stage* `100dvh`) serta seluruh kapabilitas interaktif (sinkronisasi *stage* aktif dengan *Dynamic Notch Island* & *Left Rail*, *hover preview* ke panel kanan, penyimpanan *bookmark* lokal di `Tersimpan`, serta navigasi keyboard/scroll).
+Rencana ini menerjemahkan keempat gambar mockup ke dalam arsitektur komponen Astro, sistem gaya SCSS, dan runtime interaktif PakRPP secara menyeluruh di seluruh halaman.
 
 ---
 
-## Lingkup Perubahan (`src/components/reader/EditorialFront.astro`)
+## 1. Tema Default Kertas & Bingkai UI Global (Semua Halaman)
 
-### 1. Penghapusan Header Divider Bernomor (`.pakrpp-group-divider`) di Semua Stage
-Menghapus elemen `<div class="pakrpp-group-divider">` pada seluruh *stage* yang tersisa:
-- **Stage 02 (`#stage-02`)**: Menghapus blok `02 · TERSIMPAN · TOPIK · ARSIP · PENGETAHUAN`.
-- **Stage 03 (`#stage-03`)**: Menghapus blok `03 · PENULIS · PROYEK · METODOLOGI · KONTAK`.
-- **Stage 04 (`#stage-04`)**: Menghapus blok `04 · KEBIJAKAN · LISENSI · PETA SITUS`.
-
-### 2. Penghapusan Footer Navigasi Stage (`.pakrpp-stage-cue`) di Semua Stage
-Menghapus elemen `<footer class="pakrpp-stage-cue">` di bagian bawah setiap *stage*:
-- **Stage 02 (`#stage-02`)**: Menghapus footer `02 / 04 · EKSPLORASI` beserta tautan lompatan `↑ 01 Terbaru` dan `↓ 03 Konteks`.
-- **Stage 03 (`#stage-03`)**: Menghapus footer `03 / 04 · KONTEKS` beserta tautan lompatan `↑ 02 Eksplorasi` dan `↓ 04 Sistem`.
-- **Stage 04 (`#stage-04`)**: Menghapus footer `04 / 04 · SISTEM` beserta tautan lompatan `↑ 03 Konteks` dan `↑↑ 01 Ke Atas`.
-
-### 3. Pembersihan Badge Status & Path URL Dekoratif
-Menghilangkan elemen visual sekunder yang menambah beban visual tanpa mengurangi informasi inti maupun fungsi klik/hover:
-- **Header Sub-Section (`.pakrpp-section-tag`)**:
-  - Menghapus *badge* dekoratif di samping judul sub-section pada `#saved` (`0 tersimpan` di header tetap disinkronkan secara internal bila diperlukan atau disederhanakan tanpa *pill*), `#topics` (`3 klasifikasi`), `#archive` (`Temporal`), dan `#knowledge` (`Relasional`).
-- **Kartu Arsip & Pengetahuan (`#archive` & `#knowledge`)**:
-  - Menghapus *badge* status di pojok kartu (`Indeks Penuh`, `Peta Relasi`, `Direktori A–Z`, `24 Entri`, `Sitasi & Pustaka`).
-  - Menghapus teks *path* URL monospasi dekoratif (`/publications`, `/knowledge/graph`, `/knowledge/index`, `/knowledge/tags`, `/knowledge/references`) sehingga kartu hanya menampilkan judul yang bersih dan deskripsi esensial.
-- **Kartu Konteks & Sistem (`#stage-03` & `#stage-04`)**:
-  - Menghapus teks *path* URL dekoratif (`/about`, `/projects`, `/methodology`, `/contact`, `/legal/privacy`, `/legal/license`, `/system/sitemap`) dari permukaan kartu agar fokus pada judul dan deskripsi ringkas.
-
-### 4. Pelestarian Struktur Full-Viewport & Rich Features
-- **Tata Letak Full-Viewport (`100dvh`)**: Setiap `#stage-01` hingga `#stage-04` tetap mempertahankan `min-height: calc(100dvh - 3.5rem)` dengan perataan ruang yang proporsional.
-- **Fitur Interaktif Utuh**:
-  - Atribut `data-pakrpp-viewport-stage="01".."04"` dan `data-stage-label` tetap dipertahankan pada kontainer *stage* agar indikator *Dynamic Notch Island* dan *IntersectionObserver* tetap bekerja akurat.
-  - Atribut `data-pakrpp-preview-*` pada setiap kartu dan item publikasi tetap dipertahankan untuk fitur *rich preview* instan.
-  - Fungsionalitas daftar `Tersimpan` (`localStorage` reader state) tetap berfungsi penuh.
-- **Pembersihan CSS**: Menghapus aturan CSS `.pakrpp-group-divider`, `.pakrpp-stage-cue`, `.pakrpp-section-tag`, `.pakrpp-card-badge`, dan `.pakrpp-card-route` yang tidak lagi digunakan di `EditorialFront.astro`.
+- **Tema Kertas (`paper`) sebagai Default Global**:
+  - Mengubah `defaultTheme` di `src/config/theme.ts`, `src/config/reader.ts`, dan variabel `:root` di `src/styles/tokens.css` agar menggunakan palet terang bersih hangat (`#F7F6F2` / `#F4F3EF`) dengan teks tinta gelap (`#181816`) dan permukaan tanpa garis grid latar.
+  - Pengguna tetap dapat mengganti tema kapan saja melalui panel **Token & Tampilan** di Gaga Notch.
+- **Notch Atas (`ActionRuntime.astro` & `_action-island.scss`)**:
+  - Menyesuaikan tampilan kapsul (pill) hitam kontras tinggi (`#111110` dengan teks putih bersih `#F7F6F2`) tepat di tengah atas layar dengan ikon lingkaran dan identitas `PakRPP` sesuai mockup.
+  - Saat diklik atau diarahkan kursor, kapsul tetap dapat membuka panel navigasi, pencarian, dan kustomisasi **Token & Tampilan**.
+- **Tombol Sudut Kiri Atas & Kanan Atas (`LeftRail.astro` & `RightInfoRail.astro`)**:
+  - Kedua rail di kiri dan kanan diatur dalam status terlipat (`collapsed`) dengan latar belakang transparan sehingga hanya menampilkan ikon tombol garis (`≡`) minimalis di sudut kiri atas dan kanan atas sesuai mockup.
+  - Keduanya disiapkan sebagai wadah *context-aware* yang saat ini dikosongkan (`LeftRail` dan `RightInfoRail` tidak lagi menampilkan blok daftar isi atau panel samping yang memakan ruang baca).
 
 ---
 
-## Verifikasi
-1. Menjalankan `compile_applet` dan memastikan *build* Astro serta pengujian arsitektur (`tools/hardening.test.mjs`) lulus tanpa error.
-2. Memastikan tampilan setiap *stage* (`#stage-01` s.d. `#stage-04`) tampil bersih, minimalis, dan seluruh fitur interaktif tetap berjalan mulus.
+## 2. Pemindahan Table of Contents ke "Gaga Dynamic Outline Peek" (Pill Bawah)
+
+- **Aktif di Semua Ukuran Layar (Mobile, Tablet, dan Desktop)**:
+  - Menghapus pembatasan `@media (min-width: 64rem) { display: none !important; }` pada `src/components/frame/ArticleOutlinePeek.astro`.
+  - Memperbarui `src/scripts/systems/outline-peek.ts` agar `isAvailable` mengaktifkan **Gaga Dynamic Outline Peek** pada mode `desktop` dan `tablet-large` selain `mobile` dan `tablet-mini`.
+  - Memindahkan fungsi **Table of Contents (Daftar Isi)** sepenuhnya dari `RightInfoRail.astro` ke komponen kapsul bawah `ArticleOutlinePeek.astro`.
+- **Desain Kapsul Hitam Bawah Sesuai Mockup**:
+  - Menata `.gaga-outline-peek-preview` di `src/styles/partials/_outline-peek.scss` menjadi kapsul hitam kontras tinggi di tengah bawah layar (`Gaga Dynamic Outline Peek`) yang menampilkan posisi baca/bagian aktif dan membuka panel Daftar Isi (Table of Contents) saat diklik.
+  - Di halaman **Beranda (`/`)**, kapsul bawah ini memuat daftar isi 4 babak utama (`01 Publikasi`, `02 Eksplorasi & Tersimpan`, `03 Tentang, Sistem & Legal`, `04 Sosial`) untuk melompat antar layar, sedangkan di halaman **Artikel & Sub-halaman** memuat struktur subjudul (`H2`/`H3`) halaman tersebut.
+
+---
+
+## 3. Implementasi 4 Layar Penuh (`scroll-snap`) di Beranda (`EditorialFront.astro`)
+
+Mengatur `.gaga-main-region:has([data-pakrpp-root-index])` dengan `scroll-snap-type: y mandatory` dan setiap `.pakrpp-viewport-stage` berukuran `100dvh` (`scroll-snap-align: start`) tanpa garis pembatas horizontal maupun garis pohon kiri:
+
+1. **Layar 1 — Daftar 20 Publikasi (`1_08edb1cd.png`)**:
+   - Menghapus judul besar `<h1>PakRPP</h1>` di dalam kanvas (karena sudah diwakili oleh pill notch atas).
+   - Menampilkan daftar bernomor `01` s.d. `20` secara bersih tanpa garis bawah per baris, dengan kepadatan vertikal yang terkalibrasi agar ke-20 judul beserta tautan bawah muat utuh dalam satu layar penuh (`100dvh`).
+   - Bagian bawah daftar menampilkan `Semua Publikasi →` di sisi kiri dan `Indeks Objek Publikasi →` di sisi kanan (`justify-content: space-between`).
+2. **Layar 2 — Topik, Arsip, Pengetahuan & Tersimpan (`2_4c136fda.png`)**:
+   - Baris atas: Grid 3 kolom bersih tanpa border untuk **Topik** (`Pelaporan · 3 publikasi`, `Teknologi · 5 publikasi`, `Anomali · 3 publikasi`, `Semua Topik →`), **Arsip** (`2026 · 7 publikasi`, `2025 · 0 publikasi`, `2024 · 0 publikasi`, `Semua Arsip →`), dan **Pengetahuan** (`Graf`, `Indeks`, `Tag`, `Referensi`, `Ikhtisar Pengetahuan →`).
+   - Baris bawah: Bagian **Tersimpan** ditempatkan terpusat (`text-align: center`) di bawah grid 3 kolom, lengkap dengan pesan status simpanan dan tautan `Semua Tersimpan →`.
+3. **Layar 3 — Tentang, Sistem & Legal (`3_b7c3348c.png`)**:
+   - Grid 3 kolom terpusat di tengah layar penuh tanpa garis kotak/border:
+     - **Tentang**: `Tentang`, `Penulis`, `Dukungan`, `Kontak`
+     - **Sistem**: `Peta Situs`, `RSS`, `Status`
+     - **Legal**: `Kebijakan Privasi`, `Ketentuan Penggunaan`, `Penafian`, `Lisensi`
+4. **Layar 4 — Kanal Sosial (`4_bb5f39c1.png`)**:
+   - Tanpa judul seksi `Sosial`, langsung menampilkan baris 3 kolom terpusat secara vertikal dan horizontal:
+     - `LinkedIn` `in/pakrpp`
+     - `YouTube` `@pakrpp`
+     - `Reddit` `u/pakrpp`
+
+---
+
+## 4. File yang Akan Dimodifikasi
+
+- `src/config/theme.ts`, `src/config/reader.ts`, & `src/styles/tokens.css`: Mengatur tema default ke `paper` (latar kertas terang hangat) di seluruh halaman.
+- `src/components/frame/ActionRuntime.astro` & `src/styles/partials/_action-island.scss`: Penyesuaian kapsul hitam atas `PakRPP` sesuai proporsi mockup.
+- `src/components/frame/LeftRail.astro`, `src/components/frame/RightInfoRail.astro`, `src/styles/partials/_left-rail.scss`, & `src/styles/partials/_right-rail.scss`: Mengosongkan isi rail kiri/kanan (context-aware kosong) dan menampilkan pemicu ikon `≡` bersih di sudut kiri/kanan atas.
+- `src/components/frame/ArticleOutlinePeek.astro`, `src/components/gaga/PageFrame.astro`, `src/components/frame/StandaloneAppFrame.astro`, `src/scripts/systems/outline-peek.ts`, & `src/styles/partials/_outline-peek.scss`: Memindahkan Table of Contents dari sidebar kanan ke pill bawah `Gaga Dynamic Outline Peek` untuk desktop, tablet, dan mobile.
+- `src/components/reader/EditorialFront.astro`: Merombak tata letak 4 layar penuh (`scroll-snap`) sesuai presisi visual keempat gambar mockup.

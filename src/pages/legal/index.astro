@@ -24,7 +24,7 @@ const entryData = {
   <ul>
     {(legalSection?.items ?? []).map((item) => (
       <li>
-        <a href={item.href}><strong>{item.label}</strong></a> (<code>{item.href}</code>) — {item.meta}
+        <a href={item.href}><strong>{item.label}</strong></a>{item.meta ? ` — ${item.meta}` : ''}
       </li>
     ))}
   </ul>

@@ -14,7 +14,7 @@ export const themeOptions = [
 
 export type ThemeId = typeof themeOptions[number]['id'];
 export type ThemeColorScheme = typeof themeOptions[number]['colorScheme'];
-export const defaultTheme: ThemeId = 'default';
+export const defaultTheme: ThemeId = 'paper';
 export const themeChromeColorMap = Object.fromEntries(
   themeOptions.map((theme) => [theme.id, theme.chromeColor])
 ) as Record<ThemeId, string>;
@@ -27,7 +27,7 @@ export function isThemeId(value: unknown): value is ThemeId {
 }
 
 export function normalizeTheme(value: unknown): ThemeId {
-  return isThemeId(value) ? value : 'default';
+  return isThemeId(value) ? value : 'paper';
 }
 
 export function themeChromeColor(theme: ThemeId) {

@@ -1,26 +1,26 @@
 :root {
-  /* Default = restrained blueprintism workspace. */
-  color-scheme: dark;
-  --gaga-color-background: #07101d;
-  --gaga-color-surface: #0b1726;
-  --gaga-color-surface-subtle: #102033;
-  --gaga-color-surface-elevated: #14283f;
-  --gaga-color-text: #f0f7ff;
-  --gaga-color-text-muted: #b6c8d9;
-  --gaga-color-text-subtle: #9eb3c7;
-  --gaga-color-border: rgba(188, 215, 241, 0.18);
-  --gaga-color-border-strong: rgba(188, 215, 241, 0.38);
-  --gaga-color-interactive: #dbeeff;
-  --gaga-color-interactive-hover: #ffffff;
-  --gaga-color-interactive-active: rgba(114, 169, 220, 0.16);
-  --gaga-color-focus: #ffffff;
-  --gaga-color-selection: rgba(114, 169, 220, 0.24);
-  --gaga-color-danger: #f0aaa7;
-  --gaga-color-warning: #e2cb8f;
-  --gaga-color-success: #bdd4b4;
+  /* Default = archival warm paper workspace. */
+  color-scheme: light;
+  --gaga-color-background: #f4f3ef;
+  --gaga-color-surface: #fbfaf7;
+  --gaga-color-surface-subtle: #eceae4;
+  --gaga-color-surface-elevated: #ffffff;
+  --gaga-color-text: #181816;
+  --gaga-color-text-muted: #5f5d57;
+  --gaga-color-text-subtle: #68645c;
+  --gaga-color-border: rgba(24, 24, 22, 0.14);
+  --gaga-color-border-strong: rgba(24, 24, 22, 0.32);
+  --gaga-color-interactive: #181816;
+  --gaga-color-interactive-hover: #000000;
+  --gaga-color-interactive-active: rgba(24, 24, 22, 0.085);
+  --gaga-color-focus: #000000;
+  --gaga-color-selection: rgba(24, 24, 22, 0.13);
+  --gaga-color-danger: #c63d38;
+  --gaga-color-warning: #9a6c18;
+  --gaga-color-success: #286a3a;
   --gaga-bg: var(--gaga-color-background);
-  --gaga-bg-grid: rgba(188, 215, 241, 0.02);
-  --gaga-bg-grid-strong: rgba(188, 215, 241, 0.05);
+  --gaga-bg-grid: transparent;
+  --gaga-bg-grid-strong: transparent;
   --gaga-surface: var(--gaga-color-surface);
   --gaga-surface-subtle: var(--gaga-color-surface-subtle);
   --gaga-surface-2: var(--gaga-color-surface-subtle);
@@ -33,7 +33,7 @@
   --gaga-blue: var(--gaga-color-interactive);
   --gaga-blue-soft: var(--gaga-color-interactive-active);
   --gaga-focus-ring: var(--gaga-color-focus);
-  --gaga-shadow: 0 1.1rem 2.8rem rgba(1, 8, 16, 0.42);
+  --gaga-shadow: 0 1rem 2.4rem rgba(24, 24, 22, 0.1);
   --gaga-tooltip-bg: var(--gaga-ink);
   --gaga-tooltip-ink: var(--gaga-bg);
 
@@ -103,6 +103,28 @@
   --gaga-type-code-size: 0.92em;
 }
 
+:root[data-gaga-theme='default'],
+body[data-gaga-theme='default'] {
+  color-scheme: dark;
+  --gaga-color-background: #07101d;
+  --gaga-color-surface: #0b1726;
+  --gaga-color-surface-subtle: #102033;
+  --gaga-color-surface-elevated: #14283f;
+  --gaga-color-text: #f0f7ff;
+  --gaga-color-text-muted: #b6c8d9;
+  --gaga-color-text-subtle: #9eb3c7;
+  --gaga-color-border: rgba(188, 215, 241, 0.18);
+  --gaga-color-border-strong: rgba(188, 215, 241, 0.38);
+  --gaga-color-interactive: #dbeeff;
+  --gaga-color-interactive-hover: #ffffff;
+  --gaga-color-interactive-active: rgba(114, 169, 220, 0.16);
+  --gaga-color-focus: #ffffff;
+  --gaga-color-selection: rgba(114, 169, 220, 0.24);
+  --gaga-bg-grid: rgba(188, 215, 241, 0.02);
+  --gaga-bg-grid-strong: rgba(188, 215, 241, 0.05);
+  --gaga-shadow: 0 1.1rem 2.8rem rgba(1, 8, 16, 0.42);
+}
+
 :root[data-gaga-theme='dark'],
 body[data-gaga-theme='dark'] {
   color-scheme: dark;
@@ -135,15 +157,15 @@ body[data-gaga-theme='paper'] {
   --gaga-color-text: #181816;
   --gaga-color-text-muted: #5f5d57;
   --gaga-color-text-subtle: #68645c;
-  --gaga-color-border: rgba(24, 24, 22, 0.16);
-  --gaga-color-border-strong: rgba(24, 24, 22, 0.34);
+  --gaga-color-border: rgba(24, 24, 22, 0.14);
+  --gaga-color-border-strong: rgba(24, 24, 22, 0.32);
   --gaga-color-interactive: #181816;
   --gaga-color-interactive-hover: #000000;
   --gaga-color-interactive-active: rgba(24, 24, 22, 0.085);
   --gaga-color-focus: #000000;
   --gaga-color-selection: rgba(24, 24, 22, 0.13);
-  --gaga-bg-grid: rgba(24, 24, 22, 0.018);
-  --gaga-bg-grid-strong: rgba(24, 24, 22, 0.045);
+  --gaga-bg-grid: transparent;
+  --gaga-bg-grid-strong: transparent;
   --gaga-shadow: 0 1rem 2.4rem rgba(24, 24, 22, 0.1);
 }
 

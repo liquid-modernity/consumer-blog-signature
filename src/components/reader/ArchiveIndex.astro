@@ -1,6 +1,7 @@
 ---
 import { getArticles, groupArticlesByMonth, toArticlePreview } from '../../lib/content';
 import { contentDefaults } from '../../config/content';
+import { routes } from '../../config/routes';
 import { normalizeContentMetadata, resolveContentDateLocale } from '@gaga/engine/content';
 const articles = await getArticles();
 const route = Astro.locals.gagaRoute;
@@ -8,22 +9,23 @@ const metadata = normalizeContentMetadata(route?.entry?.data ?? {});
 const surfaceLocale = resolveContentDateLocale(metadata.language ?? route?.lang ?? contentDefaults.defaultLanguage, contentDefaults.dateLocale);
 const groups = groupArticlesByMonth(articles, surfaceLocale);
 ---
-<section class="gaga-archive-screen" aria-labelledby="archive-title">
-  <h2 id="archive-title" class="gaga-screen-subtitle">Archives</h2>
-  <div class="gaga-archive-log" aria-label="Chronological archive" data-gaga-preview-scope>
+<section class="gaga-archive-screen" aria-label="Arsip Kronologis">
+  <div class="gaga-archive-log" aria-label="Daftar arsip berdasarkan bulan" data-gaga-preview-scope>
     {groups.map((group) => (
       <section class="gaga-archive-month" data-gaga-motion>
-        <h3 id={`archive-${group.slug}`}>{group.month}</h3>
+        <h2 id={`archive-${group.slug}`}>{group.month}</h2>
         <ol>
           {group.articles.map((article) => {
             const preview = toArticlePreview(article, surfaceLocale, contentDefaults.preview);
+            const cleanSlug = preview.href.replace(/^\/+|\/+$/g, '');
+            const canonicalHref = routes.publications.detail(cleanSlug);
             return (
               <li>
                 <a
-                  href={preview.href}
+                  href={canonicalHref}
                   data-gaga-preview
                   data-gaga-preview-title={preview.title}
-                  data-gaga-preview-href={preview.href}
+                  data-gaga-preview-href={canonicalHref}
                   data-gaga-preview-snippet={preview.snippet}
                   data-gaga-preview-topics={preview.topics}
                   data-gaga-preview-tags={preview.tags}

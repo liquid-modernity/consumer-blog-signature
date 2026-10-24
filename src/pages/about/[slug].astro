@@ -57,13 +57,13 @@ const entryData = {
 
 <GagaSiteLayout entryData={entryData}>
   <nav class="pakrpp-subnav" aria-label="Navigasi Tentang">
-    <a href={routes.about.root}>Tentang (/about)</a>
+    <a href={routes.about.root}>Tentang</a>
     <span aria-hidden="true">·</span>
-    <a href={routes.about.author}>Penulis (/about/author)</a>
+    <a href={routes.about.author}>Penulis</a>
     <span aria-hidden="true">·</span>
-    <a href={routes.about.support}>Dukungan (/about/support)</a>
+    <a href={routes.about.support}>Dukungan</a>
     <span aria-hidden="true">·</span>
-    <a href={routes.about.contact}>Kontak (/about/contact)</a>
+    <a href={routes.about.contact}>Kontak</a>
   </nav>
 
   {slug === 'author' && (
@@ -97,9 +97,9 @@ const entryData = {
         PAKRPP dibangun sebagai sistem publikasi independen tanpa iklan intrusif dan tanpa kompromi terhadap integritas bukti. Anda dapat mendukung ekosistem ini melalui:
       </p>
       <ul>
-        <li><strong>Sitasi Terbuka</strong>: Mengutip publikasi dan objek referensi menggunakan URL kanonik (<code>/publications/:slug</code>).</li>
+        <li><strong>Sitasi Terbuka</strong>: Mengutip publikasi dan objek referensi menggunakan tautan kanonik.</li>
         <li><strong>Uji Silang &amp; Koreksi</strong>: Mengirimkan catatan verifikasi atau sumber primer tambahan untuk memperkaya indeks pengetahuan.</li>
-        <li><strong>Distribusi Sindikasi</strong>: Berlangganan dan menyebarkan umpan terbuka melalui <a href={routes.system.rss}>/system/rss</a>.</li>
+        <li><strong>Distribusi Sindikasi</strong>: Berlangganan dan menyebarkan umpan terbuka melalui <a href={routes.system.rss}>Halaman RSS</a>.</li>
       </ul>
     </section>
   )}

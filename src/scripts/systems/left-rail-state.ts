@@ -28,14 +28,20 @@ export function initLeftRailState() {
   if (!rail) return;
   initialized = true;
 
+  const hasContent = rail.dataset.gagaHasContent === 'true';
+
   createLeftRailCapability({
     rail,
-    storageKey: storageKeys.leftRail,
-    defaultPreference: defaultRailPreference,
+    storageKey: hasContent ? storageKeys.leftRail : `${storageKeys.leftRail}:empty`,
+    defaultPreference: hasContent ? defaultRailPreference : 'collapsed',
     getLayoutMode: () => document.documentElement.dataset.gagaLayout,
-    getConfiguredState: getConfiguredLeftRailState,
+    getConfiguredState: (mode) => {
+      const base = getConfiguredLeftRailState(mode);
+      if (!hasContent && base === 'expanded') return 'collapsed';
+      return base;
+    },
     isCompactMode: supportsGagaDock,
-    isPersistentPreferenceMode: (mode) => mode === 'desktop',
+    isPersistentPreferenceMode: (mode) => hasContent && mode === 'desktop',
     modalIsolation: {
       activate: activateModalIsolation,
       clear: clearModalIsolation

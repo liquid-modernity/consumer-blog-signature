@@ -68,37 +68,33 @@ const entryData = {
 
 <GagaSiteLayout entryData={entryData}>
   <nav class="pakrpp-sys-nav" aria-label="Navigasi Sistem">
-    <a href={routes.system.sitemap}>Peta Situs (/system/sitemap)</a>
+    <a href={routes.system.sitemap}>Peta Situs</a>
     <span aria-hidden="true">·</span>
-    <a href={routes.system.rss}>RSS (/system/rss)</a>
+    <a href={routes.system.rss}>RSS</a>
     <span aria-hidden="true">·</span>
-    <a href={routes.system.status}>Status (/system/status)</a>
+    <a href={routes.system.status}>Status</a>
     <span aria-hidden="true">·</span>
-    <a href={routes.machine.sitemap}>XML Crawler ({routes.machine.sitemap})</a>
+    <a href={routes.machine.sitemap}>XML Sitemap</a>
   </nav>
 
   {slug === 'sitemap' && (
     <section class="pakrpp-sys-section" aria-label="Hierarki Peta Situs Manusia">
-      <p>
-        Peta situs ini dirancang untuk manusia. Untuk crawler dan pengindeks otomatis, gunakan <a href={routes.machine.sitemap}><code>{routes.machine.sitemap}</code></a>.
-      </p>
-
-      <h2>1. Bagian Root Indeks (/)</h2>
+      <h2>1. Bagian Beranda</h2>
       <ul>
         {rootSections.map((sec) => (
           <li>
-            <a href={`/#${sec.anchor}`}><strong>#{sec.label}</strong></a> (<code>/#{sec.anchor}</code>)
+            <a href={`/#${sec.anchor}`}><strong>#{sec.label}</strong></a>
           </li>
         ))}
       </ul>
 
-      <h2>2. Publikasi Kanonik ({publications.length})</h2>
+      <h2>2. Publikasi ({publications.length})</h2>
       <ul>
-        <li><a href={routes.publications.index}><strong>Indeks Objek Publikasi</strong></a> (<code>/publications</code>)</li>
-        <li><a href={routes.discovery.latest}><strong>Semua Publikasi Terbaru</strong></a> (<code>/latest</code>)</li>
+        <li><a href={routes.publications.index}><strong>Indeks Objek Publikasi</strong></a></li>
+        <li><a href={routes.discovery.latest}><strong>Semua Publikasi Terbaru</strong></a></li>
         {publications.map((pub) => (
           <li>
-            <a href={pub.canonicalHref}>{pub.title}</a> (<code>{pub.canonicalHref}</code>)
+            <a href={pub.canonicalHref}>{pub.title}</a>
           </li>
         ))}
       </ul>
@@ -107,23 +103,23 @@ const entryData = {
       <ul>
         {topics.map((t) => (
           <li>
-            <a href={t.href}>Topik: {t.label}</a> (<code>{t.href}</code> · {t.count} publikasi)
+            <a href={t.href}>Topik: {t.label}</a> ({t.count} publikasi)
           </li>
         ))}
         {archiveYears.map((y) => (
           <li>
-            <a href={y.href}>Arsip {y.year}</a> (<code>{y.href}</code> · {y.count} publikasi)
+            <a href={y.href}>Arsip {y.year}</a> ({y.count} publikasi)
           </li>
         ))}
       </ul>
 
       <h2>4. Pengetahuan, Tentang, Sistem &amp; Legal</h2>
       <ul>
-        <li><a href={routes.knowledge.graph}>Graf Pengetahuan</a> (<code>{routes.knowledge.graph}</code>)</li>
-        <li><a href={routes.knowledge.index}>Indeks Pengetahuan</a> (<code>{routes.knowledge.index}</code>)</li>
-        <li><a href={routes.knowledge.tags}>Tag Pengetahuan</a> (<code>{routes.knowledge.tags}</code>)</li>
-        <li><a href={routes.knowledge.references}>Objek Referensi</a> (<code>{routes.knowledge.references}</code>)</li>
-        <li><a href={routes.about.root}>Tentang</a> (<code>{routes.about.root}</code>) · <a href={routes.about.author}>Penulis</a> · <a href={routes.about.support}>Dukungan</a> · <a href={routes.about.contact}>Kontak</a></li>
+        <li><a href={routes.knowledge.graph}>Graf Pengetahuan</a></li>
+        <li><a href={routes.knowledge.index}>Indeks Pengetahuan</a></li>
+        <li><a href={routes.knowledge.tags}>Tag Pengetahuan</a></li>
+        <li><a href={routes.knowledge.references}>Objek Referensi</a></li>
+        <li><a href={routes.about.root}>Tentang</a> · <a href={routes.about.author}>Penulis</a> · <a href={routes.about.support}>Dukungan</a> · <a href={routes.about.contact}>Kontak</a></li>
         <li><a href={routes.legal.privacy}>Kebijakan Privasi</a> · <a href={routes.legal.terms}>Ketentuan Penggunaan</a> · <a href={routes.legal.disclaimer}>Penafian</a> · <a href={routes.legal.license}>Lisensi</a></li>
       </ul>
     </section>
@@ -132,37 +128,27 @@ const entryData = {
   {slug === 'rss' && (
     <section class="pakrpp-sys-section" aria-label="Informasi Langganan RSS">
       <p>
-        Halaman ini (<code>/system/rss</code>) menyediakan panduan berlangganan bagi pembaca manusia. Umpan sindikasi XML mesin tersedia langsung pada:
+        Panduan berlangganan sindikasi terbuka untuk aplikasi pembaca RSS.
       </p>
       <p>
-        <a href={routes.machine.rss}><strong>Buka Feed XML Aktual ({routes.machine.rss}) →</strong></a>
+        <a href={routes.machine.rss}><strong>Buka Feed XML Aktual →</strong></a>
       </p>
       <h2>Cara Berlangganan</h2>
       <ol>
-        <li>Salin alamat kanonik <code>{routes.machine.rss}</code> ke pembaca RSS pilihan Anda (NetNewsWire, Feedbin, Inoreader, atau Miniflux).</li>
-        <li>Setiap publikasi baru pada <code>/publications/:slug</code> secara otomatis diproyeksikan ke dalam umpan sindikasi terbuka.</li>
+        <li>Salin tautan umpan RSS di atas ke pembaca RSS pilihan Anda (NetNewsWire, Feedbin, Inoreader, atau Miniflux).</li>
+        <li>Setiap publikasi baru secara otomatis tersedia di dalam umpan sindikasi terbuka.</li>
       </ol>
     </section>
   )}
 
   {slug === 'status' && (
     <section class="pakrpp-sys-section" aria-label="Status Kontrak Sistem">
-      <h2>Status Kontrak Arsitektur</h2>
+      <h2>Ringkasan Sistem</h2>
       <ul>
-        <li><strong>Content Adapter Aktif</strong>: {localContentAdapter.providerName} (<code>{localContentAdapter.providerId}</code>)</li>
-        <li><strong>CMS Boundary</strong>: Provider-Neutral / Siap diintegrasikan dengan EmDash CMS maupun headless CMS masa depan</li>
-        <li><strong>Publikasi Tervalidasi</strong>: {publications.length} objek publikasi memenuhi invarian inti (<code>id, type, slug, title, status</code>)</li>
-        <li><strong>Tipe Publikasi Terdaftar</strong>: {pubTypes.length} tipe ({pubTypes.map((t) => t.id).join(', ')})</li>
-        <li><strong>Topik Kanonik Aktif</strong>: {topics.map((t) => `${t.label} (${t.id})`).join(', ')}</li>
-      </ul>
-
-      <h2>Feature Flags</h2>
-      <ul>
-        {Object.entries(featureFlags).map(([key, enabled]) => (
-          <li>
-            <code>{key}</code>: <strong>{enabled ? 'ENABLED' : 'DISABLED'}</strong>
-          </li>
-        ))}
+        <li><strong>Penyedia Konten</strong>: {localContentAdapter.providerName}</li>
+        <li><strong>Publikasi Aktif</strong>: {publications.length} publikasi</li>
+        <li><strong>Tipe Publikasi</strong>: {pubTypes.map((t) => t.label).join(', ')}</li>
+        <li><strong>Topik Kanonik</strong>: {topics.map((t) => t.label).join(', ')}</li>
       </ul>
     </section>
   )}

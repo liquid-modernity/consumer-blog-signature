@@ -15,39 +15,39 @@ const commandProviders = searchCommands
   }));
 
 const tabs = [
-  { type: 'all', label: 'All', href: '/search' },
-  { type: 'articles', label: 'Articles', href: '/search?type=articles' },
-  { type: 'topics', label: 'Topics', href: '/search?type=topics' },
-  { type: 'tags', label: 'Tags', href: '/search?type=tags' },
-  { type: 'commands', label: 'Commands', href: '/search?type=commands' },
-  { type: 'graph', label: 'Graph', href: '/search?type=graph' }
+  { type: 'all', label: 'Semua', href: '/search' },
+  { type: 'articles', label: 'Publikasi', href: '/search?type=articles' },
+  { type: 'topics', label: 'Topik', href: '/search?type=topics' },
+  { type: 'tags', label: 'Tag', href: '/search?type=tags' },
+  { type: 'commands', label: 'Perintah', href: '/search?type=commands' },
+  { type: 'graph', label: 'Graf', href: '/search?type=graph' }
 ];
 ---
 <section class="gaga-search-page" data-gaga-search-page data-gaga-search-state="initial">
   <form class="gaga-search-workspace" action="/search" method="get" role="search" data-gaga-search-workspace>
-    <label class="gaga-visually-hidden" for="gaga-search-workspace-input">What are you looking for?</label>
+    <label class="gaga-visually-hidden" for="gaga-search-workspace-input">Apa yang sedang Anda cari?</label>
     <div class="gaga-search-workspace__row">
       <input
         id="gaga-search-workspace-input"
         type="search"
         name="q"
-        placeholder="Search articles, topics, saved reading, or actions"
+        placeholder="Cari publikasi, topik, bacaan tersimpan, atau perintah..."
         data-gaga-search-input
         autocomplete="off"
         autofocus
       />
-      <button type="submit">Search</button>
+      <button type="submit">Cari</button>
     </div>
   </form>
 
-  <nav class="gaga-search-tabs" aria-label="Search result type" data-gaga-search-tabs>
+  <nav class="gaga-search-tabs" aria-label="Tipe hasil pencarian" data-gaga-search-tabs>
     {tabs.map((tab) => (
       <a href={tab.href} data-gaga-search-tab={tab.type} aria-current={tab.type === 'all' ? 'page' : undefined}>{tab.label}</a>
     ))}
   </nav>
 
   <div class="gaga-search-status gaga-visually-hidden" role="status" aria-live="polite" data-gaga-search-status>
-    Type at least two characters to search this publication.
+    Ketik minimal dua karakter untuk mencari di sistem publikasi ini.
   </div>
 
   <div class="gaga-search-results" data-gaga-search-results></div>
@@ -88,7 +88,7 @@ const tabs = [
   const results = root?.querySelector<HTMLElement>('[data-gaga-search-results]');
   const status = root?.querySelector<HTMLElement>('[data-gaga-search-status]');
   const commandsScript = root?.querySelector<HTMLScriptElement>('[data-gaga-search-command-providers]');
-  const emptyMessage = 'Type at least two characters to search this publication.';
+  const emptyMessage = 'Ketik minimal dua karakter untuk mencari di sistem publikasi ini.';
   let index: SearchItem[] = [];
   let loading: Promise<void> | null = null;
   let activeQuery = '';
@@ -224,12 +224,12 @@ const tabs = [
 
   function renderSearchSection(matches: SearchItem[]) {
     if (!matches.length) return null;
-    const node = section('Articles', 'SEARCH_PROVIDER', 'Ranked article results.');
+    const node = section('Publikasi', 'SEARCH_PROVIDER', 'Hasil publikasi yang relevan.');
     node.classList.add('gaga-search-provider--articles');
     const list = resultList();
     list.classList.add('gaga-search-provider__list');
     for (const item of matches) {
-      list.append(createLinkCard(item.href, item.title, item.description ?? '', 'Article'));
+      list.append(createLinkCard(item.href, item.title, item.description ?? '', 'Publikasi'));
     }
     node.append(list);
     return node;
@@ -237,7 +237,7 @@ const tabs = [
 
   function renderCommandSection(commands: CommandProvider[]) {
     if (!commands.length) return null;
-    const node = section('Actions', 'COMMAND_PROVIDER', 'Choose an action intentionally.');
+    const node = section('Perintah & Aksi', 'COMMAND_PROVIDER', 'Jalankan aksi atau navigasi cepat.');
     node.classList.add('gaga-search-provider--commands');
     const list = resultList();
     list.classList.add('gaga-search-provider__list');
@@ -248,10 +248,10 @@ const tabs = [
 
   function renderTopicSection(topics: FacetMatch[]) {
     if (!topics.length) return null;
-    const node = section('Topics', 'KNOWLEDGE_PROVIDER', 'Topics from matching public articles.');
+    const node = section('Topik', 'KNOWLEDGE_PROVIDER', 'Klasifikasi topik dari publikasi yang cocok.');
     const list = resultList();
     for (const topic of topics) {
-      list.append(createLinkCard(topic.href, topic.label, `${topic.count} matching item${topic.count === 1 ? '' : 's'}`, 'Topic'));
+      list.append(createLinkCard(topic.href, topic.label, `${topic.count} publikasi cocok`, 'Topik'));
     }
     node.append(list);
     return node;
@@ -259,34 +259,34 @@ const tabs = [
 
   function renderTagSection(tags: FacetMatch[]) {
     if (!tags.length) return null;
-    const node = section('Tags', 'TAG_PROVIDER', 'Lightweight authored labels from matching public articles.');
+    const node = section('Tag', 'TAG_PROVIDER', 'Deskriptor granular dari publikasi yang cocok.');
     const list = resultList();
     for (const tag of tags) {
-      list.append(createLinkCard(tag.href, tag.label, `${tag.count} matching item${tag.count === 1 ? '' : 's'}`, 'Tag'));
+      list.append(createLinkCard(tag.href, tag.label, `${tag.count} publikasi cocok`, 'Tag'));
     }
     node.append(list);
     return node;
   }
 
   function renderSavedSection(query: string) {
-    if (!matchesQuery('saved bookmark continue reading queue continuity', query)) return null;
-    const node = section('Saved reading', 'SAVED_PROVIDER', 'Saved and continuity state remain owned by the Saved page and local reading systems.');
+    if (!matchesQuery('saved tersimpan bookmark continue reading queue continuity', query)) return null;
+    const node = section('Bacaan Tersimpan', 'SAVED_PROVIDER', 'Akses daftar artikel tersimpan, sorotan, dan progres baca.');
     const list = resultList();
-    list.append(createLinkCard('/library', 'Library', 'Open saved reading and local continuity context.', 'Library'));
+    list.append(createLinkCard('/saved', 'Tersimpan', 'Buka daftar bacaan tersimpan dan memori baca lokal.', 'Pustaka'));
     node.append(list);
     return node;
   }
 
   function renderGraphSection(matches: SearchItem[], topics: FacetMatch[], query: string) {
-    if (!matches.length && !topics.length && !matchesQuery('graph relationship topic map', query)) return null;
-    const node = section('Relationship view', 'GRAPH_PROVIDER', 'Topic and article relationships that can be explained from public content.');
+    if (!matches.length && !topics.length && !matchesQuery('graph graf relationship relasi topic map', query)) return null;
+    const node = section('Relasi Pengetahuan', 'GRAPH_PROVIDER', 'Hubungan antar topik dan publikasi berdasarkan kueri.');
     const graph = document.createElement('div');
     graph.className = 'gaga-search-graph';
     graph.setAttribute('role', 'list');
     const queryNode = document.createElement('div');
     queryNode.className = 'gaga-search-graph__node gaga-search-graph__node--focus';
     queryNode.setAttribute('role', 'listitem');
-    queryNode.textContent = `Query: ${activeQuery}`;
+    queryNode.textContent = `Kueri: ${activeQuery}`;
     graph.append(queryNode);
     for (const topic of topics.slice(0, 4)) {
       const topicNode = document.createElement('a');
@@ -309,18 +309,15 @@ const tabs = [
     const fullGraph = document.createElement('p');
     fullGraph.className = 'gaga-search-provider__action';
     const fullGraphLink = document.createElement('a');
-    const fullGraphParams = new URLSearchParams();
-    if (activeQuery) fullGraphParams.set('q', activeQuery);
-    const fullGraphQuery = fullGraphParams.toString();
-    fullGraphLink.href = fullGraphQuery ? `/graphs?${fullGraphQuery}` : '/graphs';
-    fullGraphLink.textContent = 'Open interactive graph';
+    fullGraphLink.href = '/knowledge/graph';
+    fullGraphLink.textContent = 'Buka Graf Pengetahuan Interaktif →';
     fullGraph.append(fullGraphLink);
     node.append(fullGraph);
 
     const details = document.createElement('details');
     details.className = 'gaga-search-graph-expanded';
     const summary = document.createElement('summary');
-    summary.textContent = 'Expand graph';
+    summary.textContent = 'Rincian relasi';
     details.append(summary);
     const relationshipList = document.createElement('ul');
     for (const item of matches.slice(0, 10)) {
@@ -329,12 +326,12 @@ const tabs = [
       link.href = item.href;
       link.textContent = item.title;
       const topicsText = (item.topics ?? []).map(topicLabel).join(', ');
-      row.append(link, document.createTextNode(topicsText ? ` has_topic ${topicsText}` : ' matched search text'));
+      row.append(link, document.createTextNode(topicsText ? ` · Topik: ${topicsText}` : ' · Cocok dengan teks pencarian'));
       relationshipList.append(row);
     }
     if (!relationshipList.children.length) {
       const row = document.createElement('li');
-      row.textContent = 'No article-topic relationships matched this query yet.';
+      row.textContent = 'Belum ada relasi artikel-topik yang cocok dengan kueri ini.';
       relationshipList.append(row);
     }
     details.append(relationshipList);
@@ -396,11 +393,11 @@ const tabs = [
       type === 'all' || type === 'graph' ? renderGraphSection(matches, topics, q) : null
     ].filter((section): section is HTMLElement => !!section);
     if (!sections.length) {
-      setStatus('No matching public results yet.');
+      setStatus('Belum ada hasil publik yang cocok.');
       results.replaceChildren();
       return;
     }
-    setStatus(`${sections.length} provider section${sections.length === 1 ? '' : 's'} available.`);
+    setStatus(`${sections.length} bagian hasil ditemukan.`);
     results.replaceChildren(...sections);
   }
 

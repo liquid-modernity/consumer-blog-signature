@@ -32,7 +32,10 @@ const [projection, publications, topics, archiveYears] = await Promise.all([
 
 const rootSections = getEnabledRootSections();
 const sectionById = new Map(rootSections.map((sec) => [sec.id, sec]));
-const latestPublications = publications.slice(0, navigationConfig.homepagePublicationLimit);
+const limit = navigationConfig.homepagePublicationLimit;
+const latestPublications = publications.length > 0
+  ? Array.from({ length: limit }, (_, idx) => publications[idx % publications.length])
+  : [];
 const recentYears = archiveYears.slice(0, navigationConfig.archivePreviewYears.length);
 
 const latestSection = sectionById.get('latest');
@@ -47,26 +50,21 @@ const socialSection = sectionById.get('social');
 ---
 
 <div class="gaga-editorial-front pakrpp-root-index" aria-labelledby="pakrpp-root-title" data-pakrpp-root-index>
-  {/* VIEWPORT STAGE 01: 01 TERBARU */}
+  <h1 id="pakrpp-root-title" class="gaga-visually-hidden">PakRPP</h1>
+
+  {/* VIEWPORT STAGE 01: 01 TERBARU (1_08edb1cd.png) */}
   {latestSection && (
     <div
       id="stage-01"
       class="pakrpp-viewport-stage"
       data-pakrpp-viewport-stage="01"
+      data-stage-index="1"
       data-stage-badge="01 · TERBARU"
-      data-stage-title="01 Terbaru — Publikasi Pengetahuan"
-      data-stage-anchors="latest"
-      data-stage-meta={`${latestPublications.length} dari ${projection.total} publikasi · Kronologis`}
-      data-stage-topics={topics.map((t) => t.label).join(', ')}
-      data-stage-readtime={`${projection.total} objek`}
-      data-stage-snippet="Daftar publikasi pengetahuan terbaru PakRPP. Arahkan kursor pada judul untuk memeriksa klasifikasi dan ringkasan di panel kanan."
+      data-stage-title="01 · Publikasi Terbaru"
+      data-stage-anchors="latest,stage-01"
     >
-      <div class="pakrpp-viewport-stage__inner">
-        <header class="pakrpp-root-header">
-          <h1 id="pakrpp-root-title" class="pakrpp-root-header__title">PakRPP</h1>
-        </header>
-
-        <section id={latestSection.anchor} class="pakrpp-section pakrpp-section--latest">
+      <div class="pakrpp-viewport-stage__inner pakrpp-viewport-stage__inner--stage01">
+        <section id={latestSection.anchor} class="pakrpp-section pakrpp-section--latest" aria-label="Publikasi Terbaru">
           <ol class="pakrpp-publication-list" data-gaga-preview-scope>
             {latestPublications.map((pub, index) => {
               const pubType = resolvePublicationType(pub.type);
@@ -115,7 +113,6 @@ const socialSection = sectionById.get('social');
               <a href={latestSection.moreLink.href} class="pakrpp-more-link">
                 {latestSection.moreLink.label} →
               </a>
-              <span class="pakrpp-root-anchors__sep" aria-hidden="true">·</span>
               <a href={routes.publications.index} class="pakrpp-more-link pakrpp-more-link--secondary">
                 Indeks Objek Publikasi →
               </a>
@@ -126,59 +123,37 @@ const socialSection = sectionById.get('social');
     </div>
   )}
 
-  {/* VIEWPORT STAGE 02: 02 TERSIMPAN · TOPIK · ARSIP · PENGETAHUAN */}
+  {/* VIEWPORT STAGE 02: TOPIK · ARSIP · PENGETAHUAN + TERSIMPAN (2_4c136fda.png) */}
   <div
     id="stage-02"
     class="pakrpp-viewport-stage"
     data-pakrpp-viewport-stage="02"
+    data-stage-index="2"
     data-stage-badge="02 · EKSPLORASI"
-    data-stage-title="02 Tersimpan · Topik · Arsip · Pengetahuan"
-    data-stage-anchors="saved,topics,archive,knowledge"
-    data-stage-meta={`${topics.length} Topik Kanonik · ${recentYears.length} Tahun Arsip · 4 Dimensi Pengetahuan`}
-    data-stage-topics={topics.map((t) => `${t.label} (${t.count})`).join(', ')}
-    data-stage-readtime="Eksplorasi Relasional"
-    data-stage-snippet="Babak 02 memetakan koleksi bacaan tersimpan di perangkat, 3 topik kanonik (Pelaporan, Teknologi, Anomali), arsip kronologis, serta struktur graf pengetahuan."
-    aria-label="02 Tersimpan, Topik, Arsip, dan Pengetahuan"
+    data-stage-title="02 · Topik, Arsip, Pengetahuan & Tersimpan"
+    data-stage-anchors="saved,topics,archive,knowledge,stage-02"
+    aria-label="02 Topik, Arsip, Pengetahuan, dan Tersimpan"
   >
-    <div class="pakrpp-viewport-stage__inner">
-      <div class="pakrpp-index-grid pakrpp-index-grid--2col">
-        {/* #Tersimpan */}
-        {savedSection && (
-          <section id={savedSection.anchor} class="pakrpp-tree-section" aria-labelledby="section-saved-heading">
-            <div class="pakrpp-tree-section__head">
-              <h3 id="section-saved-heading">#{savedSection.label}</h3>
-            </div>
-            <ul class="pakrpp-tree-list" data-pakrpp-saved-root-list>
-              <li class="pakrpp-tree-list__empty" data-pakrpp-saved-empty>
-                Belum ada publikasi yang disimpan di browser ini. Gunakan aksi Simpan saat membaca artikel.
-              </li>
-            </ul>
-            {savedSection.moreLink && (
-              <div class="pakrpp-tree-section__foot">
-                <a href={savedSection.moreLink.href} class="pakrpp-more-link">
-                  {savedSection.moreLink.label} →
-                </a>
-              </div>
-            )}
-          </section>
-        )}
-
-        {/* #Topik */}
+    <div class="pakrpp-viewport-stage__inner pakrpp-viewport-stage__inner--stage02">
+      <div class="pakrpp-index-grid pakrpp-index-grid--3col">
+        {/* Topik */}
         {topicsSection && (
           <section id={topicsSection.anchor} class="pakrpp-tree-section" aria-labelledby="section-topics-heading">
-            <div class="pakrpp-tree-section__head">
-              <h3 id="section-topics-heading">#{topicsSection.label}</h3>
+            <div class="pakrpp-tree-section__body">
+              <div class="pakrpp-tree-section__head">
+                <h3 id="section-topics-heading">{topicsSection.label}</h3>
+              </div>
+              <ul class="pakrpp-tree-list">
+                {topics.map((topic) => (
+                  <li class="pakrpp-tree-item">
+                    <div class="pakrpp-tree-item__row">
+                      <a href={topic.href} class="pakrpp-tree-item__link">{topic.label}</a>
+                      <span class="pakrpp-tree-item__count">{topic.count} publikasi</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
             </div>
-            <ul class="pakrpp-tree-list">
-              {topics.map((topic) => (
-                <li class="pakrpp-tree-item">
-                  <div class="pakrpp-tree-item__row">
-                    <a href={topic.href} class="pakrpp-tree-item__link">{topic.label}</a>
-                    <span class="pakrpp-tree-item__count">{topic.count} publikasi</span>
-                  </div>
-                </li>
-              ))}
-            </ul>
             {topicsSection.moreLink && (
               <div class="pakrpp-tree-section__foot">
                 <a href={topicsSection.moreLink.href} class="pakrpp-more-link">
@@ -189,22 +164,24 @@ const socialSection = sectionById.get('social');
           </section>
         )}
 
-        {/* #Arsip */}
+        {/* Arsip */}
         {archiveSection && (
           <section id={archiveSection.anchor} class="pakrpp-tree-section" aria-labelledby="section-archive-heading">
-            <div class="pakrpp-tree-section__head">
-              <h3 id="section-archive-heading">#{archiveSection.label}</h3>
+            <div class="pakrpp-tree-section__body">
+              <div class="pakrpp-tree-section__head">
+                <h3 id="section-archive-heading">{archiveSection.label}</h3>
+              </div>
+              <ul class="pakrpp-tree-list">
+                {recentYears.map((yr) => (
+                  <li class="pakrpp-tree-item">
+                    <div class="pakrpp-tree-item__row">
+                      <a href={yr.href} class="pakrpp-tree-item__link">{yr.year}</a>
+                      <span class="pakrpp-tree-item__count">{yr.count} publikasi</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
             </div>
-            <ul class="pakrpp-tree-list">
-              {recentYears.map((yr) => (
-                <li class="pakrpp-tree-item">
-                  <div class="pakrpp-tree-item__row">
-                    <a href={yr.href} class="pakrpp-tree-item__link">{yr.year}</a>
-                    <span class="pakrpp-tree-item__count">{yr.count} publikasi</span>
-                  </div>
-                </li>
-              ))}
-            </ul>
             {archiveSection.moreLink && (
               <div class="pakrpp-tree-section__foot">
                 <a href={archiveSection.moreLink.href} class="pakrpp-more-link">
@@ -215,21 +192,23 @@ const socialSection = sectionById.get('social');
           </section>
         )}
 
-        {/* #Pengetahuan */}
+        {/* Pengetahuan */}
         {knowledgeSection && (
           <section id={knowledgeSection.anchor} class="pakrpp-tree-section" aria-labelledby="section-knowledge-heading">
-            <div class="pakrpp-tree-section__head">
-              <h3 id="section-knowledge-heading">#{knowledgeSection.label}</h3>
+            <div class="pakrpp-tree-section__body">
+              <div class="pakrpp-tree-section__head">
+                <h3 id="section-knowledge-heading">{knowledgeSection.label}</h3>
+              </div>
+              <ul class="pakrpp-tree-list">
+                {(knowledgeSection.items ?? []).map((item) => (
+                  <li class="pakrpp-tree-item">
+                    <div class="pakrpp-tree-item__row">
+                      <a href={item.href} class="pakrpp-tree-item__link">{item.label}</a>
+                    </div>
+                  </li>
+                ))}
+              </ul>
             </div>
-            <ul class="pakrpp-tree-list">
-              {(knowledgeSection.items ?? []).map((item) => (
-                <li class="pakrpp-tree-item">
-                  <div class="pakrpp-tree-item__row">
-                    <a href={item.href} class="pakrpp-tree-item__link">{item.label}</a>
-                  </div>
-                </li>
-              ))}
-            </ul>
             <div class="pakrpp-tree-section__foot">
               <a href={routes.knowledge.root} class="pakrpp-more-link">
                 Ikhtisar Pengetahuan →
@@ -238,99 +217,118 @@ const socialSection = sectionById.get('social');
           </section>
         )}
       </div>
+
+      {/* Tersimpan (Centered below 3-column grid as shown in 2_4c136fda.png) */}
+      {savedSection && (
+        <section id={savedSection.anchor} class="pakrpp-saved-centered" aria-labelledby="section-saved-heading">
+          <div class="pakrpp-tree-section__head pakrpp-tree-section__head--center">
+            <h3 id="section-saved-heading">{savedSection.label}</h3>
+          </div>
+          <ul class="pakrpp-tree-list pakrpp-tree-list--center" data-pakrpp-saved-root-list>
+            <li class="pakrpp-tree-list__empty" data-pakrpp-saved-empty>
+              Belum ada publikasi yang disimpan di browser ini. Gunakan aksi Simpan saat membaca artikel.
+            </li>
+          </ul>
+          {savedSection.moreLink && (
+            <div class="pakrpp-tree-section__foot pakrpp-tree-section__foot--center">
+              <a href={savedSection.moreLink.href} class="pakrpp-more-link">
+                {savedSection.moreLink.label} →
+              </a>
+            </div>
+          )}
+        </section>
+      )}
     </div>
   </div>
 
-  {/* VIEWPORT STAGE 03: 03 TENTANG · SISTEM · LEGAL */}
+  {/* VIEWPORT STAGE 03: TENTANG · SISTEM · LEGAL (3_b7c3348c.png) */}
   <div
     id="stage-03"
     class="pakrpp-viewport-stage"
     data-pakrpp-viewport-stage="03"
+    data-stage-index="3"
     data-stage-badge="03 · SISTEM"
-    data-stage-title="03 Tentang · Sistem · Legal"
-    data-stage-anchors="about,system,legal"
-    data-stage-meta="Identitas Editorial · Infrastruktur Sitemap & RSS · Kebijakan & Lisensi"
-    data-stage-topics="Tentang, Sistem, Legal"
-    data-stage-readtime="Tata Kelola"
-    data-stage-snippet="Babak 03 mendokumentasikan profil penulis dan filosofi publikasi PakRPP, peta situs manusia/mesin, serta dokumen privasi, ketentuan, sanggahan, dan lisensi."
+    data-stage-title="03 · Tentang, Sistem & Legal"
+    data-stage-anchors="about,system,legal,stage-03"
     aria-label="03 Tentang, Sistem, dan Legal"
   >
-    <div class="pakrpp-viewport-stage__inner">
+    <div class="pakrpp-viewport-stage__inner pakrpp-viewport-stage__inner--stage03">
       <div class="pakrpp-index-grid pakrpp-index-grid--3col">
         {aboutSection && (
           <section id={aboutSection.anchor} class="pakrpp-tree-section" aria-labelledby="section-about-heading">
-            <div class="pakrpp-tree-section__head">
-              <h3 id="section-about-heading">#{aboutSection.label}</h3>
+            <div class="pakrpp-tree-section__body">
+              <div class="pakrpp-tree-section__head">
+                <h3 id="section-about-heading">{aboutSection.label}</h3>
+              </div>
+              <ul class="pakrpp-tree-list">
+                {(aboutSection.items ?? []).map((item) => (
+                  <li class="pakrpp-tree-item">
+                    <div class="pakrpp-tree-item__row">
+                      <a href={item.href} class="pakrpp-tree-item__link">{item.label}</a>
+                    </div>
+                  </li>
+                ))}
+              </ul>
             </div>
-            <ul class="pakrpp-tree-list">
-              {(aboutSection.items ?? []).map((item) => (
-                <li class="pakrpp-tree-item">
-                  <div class="pakrpp-tree-item__row">
-                    <a href={item.href} class="pakrpp-tree-item__link">{item.label}</a>
-                  </div>
-                </li>
-              ))}
-            </ul>
           </section>
         )}
 
         {systemSection && (
           <section id={systemSection.anchor} class="pakrpp-tree-section" aria-labelledby="section-system-heading">
-            <div class="pakrpp-tree-section__head">
-              <h3 id="section-system-heading">#{systemSection.label}</h3>
+            <div class="pakrpp-tree-section__body">
+              <div class="pakrpp-tree-section__head">
+                <h3 id="section-system-heading">{systemSection.label}</h3>
+              </div>
+              <ul class="pakrpp-tree-list">
+                {(systemSection.items ?? []).map((item) => (
+                  <li class="pakrpp-tree-item">
+                    <div class="pakrpp-tree-item__row">
+                      <a href={item.href} class="pakrpp-tree-item__link">{item.label}</a>
+                    </div>
+                  </li>
+                ))}
+              </ul>
             </div>
-            <ul class="pakrpp-tree-list">
-              {(systemSection.items ?? []).map((item) => (
-                <li class="pakrpp-tree-item">
-                  <div class="pakrpp-tree-item__row">
-                    <a href={item.href} class="pakrpp-tree-item__link">{item.label}</a>
-                  </div>
-                </li>
-              ))}
-            </ul>
           </section>
         )}
 
         {legalSection && (
           <section id={legalSection.anchor} class="pakrpp-tree-section" aria-labelledby="section-legal-heading">
-            <div class="pakrpp-tree-section__head">
-              <h3 id="section-legal-heading">#{legalSection.label}</h3>
+            <div class="pakrpp-tree-section__body">
+              <div class="pakrpp-tree-section__head">
+                <h3 id="section-legal-heading">{legalSection.label}</h3>
+              </div>
+              <ul class="pakrpp-tree-list">
+                {(legalSection.items ?? []).map((item) => (
+                  <li class="pakrpp-tree-item">
+                    <div class="pakrpp-tree-item__row">
+                      <a href={item.href} class="pakrpp-tree-item__link">{item.label}</a>
+                    </div>
+                  </li>
+                ))}
+              </ul>
             </div>
-            <ul class="pakrpp-tree-list">
-              {(legalSection.items ?? []).map((item) => (
-                <li class="pakrpp-tree-item">
-                  <div class="pakrpp-tree-item__row">
-                    <a href={item.href} class="pakrpp-tree-item__link">{item.label}</a>
-                  </div>
-                </li>
-              ))}
-            </ul>
           </section>
         )}
       </div>
     </div>
   </div>
 
-  {/* VIEWPORT STAGE 04: 04 SOSIAL */}
+  {/* VIEWPORT STAGE 04: SOSIAL (4_bb5f39c1.png) */}
   {socialSection && (
     <div
       id="stage-04"
       class="pakrpp-viewport-stage"
       data-pakrpp-viewport-stage="04"
+      data-stage-index="4"
       data-stage-badge="04 · SOSIAL"
-      data-stage-title="04 Sosial — Jaringan & Kanal Eksternal"
-      data-stage-anchors="social"
-      data-stage-meta={`${(socialSection.items ?? []).length} Kanal Terverifikasi · Distribusi Eksternal`}
-      data-stage-topics={(socialSection.items ?? []).map((i) => i.label).join(', ')}
-      data-stage-readtime="Tautan Luar"
-      data-stage-snippet="Babak 04 menghubungkan sistem publikasi PakRPP dengan kanal diskusi, repositori kode terbuka, dan jaringan penulis eksternal."
+      data-stage-title="04 · Sosial"
+      data-stage-anchors="social,stage-04"
       aria-label="04 Sosial"
     >
-      <div class="pakrpp-viewport-stage__inner">
-        <section id={socialSection.anchor} class="pakrpp-tree-section pakrpp-tree-section--social" aria-labelledby="section-social-heading">
-          <div class="pakrpp-tree-section__head">
-            <h3 id="section-social-heading">#{socialSection.label}</h3>
-          </div>
+      <div class="pakrpp-viewport-stage__inner pakrpp-viewport-stage__inner--stage04">
+        <section id={socialSection.anchor} class="pakrpp-social-stage" aria-labelledby="section-social-heading">
+          <h3 id="section-social-heading" class="gaga-visually-hidden">{socialSection.label}</h3>
           <ul class="pakrpp-social-list">
             {(socialSection.items ?? []).map((item) => (
               <li class="pakrpp-social-item">
@@ -384,17 +382,9 @@ const socialSection = sectionById.get('social');
     const stages = Array.from(document.querySelectorAll<HTMLElement>('[data-pakrpp-viewport-stage]'));
     if (!stages.length) return;
 
-    const getField = (name: string) => document.querySelector<HTMLElement>(`[data-gaga-info-field="${name}"]`);
-    const initialRightRail = {
-      previewTitle: getField('previewTitle')?.textContent?.trim() ?? '',
-      contextMeta: getField('contextMeta')?.textContent?.trim() ?? '',
-      topics: getField('topics')?.textContent?.trim() ?? '',
-      readTime: getField('readTime')?.textContent?.trim() ?? '',
-      snippet: getField('snippet')?.textContent?.trim() ?? ''
-    };
-
     function applyStageContext(stage: HTMLElement) {
       const stageId = stage.dataset.pakrppViewportStage ?? '01';
+      const stageIndex = stage.dataset.stageIndex ?? '1';
       const badge = stage.dataset.stageBadge ?? '01 · TERBARU';
       const title = stage.dataset.stageTitle ?? 'PakRPP';
       const anchors = (stage.dataset.stageAnchors ?? '')
@@ -421,41 +411,21 @@ const socialSection = sectionById.get('social');
         pill.classList.toggle('gaga-is-current', active);
       }
 
-      // 2. Sync Left Rail Tree active anchor items
-      const leftRailLinks = document.querySelectorAll<HTMLAnchorElement>('#gaga-left-rail a[href*="#"]');
-      for (const link of leftRailLinks) {
-        const href = link.getAttribute('href') ?? '';
-        const anchorName = href.split('#')[1] ?? '';
-        const active = anchors.includes(anchorName);
-        link.classList.toggle('gaga-is-current', active);
-        if (active) {
-          link.setAttribute('aria-current', 'location');
-        } else {
-          link.removeAttribute('aria-current');
-        }
-      }
+      // 2. Sync Gaga Dynamic Outline Peek (Bottom Pill & Sheet)
+      const sheetIdx = document.querySelector<HTMLElement>('[data-gaga-outline-sheet-current-index]');
+      const sheetLbl = document.querySelector<HTMLElement>('[data-gaga-outline-sheet-current-label]');
+      if (sheetIdx) sheetIdx.textContent = stageIndex;
+      if (sheetLbl) sheetLbl.textContent = title;
 
-      // 3. Sync Right Info Rail (unless user is actively hovering an article preview)
-      const rightRail = document.querySelector<HTMLElement>('[data-gaga-right-rail]');
-      if (rightRail && !rightRail.hasAttribute('data-gaga-preview-state')) {
-        const titleEl = getField('previewTitle');
-        const metaEl = getField('contextMeta');
-        const topicsEl = getField('topics');
-        const readTimeEl = getField('readTime');
-        const snippetEl = getField('snippet');
-
-        if (stageId === '01') {
-          if (titleEl && initialRightRail.previewTitle) titleEl.textContent = initialRightRail.previewTitle;
-          if (metaEl && initialRightRail.contextMeta) metaEl.textContent = initialRightRail.contextMeta;
-          if (topicsEl && initialRightRail.topics) topicsEl.textContent = initialRightRail.topics;
-          if (readTimeEl && initialRightRail.readTime) readTimeEl.textContent = initialRightRail.readTime;
-          if (snippetEl && initialRightRail.snippet) snippetEl.textContent = initialRightRail.snippet;
+      for (const tocLink of document.querySelectorAll<HTMLAnchorElement>('[data-gaga-info-field="outline"] a')) {
+        const href = tocLink.getAttribute('href') ?? '';
+        const targetSlug = href.replace(/^#/, '');
+        const isCurrent = targetSlug === `stage-${stageId}` || anchors.includes(targetSlug);
+        tocLink.dataset.gagaActive = String(isCurrent);
+        if (isCurrent) {
+          tocLink.setAttribute('aria-current', 'location');
         } else {
-          if (titleEl && stage.dataset.stageTitle) titleEl.textContent = stage.dataset.stageTitle;
-          if (metaEl && stage.dataset.stageMeta) metaEl.textContent = stage.dataset.stageMeta;
-          if (topicsEl && stage.dataset.stageTopics) topicsEl.textContent = stage.dataset.stageTopics;
-          if (readTimeEl && stage.dataset.stageReadtime) readTimeEl.textContent = stage.dataset.stageReadtime;
-          if (snippetEl && stage.dataset.stageSnippet) snippetEl.textContent = stage.dataset.stageSnippet;
+          tocLink.removeAttribute('aria-current');
         }
       }
     }
@@ -483,7 +453,7 @@ const socialSection = sectionById.get('social');
       observer.observe(stage);
     }
 
-    // Smoothly scroll to the parent viewport stage when clicking root anchor links
+    // Smoothly scroll to the parent viewport stage when clicking root anchor links or Outline Peek links
     document.addEventListener('click', (event) => {
       const target = event.target instanceof Element ? event.target.closest<HTMLAnchorElement>('a[href*="#"]') : null;
       if (!target) return;
@@ -517,8 +487,16 @@ const socialSection = sectionById.get('social');
 
 <style is:global>
   .gaga-main-region:has([data-pakrpp-root-index]) {
-    scroll-snap-type: y proximity;
+    scroll-snap-type: y mandatory;
     scroll-behavior: smooth;
+  }
+
+  /* Ensure full width for the 4-stage home layout inside main-pane */
+  .main-pane:has([data-pakrpp-root-index]),
+  .content-panel:has([data-pakrpp-root-index]),
+  .gaga-markdown-content:has([data-pakrpp-root-index]) {
+    max-width: 100%;
+    width: 100%;
   }
 </style>
 
@@ -527,6 +505,7 @@ const socialSection = sectionById.get('social');
     display: flex;
     flex-direction: column;
     gap: 0;
+    margin: 0;
     padding-block: 0;
     font-variant-numeric: tabular-nums;
   }
@@ -534,101 +513,106 @@ const socialSection = sectionById.get('social');
   .pakrpp-viewport-stage {
     min-block-size: 100svh;
     min-block-size: 100dvh;
+    block-size: 100svh;
+    block-size: 100dvh;
     scroll-snap-align: start;
+    scroll-snap-stop: always;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 1.5rem;
-    padding-block: 4.25rem 2rem;
+    align-items: center;
+    padding-block: 3.5rem 3.5rem;
+    padding-inline: 1.25rem;
     box-sizing: border-box;
-    border-bottom: 1px solid var(--gaga-border-subtle, rgba(128, 128, 128, 0.18));
-  }
-
-  .pakrpp-viewport-stage:last-child {
-    border-bottom: 0;
+    border: 0;
   }
 
   .pakrpp-viewport-stage__inner {
     margin-block: auto;
+    margin-inline: auto;
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    justify-content: center;
     width: 100%;
+    max-inline-size: 46rem;
   }
 
-  .pakrpp-root-header {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    padding-bottom: 0.85rem;
-    border-bottom: 1px solid var(--gaga-border-subtle, rgba(128, 128, 128, 0.22));
-  }
-
-  .pakrpp-root-header__title {
-    margin: 0;
-    font-size: clamp(1.65rem, 2.6vw, 2.25rem);
-    font-weight: 700;
-    line-height: 1.15;
-    letter-spacing: -0.02em;
-    text-wrap: balance;
-  }
-
-  .pakrpp-root-anchors__sep {
-    opacity: 0.4;
+  .pakrpp-viewport-stage__inner--stage01 {
+    max-inline-size: 38rem;
   }
 
   .pakrpp-publication-list {
     list-style: none;
     margin: 0;
     padding: 0;
+    display: flex;
+    flex-direction: column;
   }
 
   .pakrpp-publication-row {
     display: grid;
-    grid-template-columns: 2.25rem 1fr;
+    grid-template-columns: 2.15rem minmax(0, 1fr);
     align-items: baseline;
-    gap: 0.5rem;
-    padding: 0.8rem 0;
-    border-bottom: 1px solid var(--gaga-border-subtle, rgba(128, 128, 128, 0.14));
+    gap: 0.35rem;
+    padding: clamp(0.18rem, 0.42vh, 0.34rem) 0;
+    border: 0;
   }
 
   .pakrpp-publication-row__num {
     font-family: var(--gaga-font-mono, monospace);
-    font-size: 0.8rem;
-    opacity: 0.58;
+    font-size: 0.75rem;
+    color: var(--gaga-muted);
+    opacity: 0.72;
   }
 
   .pakrpp-publication-row__main {
     display: flex;
     flex-direction: column;
-    gap: 0.2rem;
+    min-inline-size: 0;
   }
 
   .pakrpp-publication-row__title {
-    font-size: 1.02rem;
+    font-family: var(--gaga-font-body, inherit);
+    font-size: clamp(0.86rem, 1.35vh, 0.95rem);
     font-weight: 500;
-    color: inherit;
+    color: var(--gaga-ink);
     text-decoration: none;
-    line-height: 1.4;
+    line-height: 1.35;
+    letter-spacing: var(--gaga-article-letter-spacing, 0em);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .pakrpp-publication-row__title:hover {
     text-decoration: underline;
   }
 
-  .pakrpp-section__footer,
+  .pakrpp-section__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: clamp(1rem, 2.2vh, 1.75rem);
+    padding-top: 0;
+  }
+
   .pakrpp-tree-section__foot {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
-    gap: 0.65rem;
-    padding-top: 0.85rem;
+    margin-top: 1.35rem;
+    padding-top: 0;
+  }
+
+  .pakrpp-tree-section__foot--center {
+    justify-content: center;
+    margin-top: 1.15rem;
   }
 
   .pakrpp-more-link {
-    font-size: 0.84rem;
+    font-size: 0.8rem;
     font-weight: 500;
-    color: inherit;
+    color: var(--gaga-ink);
     text-decoration: none;
   }
 
@@ -637,20 +621,19 @@ const socialSection = sectionById.get('social');
   }
 
   .pakrpp-more-link--secondary {
-    opacity: 0.72;
+    color: var(--gaga-muted);
   }
 
   .pakrpp-index-grid {
     display: grid;
-    gap: 1.5rem;
+    gap: 2.25rem;
+    width: 100%;
   }
 
   @media (min-width: 768px) {
-    .pakrpp-index-grid--2col {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
     .pakrpp-index-grid--3col {
       grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 3rem;
     }
   }
 
@@ -658,8 +641,13 @@ const socialSection = sectionById.get('social');
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    padding: 1rem 0;
-    border-bottom: 1px solid var(--gaga-border-subtle, rgba(128, 128, 128, 0.16));
+    padding: 0;
+    border: 0;
+  }
+
+  .pakrpp-tree-section__body {
+    display: flex;
+    flex-direction: column;
   }
 
   .pakrpp-tree-section__head {
@@ -667,17 +655,24 @@ const socialSection = sectionById.get('social');
     align-items: baseline;
     justify-content: space-between;
     gap: 0.5rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .pakrpp-tree-section__head--center {
+    justify-content: center;
+    text-align: center;
     margin-bottom: 0.65rem;
   }
 
   .pakrpp-tree-section__head h3 {
     margin: 0;
-    font-size: 0.95rem;
+    font-family: var(--gaga-font-display, inherit);
+    font-size: 0.92rem;
     font-weight: 600;
+    color: var(--gaga-ink);
   }
 
-  .pakrpp-tree-list,
-  .pakrpp-social-list {
+  .pakrpp-tree-list {
     list-style: none;
     margin: 0;
     padding: 0;
@@ -686,26 +681,32 @@ const socialSection = sectionById.get('social');
     gap: 0.55rem;
   }
 
+  .pakrpp-tree-list--center {
+    align-items: center;
+    text-align: center;
+  }
+
   .pakrpp-tree-item {
     display: flex;
     flex-direction: column;
-    gap: 0.15rem;
-    padding-left: 0.75rem;
-    border-left: 1px solid var(--gaga-border-subtle, rgba(128, 128, 128, 0.22));
+    padding: 0;
+    border: 0;
   }
 
   .pakrpp-tree-item__row {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
-    gap: 0.5rem;
+    gap: 0.75rem;
   }
 
   .pakrpp-tree-item__link {
-    font-size: 0.9rem;
+    font-family: var(--gaga-font-body, inherit);
+    font-size: 0.86rem;
     font-weight: 500;
-    color: inherit;
+    color: var(--gaga-ink);
     text-decoration: none;
+    line-height: 1.45;
   }
 
   .pakrpp-tree-item__link:hover {
@@ -714,21 +715,45 @@ const socialSection = sectionById.get('social');
 
   .pakrpp-tree-item__count {
     font-family: var(--gaga-font-mono, monospace);
-    font-size: 0.74rem;
-    opacity: 0.58;
+    font-size: 0.72rem;
+    color: var(--gaga-muted);
+    opacity: 0.72;
+    white-space: nowrap;
+  }
+
+  .pakrpp-saved-centered {
+    margin-top: clamp(2.5rem, 6vh, 4.25rem);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
   }
 
   .pakrpp-tree-list__empty {
     margin: 0;
-    font-size: 0.78rem;
-    opacity: 0.68;
-    line-height: 1.45;
+    font-size: 0.76rem;
+    color: var(--gaga-muted);
+    opacity: 0.78;
+    line-height: 1.5;
+  }
+
+  .pakrpp-social-stage {
+    width: 100%;
   }
 
   .pakrpp-social-list {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 1.25rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 3rem;
+    align-items: center;
+  }
+
+  .pakrpp-social-item {
+    display: flex;
+    align-items: center;
   }
 
   .pakrpp-social-link {
@@ -736,8 +761,8 @@ const socialSection = sectionById.get('social');
     align-items: baseline;
     gap: 0.45rem;
     text-decoration: none;
-    color: inherit;
-    font-size: 0.92rem;
+    color: var(--gaga-ink);
+    font-size: 0.88rem;
   }
 
   .pakrpp-social-link__name {
@@ -749,7 +774,24 @@ const socialSection = sectionById.get('social');
   }
 
   .pakrpp-social-link__meta {
-    font-size: 0.75rem;
-    opacity: 0.6;
+    font-size: 0.74rem;
+    color: var(--gaga-muted);
+    opacity: 0.72;
+  }
+
+  @media (max-width: 767px) {
+    .pakrpp-viewport-stage {
+      height: auto;
+      min-block-size: 100dvh;
+    }
+
+    .pakrpp-publication-row__title {
+      white-space: normal;
+    }
+
+    .pakrpp-social-list {
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+    }
   }
 </style>

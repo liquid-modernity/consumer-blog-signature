@@ -20,14 +20,20 @@ export function initRightRailState() {
   if (!rail) return;
   initialized = true;
 
+  const hasOutline = rail.dataset.gagaHasOutline === 'true';
+
   createRightRailCapability({
     rail,
-    storageKey: storageKeys.rightRail,
-    defaultPreference: defaultRailPreference,
+    storageKey: hasOutline ? storageKeys.rightRail : `${storageKeys.rightRail}:empty`,
+    defaultPreference: hasOutline ? 'expanded' : 'collapsed',
     getLayoutMode: () => document.documentElement.dataset.gagaLayout,
-    getConfiguredState: getConfiguredRightRailState,
+    getConfiguredState: (mode) => {
+      const base = getConfiguredRightRailState(mode);
+      if (!hasOutline && base === 'expanded') return 'collapsed';
+      return base;
+    },
     isAvailable: supportsRightRail,
-    isPersistentPreferenceMode: (mode) => mode === 'desktop',
+    isPersistentPreferenceMode: (mode) => hasOutline && mode === 'desktop',
     beforeExpand: () => {
       if (getConfiguredLeftRailState(document.documentElement.dataset.gagaLayout) !== 'expanded') {
         requestLeftRail({ action: 'collapse', source: 'right-rail-open' });

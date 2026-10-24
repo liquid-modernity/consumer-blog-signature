@@ -36,17 +36,12 @@ const entryData = {
 
 <GagaSiteLayout entryData={entryData}>
   <section class="pakrpp-knowledge-hub" aria-label="Jalur Navigasi Pengetahuan">
-    <p class="pakrpp-knowledge-hub__principle">
-      Prinsip semantik: <strong>Topik</strong> = klasifikasi · <strong>Tag</strong> = deskriptor · <strong>Seri</strong> = sekuens editorial · <strong>Koleksi (Curation)</strong> = pengelompokan tujuan · <strong>Graf</strong> = relasi nyata ({totalRelations} relasi aktif) · <strong>Indeks</strong> = enumerasi sistematis · <strong>Referensi</strong> = objek rujukan primer ({referenceRegistry.length} objek).
-    </p>
-
     <div class="pakrpp-knowledge-hub__grid">
       {(knowledgeSection?.items ?? []).map((item, idx) => (
         <article class="pakrpp-knowledge-card">
           <div class="pakrpp-knowledge-card__head">
             <span class="pakrpp-knowledge-card__num">{String(idx + 1).padStart(2, '0')}</span>
             <h2><a href={item.href}>{item.label}</a></h2>
-            <span class="pakrpp-knowledge-card__path">{item.href}</span>
           </div>
           {item.meta && <p class="pakrpp-knowledge-card__desc">{item.meta}</p>}
         </article>

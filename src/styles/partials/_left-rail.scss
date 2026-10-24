@@ -314,6 +314,13 @@
 
 .gaga-left-rail[data-gaga-state='collapsed'] {
   width: var(--gaga-left-rail-collapsed);
+  background: transparent;
+  box-shadow: none;
+  pointer-events: none;
+}
+
+.gaga-left-rail[data-gaga-state='collapsed'] .gaga-rail-toggle {
+  pointer-events: auto;
 }
 
 .gaga-left-rail[data-gaga-state='collapsed'] .gaga-left-rail__context-head {

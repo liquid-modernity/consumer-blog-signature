@@ -13,9 +13,9 @@ const topics = await getTopicGroups();
       data-gaga-preview-href={group.href}
       data-gaga-preview-snippet={group.summary ?? `${i18nCount('article', group.count)} dalam topik ${group.topic}.`}
       data-gaga-preview-topics={group.topic}
-      data-gaga-preview-tags="topic · taxonomy · notes"
+      data-gaga-preview-tags="Topik Kanonik"
       data-gaga-preview-read-time={i18nCount('article', group.count)}
-      data-gaga-preview-author="Consumer Signature"
+      data-gaga-preview-author="PakRPP"
     >
       <span>{group.topic}</span>
       {group.summary ? <small>{group.summary}</small> : null}

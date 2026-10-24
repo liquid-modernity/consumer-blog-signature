@@ -66,7 +66,7 @@ const runtimeContext = resolveExperienceContext({
   contentClass
 });
 const surfaceProfile = experienceSurfaceProfile(runtimeContext);
-const showGagaDock = surfaceProfile.dockMode === 'workspace';
+const showGagaDock = false;
 ---
 <SkipLink />
 <div
@@ -110,8 +110,75 @@ const showGagaDock = surfaceProfile.dockMode === 'workspace';
   )}
   <slot name="after-main" />
   {showGagaDock ? <GagaDock dock={shell.gagaDock} /> : null}
+  <aside
+    class="gaga-hover-preview-card"
+    data-gaga-hover-preview-card
+    aria-label="Pratinjau Publikasi"
+    hidden
+  >
+    <div class="gaga-hover-preview-card__meta" data-gaga-hover-preview-meta></div>
+    <p class="gaga-hover-preview-card__title" data-gaga-hover-preview-title></p>
+    <p class="gaga-hover-preview-card__snippet" data-gaga-hover-preview-snippet></p>
+  </aside>
   <ReaderPreferences preferences={shell.readerPreferences} />
 </div>
 <script>
   import '../../scripts/app';
 </script>
+
+<style is:global>
+  .gaga-hover-preview-card {
+    position: fixed;
+    inset-block-end: 1.5rem;
+    inset-inline-end: 1.5rem;
+    z-index: 45;
+    inline-size: min(22rem, calc(100vw - 2rem));
+    padding: 0.9rem 1.05rem;
+    border: 1px solid var(--gaga-line-strong, rgba(128, 128, 128, 0.28));
+    background: color-mix(in srgb, var(--gaga-surface-elevated, var(--gaga-bg)) 96%, transparent);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    color: var(--gaga-ink);
+    pointer-events: none;
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.14);
+    transition: opacity 0.16s ease, transform 0.16s ease;
+  }
+
+  .gaga-hover-preview-card[hidden] {
+    display: none;
+  }
+
+  .gaga-hover-preview-card__meta {
+    margin: 0 0 0.3rem;
+    font-family: var(--gaga-font-mono, monospace);
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--gaga-muted);
+  }
+
+  .gaga-hover-preview-card__title {
+    margin: 0 0 0.35rem;
+    font-size: 0.92rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--gaga-ink);
+  }
+
+  .gaga-hover-preview-card__snippet {
+    margin: 0;
+    font-size: 0.8rem;
+    line-height: 1.48;
+    color: var(--gaga-muted);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  @media (max-width: 767px) {
+    .gaga-hover-preview-card {
+      display: none !important;
+    }
+  }
+</style>

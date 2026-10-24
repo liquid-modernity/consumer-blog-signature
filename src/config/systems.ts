@@ -1,7 +1,7 @@
 import type { LayoutMode, LeftRailState, RightRailState } from '../lib/schema';
 
 export type RailPreference = 'expanded' | 'collapsed';
-export const defaultRailPreference: RailPreference = 'expanded';
+export const defaultRailPreference: RailPreference = 'collapsed';
 
 // SITE composition: responsive shell inventory and surface availability.
 export const responsiveShellConfig = {
@@ -29,16 +29,16 @@ export const responsiveShellConfig = {
       modeState: {
         mobile: 'hidden',
         'tablet-mini': 'hidden',
-        'tablet-large': 'expanded',
-        desktop: 'expanded'
+        'tablet-large': 'collapsed',
+        desktop: 'collapsed'
       }
     },
     rightRail: {
       modeState: {
         mobile: 'detached',
         'tablet-mini': 'detached',
-        'tablet-large': 'expanded',
-        desktop: 'expanded'
+        'tablet-large': 'collapsed',
+        desktop: 'collapsed'
       }
     }
   }
@@ -100,13 +100,13 @@ export function isRailPreference(value: unknown): value is RailPreference {
 
 // GAGA runtime contract vocabulary, located here transitionally for Gate 4.
 export const storageKeys = {
-  theme: 'gaga:theme:v1',
-  reader: 'gaga:reader:v1',
+  theme: 'gaga:theme:v2',
+  reader: 'gaga:reader:v2',
   sfx: 'gaga:sfx:v1',
   continuity: 'gaga:continuity:v1',
   saved: 'gaga:saved:v1',
-  leftRail: 'gaga:left-rail:v2',
-  rightRail: 'gaga:right-rail:v2',
+  leftRail: 'gaga:left-rail:v3',
+  rightRail: 'gaga:right-rail:v3',
   language: 'gaga:language:v1',
   returnContext: 'gaga:return-context:v1'
 } as const;

@@ -160,7 +160,16 @@ body:has(.gaga-app-frame) {
   }
 }
 .gaga-main-region .content-panel {
-  padding: 0.5rem 0;
+  padding-block: calc(var(--gaga-action-island-height, 2.85rem) + var(--gaga-safe-area-top, 0px) + 1.75rem) 3.5rem;
+  padding-inline: 0;
+}
+
+.gaga-main-region .content-panel:has([data-pakrpp-root-index]) {
+  padding: 0;
+}
+
+.gaga-app-frame[data-gaga-content-kind='article'] .gaga-article-scroll__inner {
+  padding-block-start: calc(var(--gaga-action-island-height, 2.85rem) + var(--gaga-safe-area-top, 0px) + 1.75rem);
 }
 
 .gaga-main-region :where(main) {

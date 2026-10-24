@@ -2,6 +2,8 @@ import { initRouteNormalize } from './systems/route-normalize';
 import { initLayoutContext } from './systems/layout-context';
 import { initTheme } from './systems/theme';
 import { initReturnNavigation } from './systems/return-navigation';
+import { initReaderPreferences } from './systems/reader-preferences';
+import { initToast } from './systems/toast';
 
 type IdleTask = () => Promise<void>;
 
@@ -12,8 +14,8 @@ type IdleTask = () => Promise<void>;
  */
 const hasCapability = (selector: string) => document.querySelector(selector) !== null;
 const hasInformationSurfaceCapability = () =>
-  hasCapability('[data-gaga-right-rail]') &&
-  (hasCapability('[data-gaga-preview]') || hasCapability('[data-gaga-toc-block] a'));
+  hasCapability('[data-gaga-preview]') ||
+  (hasCapability('[data-gaga-right-rail]') && hasCapability('[data-gaga-toc-block] a'));
 
 function onIdle(task: IdleTask, timeout = 1400) {
   if ('requestIdleCallback' in window) {
@@ -32,6 +34,8 @@ async function boot() {
     initRouteNormalize();
     initLayoutContext();
     initTheme();
+    initToast();
+    initReaderPreferences();
     initReturnNavigation();
   } catch (err) {
     console.warn('[GAGA] Core systems boot warning:', err);

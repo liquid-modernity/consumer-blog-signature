@@ -30,6 +30,7 @@ export function attachRailPreview({
   const canPreview = () => (
     getLayoutMode() === 'desktop'
     && rail.dataset.gagaState === 'collapsed'
+    && (rail.dataset.gagaHasContent === 'true' || rail.dataset.gagaHasOutline === 'true')
   );
 
   const open = (immediate = false) => {

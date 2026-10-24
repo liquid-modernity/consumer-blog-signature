@@ -14,6 +14,7 @@ interface Props {
   missingTitleSource: string;
   breadcrumbs?: BreadcrumbItem[];
   coverage: CoverageAuthority;
+  readingMetaItems?: string[];
 }
 
 const {
@@ -23,7 +24,8 @@ const {
   routeIdentity,
   missingTitleSource,
   breadcrumbs = [],
-  coverage
+  coverage,
+  readingMetaItems = []
 } = Astro.props;
 const title = identity.title;
 if (!title) throw new Error(`Article title is required for ${missingTitleSource}.`);
@@ -74,6 +76,28 @@ const articleTitleId = '_top';
         {identity.subtitle ? (
           <p class="gaga-article-header__dek" data-gaga-article-dek>{identity.subtitle}</p>
         ) : null}
+
+        <div class="gaga-article-header__bar" aria-label="Informasi baca dan aksi cepat">
+          {readingMetaItems.length > 0 && (
+            <div class="gaga-article-header__meta">
+              {readingMetaItems.map((item, idx) => (
+                <>
+                  {idx > 0 && <span aria-hidden="true">·</span>}
+                  <span>{item}</span>
+                </>
+              ))}
+            </div>
+          )}
+          <div class="gaga-article-header__quick-actions">
+            <button type="button" class="gaga-article-header__action-btn" data-gaga-action="save-reading" data-gaga-quick-action="save">
+              Simpan
+            </button>
+            <span aria-hidden="true">·</span>
+            <button type="button" class="gaga-article-header__action-btn" data-gaga-action="share-page">
+              Salin Tautan
+            </button>
+          </div>
+        </div>
       </header>
       <CoverageTimeline coverage={coverage} language={language} />
       <section class="gaga-continuity-resume" data-gaga-continuity-resume hidden aria-labelledby="gaga-continuity-resume-title">
@@ -116,3 +140,43 @@ const articleTitleId = '_top';
     </div>
   </div>
 </article>
+
+<style>
+  .gaga-article-header__bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: 0.85rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--gaga-border-subtle, rgba(128, 128, 128, 0.18));
+    font-size: 0.8rem;
+    color: var(--gaga-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .gaga-article-header__meta,
+  .gaga-article-header__quick-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  .gaga-article-header__action-btn {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--gaga-ink);
+    font: inherit;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .gaga-article-header__action-btn:hover {
+    text-decoration: underline;
+    color: var(--gaga-blue);
+  }
+</style>

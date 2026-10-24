@@ -88,7 +88,7 @@ export const readerPresets = [
   }
 ] as const satisfies readonly ReaderPreset[];
 
-export const defaultReaderPreset: ReaderPresetId = 'everyday';
+export const defaultReaderPreset: ReaderPresetId = 'paper';
 
 export const defaultReaderState: ReaderState = {
   density: 'comfort',

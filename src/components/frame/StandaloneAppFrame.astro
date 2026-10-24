@@ -54,7 +54,11 @@ const rail = createLeftRailInput(currentPath, projectContextRail({
   sections: editorialSections
 }));
 const rightRail = createRightRailInput(info);
-const articleOutline = currentPath !== '/' && rightRail.outlineItems.length > 0;
+const resolvedOutlineItems = rightRail.outlineItems.length > 0
+  ? rightRail.outlineItems
+  : [{ slug: '_top', text: pageTitle, depth: 2, children: [] }];
+const outlineRail = { ...rightRail, outlineItems: resolvedOutlineItems };
+const articleOutline = resolvedOutlineItems.length > 0;
 ---
 <AppFrameBase
   pageId={pageId}
@@ -88,6 +92,6 @@ const articleOutline = currentPath !== '/' && rightRail.outlineItems.length > 0;
       contextRole={shellContext.right}
       contextPriority={shellContext.rightPriority}
     />
-    {articleOutline ? <ArticleOutlinePeek rail={rightRail} /> : null}
+    {articleOutline ? <ArticleOutlinePeek rail={outlineRail} /> : null}
   </Fragment>
 </AppFrameBase>

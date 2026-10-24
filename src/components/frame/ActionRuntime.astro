@@ -35,7 +35,19 @@ const actions = profile.notchActionIds
 const global = globalNavigationProjection();
 const globalItems = global.items;
 const infoGroups = global.groups;
-const archetypes = styleArchetypeRegistry.slice(0, 3);
+const archetypes = styleArchetypeRegistry;
+const notchThemes = [
+  { id: 'default', label: 'Blueprint', summary: 'Tema gelap biru struktural khas PakRPP' },
+  { id: 'dark', label: 'Gelap', summary: 'Tema gelap monokrom untuk fokus baca malam' },
+  { id: 'paper', label: 'Kertas', summary: 'Tema terang hangat menyerupai kertas cetak' },
+  { id: 'sepia', label: 'Sepia', summary: 'Tema klasik hangat untuk bacaan panjang' }
+] as const;
+const archetypeShortLabels: Record<string, string> = {
+  editorial: 'Editorial',
+  brutalism: 'Brutalism',
+  blueprintism: 'Blueprint',
+  enterprise: 'Institusional'
+};
 const rootSections = getEnabledRootSections();
 const canonicalTopics = getEnabledTopics();
 
@@ -406,23 +418,49 @@ const actionsLabel = i18nLabel('actionIsland.actions');
         </section>
 
         {/* ZONE C: DYNAMIC STYLE ARCHETYPES & APPEARANCE */}
-        <section class="gaga-island-zone gaga-island-zone--archetypes" aria-label="Dynamic Style Archetypes & Appearance">
-          <div class="gaga-notch-archetypes" role="group" aria-label="Dynamic Style Archetypes">
-            {archetypes.map((arch) => (
-              <button
-                type="button"
-                class="gaga-notch-archetype-btn"
-                data-gaga-reader-pref="identity"
-                data-gaga-reader-value={arch.id}
-                title={arch.summary}
-              >
-                {arch.label}
-              </button>
-            ))}
+        <section class="gaga-island-zone gaga-island-zone--archetypes" aria-label="Kustomisasi Tema, Arketipe Desain & Token Tampilan">
+          <div class="gaga-notch-appearance-grid">
+            <div class="gaga-notch-appearance-group" role="group" aria-label="Tema Warna">
+              <span class="gaga-notch-appearance-group__label">TEMA</span>
+              <div class="gaga-notch-archetypes">
+                {notchThemes.map((t) => (
+                  <button
+                    type="button"
+                    class="gaga-notch-archetype-btn"
+                    data-gaga-reader-pref="theme"
+                    data-gaga-reader-value={t.id}
+                    title={t.summary}
+                    aria-pressed="false"
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div class="gaga-notch-appearance-group" role="group" aria-label="Arketipe Desain">
+              <span class="gaga-notch-appearance-group__label">ARKETIPE</span>
+              <div class="gaga-notch-archetypes">
+                {archetypes.map((arch) => (
+                  <button
+                    type="button"
+                    class="gaga-notch-archetype-btn"
+                    data-gaga-reader-pref="identity"
+                    data-gaga-reader-value={arch.id}
+                    title={arch.summary}
+                    aria-pressed="false"
+                  >
+                    {archetypeShortLabels[arch.id] ?? arch.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <button
               type="button"
               class="gaga-notch-archetype-btn gaga-notch-archetype-btn--tokens"
               data-gaga-action="toggle-reader-preferences"
+              title="Buka panel penuh untuk kustomisasi tipografi, ukuran teks, kerapatan, dan token tampilan"
             >
               <Icon name="settings" />
               <span>Token &amp; Tampilan</span>
@@ -436,29 +474,16 @@ const actionsLabel = i18nLabel('actionIsland.actions');
 
 <script>
   import { onRuntimeEvent } from '@gaga/engine-web/runtime/events';
-  import { readJson, writeJson } from '@gaga/engine-web/runtime/storage';
   import { runSiteCommand } from '../../scripts/systems/site-commands';
   import { getUnifiedScrollMetrics, resolveReadingScrollContext } from '../../scripts/systems/reading-scroll';
+  import {
+    applyIdentity,
+    applyTheme,
+    readIdentityPreference,
+    readThemePreference
+  } from '../../scripts/systems/theme';
 
-  const DESIGN_LANGUAGE_KEY = 'gaga:design-language:v1';
   type IslandState = 'micro' | 'collapsed' | 'peek' | 'expanded';
-
-  function isDesignLanguage(val: unknown): val is string {
-    return typeof val === 'string' && ['editorial', 'brutalism', 'blueprintism', 'minimal', 'enterprise', 'futuristic'].includes(val);
-  }
-
-  function applyDesignLanguage(lang: string) {
-    document.documentElement.dataset.gagaDesignLanguage = lang;
-    document.body.dataset.gagaDesignLanguage = lang;
-    const frame = document.querySelector<HTMLElement>('[data-gaga-app-frame]');
-    if (frame) frame.dataset.gagaDesignLanguage = lang;
-
-    for (const btn of document.querySelectorAll<HTMLElement>('[data-gaga-reader-pref="identity"]')) {
-      const active = btn.dataset.gagaReaderValue === lang;
-      btn.dataset.gagaActive = String(active);
-      btn.setAttribute('aria-pressed', String(active));
-    }
-  }
 
   function setupActionRuntime() {
     const runtime = document.querySelector<HTMLElement>('[data-gaga-action-runtime]');
@@ -466,8 +491,9 @@ const actionsLabel = i18nLabel('actionIsland.actions');
     const island = runtime;
     island.dataset.wired = 'true';
 
-    const savedLang = readJson<string>(DESIGN_LANGUAGE_KEY, 'editorial', isDesignLanguage);
-    applyDesignLanguage(savedLang);
+    // Synchronize active Theme and Design Archetype buttons inside the Notch
+    applyTheme(readThemePreference());
+    applyIdentity(readIdentityPreference());
 
     const toggle = island.querySelector<HTMLButtonElement>('[data-gaga-action-island-toggle]');
     const infoTrigger = island.querySelector<HTMLButtonElement>('[data-gaga-info-trigger]');
@@ -615,11 +641,10 @@ const actionsLabel = i18nLabel('actionIsland.actions');
         return;
       }
 
-      const archBtn = target.closest<HTMLButtonElement>('[data-gaga-reader-pref="identity"]');
-      if (archBtn && archBtn.dataset.gagaReaderValue) {
-        const lang = archBtn.dataset.gagaReaderValue;
-        writeJson(DESIGN_LANGUAGE_KEY, lang);
-        applyDesignLanguage(lang);
+      // Theme & Archetype buttons inside the Notch are handled by theme.ts on document;
+      // keep the Notch open so the user can live-preview themes and archetypes.
+      const prefBtn = target.closest<HTMLButtonElement>('[data-gaga-reader-pref]');
+      if (prefBtn) {
         return;
       }
 
@@ -632,15 +657,19 @@ const actionsLabel = i18nLabel('actionIsland.actions');
       const button = target.closest<HTMLButtonElement>('[data-gaga-action]');
       const command = button?.dataset.gagaAction;
       if (button && command) {
+        // Stop propagation so @gaga/engine-web's document listener does not double-toggle the Reader Panel
+        event.preventDefault();
+        event.stopPropagation();
+
+        if (command !== 'speak' && command !== 'toggle-focus-mode') {
+          setState('collapsed');
+        }
+
         runSiteCommand(command as any, {
           source: 'action-runtime',
           target: button,
           pointer: { x: event.clientX, y: event.clientY }
         });
-
-        if (command !== 'speak' && command !== 'toggle-focus-mode' && command !== 'toggle-reader-preferences') {
-          setState('collapsed');
-        }
         return;
       }
 
@@ -724,7 +753,14 @@ const actionsLabel = i18nLabel('actionIsland.actions');
 <style>
   .gaga-dynamic-island {
     --gaga-island-spring: cubic-bezier(0.22, 1.28, 0.36, 1);
+    --gaga-island-bg: #0f0f0e;
+    --gaga-island-ink: #f7f6f2;
+    --gaga-island-muted: #a8a69e;
+    --gaga-island-line: rgba(247, 246, 242, 0.14);
+    --gaga-island-accent: #f7f6f2;
+    --gaga-island-accent-soft: rgba(247, 246, 242, 0.12);
     max-inline-size: min(48rem, calc(100vw - var(--gaga-safe-area-left) - var(--gaga-safe-area-right) - 1rem));
+    color: var(--gaga-island-ink);
   }
 
   .gaga-dynamic-island .gaga-action-runtime__shell {
@@ -732,8 +768,13 @@ const actionsLabel = i18nLabel('actionIsland.actions');
     flex-direction: column;
     align-items: stretch;
     gap: 0;
-    padding: 0.24rem 0.42rem 0.28rem;
+    min-block-size: 2.3rem;
+    padding: 0.2rem 0.65rem 0.24rem;
+    border: 0;
     border-radius: 0 0 1.25rem 1.25rem;
+    background: var(--gaga-island-bg);
+    color: var(--gaga-island-ink);
+    box-shadow: 0 0.35rem 1.2rem rgba(0, 0, 0, 0.14);
     transition:
       transform 0.36s var(--gaga-island-spring),
       border-radius 0.32s var(--gaga-island-spring),
@@ -748,36 +789,38 @@ const actionsLabel = i18nLabel('actionIsland.actions');
     z-index: 3;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     gap: 0.35rem;
-    min-block-size: 2.1rem;
+    min-block-size: 1.85rem;
     cursor: pointer;
   }
 
   .gaga-island-brand {
     display: inline-flex;
     align-items: center;
-    gap: 0.38rem;
-    padding: 0.28rem 0.52rem;
+    gap: 0.45rem;
+    padding: 0.22rem 0.38rem;
     border-radius: 999px;
-    color: var(--gaga-ink);
-    font: 800 0.78rem / 1 var(--gaga-font-mono);
-    letter-spacing: 0.02em;
+    color: var(--gaga-island-ink);
+    font: 600 0.82rem / 1 var(--gaga-font-ui);
+    letter-spacing: -0.01em;
     text-decoration: none;
     white-space: nowrap;
   }
 
   .gaga-island-brand:is(:hover, :focus-visible) {
-    color: var(--gaga-blue);
-    background: var(--gaga-blue-soft);
+    color: #ffffff;
+    background: var(--gaga-island-accent-soft);
   }
 
   .gaga-island-brand__sensor {
-    inline-size: 0.42rem;
-    block-size: 0.42rem;
+    inline-size: 0.78rem;
+    block-size: 0.78rem;
     border-radius: 999px;
-    background: var(--gaga-blue);
-    box-shadow: 0 0 0.45rem var(--gaga-blue);
+    border: 1.6px solid currentColor;
+    background: transparent;
+    box-shadow: none;
+    box-sizing: border-box;
   }
 
   /* PEEK LAYER: Hidden in Idle Compact (collapsed / micro), revealed in Peek */
@@ -803,7 +846,7 @@ const actionsLabel = i18nLabel('actionIsland.actions');
   .gaga-island-peek__sep {
     inline-size: 1px;
     block-size: 0.95rem;
-    background: var(--gaga-line);
+    background: var(--gaga-island-line);
     flex: none;
   }
 
@@ -813,7 +856,7 @@ const actionsLabel = i18nLabel('actionIsland.actions');
     text-overflow: ellipsis;
     white-space: nowrap;
     font: 600 0.74rem / 1.2 var(--gaga-font-ui);
-    color: var(--gaga-muted);
+    color: var(--gaga-island-muted);
   }
 
   .gaga-island-peek__actions {
@@ -827,10 +870,10 @@ const actionsLabel = i18nLabel('actionIsland.actions');
     align-items: center;
     gap: 0.26rem;
     padding: 0.24rem 0.5rem;
-    border: 1px solid var(--gaga-line);
+    border: 1px solid var(--gaga-island-line);
     border-radius: 999px;
     background: transparent;
-    color: var(--gaga-ink);
+    color: var(--gaga-island-ink);
     font: 600 0.72rem / 1 var(--gaga-font-ui);
     text-decoration: none;
     cursor: pointer;
@@ -838,13 +881,14 @@ const actionsLabel = i18nLabel('actionIsland.actions');
   }
 
   .gaga-island-chip:is(:hover, :focus-visible, .gaga-is-current) {
-    color: var(--gaga-blue);
-    background: var(--gaga-blue-soft);
-    border-color: var(--gaga-blue);
+    color: #ffffff;
+    background: var(--gaga-island-accent-soft);
+    border-color: rgba(247, 246, 242, 0.38);
   }
 
-  /* In Idle Compact state, hide the toggle button until Peek or Expanded so capsule is pure PakRPP + active indicator */
-  .gaga-dynamic-island[data-gaga-state='collapsed'] .gaga-action-runtime__toggle {
+  /* In Idle Compact state, hide the toggle button and status text so capsule is pure PakRPP pill */
+  .gaga-dynamic-island[data-gaga-state='collapsed'] .gaga-action-runtime__toggle,
+  .gaga-dynamic-island[data-gaga-state='collapsed'] .gaga-action-runtime__status {
     max-inline-size: 0;
     min-inline-size: 0;
     padding-inline: 0;
@@ -859,6 +903,7 @@ const actionsLabel = i18nLabel('actionIsland.actions');
     max-inline-size: 2.2rem;
     min-inline-size: 2rem;
     padding-inline: 0.45rem;
+    color: var(--gaga-island-ink);
     opacity: 1;
     pointer-events: auto;
   }
@@ -866,6 +911,7 @@ const actionsLabel = i18nLabel('actionIsland.actions');
   .gaga-dynamic-island .gaga-action-runtime__status {
     min-inline-size: auto;
     padding-inline: 0.48rem;
+    color: var(--gaga-island-muted);
     font-variant-numeric: tabular-nums;
   }
 
@@ -878,13 +924,15 @@ const actionsLabel = i18nLabel('actionIsland.actions');
     gap: 0.55rem;
     padding: 0.55rem 0.35rem 0.35rem;
     margin-top: 0.3rem;
-    border-top: 1px solid var(--gaga-line);
+    border-top: 1px solid var(--gaga-island-line);
+    color: var(--gaga-island-ink);
     animation: gagaIslandExpand 0.32s var(--gaga-island-spring);
   }
 
   .gaga-dynamic-island[data-gaga-state='expanded'] .gaga-action-runtime__shell {
     padding: 0.38rem 0.65rem 0.6rem;
     border-radius: 0 0 1.45rem 1.45rem;
+    background: var(--gaga-island-bg);
     box-shadow: 0 1rem 2.6rem rgba(0, 0, 0, 0.28);
   }
 
@@ -911,7 +959,7 @@ const actionsLabel = i18nLabel('actionIsland.actions');
 
   .gaga-island-zone + .gaga-island-zone {
     padding-top: 0.48rem;
-    border-top: 1px solid color-mix(in srgb, var(--gaga-line) 75%, transparent);
+    border-top: 1px solid var(--gaga-island-line);
   }
 
   .gaga-island-zone__header {
@@ -925,13 +973,13 @@ const actionsLabel = i18nLabel('actionIsland.actions');
   .gaga-island-zone__kicker {
     font: 700 0.66rem / 1 var(--gaga-font-mono);
     letter-spacing: 0.06em;
-    color: var(--gaga-blue);
+    color: var(--gaga-island-muted);
     white-space: nowrap;
   }
 
   .gaga-island-zone__page-title {
     font: 600 0.76rem / 1.2 var(--gaga-font-ui);
-    color: var(--gaga-muted);
+    color: var(--gaga-island-muted);
     max-inline-size: 24rem;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -949,18 +997,18 @@ const actionsLabel = i18nLabel('actionIsland.actions');
     display: inline-flex;
     align-items: center;
     padding: 0.24rem 0.52rem;
-    border: 1px solid var(--gaga-line);
+    border: 1px solid var(--gaga-island-line);
     border-radius: 0.45rem;
     font: 600 0.72rem / 1.1 var(--gaga-font-mono);
-    color: var(--gaga-ink);
+    color: var(--gaga-island-ink);
     text-decoration: none;
     white-space: nowrap;
   }
 
   .gaga-island-pill:is(:hover, :focus-visible, .gaga-is-current) {
-    color: var(--gaga-blue);
-    background: var(--gaga-blue-soft);
-    border-color: var(--gaga-blue);
+    color: #ffffff;
+    background: var(--gaga-island-accent-soft);
+    border-color: rgba(247, 246, 242, 0.38);
   }
 
   .gaga-island-runtime-actions {
@@ -975,8 +1023,15 @@ const actionsLabel = i18nLabel('actionIsland.actions');
     max-inline-size: none;
     min-inline-size: 2rem;
     padding: 0.34rem 0.58rem;
+    color: var(--gaga-island-ink);
     opacity: 1;
     pointer-events: auto;
+  }
+
+  .gaga-dynamic-island .gaga-action-runtime__btn:is(:hover, :focus-visible),
+  .gaga-dynamic-island .gaga-action-runtime__toggle:is(:hover, :focus-visible) {
+    color: #ffffff;
+    background: var(--gaga-island-accent-soft);
   }
 
   .gaga-island-global-nav {
@@ -994,7 +1049,7 @@ const actionsLabel = i18nLabel('actionIsland.actions');
     border: 0;
     border-radius: 0.55rem;
     background: transparent;
-    color: var(--gaga-ink);
+    color: var(--gaga-island-ink);
     font: 600 0.75rem / 1 var(--gaga-font-ui);
     text-decoration: none;
     cursor: pointer;
@@ -1002,45 +1057,72 @@ const actionsLabel = i18nLabel('actionIsland.actions');
   }
 
   .gaga-island-nav-item:is(:hover, :focus-visible, .gaga-is-current) {
-    color: var(--gaga-blue);
-    background: var(--gaga-blue-soft);
+    color: #ffffff;
+    background: var(--gaga-island-accent-soft);
+  }
+
+  .gaga-notch-appearance-grid {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.42rem 0.65rem;
+  }
+
+  .gaga-notch-appearance-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.32rem;
+  }
+
+  .gaga-notch-appearance-group__label {
+    font: 700 0.62rem / 1 var(--gaga-font-mono);
+    letter-spacing: 0.06em;
+    color: var(--gaga-island-muted);
+    padding-inline: 0.12rem;
+    user-select: none;
   }
 
   .gaga-notch-archetypes {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0.26rem;
+    gap: 0.22rem;
   }
 
   .gaga-notch-archetype-btn {
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
-    padding: 0.26rem 0.54rem;
-    border: 1px solid var(--gaga-line);
-    border-radius: 0.45rem;
+    padding: 0.24rem 0.5rem;
+    border: 1px solid var(--gaga-island-line);
+    border-radius: var(--gaga-radius-sm, 0.45rem);
     background: transparent;
-    color: var(--gaga-ink);
-    font: 600 0.72rem / 1.2 var(--gaga-font-mono);
+    color: var(--gaga-island-ink);
+    font: 600 0.71rem / 1.2 var(--gaga-font-mono);
     cursor: pointer;
     white-space: nowrap;
+    transition: background-color 0.14s ease, color 0.14s ease, border-color 0.14s ease;
   }
 
   .gaga-notch-archetype-btn:is(:hover, :focus-visible),
-  .gaga-notch-archetype-btn[data-gaga-active='true'] {
-    color: var(--gaga-blue);
-    background: var(--gaga-blue-soft);
-    border-color: var(--gaga-blue);
+  .gaga-notch-archetype-btn[data-gaga-active='true'],
+  .gaga-notch-archetype-btn[aria-pressed='true'] {
+    color: #ffffff;
+    background: var(--gaga-island-accent-soft);
+    border-color: rgba(247, 246, 242, 0.42);
   }
 
   .gaga-notch-archetype-btn--tokens {
+    margin-inline-start: auto;
     font-weight: 700;
+    border-color: rgba(247, 246, 242, 0.32);
   }
 
   .gaga-notch-info-flyout {
     padding: 0.55rem 0.35rem 0.25rem;
-    border-top: 1px solid var(--gaga-line);
+    border-top: 1px solid var(--gaga-island-line);
   }
 
   .gaga-notch-info-flyout[hidden] {
@@ -1057,7 +1139,7 @@ const actionsLabel = i18nLabel('actionIsland.actions');
   .gaga-notch-info-flyout__kicker {
     font: 700 0.66rem / 1 var(--gaga-font-mono);
     letter-spacing: 0.06em;
-    color: var(--gaga-blue);
+    color: var(--gaga-island-muted);
   }
 
   .gaga-notch-info-flyout__close {
@@ -1068,7 +1150,7 @@ const actionsLabel = i18nLabel('actionIsland.actions');
     border: 0;
     border-radius: 0.35rem;
     background: transparent;
-    color: var(--gaga-muted);
+    color: var(--gaga-island-muted);
     cursor: pointer;
   }
 
@@ -1081,7 +1163,7 @@ const actionsLabel = i18nLabel('actionIsland.actions');
   .gaga-notch-info-flyout__group > p {
     margin: 0 0 0.2rem;
     font: 700 0.66rem / 1.2 var(--gaga-font-mono);
-    color: var(--gaga-muted);
+    color: var(--gaga-island-muted);
     text-transform: uppercase;
   }
 
@@ -1097,14 +1179,14 @@ const actionsLabel = i18nLabel('actionIsland.actions');
     gap: 0.35rem;
     padding: 0.22rem 0.38rem;
     border-radius: 0.35rem;
-    color: var(--gaga-ink);
+    color: var(--gaga-island-ink);
     font-size: 0.76rem;
     text-decoration: none;
   }
 
   .gaga-notch-info-flyout__link:is(:hover, :focus-visible, .gaga-is-current) {
-    color: var(--gaga-blue);
-    background: var(--gaga-blue-soft);
+    color: #ffffff;
+    background: var(--gaga-island-accent-soft);
   }
 
   @media (max-width: 767px) {

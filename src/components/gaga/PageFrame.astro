@@ -76,7 +76,19 @@ const leftRailProjection = projectContextRail({
   sections: editorialSections
 });
 const leftRail = createLeftRailInput(currentPath, leftRailProjection);
-const articleOutline = currentPath !== '/' && rightRail.outlineItems.length > 0;
+const rootOutlineItems = [
+  { slug: 'stage-01', text: '01 · Publikasi Terbaru', depth: 2, children: [] },
+  { slug: 'stage-02', text: '02 · Topik, Arsip, Pengetahuan & Tersimpan', depth: 2, children: [] },
+  { slug: 'stage-03', text: '03 · Tentang, Sistem & Legal', depth: 2, children: [] },
+  { slug: 'stage-04', text: '04 · Sosial', depth: 2, children: [] }
+];
+const resolvedOutlineItems = currentPath === '/'
+  ? rootOutlineItems
+  : rightRail.outlineItems.length > 0
+    ? rightRail.outlineItems
+    : [{ slug: '_top', text: pageTitle, depth: 2, children: [] }];
+const outlineRail = { ...rightRail, outlineItems: resolvedOutlineItems };
+const articleOutline = resolvedOutlineItems.length > 0;
 const coveragePromotion = selectCoveragePromotion(articles);
 const showCoveragePromotion = coveragePromotion
   && normalizeCurrentPath(coveragePromotion.article.href) !== currentPath;
@@ -127,6 +139,6 @@ const showCoveragePromotion = coveragePromotion
     />
   </Fragment>
   <Fragment slot="after-main">
-    {articleOutline ? <ArticleOutlinePeek rail={rightRail} /> : null}
+    {articleOutline ? <ArticleOutlinePeek rail={outlineRail} /> : null}
   </Fragment>
 </AppFrameBase>

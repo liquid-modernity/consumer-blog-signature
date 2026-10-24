@@ -43,11 +43,9 @@ const entryData = {
 <GagaSiteLayout entryData={entryData}>
   <section class="pakrpp-ref-detail" aria-label="Detail Objek Referensi">
     <p class="pakrpp-ref-detail__nav">
-      <a href={routes.knowledge.references}>← Semua Referensi (/knowledge/references)</a>
+      <a href={routes.knowledge.references}>← Semua Referensi</a>
       <span aria-hidden="true">·</span>
-      <span>ID: {reference.id}</span>
-      <span aria-hidden="true">·</span>
-      <span>Tipe: {reference.sourceType.toUpperCase()}</span>
+      <span>{reference.sourceType.toUpperCase()}</span>
     </p>
 
     <p>{reference.summary}</p>

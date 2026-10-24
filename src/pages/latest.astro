@@ -1,6 +1,7 @@
 ---
 import GagaSiteLayout from '../components/gaga/GagaSiteLayout.astro';
 import {
+  getEnabledTopics,
   resolveCanonicalTopic,
   resolvePublicationType
 } from '../config/pakrpp-architecture';
@@ -10,6 +11,7 @@ import { routes } from '../config/routes';
 export const prerender = true;
 
 const publications = await toCanonicalPublications();
+const topics = getEnabledTopics();
 
 const entryData = {
   title: 'Semua Publikasi Terbaru',
@@ -26,10 +28,34 @@ const entryData = {
 ---
 
 <GagaSiteLayout entryData={entryData}>
-  <section class="pakrpp-latest-view" aria-label="Daftar Publikasi Terbaru">
-    <p class="pakrpp-latest-view__note">
-      Menampilkan {publications.length} publikasi secara kronologis · <a href={routes.publications.index}>Lihat Repositori Objek (/publications) →</a>
-    </p>
+  <section class="pakrpp-latest-view" aria-label="Daftar Publikasi Terbaru" data-pakrpp-latest-root>
+    <div class="pakrpp-latest-toolbar">
+      <div class="pakrpp-latest-toolbar__row">
+        <p class="pakrpp-latest-view__note">
+          Menampilkan <strong data-pakrpp-latest-count>{publications.length}</strong> publikasi secara kronologis · <a href={routes.publications.index}>Indeks Publikasi →</a>
+        </p>
+        <input
+          type="search"
+          placeholder="Saring cepat..."
+          aria-label="Saring publikasi terbaru"
+          class="pakrpp-latest-search"
+          data-pakrpp-latest-search
+          autocomplete="off"
+        />
+      </div>
+
+      <div class="pakrpp-latest-filters" role="group" aria-label="Filter Topik">
+        <button type="button" class="pakrpp-latest-filter-btn is-active" data-pakrpp-latest-topic="all" aria-pressed="true">
+          Semua Topik
+        </button>
+        {topics.map((topic) => (
+          <button type="button" class="pakrpp-latest-filter-btn" data-pakrpp-latest-topic={topic.id} aria-pressed="false">
+            {topic.label}
+          </button>
+        ))}
+      </div>
+    </div>
+
     <ol class="pakrpp-latest-view__list" data-gaga-preview-scope>
       {publications.map((pub, index) => {
         const pubType = resolvePublicationType(pub.type);
@@ -37,9 +63,15 @@ const entryData = {
           .map((t) => resolveCanonicalTopic(t)?.label ?? t)
           .join(', ');
         const contextLabel = [pubType.label, topicLabels, pub.readTime].filter(Boolean).join(' · ');
+        const searchBlob = [pub.title, pub.summary ?? '', topicLabels, pubType.label].join(' ').toLowerCase();
         return (
-          <li class="pakrpp-latest-view__item">
-            <span class="pakrpp-latest-view__num">{String(index + 1).padStart(2, '0')}</span>
+          <li
+            class="pakrpp-latest-view__item"
+            data-pakrpp-latest-item
+            data-pub-topics={pub.topics.join(',')}
+            data-pub-search={searchBlob}
+          >
+            <span class="pakrpp-latest-view__num" data-pakrpp-latest-idx>{String(index + 1).padStart(2, '0')}</span>
             <div>
               <a
                 href={pub.canonicalHref}
@@ -58,6 +90,9 @@ const entryData = {
               >
                 {pub.title}
               </a>
+              <p class="pakrpp-latest-view__meta">
+                {[pubType.label, topicLabels, pub.publishedAt, pub.readTime].filter(Boolean).join(' · ')}
+              </p>
             </div>
           </li>
         );
@@ -66,6 +101,61 @@ const entryData = {
   </section>
 </GagaSiteLayout>
 
+<script>
+  function initLatestFilter() {
+    const root = document.querySelector<HTMLElement>('[data-pakrpp-latest-root]');
+    if (!root || root.dataset.wired === 'true') return;
+    root.dataset.wired = 'true';
+
+    const items = Array.from(root.querySelectorAll<HTMLElement>('[data-pakrpp-latest-item]'));
+    const topicBtns = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-pakrpp-latest-topic]'));
+    const searchInput = root.querySelector<HTMLInputElement>('[data-pakrpp-latest-search]');
+    const countEl = root.querySelector<HTMLElement>('[data-pakrpp-latest-count]');
+
+    let activeTopic = 'all';
+    let query = '';
+
+    function applyFilter() {
+      let visible = 0;
+      for (const item of items) {
+        const topics = (item.dataset.pubTopics ?? '').split(',').filter(Boolean);
+        const text = item.dataset.pubSearch ?? '';
+        const show = (activeTopic === 'all' || topics.includes(activeTopic)) && (!query || text.includes(query));
+        item.toggleAttribute('hidden', !show);
+        if (show) {
+          visible += 1;
+          const idxEl = item.querySelector<HTMLElement>('[data-pakrpp-latest-idx]');
+          if (idxEl) idxEl.textContent = String(visible).padStart(2, '0');
+        }
+      }
+      if (countEl) countEl.textContent = String(visible);
+    }
+
+    for (const btn of topicBtns) {
+      btn.addEventListener('click', () => {
+        activeTopic = btn.dataset.pakrppLatestTopic ?? 'all';
+        for (const b of topicBtns) {
+          const isCurrent = b === btn;
+          b.classList.toggle('is-active', isCurrent);
+          b.setAttribute('aria-pressed', String(isCurrent));
+        }
+        applyFilter();
+      });
+    }
+
+    searchInput?.addEventListener('input', () => {
+      query = searchInput.value.trim().toLowerCase();
+      applyFilter();
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initLatestFilter, { once: true });
+  } else {
+    initLatestFilter();
+  }
+</script>
+
 <style>
   .pakrpp-latest-view {
     display: flex;
@@ -73,12 +163,57 @@ const entryData = {
     gap: 1.25rem;
     font-variant-numeric: tabular-nums;
   }
+  .pakrpp-latest-toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding-bottom: 0.85rem;
+    border-bottom: 1px solid var(--gaga-border-subtle, rgba(128, 128, 128, 0.22));
+  }
+  .pakrpp-latest-toolbar__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
   .pakrpp-latest-view__note {
     margin: 0;
     font-size: 0.82rem;
-    opacity: 0.75;
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid var(--gaga-border-subtle, rgba(128, 128, 128, 0.22));
+    opacity: 0.78;
+  }
+  .pakrpp-latest-search {
+    min-width: 14rem;
+    padding: 0.35rem 0.65rem;
+    border: 1px solid var(--gaga-border-subtle, rgba(128, 128, 128, 0.28));
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 0.82rem;
+  }
+  .pakrpp-latest-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+  }
+  .pakrpp-latest-filter-btn {
+    padding: 0.15rem 0;
+    border: 0;
+    border-bottom: 1.5px solid transparent;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 0.82rem;
+    opacity: 0.65;
+    cursor: pointer;
+  }
+  .pakrpp-latest-filter-btn:hover {
+    opacity: 1;
+  }
+  .pakrpp-latest-filter-btn.is-active {
+    opacity: 1;
+    font-weight: 600;
+    border-bottom-color: currentColor;
   }
   .pakrpp-latest-view__list {
     list-style: none;
@@ -91,6 +226,9 @@ const entryData = {
     gap: 0.65rem;
     padding: 0.85rem 0;
     border-bottom: 1px solid var(--gaga-border-subtle, rgba(128, 128, 128, 0.15));
+  }
+  .pakrpp-latest-view__item[hidden] {
+    display: none;
   }
   .pakrpp-latest-view__num {
     font-family: var(--gaga-font-mono, monospace);

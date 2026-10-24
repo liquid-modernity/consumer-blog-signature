@@ -1,5 +1,6 @@
 ---
 import ArticleShell from './ArticleShell.astro';
+import PageTitle from './PageTitle.astro';
 import AuthorArticleIndex from '../reader/AuthorArticleIndex.astro';
 import TopicArticleIndex from '../reader/TopicArticleIndex.astro';
 import PageMetadataTable from '../information/PageMetadataTable.astro';
@@ -7,6 +8,8 @@ import { createArticleWorkspaceActionsInput, createRightRailInput } from '../fra
 import { contentDefaults } from '../../config/content';
 import { i18nLabel } from '../../config/i18n';
 import { getArticles, getAuthorBySlug, getAuthors, getTagGroups, getTopicGroups } from '../../lib/content';
+import { toCanonicalPublications } from '../../lib/pakrpp-content';
+import { resolveCanonicalTopic, resolvePublicationType } from '../../config/pakrpp-architecture';
 import { getScreenInfo } from '../../lib/screen-info';
 import type { BreadcrumbItem } from '../../lib/page-context';
 import { normalizeContentMetadata } from '@gaga/engine/content';
@@ -40,13 +43,17 @@ const cleanPath = Astro.url.pathname.replace(/\/$/, '') || '/';
 const isRootPage = cleanPath === '/';
 let breadcrumbs: BreadcrumbItem[] = [];
 let rightRail = null;
+let readingMetaItems: string[] = [];
+let prevPub: { title: string; canonicalHref: string; summary?: string; metaText?: string } | null = null;
+let nextPub: { title: string; canonicalHref: string; summary?: string; metaText?: string } | null = null;
 
 if (!isRootPage) {
-  const [articles, authors, topicGroupsAll, tagGroups] = await Promise.all([
+  const [articles, authors, topicGroupsAll, tagGroups, canonicalPubs] = await Promise.all([
     getArticles(),
     getAuthors(),
     getTopicGroups(),
-    getTagGroups()
+    getTagGroups(),
+    isArticle ? toCanonicalPublications() : Promise.resolve([])
   ]);
   const context = getScreenInfo({
     pathname: Astro.url.pathname,
@@ -61,6 +68,47 @@ if (!isRootPage) {
   });
   breadcrumbs = context.breadcrumbs ?? [];
   rightRail = createRightRailInput(context);
+
+  if (isArticle && canonicalPubs.length > 0) {
+    const slugSegment = cleanPath.split('/').filter(Boolean).at(-1) ?? '';
+    const currentIdx = canonicalPubs.findIndex((p) => p.slug === slugSegment || p.canonicalHref === cleanPath);
+    const currentPub = currentIdx >= 0 ? canonicalPubs[currentIdx] : null;
+    if (currentPub) {
+      const pubTypeLabel = resolvePublicationType(currentPub.type).label;
+      const topicLabels = currentPub.topics.map((t) => resolveCanonicalTopic(t)?.label ?? t).join(', ');
+      readingMetaItems = [
+        pubTypeLabel,
+        topicLabels,
+        rightRail?.publishedDate?.text ?? currentPub.publishedAt ?? '',
+        rightRail?.readTime ?? currentPub.readTime ?? ''
+      ].filter(Boolean);
+
+      if (currentIdx > 0) {
+        const nextItem = canonicalPubs[currentIdx - 1];
+        nextPub = {
+          title: nextItem.title,
+          canonicalHref: nextItem.canonicalHref,
+          summary: nextItem.summary,
+          metaText: `${resolvePublicationType(nextItem.type).label} · ${nextItem.publishedAt}`
+        };
+      }
+      if (currentIdx < canonicalPubs.length - 1) {
+        const prevItem = canonicalPubs[currentIdx + 1];
+        prevPub = {
+          title: prevItem.title,
+          canonicalHref: prevItem.canonicalHref,
+          summary: prevItem.summary,
+          metaText: `${resolvePublicationType(prevItem.type).label} · ${prevItem.publishedAt}`
+        };
+      }
+    } else if (rightRail) {
+      readingMetaItems = [
+        rightRail.publishedDate?.text ?? '',
+        rightRail.readTime ?? '',
+        (rightRail.topics ?? []).join(', ')
+      ].filter(Boolean);
+    }
+  }
 }
 
 const authorSlug = isAuthor ? Astro.url.pathname.split('/').filter(Boolean).at(-1) : undefined;
@@ -82,8 +130,45 @@ const entityNavigationLabel = i18nLabel(isAuthor ? 'entity.authorNavigation' : '
     missingTitleSource={missingTitleSource}
     breadcrumbs={breadcrumbs}
     coverage={coverage}
+    readingMetaItems={readingMetaItems}
   >
     <div class="gaga-article-body gaga-markdown-content" data-gaga-article-body><slot /></div>
+    {(prevPub || nextPub) && (
+      <nav class="gaga-article-pager" aria-label="Navigasi antar publikasi" data-gaga-preview-scope>
+        <div class="gaga-article-pager__col">
+          {prevPub && (
+            <a
+              href={prevPub.canonicalHref}
+              class="gaga-article-pager__link"
+              data-gaga-preview
+              data-gaga-preview-title={prevPub.title}
+              data-gaga-preview-summary={prevPub.summary}
+              data-gaga-preview-meta={prevPub.metaText}
+              data-gaga-preview-href={prevPub.canonicalHref}
+            >
+              <span class="gaga-article-pager__dir">← Publikasi Sebelumnya</span>
+              <span class="gaga-article-pager__title">{prevPub.title}</span>
+            </a>
+          )}
+        </div>
+        <div class="gaga-article-pager__col gaga-article-pager__col--end">
+          {nextPub && (
+            <a
+              href={nextPub.canonicalHref}
+              class="gaga-article-pager__link"
+              data-gaga-preview
+              data-gaga-preview-title={nextPub.title}
+              data-gaga-preview-summary={nextPub.summary}
+              data-gaga-preview-meta={nextPub.metaText}
+              data-gaga-preview-href={nextPub.canonicalHref}
+            >
+              <span class="gaga-article-pager__dir">Publikasi Selanjutnya →</span>
+              <span class="gaga-article-pager__title">{nextPub.title}</span>
+            </a>
+          )}
+        </div>
+      </nav>
+    )}
     {rightRail ? <PageMetadataTable rail={rightRail} /> : null}
   </ArticleShell>
 ) : (
@@ -150,6 +235,7 @@ const entityNavigationLabel = i18nLabel(isAuthor ? 'entity.authorNavigation' : '
     </section>
   ) : (
     <>
+      <PageTitle entryData={entryData} routeId={routeIdentity} />
       <div class="gaga-markdown-content">
         <slot />
       </div>
@@ -157,3 +243,68 @@ const entityNavigationLabel = i18nLabel(isAuthor ? 'entity.authorNavigation' : '
     </>
   )
 )}
+
+<style>
+  .gaga-article-pager {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+    margin-top: 2.5rem;
+    padding-top: 1.35rem;
+    border-top: 1px solid color-mix(in srgb, var(--sl-color-gray-5) 55%, transparent);
+  }
+
+  .gaga-article-pager__col--end {
+    text-align: right;
+  }
+
+  .gaga-article-pager__link {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    text-decoration: none;
+    color: inherit;
+    max-width: 100%;
+  }
+
+  .gaga-article-pager__col--end .gaga-article-pager__link {
+    align-items: flex-end;
+  }
+
+  .gaga-article-pager__dir {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--sl-color-gray-3);
+  }
+
+  .gaga-article-pager__title {
+    font-size: 0.94rem;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--sl-color-white);
+  }
+
+  .gaga-article-pager__link:hover .gaga-article-pager__title,
+  .gaga-article-pager__link:focus-visible .gaga-article-pager__title {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  @media (max-width: 42rem) {
+    .gaga-article-pager {
+      grid-template-columns: 1fr;
+      gap: 1.1rem;
+    }
+
+    .gaga-article-pager__col--end {
+      text-align: left;
+    }
+
+    .gaga-article-pager__col--end .gaga-article-pager__link {
+      align-items: flex-start;
+    }
+  }
+</style>
+

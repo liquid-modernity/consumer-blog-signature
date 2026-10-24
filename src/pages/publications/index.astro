@@ -2,6 +2,7 @@
 import GagaSiteLayout from '../../components/gaga/GagaSiteLayout.astro';
 import {
   getEnabledPublicationTypes,
+  getEnabledTopics,
   resolveCanonicalTopic,
   resolvePublicationType
 } from '../../config/pakrpp-architecture';
@@ -12,6 +13,9 @@ export const prerender = true;
 
 const publications = await toCanonicalPublications();
 const pubTypes = getEnabledPublicationTypes();
+const topics = getEnabledTopics();
+const usedTypeIds = new Set(publications.map((p) => p.type));
+const activeTypes = pubTypes.filter((t) => usedTypeIds.has(t.id));
 
 const entryData = {
   title: 'Publikasi',
@@ -28,24 +32,76 @@ const entryData = {
 ---
 
 <GagaSiteLayout entryData={entryData}>
-  <section class="pakrpp-page-section" aria-label="Registry Tipe Publikasi">
-    <div class="pakrpp-meta-strip">
-      <span>Total: <strong>{publications.length}</strong> publikasi</span>
-      <span aria-hidden="true">·</span>
-      <span>Tipe aktif: {pubTypes.map((t) => t.label).join(', ')}</span>
-      <span aria-hidden="true">·</span>
-      <a href={routes.discovery.latest}>Tampilan Terbaru (/latest) →</a>
+  <section class="pakrpp-page-section" aria-label="Registry Tipe Publikasi" data-pakrpp-pub-filter-root>
+    <div class="pakrpp-filter-bar">
+      <div class="pakrpp-filter-bar__top">
+        <div class="pakrpp-meta-strip">
+          <span><strong data-pakrpp-pub-count>{publications.length}</strong> publikasi</span>
+          <span aria-hidden="true">·</span>
+          <a href={routes.discovery.latest}>Tampilan Terbaru →</a>
+        </div>
+        <div class="pakrpp-filter-search">
+          <label class="gaga-visually-hidden" for="pakrpp-pub-search-input">Saring publikasi</label>
+          <input
+            id="pakrpp-pub-search-input"
+            type="search"
+            placeholder="Saring judul atau kata kunci..."
+            class="pakrpp-filter-search__input"
+            data-pakrpp-pub-search
+            autocomplete="off"
+          />
+        </div>
+      </div>
+
+      <div class="pakrpp-filter-controls" role="group" aria-label="Filter Topik dan Tipe Publikasi">
+        <div class="pakrpp-filter-row">
+          <span class="pakrpp-filter-row__label">Topik</span>
+          <div class="pakrpp-filter-row__items">
+            <button type="button" class="pakrpp-filter-btn is-active" data-pakrpp-filter-topic="all" aria-pressed="true">
+              Semua
+            </button>
+            {topics.map((topic) => (
+              <button type="button" class="pakrpp-filter-btn" data-pakrpp-filter-topic={topic.id} aria-pressed="false">
+                {topic.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {activeTypes.length > 1 && (
+          <div class="pakrpp-filter-row">
+            <span class="pakrpp-filter-row__label">Tipe</span>
+            <div class="pakrpp-filter-row__items">
+              <button type="button" class="pakrpp-filter-btn is-active" data-pakrpp-filter-type="all" aria-pressed="true">
+                Semua
+              </button>
+              {activeTypes.map((t) => (
+                <button type="button" class="pakrpp-filter-btn" data-pakrpp-filter-type={t.id} aria-pressed="false">
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
 
-    <ol class="pakrpp-pub-table" data-gaga-preview-scope>
+    <ol class="pakrpp-pub-table" data-gaga-preview-scope data-pakrpp-pub-list>
       {publications.map((pub, idx) => {
         const pubType = resolvePublicationType(pub.type);
         const topicLabels = pub.topics
           .map((t) => resolveCanonicalTopic(t)?.label ?? t)
           .join(', ');
+        const searchBlob = [pub.title, pub.summary ?? '', topicLabels, pubType.label, ...pub.tags].join(' ').toLowerCase();
         return (
-          <li class="pakrpp-pub-item">
-            <span class="pakrpp-pub-item__idx">{String(idx + 1).padStart(2, '0')}</span>
+          <li
+            class="pakrpp-pub-item"
+            data-pakrpp-pub-item
+            data-pub-type={pub.type}
+            data-pub-topics={pub.topics.join(',')}
+            data-pub-search={searchBlob}
+          >
+            <span class="pakrpp-pub-item__idx" data-pakrpp-pub-idx>{String(idx + 1).padStart(2, '0')}</span>
             <div class="pakrpp-pub-item__body">
               <div class="pakrpp-pub-item__head">
                 <a
@@ -54,6 +110,7 @@ const entryData = {
                   data-gaga-preview
                   data-gaga-preview-title={pub.title}
                   data-gaga-preview-href={pub.canonicalHref}
+                  data-gaga-preview-type={pubType.label}
                   data-gaga-preview-snippet={pub.summary ?? ''}
                   data-gaga-preview-topics={topicLabels}
                   data-gaga-preview-tags={pub.tags.join(', ')}
@@ -66,9 +123,8 @@ const entryData = {
               {pub.summary && <p class="pakrpp-pub-item__summary">{pub.summary}</p>}
               <p class="pakrpp-pub-item__meta">
                 {[
-                  `ID: ${pub.id}`,
-                  `Tipe: ${pubType.label}`,
-                  topicLabels ? `Topik: ${topicLabels}` : '',
+                  pubType.label,
+                  topicLabels,
                   pub.publishedAt,
                   pub.readTime
                 ].filter(Boolean).join(' · ')}
@@ -78,24 +134,176 @@ const entryData = {
         );
       })}
     </ol>
+
+    <p class="pakrpp-pub-empty" data-pakrpp-pub-empty hidden>
+      Tidak ada publikasi yang cocok dengan kriteria filter saat ini.
+    </p>
   </section>
 </GagaSiteLayout>
+
+<script>
+  function initPublicationsFilter() {
+    const root = document.querySelector<HTMLElement>('[data-pakrpp-pub-filter-root]');
+    if (!root || root.dataset.wired === 'true') return;
+    root.dataset.wired = 'true';
+
+    const items = Array.from(root.querySelectorAll<HTMLElement>('[data-pakrpp-pub-item]'));
+    const topicBtns = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-pakrpp-filter-topic]'));
+    const typeBtns = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-pakrpp-filter-type]'));
+    const searchInput = root.querySelector<HTMLInputElement>('[data-pakrpp-pub-search]');
+    const countEl = root.querySelector<HTMLElement>('[data-pakrpp-pub-count]');
+    const emptyEl = root.querySelector<HTMLElement>('[data-pakrpp-pub-empty]');
+
+    let activeTopic = 'all';
+    let activeType = 'all';
+    let query = '';
+
+    function applyFilter() {
+      let visibleCount = 0;
+      for (const item of items) {
+        const topics = (item.dataset.pubTopics ?? '').split(',').filter(Boolean);
+        const type = item.dataset.pubType ?? '';
+        const text = item.dataset.pubSearch ?? '';
+
+        const matchTopic = activeTopic === 'all' || topics.includes(activeTopic);
+        const matchType = activeType === 'all' || type === activeType;
+        const matchSearch = !query || text.includes(query);
+
+        const show = matchTopic && matchType && matchSearch;
+        item.toggleAttribute('hidden', !show);
+        if (show) {
+          visibleCount += 1;
+          const idxEl = item.querySelector<HTMLElement>('[data-pakrpp-pub-idx]');
+          if (idxEl) idxEl.textContent = String(visibleCount).padStart(2, '0');
+        }
+      }
+
+      if (countEl) countEl.textContent = String(visibleCount);
+      if (emptyEl) emptyEl.toggleAttribute('hidden', visibleCount > 0);
+    }
+
+    for (const btn of topicBtns) {
+      btn.addEventListener('click', () => {
+        activeTopic = btn.dataset.pakrppFilterTopic ?? 'all';
+        for (const b of topicBtns) {
+          const isCurrent = b === btn;
+          b.classList.toggle('is-active', isCurrent);
+          b.setAttribute('aria-pressed', String(isCurrent));
+        }
+        applyFilter();
+      });
+    }
+
+    for (const btn of typeBtns) {
+      btn.addEventListener('click', () => {
+        activeType = btn.dataset.pakrppFilterType ?? 'all';
+        for (const b of typeBtns) {
+          const isCurrent = b === btn;
+          b.classList.toggle('is-active', isCurrent);
+          b.setAttribute('aria-pressed', String(isCurrent));
+        }
+        applyFilter();
+      });
+    }
+
+    searchInput?.addEventListener('input', () => {
+      query = searchInput.value.trim().toLowerCase();
+      applyFilter();
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPublicationsFilter, { once: true });
+  } else {
+    initPublicationsFilter();
+  }
+</script>
 
 <style>
   .pakrpp-page-section {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1.25rem;
     font-variant-numeric: tabular-nums;
+  }
+  .pakrpp-filter-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--gaga-border-subtle, rgba(128, 128, 128, 0.22));
+  }
+  .pakrpp-filter-bar__top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
   }
   .pakrpp-meta-strip {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     gap: 0.5rem;
     font-size: 0.82rem;
-    opacity: 0.78;
-    padding-bottom: 0.85rem;
-    border-bottom: 1px solid var(--gaga-border-subtle, rgba(128, 128, 128, 0.22));
+    opacity: 0.82;
+  }
+  .pakrpp-filter-search__input {
+    min-width: 15rem;
+    padding: 0.38rem 0.65rem;
+    border: 1px solid var(--gaga-border-subtle, rgba(128, 128, 128, 0.28));
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 0.82rem;
+  }
+  .pakrpp-filter-search__input:focus-visible {
+    outline: 1px solid currentColor;
+    outline-offset: 1px;
+  }
+  .pakrpp-filter-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .pakrpp-filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.75rem;
+  }
+  .pakrpp-filter-row__label {
+    min-width: 3.25rem;
+    font-family: var(--gaga-font-mono, monospace);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.58;
+  }
+  .pakrpp-filter-row__items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+  }
+  .pakrpp-filter-btn {
+    padding: 0.15rem 0;
+    border: 0;
+    border-bottom: 1.5px solid transparent;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 0.82rem;
+    opacity: 0.65;
+    cursor: pointer;
+    transition: opacity 0.15s ease, border-color 0.15s ease;
+  }
+  .pakrpp-filter-btn:hover {
+    opacity: 1;
+  }
+  .pakrpp-filter-btn.is-active {
+    opacity: 1;
+    font-weight: 600;
+    border-bottom-color: currentColor;
   }
   .pakrpp-pub-table {
     list-style: none;
@@ -108,6 +316,9 @@ const entryData = {
     gap: 0.65rem;
     padding: 1rem 0;
     border-bottom: 1px solid var(--gaga-border-subtle, rgba(128, 128, 128, 0.16));
+  }
+  .pakrpp-pub-item[hidden] {
+    display: none;
   }
   .pakrpp-pub-item__idx {
     font-family: var(--gaga-font-mono, monospace);
@@ -132,5 +343,10 @@ const entryData = {
     margin: 0;
     font-size: 0.78rem;
     opacity: 0.65;
+  }
+  .pakrpp-pub-empty {
+    margin: 1rem 0;
+    font-size: 0.88rem;
+    opacity: 0.7;
   }
 </style>

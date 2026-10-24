@@ -23,20 +23,20 @@ const entryData = {
 
 <GagaSiteLayout entryData={entryData}>
   <section class="pakrpp-sys-hub" aria-label="Antarmuka Sistem">
-    <h2>Antarmuka Manusia (Human-Facing)</h2>
+    <h2>Antarmuka Pembaca</h2>
     <ul>
       {(systemSection?.items ?? []).map((item) => (
         <li>
-          <a href={item.href}><strong>{item.label}</strong></a> (<code>{item.href}</code>) — {item.meta}
+          <a href={item.href}><strong>{item.label}</strong></a>{item.meta ? ` — ${item.meta}` : ''}
         </li>
       ))}
     </ul>
 
-    <h2>Antarmuka Mesin (Machine-Facing)</h2>
+    <h2>Antarmuka Mesin</h2>
     <ul>
-      <li><a href={routes.machine.sitemap}><strong>XML Sitemap</strong></a> (<code>{routes.machine.sitemap}</code>)</li>
-      <li><a href={routes.machine.rss}><strong>RSS XML Feed</strong></a> (<code>{routes.machine.rss}</code>)</li>
-      <li><a href={routes.machine.robots}><strong>Robots Policy</strong></a> (<code>{routes.machine.robots}</code>)</li>
+      <li><a href={routes.machine.sitemap}><strong>XML Sitemap</strong></a></li>
+      <li><a href={routes.machine.rss}><strong>RSS XML Feed</strong></a></li>
+      <li><a href={routes.machine.robots}><strong>Robots Policy</strong></a></li>
     </ul>
   </section>
 </GagaSiteLayout>

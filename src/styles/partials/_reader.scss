@@ -3,13 +3,14 @@
 .gaga-reader-panel {
   position: fixed;
   inset: 50% auto auto 50%;
-  z-index: var(--gaga-z-panel);
-  width: min(calc(100vw - var(--gaga-safe-area-left) - var(--gaga-safe-area-right) - 2rem), 31rem);
-  max-height: min(82svh, 42rem);
-  max-height: min(calc(82dvh - var(--gaga-safe-area-top) - var(--gaga-safe-area-bottom)), 42rem);
+  z-index: calc(var(--gaga-z-panel, 60) + 20);
+  width: min(calc(100vw - var(--gaga-safe-area-left) - var(--gaga-safe-area-right) - 2rem), 32rem);
+  max-height: min(84svh, 44rem);
+  max-height: min(calc(84dvh - var(--gaga-safe-area-top) - var(--gaga-safe-area-bottom)), 44rem);
   overflow: auto;
   scrollbar-gutter: stable;
-  border: 1px solid var(--gaga-line);
+  border: 1px solid var(--gaga-line-strong, var(--gaga-line));
+  border-radius: var(--gaga-radius-lg, 8px);
   background: var(--gaga-surface-elevated, var(--gaga-surface));
   box-shadow: var(--gaga-shadow);
   transform: translate(-50%, calc(-50% + 1rem));
@@ -179,67 +180,176 @@
   }
 }
 
+:root,
 body {
   --gaga-article-font-size: clamp(1rem, calc(.96rem + .2vw), var(--gaga-type-body-size));
   --gaga-article-line-height: var(--gaga-type-body-line-height);
-  --gaga-article-letter-spacing: normal;
+  --gaga-article-letter-spacing: 0em;
   --gaga-article-measure: 44rem;
-  --gaga-article-font-family: var(--gaga-font-sans, system-ui, -apple-system, sans-serif);
+  --gaga-article-font-family: var(--gaga-font-body, system-ui, -apple-system, sans-serif);
+  --gaga-row-padding-y: 0.8rem;
+  --gaga-section-gap: 1.5rem;
 }
 
-body[data-gaga-reader-font='sm'] { --gaga-article-font-size: clamp(.92rem, calc(.88rem + .2vw), .98rem); }
-body[data-gaga-reader-font='md'] { --gaga-article-font-size: clamp(1rem, calc(.96rem + .2vw), var(--gaga-type-body-size)); }
-body[data-gaga-reader-font='lg'] { --gaga-article-font-size: clamp(1.1rem, calc(1.02rem + .45vw), 1.2rem); }
-body[data-gaga-reader-font='xl'] { --gaga-article-font-size: clamp(1.24rem, calc(1.15rem + .6vw), 1.38rem); }
+/* Global Font Scale (sm, md, lg, xl) across Beranda, Index, and Article pages */
+:root[data-gaga-reader-font='sm'],
+body[data-gaga-reader-font='sm'] {
+  --gaga-type-body-size: 0.94rem;
+  --gaga-type-body-compact-size: 0.84rem;
+  --gaga-type-subheading-size: 0.94rem;
+  --gaga-type-lead-size: 1.04rem;
+  --gaga-article-font-size: clamp(.92rem, calc(.88rem + .2vw), .96rem);
+}
 
+:root[data-gaga-reader-font='md'],
+body[data-gaga-reader-font='md'] {
+  --gaga-type-body-size: 1.04rem;
+  --gaga-type-body-compact-size: 0.9rem;
+  --gaga-type-subheading-size: 1rem;
+  --gaga-type-lead-size: 1.14rem;
+  --gaga-article-font-size: clamp(1rem, calc(.96rem + .2vw), 1.04rem);
+}
+
+:root[data-gaga-reader-font='lg'],
+body[data-gaga-reader-font='lg'] {
+  --gaga-type-body-size: 1.16rem;
+  --gaga-type-body-compact-size: 0.98rem;
+  --gaga-type-subheading-size: 1.12rem;
+  --gaga-type-lead-size: 1.24rem;
+  --gaga-article-font-size: clamp(1.12rem, calc(1.04rem + .45vw), 1.22rem);
+}
+
+:root[data-gaga-reader-font='xl'],
+body[data-gaga-reader-font='xl'] {
+  --gaga-type-body-size: 1.28rem;
+  --gaga-type-body-compact-size: 1.08rem;
+  --gaga-type-subheading-size: 1.24rem;
+  --gaga-type-lead-size: 1.38rem;
+  --gaga-article-font-size: clamp(1.24rem, calc(1.15rem + .6vw), 1.38rem);
+}
+
+/* Global Typeface / Font Family (sans, serif, mono) */
+:root[data-gaga-reader-font-family='sans'],
 body[data-gaga-reader-font-family='sans'] {
-  --gaga-article-font-family: var(--gaga-font-sans, system-ui, -apple-system, sans-serif);
+  --gaga-font-body: var(--gaga-font-ui, ui-sans-serif, system-ui, -apple-system, sans-serif);
+  --gaga-article-font-family: var(--gaga-font-body);
 }
+
+:root[data-gaga-reader-font-family='serif'],
 body[data-gaga-reader-font-family='serif'] {
-  --gaga-article-font-family: var(--gaga-font-serif, "Lora", Georgia, serif);
+  --gaga-font-body: Georgia, 'Newsreader', 'Lora', 'Times New Roman', serif;
+  --gaga-font-display: Georgia, 'Newsreader', 'Playfair Display', 'Times New Roman', serif;
+  --gaga-article-font-family: var(--gaga-font-body);
 }
+
+:root[data-gaga-reader-font-family='mono'],
 body[data-gaga-reader-font-family='mono'] {
-  --gaga-article-font-family: var(--gaga-font-mono, "JetBrains Mono", monospace);
+  --gaga-font-body: var(--gaga-font-mono, 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace);
+  --gaga-font-display: var(--gaga-font-mono, 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace);
+  --gaga-article-font-family: var(--gaga-font-body);
 }
 
-body[data-gaga-reader-line-height='normal'] { --gaga-article-line-height: 1.6; }
-body[data-gaga-reader-line-height='relaxed'] { --gaga-article-line-height: 1.8; }
-body[data-gaga-reader-line-height='loose'] { --gaga-article-line-height: 2.05; }
+/* Global Line Height (normal, relaxed, loose) */
+:root[data-gaga-reader-line-height='normal'],
+body[data-gaga-reader-line-height='normal'] {
+  --gaga-type-body-line-height: 1.6;
+  --gaga-article-line-height: 1.6;
+}
 
-body[data-gaga-reader-letter-spacing='normal'] { --gaga-article-letter-spacing: 0; }
-body[data-gaga-reader-letter-spacing='wide'] { --gaga-article-letter-spacing: 0.035em; }
+:root[data-gaga-reader-line-height='relaxed'],
+body[data-gaga-reader-line-height='relaxed'] {
+  --gaga-type-body-line-height: 1.82;
+  --gaga-article-line-height: 1.82;
+}
 
+:root[data-gaga-reader-line-height='loose'],
+body[data-gaga-reader-line-height='loose'] {
+  --gaga-type-body-line-height: 2.05;
+  --gaga-article-line-height: 2.05;
+}
+
+/* Global Letter Spacing / Tracking (normal, wide) */
+:root[data-gaga-reader-letter-spacing='normal'],
+body[data-gaga-reader-letter-spacing='normal'] {
+  --gaga-article-letter-spacing: 0em;
+}
+
+:root[data-gaga-reader-letter-spacing='wide'],
+body[data-gaga-reader-letter-spacing='wide'] {
+  --gaga-article-letter-spacing: 0.035em;
+}
+
+/* Global Layout & Reading Density (compact, comfort, wide) */
+:root[data-gaga-reader-density='compact'],
 body[data-gaga-reader-density='compact'] {
-  --gaga-article-line-height: 1.52;
-  --gaga-reading-paragraph-gap: 1.15rem;
+  --gaga-row-padding-y: 0.48rem;
+  --gaga-section-gap: 1rem;
+  --gaga-reading-paragraph-gap: 1.05rem;
+  --gaga-reading-paragraph-gap-polished: 0.95rem;
 }
+
+:root[data-gaga-reader-density='comfort'],
 body[data-gaga-reader-density='comfort'] {
-  --gaga-article-line-height: 1.76;
+  --gaga-row-padding-y: 0.8rem;
+  --gaga-section-gap: 1.5rem;
   --gaga-reading-paragraph-gap: 1.55rem;
+  --gaga-reading-paragraph-gap-polished: 1.25rem;
 }
+
+:root[data-gaga-reader-density='wide'],
 body[data-gaga-reader-density='wide'] {
-  --gaga-article-line-height: 1.95;
+  --gaga-row-padding-y: 1.15rem;
+  --gaga-section-gap: 2.25rem;
   --gaga-reading-paragraph-gap: 2rem;
-  --gaga-article-measure: 48rem;
+  --gaga-reading-paragraph-gap-polished: 1.7rem;
 }
 
-body[data-gaga-reader-measure='standard'] { --gaga-article-measure: 38rem; }
-body[data-gaga-reader-measure='comfortable'] { --gaga-article-measure: 44rem; }
-body[data-gaga-reader-measure='wide'] { --gaga-article-measure: 52rem; }
+/* Global Measure / Reading Width (standard, comfortable, wide) */
+:root[data-gaga-reader-measure='standard'],
+body[data-gaga-reader-measure='standard'] {
+  --gaga-article-measure: 38rem;
+  --gaga-reading-measure: min(38rem, 100%);
+  --gaga-content-width: 38rem !important;
+}
 
+:root[data-gaga-reader-measure='comfortable'],
+body[data-gaga-reader-measure='comfortable'] {
+  --gaga-article-measure: 44rem;
+  --gaga-reading-measure: min(44rem, 100%);
+  --gaga-content-width: 46rem !important;
+}
+
+:root[data-gaga-reader-measure='wide'],
+body[data-gaga-reader-measure='wide'] {
+  --gaga-article-measure: 52rem;
+  --gaga-reading-measure: min(52rem, 100%);
+  --gaga-content-width: 56rem !important;
+}
+
+/* High Contrast Mode */
+:root[data-gaga-reader-contrast='high'],
 body[data-gaga-reader-contrast='high'] {
   --gaga-ink: #000000 !important;
   --gaga-surface: #ffffff !important;
+  --gaga-bg: #ffffff !important;
   --gaga-line: #000000 !important;
+  --gaga-line-strong: #000000 !important;
   --gaga-muted: #1e293b !important;
 }
-body[data-gaga-theme='dark'][data-gaga-reader-contrast='high'] {
+
+:root[data-gaga-theme='dark'][data-gaga-reader-contrast='high'],
+body[data-gaga-theme='dark'][data-gaga-reader-contrast='high'],
+:root[data-gaga-theme='default'][data-gaga-reader-contrast='high'],
+body[data-gaga-theme='default'][data-gaga-reader-contrast='high'] {
   --gaga-ink: #ffffff !important;
   --gaga-surface: #000000 !important;
+  --gaga-bg: #000000 !important;
   --gaga-line: #ffffff !important;
+  --gaga-line-strong: #ffffff !important;
   --gaga-muted: #e2e8f0 !important;
 }
 
+/* Motion Reduction */
 body[data-gaga-reader-motion='reduced'],
 body[data-gaga-reader-motion='reduced'] * {
   animation-duration: 0.001ms !important;
@@ -248,19 +358,24 @@ body[data-gaga-reader-motion='reduced'] * {
   scroll-behavior: auto !important;
 }
 
-body[data-gaga-reader-links='plain'] :is([data-gaga-article-shell], [data-gaga-reading-surface], .gaga-flagship-article) a {
+/* Link Decoration across all content surfaces */
+body[data-gaga-reader-links='plain'] :is(.main-pane, [data-gaga-article-shell], [data-gaga-reading-surface], .gaga-flagship-article) a {
   text-decoration: none !important;
 }
-body[data-gaga-reader-links='underlined'] :is([data-gaga-article-shell], [data-gaga-reading-surface], .gaga-flagship-article) a {
+
+body[data-gaga-reader-links='underlined'] :is(.main-pane, [data-gaga-article-shell], [data-gaga-reading-surface], .gaga-flagship-article) a:not(.gaga-button):not(.pakrpp-filter-chip) {
   text-decoration: underline !important;
   text-underline-offset: 3px !important;
 }
 
+:is(.main-pane, .gaga-markdown-content, .pakrpp-root-index, .gaga-flagship-article, .gaga-flagship-article__prose, [data-gaga-article-shell], [data-gaga-reading-surface]) {
+  font-family: var(--gaga-article-font-family, var(--gaga-font-body, inherit));
+  font-size: var(--gaga-article-font-size, var(--gaga-type-body-size, 1.04rem));
+  line-height: var(--gaga-article-line-height, var(--gaga-type-body-line-height, 1.72));
+  letter-spacing: var(--gaga-article-letter-spacing, 0em);
+}
+
 :is(.gaga-flagship-article, .gaga-flagship-article__prose, [data-gaga-article-shell], [data-gaga-reading-surface]) {
-  font-family: var(--gaga-article-font-family, inherit);
-  font-size: var(--gaga-article-font-size, 1.05rem);
-  line-height: var(--gaga-article-line-height, 1.75);
-  letter-spacing: var(--gaga-article-letter-spacing, normal);
   max-width: var(--gaga-article-measure, 44rem);
 }
 

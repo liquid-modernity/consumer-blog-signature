@@ -6,20 +6,28 @@ body[data-gaga-design-language='blueprintism'],
   --gaga-radius-sm: 4px;
   --gaga-radius-md: 6px;
   --gaga-radius-lg: 8px;
-  --gaga-font-display: Helvetica, Arial, sans-serif;
+  --gaga-font-display: var(--gaga-font-mono, 'JetBrains Mono', ui-monospace, monospace);
   --gaga-grid-size: 24px;
+  --gaga-type-display-tracking: -0.02em;
+}
+
+:root[data-gaga-design-language='blueprintism'] .gaga-main-region,
+body[data-gaga-design-language='blueprintism'] .gaga-main-region {
+  background-image:
+    linear-gradient(to right, var(--gaga-bg-grid-strong) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--gaga-bg-grid-strong) 1px, transparent 1px);
+  background-size: var(--gaga-grid-size, 24px) var(--gaga-grid-size, 24px);
 }
 
 :root[data-gaga-design-language='editorial'],
 body[data-gaga-design-language='editorial'],
 .gaga-app-frame[data-gaga-design-language='editorial'] {
-  --gaga-font-display: Georgia, 'Playfair Display', 'Times New Roman', serif;
+  --gaga-font-display: Georgia, 'Newsreader', 'Playfair Display', 'Times New Roman', serif;
   --gaga-content-width: 46rem;
   --gaga-radius-sm: 2px;
   --gaga-radius-md: 4px;
   --gaga-radius-lg: 6px;
   --gaga-type-body-line-height: 1.82;
-  --gaga-line: rgba(120, 113, 108, 0.22);
 }
 
 :root[data-gaga-design-language='brutalism'],
@@ -28,10 +36,19 @@ body[data-gaga-design-language='brutalism'],
   --gaga-radius-sm: 0px;
   --gaga-radius-md: 0px;
   --gaga-radius-lg: 0px;
-  --gaga-line: currentColor;
-  --gaga-line-strong: currentColor;
-  --gaga-shadow: 0.4rem 0.4rem 0 color-mix(in srgb, var(--gaga-ink) 25%, transparent);
-  --gaga-type-label-tracking: 0.04em;
+  --gaga-font-display: var(--gaga-font-mono, ui-monospace, monospace);
+  --gaga-line: color-mix(in srgb, var(--gaga-ink) 55%, transparent);
+  --gaga-line-strong: var(--gaga-ink);
+  --gaga-shadow: 0.35rem 0.35rem 0 color-mix(in srgb, var(--gaga-ink) 32%, transparent);
+  --gaga-type-label-tracking: 0.06em;
+}
+
+:root[data-gaga-design-language='brutalism'] :where(.pakrpp-tree-section, .gaga-topic-index a, .gaga-search-workspace__row, .gaga-reader-panel, .gaga-action-runtime__shell),
+body[data-gaga-design-language='brutalism'] :where(.pakrpp-tree-section, .gaga-topic-index a, .gaga-search-workspace__row, .gaga-reader-panel, .gaga-action-runtime__shell) {
+  border-width: 2px;
+  border-color: var(--gaga-line-strong);
+  border-radius: 0 !important;
+  box-shadow: var(--gaga-shadow);
 }
 
 :root[data-gaga-design-language='enterprise'],
@@ -41,10 +58,19 @@ body[data-gaga-design-language='enterprise'],
 body[data-gaga-design-language='corporate'],
 .gaga-app-frame[data-gaga-design-language='corporate'] {
   --gaga-font-display: var(--gaga-font-ui);
+  --gaga-content-width: 50rem;
   --gaga-radius-sm: 6px;
   --gaga-radius-md: 10px;
   --gaga-radius-lg: 14px;
-  --gaga-shadow: 0 0.75rem 2rem color-mix(in srgb, var(--gaga-ink) 10%, transparent);
+  --gaga-shadow: 0 0.75rem 2rem color-mix(in srgb, var(--gaga-ink) 12%, transparent);
+}
+
+:root[data-gaga-design-language='enterprise'] :where(.pakrpp-tree-section, .gaga-topic-index a),
+body[data-gaga-design-language='enterprise'] :where(.pakrpp-tree-section, .gaga-topic-index a) {
+  padding-inline: 1rem;
+  border: 1px solid var(--gaga-line);
+  border-radius: var(--gaga-radius-md);
+  background: color-mix(in srgb, var(--gaga-surface) 85%, transparent);
 }
 
 :root[data-gaga-design-language='minimal'],
@@ -75,3 +101,4 @@ body[data-gaga-design-language='futuristic'],
     --gaga-line-strong: currentColor;
   }
 }
+
