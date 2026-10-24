@@ -1,0 +1,66 @@
+[
+  {
+    "applicationId": "pub_002",
+    "collection": "posts",
+    "slug": "akal-imitasi-sebagai-pekerja-tanpa-dignity",
+    "originalPath": "src/content/docs/akal-imitasi-sebagai-pekerja-tanpa-dignity.md",
+    "sourceSha256": "d0608aab24900e470356f5a0d4c508e38dc36d8dcb88822d1441de50a87fe44c",
+    "bodySha256": "8df26cb6e5158871539fa874bcfe507af7a624659658f421adf01d5ef7a1d9d0"
+  },
+  {
+    "applicationId": "author.editorial-team",
+    "collection": "authors",
+    "slug": "editorial-team",
+    "originalPath": "src/content/docs/authors/editorial-team.md",
+    "sourceSha256": "08c5abbdda951c26759f71b24def879bc63d2dce767d8d6d9fea0fe40d966320",
+    "bodySha256": "b7736a6e134f0d2b4adecc12c6d063bf9b6ef687d73e22249f37f2bcd8a52fdd"
+  },
+  {
+    "applicationId": "consumer.article.context-aware-reading",
+    "collection": "posts",
+    "slug": "designing-context-aware-reading-surface",
+    "originalPath": "src/content/docs/designing-context-aware-reading-surface.md",
+    "sourceSha256": "cf3ca78cec5aabb6ceef60f5cd2086cd504932a27822e00dd69de7189577ecfb",
+    "bodySha256": "e04b5f1f1d1d85f03d079758b8b9db3f77f121b409c9889be7c6dde1e14ec3ec"
+  },
+  {
+    "applicationId": "pub_003",
+    "collection": "posts",
+    "slug": "dialog-imajiner-pakrpp-lizzie-monopoly-akal-imitasi",
+    "originalPath": "src/content/docs/dialog-imajiner-pakrpp-lizzie-monopoly-akal-imitasi.md",
+    "sourceSha256": "0777d538a53296d34e789dae9b29073a97fa7d377148fccf7966f3f036674e0f",
+    "bodySha256": "6e092ada7a61f84f87cc5da03a879e6cc5d4c81766c17f7988e2022025fb3b76"
+  },
+  {
+    "applicationId": "pub_004",
+    "collection": "posts",
+    "slug": "esg-etika-pasar-atau-tambalan-reputasi",
+    "originalPath": "src/content/docs/esg-etika-pasar-atau-tambalan-reputasi.md",
+    "sourceSha256": "c9d0e50209875e3160279f3150a8a54f80f6a252073095ce0567bc379adc7f7f",
+    "bodySha256": "62b960620e7f69fcf375ad4489981b481bdaba67bb71dc5026085505c1e61419"
+  },
+  {
+    "applicationId": "pub_005",
+    "collection": "posts",
+    "slug": "karsa-karya-kesejahteraan-antitesis-monopoly-dari-level-rw",
+    "originalPath": "src/content/docs/karsa-karya-kesejahteraan-antitesis-monopoly-dari-level-rw.md",
+    "sourceSha256": "a4f533fed21ec7f71f0b3dcf9937642fb09cd94376fe035af93315ac0e20e6e0",
+    "bodySha256": "c0c87f0670b2c0fcc37b6b5f4e3338e6061acb7f63e8f814744492a0cf9c9300"
+  },
+  {
+    "applicationId": "pub_001",
+    "collection": "posts",
+    "slug": "mengapa-ai-bukan-bukti",
+    "originalPath": "src/content/docs/mengapa-ai-bukan-bukti.md",
+    "sourceSha256": "620fc6bc32a80d3f390cbf033de119121f7e24ed203415c158e3a439c64794e1",
+    "bodySha256": "179191c6534a421abb6408a5f60678afc95ff6ec887c0c956e339d05c5aa4d9d"
+  },
+  {
+    "applicationId": "consumer.article.softcoded-systems",
+    "collection": "posts",
+    "slug": "softcoded-systems-scale-better-than-theme-forks",
+    "originalPath": "src/content/docs/softcoded-systems-scale-better-than-theme-forks.md",
+    "sourceSha256": "5c803d7712993afd13a1eabcc0e50029a7281c60c9a468122d2997c9a1947132",
+    "bodySha256": "ec86daf5314f3446f93a3e006d23abc740034fade2d19dde15b095eb21e5065f"
+  }
+]

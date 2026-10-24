@@ -1,0 +1,87 @@
+name: EmDash local activation and production preflight
+on:
+  push:
+    branches: [review/emdash-local-activation]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  cms:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: bash
+    env:
+      ASTRO_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.22.2
+      - name: Clean public application and CMS dependencies
+        run: |
+          mkdir -p "$RUNNER_TEMP/emdash-evidence"
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm --prefix cms ci --ignore-scripts --no-audit --no-fund
+      - name: Migration admission and original application boundaries
+        run: |
+          npm run test:cms | tee "$RUNNER_TEMP/emdash-evidence/migration-tests.log"
+          node tools/gaga/preservation.mjs
+          node tools/gaga/boundaries.mjs
+          cd cms
+          node node_modules/emdash/dist/cli/index.mjs seed --validate > "$RUNNER_TEMP/emdash-evidence/seed-validation.log" 2>&1
+      - name: Real CMS server build
+        run: npm --prefix cms run build > "$RUNNER_TEMP/emdash-evidence/cms-build.log" 2>&1
+      - name: CMS dependency audit
+        run: npm --prefix cms audit --audit-level=low --json > "$RUNNER_TEMP/emdash-evidence/cms-audit.json"
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+      - name: Maintained workflow lint
+        run: go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.7 -shellcheck= .github/workflows/emdash-activation.yml
+      - name: Source unchanged
+        run: |
+          git diff --exit-code
+          test -z "$(git ls-files --others --exclude-standard)"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: emdash-preparation-evidence
+          path: ${{ runner.temp }}/emdash-evidence
+  provider:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.22.2
+      - name: Existing credential and required-resource read-only preflight
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/provider-evidence"
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import {writeFileSync} from 'node:fs';
+          const token=process.env.CLOUDFLARE_API_TOKEN,account=process.env.CLOUDFLARE_ACCOUNT_ID;
+          assert.ok(token&&account,'Existing Cloudflare secrets unavailable');
+          const reads=[];
+          for(const [purpose,path] of [['token-status','/user/tokens/verify'],['workers-subdomain',`/accounts/${account}/workers/subdomain`],['d1-read',`/accounts/${account}/d1/database`],['r2-read',`/accounts/${account}/r2/buckets`]]){
+            const r=await fetch('https://api.cloudflare.com/client/v4'+path,{headers:{Authorization:'Bearer '+token},redirect:'error',signal:AbortSignal.timeout(20000)});
+            const b=await r.json();
+            reads.push({purpose,httpStatus:r.status,success:b.success===true,...(purpose==='token-status'&&b.success?{tokenStatus:b.result.status}:{}),...(purpose==='workers-subdomain'&&b.success?{subdomain:b.result.subdomain}:{}),...(!b.success?{errorCodes:(b.errors??[]).map(x=>x.code)}:{})});
+          }
+          const pass=reads.every(r=>r.success&&r.httpStatus===200);
+          writeFileSync(process.env.RUNNER_TEMP+'/provider-evidence/read-only.json',JSON.stringify({status:pass?'PASS':'OPERATOR_PERMISSION_REQUIRED',reads,resourceMutations:0,deployments:0,productionProvisioningAuthorizedByThisWorkflow:false},null,2)+'\n');
+          assert.ok(pass,'Read-only provider access incomplete; inspect the sanitized permission evidence before any provisioning');
+          JS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: emdash-provider-read-only
+          path: ${{ runner.temp }}/provider-evidence

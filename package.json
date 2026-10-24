@@ -27,7 +27,12 @@
     "precheck": "node tools/gaga/prepare.mjs",
     "test:gaga": "node --test tools/gaga/*.test.mjs",
     "test:consumer": "node tools/gaga/consumer.mjs",
-    "test:ui": "playwright test"
+    "test:ui": "playwright test",
+    "cms:dev": "bash scripts/cms-local.sh dev",
+    "cms:install": "bash scripts/cms-local.sh install",
+    "cms:seed": "bash scripts/cms-local.sh seed",
+    "cms:verify": "bash scripts/cms-local.sh verify",
+    "test:cms": "node --test tools/cms/*.test.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "7.0.8",

@@ -31,3 +31,7 @@ Thumbs.db
 worker/bundle.mjs
 test-results/
 playwright-report/
+
+# Local EmDash database, uploads and sessions
+cms/.data/
+cms/.emdash/
