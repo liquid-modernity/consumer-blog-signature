@@ -30,9 +30,15 @@ try{
  assert.deepEqual([db.binding,media.binding,kv.binding],['DB','MEDIA','SESSION']);assert.deepEqual([db.name,media.name,kv.name],[spec.databaseName,spec.mediaBucket,spec.sessionNamespace]);
  assert.match(db.id,/^[a-f0-9-]{36}$/);assert.match(kv.id,/^[a-f0-9]{32}$/);assert.equal(media.id,media.name);
  const d1=[{binding:'DB',database_name:db.name,database_id:db.id}],r2=[{binding:'MEDIA',bucket_name:media.name}],namespaces=[{binding:'SESSION',id:kv.id}];
- for(const config of [cfg,load('cms/dist-cloudflare/server/wrangler.json')]){
+ const generated=load('cms/dist-cloudflare/server/wrangler.json');
+ // Astro adds only this bookkeeping path; never relax the approved binding identities.
+ if(generated.d1_databases?.[0]?.migrations_dir!==undefined){
+  assert.equal(generated.d1_databases[0].migrations_dir,'../../migrations','Unexpected generated D1 migrations path');
+  generated.d1_databases=generated.d1_databases.map(({migrations_dir,...binding})=>binding);
+ }
+ for(const config of [cfg,generated]){
   assert.equal(config.name,spec.serviceName);assert.deepEqual(config.d1_databases,d1);assert.deepEqual(config.r2_buckets,r2);assert.deepEqual(config.kv_namespaces,namespaces);
-  for(const key of ['routes','route','services','queues','durable_objects','worker_loaders','unsafe'])assert.ok(config[key]===undefined||JSON.stringify(config[key])==='{}'||JSON.stringify(config[key])==='[]','Unexpected deployment scope: '+key);
+  for(const [key,empty] of Object.entries({routes:[],route:undefined,services:[],queues:{producers:[],consumers:[]},durable_objects:{bindings:[]},worker_loaders:[],unsafe:{}}))if(config[key]!==undefined)assert.deepEqual(config[key],empty,'Unexpected deployment scope: '+key);
  }
  assert.equal(cfg.workers_dev,true);assert.equal(cfg.preview_urls,false);
  const files=[];function inventory(dir){for(const f of readdirSync(dir,{withFileTypes:true})){const path=resolve(dir,f.name);if(f.isDirectory())inventory(path);else{assert.ok(f.isFile(),'Unexpected build file type');files.push({path:relative(root,path),sha256:createHash('sha256').update(readFileSync(path)).digest('hex')});}}}inventory(resolve(root,'cms/dist-cloudflare'));receipt.buildFiles=files.sort((a,b)=>a.path.localeCompare(b.path));
