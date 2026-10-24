@@ -65,6 +65,8 @@ test("maintained CI propagates failed commands through pipes and gates staging o
   for (const name of ["verify", "staging"])
     assert.equal(workflow.jobs[name].defaults.run.shell, "bash");
   assert.equal(workflow.jobs.staging.needs, "verify");
+  assert.equal(workflow.on.workflow_dispatch.inputs.deploy_preview.default, false);
+  assert.match(workflow.jobs.staging.if, /github.event_name == 'workflow_dispatch' && inputs.deploy_preview/);
   assert.equal(
     spawnSync("/bin/bash", [
       "--noprofile",

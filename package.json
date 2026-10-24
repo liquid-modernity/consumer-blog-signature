@@ -43,8 +43,8 @@
     "@gaga/corps-emdash": "0.1.0",
     "@gaga/corps-cloudflare": "0.1.0",
     "@astrojs/starlight": "0.41.10",
-    "@gaga/arsenal-contracts": "file:vendor/gaga-arsenal-contracts-0.0.0-dev.1.tgz",
-    "@gaga/arsenal": "file:vendor/gaga-arsenal-0.0.0-dev.1.tgz",
+    "@gaga/arsenal-contracts": "0.1.0",
+    "@gaga/arsenal": "0.1.0",
     "@astrojs/markdown-remark": "7.3.4"
   },
   "devDependencies": {

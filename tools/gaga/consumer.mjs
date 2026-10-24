@@ -32,7 +32,7 @@ assert.ok(result.output.results.some((r) => r.title.includes("Dignity")));
 const lock = JSON.parse(readFileSync("package-lock.json")),
   registry = [];
 for (const [name, p] of Object.entries(lock.packages))
-  if (name.startsWith("node_modules/@gaga/") && !name.includes("/arsenal")) {
+  if (name.startsWith("node_modules/@gaga/")) {
     const packageName = name.slice("node_modules/".length);
     const response = await fetch(
       "https://npm.cloudsmith.io/gaga/gaga/" +
@@ -73,6 +73,11 @@ for (const [name, p] of Object.entries(lock.packages))
         metadata[field] ?? null,
         packageName + " " + field,
       );
+    const admitted = JSON.parse(readFileSync("vendor/arsenal-consumer.json")).artifacts.find(a => a.name === packageName);
+    if (admitted) {
+      assert.equal(createHash("sha256").update(bytes).digest("hex"), admitted.sha256);
+      assert.equal(createHash("sha512").update(bytes).digest("hex"), admitted.sha512);
+    }
     registry.push({
       name: packageName,
       version: p.version,

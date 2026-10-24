@@ -1,23 +1,26 @@
 {
-  "sourceCommit": "44b394cb2249d5ae5886bd766547dad2d13bd733",
-  "baselineSource": "996ed1d476af528748f8d7861d941f272f5ae43b",
-  "reason": "Dotted machine endpoints and explicit prefix ownership required by the actual blog. Original dev.0 artifacts retained unchanged.",
+  "distribution": "public-registry",
+  "registry": "https://npm.cloudsmith.io/gaga/gaga/",
+  "sourceCommit": "17374947b8175a34c1f332005ca0927a4fd9d975",
+  "sourceSha256": "387762aecb615dec5d1a1a4cd6aaf8432503a8a18b903410a367c410b5fcd67f",
+  "controllerCommit": "edf8680bf0974d0b632d409f4ade88bb1ce30460",
+  "qualificationRun": 40103637774,
+  "publicationRun": 40104685274,
+  "schemaStatus": "EXPERIMENTAL",
+  "authoringApiStatus": "EXPERIMENTAL",
+  "historicalDevelopmentAdmission": "vendor/arsenal-dev1.json",
   "artifacts": [
     {
       "name": "@gaga/arsenal-contracts",
-      "version": "0.0.0-dev.1",
-      "file": "gaga-arsenal-contracts-0.0.0-dev.1.tgz",
-      "sha256": "563a8ce4e944b19e50fc93850c550e2dbdf49cbb88dfe0c2eb17ad3fa6ea4924",
-      "sha512": "bc87591650fa154032ee7344026d5e5ca4be3f0824d125ef57e8c2b7239a2b3ba9d8a3276259d72d784af1d4b6d699b781dbfa1bc4772eb96f45cadd2ef81dcf"
+      "version": "0.1.0",
+      "sha256": "bceb6b9510495d35524accd777630a2d1b632d58427efe57280a05e81decb39f",
+      "sha512": "205c49138a917e7b0d13f5b8c135ad7c33e4e60c2e7eb5ef14d7478f0c2c4890d84f5c77353d5cb2e9ce63f2219c03d012bc23900835353cb21b696494f8f7e2"
     },
     {
       "name": "@gaga/arsenal",
-      "version": "0.0.0-dev.1",
-      "file": "gaga-arsenal-0.0.0-dev.1.tgz",
-      "sha256": "983a65120a8789e739a0584abfacc5115546026b5cd7d81c2119eb2f7edc8d38",
-      "sha512": "deb437b58b37e0c32a98179225301859e44ff005293700d25d023037888a3cc94bb1949db2b11b9193b4e40892144014fa8fa0dc28acf29fa44c60d05f3e5c08"
+      "version": "0.1.0",
+      "sha256": "f3764d9811d268fcdda8393404b84138bdfafe6e7d7cd39a4c07648417f7b200",
+      "sha512": "0f3f9ef84059c1abe181ec6226aab09d259e99b6eadfd3eed341037ed32c176a53d5f790e8221764cab7924db47b4b071b3d270cbf32accbf8ab0b0942c6c1f0"
     }
-  ],
-  "qualificationRun": 40094534764,
-  "qualificationArtifactSha256": "9d9ba17335e0e10d7b5aeceb487f860bd272c5569e1a7d6b097a83609eb4105b"
+  ]
 }

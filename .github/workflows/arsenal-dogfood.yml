@@ -4,6 +4,11 @@ on:
     branches: [review/arsenal-dogfood]
   pull_request:
   workflow_dispatch:
+    inputs:
+      deploy_preview:
+        description: Explicitly deploy the qualified preview Worker
+        type: boolean
+        default: false
 permissions:
   contents: read
 concurrency:
@@ -31,12 +36,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22.22.2
-      - name: Clean install from public registries and admitted Arsenal artifacts
+      - name: Clean anonymous install from public registries
         run: |
           mkdir -p "$RUNNER_TEMP/blog-evidence"
           printf 'GAGA_EVIDENCE_DIRECTORY=%s/blog-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
           npm ci --ignore-scripts --no-audit --no-fund
-      - name: Public dependency and exact Arsenal artifact boundaries
+      - name: Public dependency and stable Arsenal integrity boundaries
         run: node tools/gaga/preservation.mjs && node tools/gaga/boundaries.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/boundaries.log"
       - name: Contract, CMS and existing signature regressions
         run: |
@@ -93,7 +98,7 @@ jobs:
             application/.gaga/deployment-manifest.json
   staging:
     needs: verify
-    if: github.event_name == 'push' && github.ref == 'refs/heads/review/arsenal-dogfood'
+    if: github.event_name == 'workflow_dispatch' && inputs.deploy_preview && github.ref == 'refs/heads/review/arsenal-dogfood'
     runs-on: ubuntu-24.04
     timeout-minutes: 12
     defaults:

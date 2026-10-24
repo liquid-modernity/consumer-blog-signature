@@ -5,17 +5,16 @@ const pkg = JSON.parse(readFileSync("package.json")),
   lock = JSON.parse(readFileSync("package-lock.json"));
 for (const [name, version] of Object.entries(pkg.dependencies))
   if (name.startsWith("@gaga/")) {
-    assert.ok(!version.startsWith("npm:") && !version.startsWith("workspace:"));
+    assert.match(version, /^\d+\.\d+\.\d+$/, "GAGA dependencies must use exact public versions");
     const p = lock.packages["node_modules/" + name];
     assert.ok(
       p && !p.link && !lstatSync("node_modules/" + name).isSymbolicLink(),
     );
-    if (!name.startsWith("@gaga/arsenal"))
-      assert.ok(p.resolved.startsWith("https://npm.cloudsmith.io/gaga/gaga/"));
+    assert.ok(p.resolved.startsWith("https://npm.cloudsmith.io/gaga/gaga/"));
   }
 for (const record of [
   "vendor/arsenal-foundation.json",
-  "vendor/arsenal-consumer.json",
+  "vendor/arsenal-dev1.json",
 ])
   for (const a of JSON.parse(readFileSync(record)).artifacts) {
     const bytes = readFileSync(
@@ -27,6 +26,15 @@ for (const record of [
     for (const hash of ["sha256", "sha512"])
       assert.equal(createHash(hash).update(bytes).digest("hex"), a[hash]);
   }
+const arsenalAdmission = JSON.parse(readFileSync("vendor/arsenal-consumer.json"));
+assert.equal(arsenalAdmission.distribution, "public-registry");
+assert.equal(arsenalAdmission.registry, "https://npm.cloudsmith.io/gaga/gaga/");
+for (const a of arsenalAdmission.artifacts) {
+  assert.equal(pkg.dependencies[a.name], a.version);
+  const p = lock.packages["node_modules/" + a.name];
+  assert.equal(p.version, a.version);
+  assert.equal(p.integrity, "sha512-" + Buffer.from(a.sha512, "hex").toString("base64"), "Published Arsenal differs from admitted stable artifact");
+}
 function walk(root) {
   for (const entry of readdirSync(root, { withFileTypes: true })) {
     const p = root + "/" + entry.name;
@@ -63,5 +71,5 @@ function walk(root) {
 walk("src");
 walk("tools/gaga");
 console.log(
-  "Public Engine/Corps registry packages; exact admitted Arsenal artifacts; no workspace/private imports",
+  "Public Engine/Corps/Arsenal registry packages; stable artifact integrity; no workspace/private imports",
 );

@@ -8,8 +8,10 @@ routes, editorial presentation, Dynamic Notch, Outline Peek and reader controls.
 
 Use Node **22.22.2** and npm **10.9.4** on a supported native host; CI uses Ubuntu
 24.04. The repository's scoped `.npmrc` installs public GAGA packages anonymously
-from Cloudsmith. Unpublished Arsenal packages are exact, checksum-pinned tarballs
-in `vendor/`, with their source and qualification recorded beside them.
+from Cloudsmith, including Arsenal **0.1.0**. Published Arsenal artifact hashes,
+source and qualification are recorded in `vendor/arsenal-consumer.json`. Historical
+development tarballs remain preserved but are no longer application dependencies.
+`gaga.app/v1` and authoring APIs remain experimental.
 
 ```sh
 npm ci --ignore-scripts
@@ -62,9 +64,9 @@ handler at `/api/search`. Both Node compatibility modes are disabled. The same
 assembled artifacts drive browser and Worker Search.
 
 The [dogfooding workflow](.github/workflows/arsenal-dogfood.yml) admits source and
-artifacts, requires passing consumer/browser/audit checks, then deploys only the
-existing preview Worker. Production promotion and Arsenal package publication
-are separate decisions.
+artifacts and requires passing consumer/browser/audit checks. Preview deployment
+requires an explicit manual `deploy_preview` selection; ordinary dependency
+validation does not deploy. Production promotion remains a separate decision.
 
 ## Signature interface
 

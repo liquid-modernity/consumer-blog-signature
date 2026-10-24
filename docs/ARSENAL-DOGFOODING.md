@@ -12,7 +12,7 @@ bytes match that preserved worktree.
 | Owner | Interface and direction | Version / source | Failure and refresh |
 |---|---|---|---|
 | Blog | UI, route matching, publication rendering, facet/command presentation | This repository | Existing signature audits + desktop/mobile browser tests |
-| Arsenal | `gaga.app.json` → normalized declaration → composition plan → assembly | Exact local tarballs, vendor/arsenal-consumer.json | Fail on invalid/missing/conflicting requirements before content reads |
+| Arsenal | `gaga.app.json` → normalized declaration → composition plan → assembly | Public Cloudsmith 0.1.0, vendor/arsenal-consumer.json | Fail on invalid/missing/conflicting requirements before content reads |
 | Engine | Public Search, content/SEO utilities, browser runtime | Public Cloudsmith 0.4.0 | Public package diagnostics, no private source imports |
 | Corps | Astro/Starlight/EmDash/Cloudflare projections | Public Cloudsmith 0.1.0 | Explicit projection rejection, no host account authority |
 | EmDash | Sole editorial CMS contract; read-only pinned body/metadata export | content/emdash/snapshot.json | Revision/draft/body hash gates; explicit reviewed export replacement |
@@ -38,13 +38,16 @@ npx playwright install --with-deps chromium
 npm run test:ui
 ```
 
-The scoped .npmrc installs Engine and Corps anonymously from Cloudsmith. Arsenal
-remains unpublished. Its exact dev.0 baseline artifacts from source
-996ed1d476af528748f8d7861d941f272f5ae43b are preserved. The real blog exposed two
-additive contract gaps: dotted machine endpoint paths and prefix ownership. The
-reviewed dev.1 artifacts add only those fields/rules and regression coverage;
-see vendor/arsenal-consumer.json for source and both checksums. No engine or
-Corps behavior changed, and no registry publication is performed by this task.
+The scoped .npmrc installs Engine 0.4.0, Corps 0.1.0 and Arsenal 0.1.0
+anonymously from Cloudsmith. No workspace links or held tarballs are application
+dependencies. `vendor/arsenal-consumer.json` pins the published Arsenal hashes and
+source. Original dev.0/dev.1 artifacts and admissions remain historical evidence.
+
+The real blog exposed two additive contract gaps: safe dotted machine endpoint
+paths and explicit exact/prefix ownership. Stable 0.1.0 retains the corrected
+implementation byte-for-byte. `gaga.app/v1` and authoring APIs remain experimental;
+package publication does not freeze declaration compatibility. Engine and Corps
+behavior remains unchanged.
 
 ## Application and routes
 
@@ -123,5 +126,5 @@ false match against the intentionally preserved `__header`/`__heading` classes.
 
 CI now uses explicit Bash pipefail and a deployment qualification receipt that
 requires four passing browser cases, no failures/skips/flakes, a successful
-consumer receipt and a zero-vulnerability audit. A failed consumer gate blocks
-staging. Earlier failed or misleading-green attempts remain preserved as evidence.
+consumer receipt and a zero-vulnerability audit. Preview deployment is explicit opt-in on manual dispatch; a failed consumer gate
+blocks staging. Earlier failed or misleading-green attempts remain preserved as evidence.

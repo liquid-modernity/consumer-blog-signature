@@ -1,7 +1,7 @@
 # consumer-blog-signature
 
 Application-owned UI, routes, Dynamic Notch, typography and presentation stay here.
-Use public Engine 0.4.0 and Corps 0.1.0 packages only. Arsenal artifacts are pinned in
+Use public Engine 0.4.0, Corps 0.1.0 and Arsenal 0.1.0 packages only. Arsenal registry artifacts are pinned in
 vendor/arsenal-consumer.json. Read docs/ARSENAL-DOGFOODING.md before changing integration.
 Published editorial files referenced by content/emdash/snapshot.json are read-only
 snapshot bodies; do not treat them as a second CMS or execute remote MDX.
