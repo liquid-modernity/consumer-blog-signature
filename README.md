@@ -24,7 +24,7 @@ npx playwright install --with-deps chromium
 npm run test:ui
 ```
 
-`verify` validates the declaration and CMS snapshot, runs the existing signature
+`verify` validates the declaration and recorded CMS export, runs the existing signature
 checks, checks TypeScript, builds the actual blog, composes Search, validates the
 public registry dependencies and executes the Worker under native workerd.
 
@@ -47,15 +47,25 @@ without replacing the blog with a documentation theme. Astro is **7.3.3**.
 
 ## Content authority
 
-Editorial content is behind the read-only EmDash connector boundary. The current
-input is explicitly a **pinned migration seed** from eight preserved published
-blog documents, not a live EmDash export. Revision, draft, metadata and body-hash
-checks reject drift. The Markdown files are snapshot bodies, not a second writable
-CMS. Live EmDash origin, ingestion and authorized export remain a provider
-activation step. Tank and Vehicle are not part of this stack.
+EmDash **1.3.1** is the editorial authority. Eight records were imported into the
+real local CMS and read through its authenticated REST API. The blog renders and
+indexes the admitted published export in `content/emdash/published.json`, including
+real revision pins. Draft overlays, stale reads and denied access fail closed.
+Builds consume that recorded export; they do not claim a fresh CMS read.
 
-See [the migration and ownership model](docs/ARSENAL-DOGFOODING.md) for the source
-mapping, versions, snapshot refresh rules and limitations.
+Start the local admin at <http://localhost:4321/_emdash/admin>:
+
+```sh
+npm run cms:install
+npm run cms:dev
+```
+
+The one-time import and admin setup are already complete on this laptop. Edit
+editorial content in EmDash, never in the preserved migration Markdown files.
+Refresh the admitted export explicitly before rebuilding. See [CMS operation and
+production prerequisites](docs/EMDASH-ACTIVATION.md) and [local commands](cms/README.md).
+Production CMS provisioning and website promotion remain pending. Tank and Vehicle
+are outside this application.
 
 ## Runtime and deployment
 

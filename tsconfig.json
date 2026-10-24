@@ -21,6 +21,7 @@
     "node_modules",
     "dist",
     ".gaga",
-    "worker/bundle.mjs"
+    "worker/bundle.mjs",
+    "cms"
   ]
 }

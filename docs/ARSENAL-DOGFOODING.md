@@ -15,7 +15,7 @@ bytes match that preserved worktree.
 | Arsenal | `gaga.app.json` → normalized declaration → composition plan → assembly | Public Cloudsmith 0.1.0, vendor/arsenal-consumer.json | Fail on invalid/missing/conflicting requirements before content reads |
 | Engine | Public Search, content/SEO utilities, browser runtime | Public Cloudsmith 0.4.0 | Public package diagnostics, no private source imports |
 | Corps | Astro/Starlight/EmDash/Cloudflare projections | Public Cloudsmith 0.1.0 | Explicit projection rejection, no host account authority |
-| EmDash | Sole editorial CMS contract; read-only pinned body/metadata export | content/emdash/snapshot.json | Revision/draft/body hash gates; explicit reviewed export replacement |
+| EmDash | Sole editorial CMS; authenticated published-content export | EmDash 1.3.1, content/emdash/published.json | Native revision/draft/body hash gates; explicit refresh and rebuild |
 | GitHub / Cloudflare | Source/CI and preview deployment/runtime | Existing repository/workflow and secure secrets | No production deployment from this branch; failed provider proof stays explicit |
 
 Old npm aliases have been replaced by their actual public packages. The optional
@@ -68,23 +68,19 @@ adding a public theme/demo route.
 
 ## Editorial content authority
 
-There is no live EmDash endpoint or CMS secret configured in this repository.
-The first checkpoint is explicitly a **pinned migration seed**, not a claim of a
-live CMS export. `cms.example` and `seed-*` provider IDs are labelled placeholders;
-application content IDs (including dotted legacy references) remain unchanged.
-Provider IDs and application IDs are separate. Before connecting live EmDash,
-replace this seed with an authenticated, host-accepted published export and its
-real revision IDs/origin. Live provider deployment is not proven by this seed.
+Real local EmDash 1.3.1 now owns seven articles and one author. The local REST
+proof verified imported bodies/metadata, stable native revision pins, draft and
+stale rejection, denied reads, public Corps projection, Arsenal assembly and
+Engine Search. Application IDs remain separate from native provider IDs.
+`content/emdash/published.json` and its receipt contain the admitted published
+output. This is a recorded real-provider export, not the old synthetic seed.
 
-Eight existing published editorial Markdown bodies remain at their original
-paths as read-only snapshot bodies. Their bytes and frontmatter must match the
-snapshot inventory; draft/stale revisions and new unadmitted editorial files fail.
-They are not a second writable CMS. Application-owned MDX shells, topic landing
-pages, QA fixtures and system/route presentation remain application source.
-There is no CMS write, two-way sync, background refresh or fallback to an
-unverified editorial store. An updated CMS export requires reviewed pin/body
-inventory changes and a rebuild; static Workers serve that same immutable set.
-Existing Obsidian links and content paths remain intact.
+The content loader renders the CMS body while retaining original application
+entry IDs and paths for links. Original Markdown, `content/emdash/snapshot.json`
+and `cms/migration/seed.json` remain read-only migration evidence. Application MDX,
+route shells and presentation remain application-owned. No CMS token is bundled
+into the site or Worker. Refresh is explicit; the export does not prove perpetual
+freshness. See [the local proof and production model](EMDASH-ACTIVATION.md).
 
 ## Search and runtime
 
@@ -108,7 +104,7 @@ upstream package publication, Tank, Vehicle and redesign are out of scope.
 | Blog owns historical UI/media primitives | Application concern | Preserve used source/behavior locally |
 | Dotted machine endpoints and route namespaces not expressible | Arsenal contract deficiency | Add safe dotted paths and exact/prefix ownership; retain v1 experimental |
 | Dotted application IDs differ from provider IDs | Application concern | Explicit identity mapping in migration seed |
-| No live EmDash environment | Provider concern | Verified seed snapshot; live proof explicitly pending |
+| No initial EmDash environment | Provider concern | Real local CMS and REST proof now pass; production stores/access remain pending |
 | Old Wrangler transitive security advisories | Application toolchain | Update owned deployment tool to 4.152.0; audit gate retained |
 | Catalina cannot run modern esbuild/workerd | Environment limitation | Fresh supported hosted build/runtime proof |
 

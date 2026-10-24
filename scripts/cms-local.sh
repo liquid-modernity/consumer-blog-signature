@@ -22,5 +22,5 @@ case "${1:-dev}" in
   seed) exec npm run seed ;;
   verify) cd "$cms_project_root"; exec node --env-file-if-exists=.env.cms.local tools/cms/verify-local.mjs ;;
   refresh) cd "$cms_project_root"; exec node --env-file-if-exists=.env.cms.local tools/cms/refresh.mjs ;;
-  *) echo 'Usage: npm run cms:install | cms:dev | cms:seed' >&2; exit 1 ;;
+  *) echo 'Usage: npm run cms:install | cms:dev | cms:seed | cms:verify | cms:refresh' >&2; exit 1 ;;
 esac

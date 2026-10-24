@@ -49,7 +49,24 @@ This command is restricted to localhost:4321. It reads actual EmDash REST items,
 checks the imported body and metadata, restores original native publication dates
 where present, tests a temporary disposable draft, rejects denied/unauthorized
 reads, composes through public Arsenal, and executes public Engine Search. Its
-export/receipt under `.gaga/cms` contains published data and provenance, no token.
-Until that command succeeds, no live-content proof or production provisioning is
-claimed. The blog continues its previously admitted snapshot until the explicit
-CMS export cutover is qualified. No main promotion or website deployment occurs.
+admitted export in `content/emdash/published.json` contains published data and
+native provenance, never a token. The separate `cms/migration/local-proof.json`
+records the successful real local provider proof. The blog now reads this export.
+The original source Markdown is immutable migration evidence.
+
+For later editorial refreshes use the read-only command:
+
+```sh
+npm run cms:refresh
+```
+
+It requires `CMS_ORIGIN` and `CMS_READ_TOKEN` in the private `.env.cms.local` file
+or process environment. Create a separate `content:read` PAT for this purpose;
+`CMS_LOCAL_TOKEN` is only the temporary local migration/test credential. Refresh
+performs GETs only, rejects unpublished/draft/changed records, and updates the
+admitted export and receipt. Review their diff, verify and rebuild. A refresh
+cannot itself prove the comprehensive migration test again; the provisioning
+proof remains pinned to its originally tested export.
+
+[Production architecture and operator checklist](../docs/EMDASH-ACTIVATION.md).
+No main promotion, website deployment or production credential change is included.
