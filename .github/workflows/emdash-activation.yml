@@ -52,6 +52,10 @@ jobs:
         run: npm --prefix cms run build > "$RUNNER_TEMP/emdash-evidence/cms-build.log" 2>&1
       - name: Separate production CMS Worker build, no deployment
         run: npm --prefix cms run build:cloudflare > "$RUNNER_TEMP/emdash-evidence/cms-cloudflare-build.log" 2>&1
+      - name: Compiled CMS startup under local native workerd, no provider access
+        env:
+          GAGA_EVIDENCE_DIRECTORY: ${{ runner.temp }}/emdash-evidence/cms-runtime
+        run: node tools/cms/runtime-proof.mjs
       - name: Actual blog through the admitted real CMS export
         env:
           GAGA_EVIDENCE_DIRECTORY: ${{ runner.temp }}/emdash-evidence/blog
