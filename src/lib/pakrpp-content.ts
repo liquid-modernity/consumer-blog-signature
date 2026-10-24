@@ -6,7 +6,7 @@ import {
   type ConsumerArticleRecord
 } from './content';
 import { contentDefaults } from '../config/content';
-import { resolveContentDateLocale } from '@gaga/engine/content';
+import { resolveContentDateLocale } from '@gaga/engine-capabilities/content';
 import {
   curationRegistry,
   getEnabledTopics,
@@ -440,8 +440,8 @@ export async function getSystematicKnowledgeIndex(): Promise<KnowledgeIndexLette
 }
 
 export const localContentAdapter: ContentProviderAdapter = {
-  providerId: 'local-astro',
-  providerName: 'Astro Content Layer (CMS-Neutral Bootstrap Adapter)',
+  providerId: 'emdash-cms',
+  providerName: 'Read-only EmDash pinned publication snapshot',
   async getPublications() {
     return toCanonicalPublications();
   },

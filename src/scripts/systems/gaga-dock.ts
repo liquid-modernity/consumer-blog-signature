@@ -1,4 +1,4 @@
-import { onRuntimeEvent } from '@gaga/engine-web/runtime/events';
+import { onRuntimeEvent } from '@gaga/engine-runtime/runtime/events';
 
 let initialized = false;
 

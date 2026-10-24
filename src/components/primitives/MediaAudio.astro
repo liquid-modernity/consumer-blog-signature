@@ -1,0 +1,61 @@
+---
+import type { GagaMediaCredit, GagaMediaFallback, GagaMediaSource, GagaMediaTranscript } from './types.js';
+import { isSafeMediaLink, isSafeMediaSource } from './media-security.js';
+
+interface Props {
+  sources: GagaMediaSource[];
+  caption?: string;
+  fallback?: GagaMediaFallback;
+  transcript?: GagaMediaTranscript;
+  credit?: GagaMediaCredit;
+  preload?: 'none' | 'metadata' | 'auto';
+  spokenKind?: 'human-recorded' | 'generated';
+  contentId?: string;
+  language?: string;
+  class?: string;
+}
+
+const {
+  sources,
+  caption,
+  fallback,
+  transcript,
+  credit,
+  preload = 'metadata',
+  spokenKind,
+  contentId,
+  language,
+  class: className = ''
+} = Astro.props;
+
+if (!Array.isArray(sources) || sources.length === 0) throw new Error('MediaAudio requires at least one source.');
+if (sources.some((source) => !source.src || !isSafeMediaSource(source.src))) throw new Error('MediaAudio sources require safe HTTP(S), blob, or relative src.');
+if (fallback?.href && !isSafeMediaLink(fallback.href)) throw new Error('MediaAudio fallback href is unsafe.');
+if (transcript?.href && !isSafeMediaLink(transcript.href)) throw new Error('MediaAudio transcript href is unsafe.');
+if (credit?.href && !isSafeMediaLink(credit.href)) throw new Error('MediaAudio credit href is unsafe.');
+
+const hasCaption = Boolean(caption || transcript || credit);
+---
+<figure class:list={['gaga-media', 'gaga-media--audio', className]} data-gaga-media-kind="audio" data-gaga-spoken-kind={spokenKind} data-gaga-content-id={contentId}>
+  <audio controls preload={preload} lang={language}>
+    {sources.map((source) => <source src={source.src} type={source.type} media={source.media} />)}
+    {fallback ? (
+      <>
+        {fallback.text}
+        {fallback.href ? <a href={fallback.href}>{fallback.href}</a> : null}
+      </>
+    ) : null}
+  </audio>
+  {hasCaption ? (
+    <figcaption data-gaga-media-caption>
+      {caption ? <span>{caption}</span> : null}
+      {transcript ? <a href={transcript.href} data-gaga-media-transcript>{transcript.label}</a> : null}
+      {credit ? (
+        <small data-gaga-media-credit>
+          {credit.label ? <span>{credit.label}</span> : null}
+          {credit.href ? <a href={credit.href}>{credit.text}</a> : <span>{credit.text}</span>}
+        </small>
+      ) : null}
+    </figcaption>
+  ) : null}
+</figure>

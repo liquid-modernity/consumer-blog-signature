@@ -8,7 +8,7 @@ import { contentDefaults } from '../../config/content';
 import { i18nCount, i18nLabel } from '../../config/i18n';
 import { getArticles, getAuthors, getTagGroup, getTagGroups, getTopicGroups, toArticlePreview } from '../../lib/content';
 import { getScreenInfo } from '../../lib/screen-info';
-import { normalizeContentMetadata, resolveContentDateLocale } from '@gaga/engine/content';
+import { normalizeContentMetadata, resolveContentDateLocale } from '@gaga/engine-capabilities/content';
 
 export async function getStaticPaths() {
   const tagGroups = await getTagGroups();

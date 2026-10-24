@@ -1,0 +1,222 @@
+{
+  "baseCommit": "8238a486d63271518c6fd40b3facd3235325cbfc",
+  "allowedNormalization": "Only old public package specifiers to current public package specifiers. No markup/style/interaction/config change.",
+  "files": [
+    {
+      "path": "src/components/frame/ActionRuntime.astro",
+      "sha256AfterImportRename": "02fc85f162dc758280e9c27326d98c8dee329af9a918fd1a1c31bf8c3eff22ca"
+    },
+    {
+      "path": "src/components/frame/AppFrameBase.astro",
+      "sha256AfterImportRename": "be9f178f1c6acde3577634c23b2d9a4adc505e0b9efaab0e725c9cae9f5eaa30"
+    },
+    {
+      "path": "src/components/frame/ArticleOutlinePeek.astro",
+      "sha256AfterImportRename": "dd1c0e4ba263a3089b652a4b299b2c5a3966f88f0e8e8b4b0e764aaef41f84d9"
+    },
+    {
+      "path": "src/components/frame/GagaDock.astro",
+      "sha256AfterImportRename": "3ae6ddbc7cdb8553509ec9a87e83033b61a082c9cd20e6cbcc0d4998bd69bd51"
+    },
+    {
+      "path": "src/components/frame/GlobalNavigationRail.astro",
+      "sha256AfterImportRename": "1c33512f746ac444d56deca424e1049f9116f5d5ac5bf398f73ced60234a0439"
+    },
+    {
+      "path": "src/components/frame/LeftRail.astro",
+      "sha256AfterImportRename": "9381d0d433e5202c7b053b528830897adb055e438718af265b214c6db135f0fe"
+    },
+    {
+      "path": "src/components/frame/MainCanvas.astro",
+      "sha256AfterImportRename": "d2ee933444c8d4ed15572943610cd5db2d340c9c52d525438865a878419ea630"
+    },
+    {
+      "path": "src/components/frame/RightInfoRail.astro",
+      "sha256AfterImportRename": "4ff5e94903ffa3529a6543016416416647a1baec31ca7ca3ec3b8b6158e25f6f"
+    },
+    {
+      "path": "src/components/frame/RightRailMeta.astro",
+      "sha256AfterImportRename": "9ac4806356517bd891ba725aaed8752ab00e0430072a2d6813363295ed0a48ae"
+    },
+    {
+      "path": "src/components/frame/StandaloneAppFrame.astro",
+      "sha256AfterImportRename": "b550bdaa4d9cceef1f2f7ef0add9bf464d4ac2c44df06ea78ac6d08ac45e22ab"
+    },
+    {
+      "path": "src/components/frame/component-inputs.ts",
+      "sha256AfterImportRename": "32dac34f9dbeb3d8e9ace5aae691015f15188b04d3e1800a048f51550befb306"
+    },
+    {
+      "path": "src/components/frame/site-composition.ts",
+      "sha256AfterImportRename": "188a9d0b22401486dba512fe79b978ff1eae02f56ef54f579b2630ffb1b6f39b"
+    },
+    {
+      "path": "src/components/gaga/ArticleShell.astro",
+      "sha256AfterImportRename": "70d3850853525e0fcf01e2e276276a81661059b7bbb1acc13672f7055ecb0136"
+    },
+    {
+      "path": "src/components/gaga/ContentPanel.astro",
+      "sha256AfterImportRename": "cc221e99db643eeb0703bbb98919f74ea54515cdf9113dfd532eddb5a225568a"
+    },
+    {
+      "path": "src/components/gaga/GagaSiteLayout.astro",
+      "sha256AfterImportRename": "ab878fb1b320f8d0b996bfc439e1914cb519a1ea3c27af3f2967aa4433ae66ab"
+    },
+    {
+      "path": "src/components/gaga/Head.astro",
+      "sha256AfterImportRename": "fc2664bf2cc0f8336d35b2d6dc918a6b79bd8bdb2753b4ec8f7bad2fd149e8e6"
+    },
+    {
+      "path": "src/components/gaga/MarkdownContent.astro",
+      "sha256AfterImportRename": "2fa37bf17b8e71e69e217f45de8ea190cc80655988a48cf2d0567f27d7d83528"
+    },
+    {
+      "path": "src/components/gaga/PageFrame.astro",
+      "sha256AfterImportRename": "a0fc326ac16811880529ab14bf909a50ea46b40ef0e24856448581e41a79ef0b"
+    },
+    {
+      "path": "src/components/gaga/PageTitle.astro",
+      "sha256AfterImportRename": "8db1a53cf87b5fd7109b44457f7581a25357bbbbc224a777dcf017767340eff3"
+    },
+    {
+      "path": "src/components/gaga/media/GagaImage.astro",
+      "sha256AfterImportRename": "0f5284568d088ee55ddaade6c060bce037d2afe6711b3ffb10423b06b73d8ca2"
+    },
+    {
+      "path": "src/config/design.ts",
+      "sha256AfterImportRename": "df9ae23f2a09cd3c47e3bd0dcfa6a8b6452d05cdceafad75e98c5977790e252e"
+    },
+    {
+      "path": "src/config/nav.ts",
+      "sha256AfterImportRename": "f76b8fdec6ea2b521ebc6f668c2f80e235ca06353b67861f3b32bf784d108143"
+    },
+    {
+      "path": "src/config/reader.ts",
+      "sha256AfterImportRename": "4329f5f484416e983412eaf03a754d8457ea6c66fe672c2717102e9ebf81ad44"
+    },
+    {
+      "path": "src/config/routes.ts",
+      "sha256AfterImportRename": "80379b070f520b4ebc853d054e1272a066f643769149daa9c1050beb8b1ee129"
+    },
+    {
+      "path": "src/config/theme.ts",
+      "sha256AfterImportRename": "3c576402c8e72d53ea3617177701b727468fc841dd9800019b66e28106c24de6"
+    },
+    {
+      "path": "src/styles/components/rail-behaviour.scss",
+      "sha256AfterImportRename": "f921eaebd6256b8aa69cd350378d7fa0f827a7738f48c007c8b3f0e1b897f951"
+    },
+    {
+      "path": "src/styles/components/rail-runtime.scss",
+      "sha256AfterImportRename": "3d546435d70af7b77bd5c4c14b7c2b81c2f31238bd2c0ceace378101634a792e"
+    },
+    {
+      "path": "src/styles/gaga-tokens.css",
+      "sha256AfterImportRename": "ace74246b1021ebf889f457f9aaee2e0d6b82c56244a92552e8319ddd2378c2f"
+    },
+    {
+      "path": "src/styles/partials/_a11y.scss",
+      "sha256AfterImportRename": "78fc8b98d4270e9e63a148818fccaeca3c7420d4df75fc60ae2149cb6aaf0357"
+    },
+    {
+      "path": "src/styles/partials/_action-island.scss",
+      "sha256AfterImportRename": "b5dc180d24e54d3972f72665646ddc9d7296c6f1f2e40211b92226eba210e73a"
+    },
+    {
+      "path": "src/styles/partials/_breakpoints.generated.scss",
+      "sha256AfterImportRename": "871d90056d38a154637b26fe2f9f76cc6340a0b551881b0dccaefe24ea567147"
+    },
+    {
+      "path": "src/styles/partials/_breakpoints.scss",
+      "sha256AfterImportRename": "14cc4bf8c73a114d8f459b6a6453673fc49fd27e4fce225865ee0b3f5950ce18"
+    },
+    {
+      "path": "src/styles/partials/_content.scss",
+      "sha256AfterImportRename": "d8c669ba9d1936e5f733a45006d65b55762d4cc59a11bb37f7025a8cd12b9a5e"
+    },
+    {
+      "path": "src/styles/partials/_coverage.scss",
+      "sha256AfterImportRename": "5d0e9217853ac08bf3cf0872d76fceb557758727a3bfc5b81c124c071c2d1a8f"
+    },
+    {
+      "path": "src/styles/partials/_design-languages.scss",
+      "sha256AfterImportRename": "e5f15ac20d2b0eda34be046be7af1a85cabd19d44d97a256bbf845fc86e1e76a"
+    },
+    {
+      "path": "src/styles/partials/_editorial-front.scss",
+      "sha256AfterImportRename": "c08d1e8082cf2bcc1ce72330aefdd420606b124a4a3eddee92874962b887c3b7"
+    },
+    {
+      "path": "src/styles/partials/_frame.scss",
+      "sha256AfterImportRename": "bb1a48fefda6e57177c204074d83c9d55399ff87d261b0eac503bff80b5bcdc4"
+    },
+    {
+      "path": "src/styles/partials/_gaga-dock.scss",
+      "sha256AfterImportRename": "e8c8c118a3910f149561aa666a8fe29a2f0958d2f158b9fefa62e18f3228501c"
+    },
+    {
+      "path": "src/styles/partials/_global-nav.scss",
+      "sha256AfterImportRename": "97fc4e00da3b6e9ce07e4efd4485cb2cdc266a1f3d554ef2e65cfcd8227a86f8"
+    },
+    {
+      "path": "src/styles/partials/_knowledge-graph.scss",
+      "sha256AfterImportRename": "3a09495d759fd9ac2d3ace0ca7babd4234ffc6f0a4a9c8c675210ee8b5c2f8f4"
+    },
+    {
+      "path": "src/styles/partials/_landing.scss",
+      "sha256AfterImportRename": "b1fc962a96ffba12d7b47341145aa167cc4c1753ee748745b5a4cf48785858c6"
+    },
+    {
+      "path": "src/styles/partials/_left-rail.scss",
+      "sha256AfterImportRename": "6bb934ee2e2097d5a19aee60c9cd1a76171075501c59e9305f55dd87532eb534"
+    },
+    {
+      "path": "src/styles/partials/_motion.scss",
+      "sha256AfterImportRename": "0357b5c38f9b156f10e36275b4dbc0cf97fe352685cf6d2f007f77998cd7dd54"
+    },
+    {
+      "path": "src/styles/partials/_outline-peek.scss",
+      "sha256AfterImportRename": "b5dbb33f30ef6e6f561ea5b7fbf01eae470cf0b3890b07b9c38140c5507d468e"
+    },
+    {
+      "path": "src/styles/partials/_people.scss",
+      "sha256AfterImportRename": "084021d4cd47f51637185c78b3dc79c390d7b80a79c88920699499a272755e75"
+    },
+    {
+      "path": "src/styles/partials/_rail-polish.scss",
+      "sha256AfterImportRename": "b4fb9b756b910c9bb3050c9addb53e156757048ac47169c1855b7fcb28cf11c0"
+    },
+    {
+      "path": "src/styles/partials/_reader.scss",
+      "sha256AfterImportRename": "a9b837fa4d2529da9824e38e0b10ba9466387c2b04a1d8714340eb80c524a405"
+    },
+    {
+      "path": "src/styles/partials/_right-rail.scss",
+      "sha256AfterImportRename": "d245abfcfc4e9d73c2e2e0c723ed6b6621947862284ffd11441fda36c7bd3e40"
+    },
+    {
+      "path": "src/styles/partials/_section-front.scss",
+      "sha256AfterImportRename": "220e0573e085f4d5c213fc7981df04ffae140582f14a8a58c857630a0429f024"
+    },
+    {
+      "path": "src/styles/partials/_visual-polish.scss",
+      "sha256AfterImportRename": "6188a9f85afde0f35d1966affa0e81adf3cbad55810ff8e178d1935a7cff1559"
+    },
+    {
+      "path": "src/styles/signature.scss",
+      "sha256AfterImportRename": "05eab1b97778edecc98b28b6709bfdcaac26acea4bde79ed08d38fce3b5eca76"
+    },
+    {
+      "path": "src/styles/tokens.css",
+      "sha256AfterImportRename": "83707608d34729fc2deae6e932ce55161e48a8d1f38efe2fb763953506238f8b"
+    },
+    {
+      "path": "src/styles/tokens/_gaga-motion.scss",
+      "sha256AfterImportRename": "ba66f73483a4b618e9a3ca41eaca8f3af145dd3823e099578d8297e7b3275e45"
+    },
+    {
+      "path": "src/styles/tokens/_gaga-surfaces.scss",
+      "sha256AfterImportRename": "ad71fe1e8e645cc4ac65be820e15d0834da3973cf391f3a6e13524f11e153e28"
+    }
+  ]
+}

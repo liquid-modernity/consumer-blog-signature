@@ -2,7 +2,7 @@
 import { contentDefaults } from '../../config/content';
 import { getEditorialFront } from '../../lib/editorial';
 import { toArticlePreview } from '../../lib/content';
-import { normalizeContentMetadata, resolveContentDateLocale } from '@gaga/engine/content';
+import { normalizeContentMetadata, resolveContentDateLocale } from '@gaga/engine-capabilities/content';
 import {
   getEnabledRootSections,
   navigationConfig,
@@ -351,8 +351,8 @@ const socialSection = sectionById.get('social');
 </div>
 
 <script>
-  import { readArray } from '@gaga/engine-web/runtime/storage';
-  import { isSavedItem, type SavedItem } from '@gaga/engine-web/reader';
+  import { readArray } from '@gaga/engine-runtime/runtime/storage';
+  import { isSavedItem, type SavedItem } from '@gaga/engine-runtime/reader';
 
   function syncSavedRootSection() {
     const listEl = document.querySelector<HTMLUListElement>('[data-pakrpp-saved-root-list]');

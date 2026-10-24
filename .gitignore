@@ -25,3 +25,9 @@ Thumbs.db
 
 # Catalina compatibility runtime
 .compat/
+
+# Derived Arsenal plans and test evidence
+.gaga/
+worker/bundle.mjs
+test-results/
+playwright-report/

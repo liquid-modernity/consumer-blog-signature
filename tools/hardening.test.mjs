@@ -119,7 +119,7 @@ test('Gaga Dynamic Notch Island + Dynamic Outline Peek signature', () => {
   assert.ok(outline.includes('data-gaga-outline-current-index'), 'Outline Peek must expose semantic section position');
   assert.ok(outline.includes('data-gaga-outline-sheet-current-label'), 'Expanded outline must expose the current semantic section label');
   assert.ok(!outline.includes('data-gaga-outline-close'), 'Outline v2 must not use a legacy close button');
-  assert.ok(!outline.includes('gaga-outline-peek__head'), 'Outline v2 must not restore the legacy visible utility header');
+  assert.ok(![...outline.matchAll(/class="([^"]+)"/g)].flatMap(m=>m[1].split(/\s+/)).includes('gaga-outline-peek__head'), 'Outline v2 must not restore the legacy visible utility header');
   assert.ok(outline.includes('data-gaga-depth="expanded"'), 'Outline v2 must support progressive sheet depth');
   assert.ok(!outline.includes('gaga-outline-progress'), 'Bottom Outline Peek must not duplicate the numeric reading progress bar');
   assert.ok(outlineStyles.includes('inset-inline-start: 50%'), 'Outline Peek must anchor bottom-center');

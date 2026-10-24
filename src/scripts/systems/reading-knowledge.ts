@@ -1,6 +1,6 @@
-import { createPersonalHighlight } from '@gaga/engine/annotation';
-import { createAnnotationStorage } from '@gaga/engine-web/runtime/annotation';
-import { readJson, writeJson } from '@gaga/engine-web/runtime/storage';
+import { createPersonalHighlight } from '@gaga/engine-capabilities/annotation';
+import { createAnnotationStorage } from '@gaga/engine-runtime/runtime/annotation';
+import { readJson, writeJson } from '@gaga/engine-runtime/runtime/storage';
 
 export const ANNOTATION_STORAGE_KEY = 'gaga:annotations:v1';
 export const KNOWLEDGE_STORAGE_KEY = 'gaga:reading-knowledge:v1';

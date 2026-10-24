@@ -1,0 +1,57 @@
+---
+import type { GagaAriaCurrent } from './types.js';
+
+interface Props {
+  href?: string;
+  action?: string;
+  label?: string;
+  ariaLabel?: string;
+  ariaControls?: string;
+  ariaExpanded?: boolean;
+  ariaPressed?: boolean;
+  ariaCurrent?: GagaAriaCurrent;
+  active?: boolean;
+  disabled?: boolean;
+  class?: string;
+}
+
+const {
+  href,
+  action,
+  label,
+  ariaLabel,
+  ariaControls,
+  ariaExpanded,
+  ariaPressed,
+  ariaCurrent,
+  active,
+  disabled = false,
+  class: className = ''
+} = Astro.props;
+const currentValue = ariaCurrent === true ? 'page' : ariaCurrent || undefined;
+---
+{href ? (
+  <a
+    class:list={['gaga-button', className]}
+    href={href}
+    aria-label={ariaLabel}
+    aria-current={currentValue}
+    data-gaga-active={active === undefined ? undefined : String(active)}
+  >
+    {label}<slot />
+  </a>
+) : (
+  <button
+    class:list={['gaga-button', className]}
+    type="button"
+    data-gaga-action={action}
+    data-gaga-active={active === undefined ? undefined : String(active)}
+    aria-label={ariaLabel}
+    aria-controls={ariaControls}
+    aria-expanded={ariaExpanded}
+    aria-pressed={ariaPressed}
+    disabled={disabled}
+  >
+    {label}<slot />
+  </button>
+)}

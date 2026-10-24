@@ -38,3 +38,9 @@ This is version `0.0.1`: a migration candidate derived from the supplied vehicle
 
 ## GAGA 0.0.35
 Production hardening foundation added for runtime policy, content boundary, and lifecycle contracts.
+
+## Current GAGA application integration
+
+See [Arsenal dogfooding](docs/ARSENAL-DOGFOODING.md) for the canonical declaration,
+public Engine 0.4.0 / Corps 0.1.0 dependencies, exact unpublished Arsenal artifacts,
+read-only CMS snapshot authority, supported toolchain and verification commands.

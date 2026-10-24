@@ -1,5 +1,5 @@
-import { createOutlinePeekCapability } from '@gaga/engine-web/runtime/outline-peek';
-import { onRuntimeEvent, requestLeftRail, requestReaderPanel, type SurfaceCommandDetail } from '@gaga/engine-web/runtime/events';
+import { createOutlinePeekCapability } from '@gaga/engine-runtime/runtime/outline-peek';
+import { onRuntimeEvent, requestLeftRail, requestReaderPanel, type SurfaceCommandDetail } from '@gaga/engine-runtime/runtime/events';
 import { getOutlinePeekAttachment, outlinePeekRequiresTableOfContents, supportsOutlinePeek } from '../../config/systems';
 import { articleReadingScopeIsActive, resolveReadingScrollContext } from './reading-scroll';
 

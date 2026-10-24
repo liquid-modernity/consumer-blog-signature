@@ -1,9 +1,9 @@
-import { createSfxCapability, type SfxToneConfig } from '@gaga/engine-web/runtime/sfx';
-import { requestFeedback } from '@gaga/engine-web/runtime/events';
+import { createSfxCapability, type SfxToneConfig } from '@gaga/engine-runtime/runtime/sfx';
+import { requestFeedback } from '@gaga/engine-runtime/runtime/events';
 import { actionFeedbackLabel, actionForCommand } from '../../config/actions';
 import { defaultReaderSfxPreference, isReaderSfxPreference, type ReaderSfxPreference } from '../../config/reader';
 import { storageKeys } from '../../config/systems';
-import { readJson, writeJson } from '@gaga/engine-web/runtime/storage';
+import { readJson, writeJson } from '@gaga/engine-runtime/runtime/storage';
 
 type Tone = 'hover' | 'focus' | 'tap' | 'click' | 'confirm' | 'open';
 

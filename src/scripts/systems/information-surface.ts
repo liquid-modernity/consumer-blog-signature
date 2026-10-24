@@ -1,5 +1,5 @@
-import { initInformationSurface as initEngineInformationSurface } from '@gaga/engine-web/runtime/information-surface';
-import { requestFeedback, requestOutline } from '@gaga/engine-web/runtime/events';
+import { initInformationSurface as initEngineInformationSurface } from '@gaga/engine-runtime/runtime/information-surface';
+import { requestFeedback, requestOutline } from '@gaga/engine-runtime/runtime/events';
 import { getInformationPreviewRestoreDelayMs } from '../../config/systems';
 
 let initialized = false;

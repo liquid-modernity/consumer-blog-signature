@@ -1,4 +1,4 @@
-import { createReturnNavigationCapability, type ReturnNavigationCapability } from '@gaga/engine-web/runtime/return-navigation';
+import { createReturnNavigationCapability, type ReturnNavigationCapability } from '@gaga/engine-runtime/runtime/return-navigation';
 import { storageKeys } from '../../config/systems';
 
 let capability: ReturnNavigationCapability | undefined;

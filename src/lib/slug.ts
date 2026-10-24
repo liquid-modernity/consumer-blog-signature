@@ -1,4 +1,4 @@
-import { slugify } from '@gaga/engine/content';
+import { slugify } from '@gaga/engine-capabilities/content';
 
 type EntryLike = { id: string; data: Record<string, unknown> };
 

@@ -1,5 +1,6 @@
 import { defineCollection } from 'astro:content';
 import { z } from 'astro/zod';
+import {docsSchema} from '@astrojs/starlight/schema';
 import { gagaDocumentSchema } from './gaga/content/schema';
 import { gagaContentLoader } from './gaga/content/loader';
 import {
@@ -114,6 +115,6 @@ const consumerFrontmatter = z.object({
 export const collections = {
   docs: defineCollection({
     loader: gagaContentLoader(),
-    schema: gagaDocumentSchema.extend(consumerFrontmatter.shape)
+    schema: docsSchema({extend:gagaDocumentSchema.extend(consumerFrontmatter.shape)})
   })
 };

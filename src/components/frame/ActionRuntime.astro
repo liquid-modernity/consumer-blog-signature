@@ -473,7 +473,7 @@ const actionsLabel = i18nLabel('actionIsland.actions');
 </div>
 
 <script>
-  import { onRuntimeEvent } from '@gaga/engine-web/runtime/events';
+  import { onRuntimeEvent } from '@gaga/engine-runtime/runtime/events';
   import { runSiteCommand } from '../../scripts/systems/site-commands';
   import { getUnifiedScrollMetrics, resolveReadingScrollContext } from '../../scripts/systems/reading-scroll';
   import {
@@ -657,7 +657,7 @@ const actionsLabel = i18nLabel('actionIsland.actions');
       const button = target.closest<HTMLButtonElement>('[data-gaga-action]');
       const command = button?.dataset.gagaAction;
       if (button && command) {
-        // Stop propagation so @gaga/engine-web's document listener does not double-toggle the Reader Panel
+        // Stop propagation so @gaga/engine-runtime's document listener does not double-toggle the Reader Panel
         event.preventDefault();
         event.stopPropagation();
 

@@ -1,4 +1,4 @@
-import { createI18nCapability } from '@gaga/engine-web/runtime/i18n';
+import { createI18nCapability } from '@gaga/engine-runtime/runtime/i18n';
 import { i18nText, isI18nMessageKey, resolveLocale, type GagaLocale } from '../../config/i18n';
 import { defaultReaderLanguage, isReaderLanguage } from '../../config/reader';
 import { storageKeys } from '../../config/systems';

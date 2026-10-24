@@ -1,4 +1,4 @@
-import { sanitizeOutlineItems, type CanonicalContentMetadata, type ContentDateLocaleConfig } from '@gaga/engine/content';
+import { sanitizeOutlineItems, type CanonicalContentMetadata, type ContentDateLocaleConfig } from '@gaga/engine-capabilities/content';
 import { getPageContext, type PageContext, type PageContextTocItem } from './page-context';
 import type { AuthorRecord, ConsumerArticleRecord, TagGroup, TopicGroup } from './content';
 

@@ -1,10 +1,10 @@
-import { createFocusModeCapability } from '@gaga/engine-web/runtime/focus-mode';
+import { createFocusModeCapability } from '@gaga/engine-runtime/runtime/focus-mode';
 import {
   requestLeftRail,
   requestQuickActionsSync,
   requestRightRail,
   type SurfaceCommandDetail
-} from '@gaga/engine-web/runtime/events';
+} from '@gaga/engine-runtime/runtime/events';
 import { supportsGagaDock } from '../../config/systems';
 
 let initialized = false;

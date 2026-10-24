@@ -1,0 +1,136 @@
+name: Real Arsenal blog dogfooding
+on:
+  push:
+    branches: [review/arsenal-dogfood]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: blog-arsenal-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: application
+    env:
+      ASTRO_TELEMETRY_DISABLED: "1"
+      ASTRO_DEV_BACKGROUND: "1"
+      WRANGLER_SEND_METRICS: "false"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: application
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.22.2
+      - name: Clean install from public registries and admitted Arsenal artifacts
+        run: |
+          mkdir -p "$RUNNER_TEMP/blog-evidence"
+          printf 'GAGA_EVIDENCE_DIRECTORY=%s/blog-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+          npm ci --ignore-scripts --no-audit --no-fund
+      - name: Public dependency and exact Arsenal artifact boundaries
+        run: node tools/gaga/preservation.mjs && node tools/gaga/boundaries.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/boundaries.log"
+      - name: Contract, CMS and existing signature regressions
+        run: |
+          npm run test:gaga | tee "$GAGA_EVIDENCE_DIRECTORY/tests.log"
+          npm test | tee "$GAGA_EVIDENCE_DIRECTORY/signature.log"
+      - name: Strict TypeScript and Astro checking
+        run: npm run check | tee "$GAGA_EVIDENCE_DIRECTORY/types.log"
+      - name: Build the real publication and Worker
+        run: npm run build | tee "$GAGA_EVIDENCE_DIRECTORY/build.log"
+      - name: Registry artifacts, actual Starlight rendering, EmDash and native workerd
+        run: npm run test:consumer | tee "$GAGA_EVIDENCE_DIRECTORY/consumer.log"
+      - name: Chromium for existing application UI verification
+        run: npx playwright install --with-deps chromium
+      - name: Native shell, Dynamic Notch, publication and Search at desktop/mobile
+        run: npm run test:ui | tee "$GAGA_EVIDENCE_DIRECTORY/browser.log"
+      - name: Dependency audit
+        run: npm audit --audit-level=low --json > "$GAGA_EVIDENCE_DIRECTORY/audit.json"
+      - name: Workers configuration dry run, no deployment
+        run: npx wrangler deploy --dry-run --outdir "$GAGA_EVIDENCE_DIRECTORY/wrangler-dry-run" | tee "$GAGA_EVIDENCE_DIRECTORY/wrangler.log"
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+      - name: Workflow lint
+        run: go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.7 -shellcheck= .github/workflows/arsenal-dogfood.yml
+      - name: Source identity and deployable artifact inventory
+        run: |
+          git diff --exit-code
+          test -z "$(git ls-files --others --exclude-standard)"
+          git log -1 --format=%B | grep -F 'Signed-off-by:'
+          git rev-parse HEAD > "$GAGA_EVIDENCE_DIRECTORY/commit.txt"
+          node tools/gaga/deployment-manifest.mjs
+      - name: Preserve application evidence
+        if: always()
+        run: |
+          cp -R .gaga/*.json .gaga/*.png "$GAGA_EVIDENCE_DIRECTORY/" 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: blog-arsenal-evidence
+          path: ${{ runner.temp }}/blog-evidence
+      - uses: actions/upload-artifact@v4
+        with:
+          name: blog-arsenal-deployable
+          include-hidden-files: true
+          path: |
+            application/dist
+            application/worker/bundle.mjs
+            application/wrangler.jsonc
+            application/.gaga/deployment-manifest.json
+  staging:
+    needs: verify
+    if: github.event_name == 'push' && github.ref == 'refs/heads/review/arsenal-dogfood'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    defaults:
+      run:
+        working-directory: application
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: application
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.22.2
+      - uses: actions/download-artifact@v4
+        with:
+          name: blog-arsenal-deployable
+          path: application
+      - name: Admit exact qualified application artifacts
+        run: |
+          mkdir -p "$RUNNER_TEMP/staging-evidence"
+          printf 'GAGA_EVIDENCE_DIRECTORY=%s/staging-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';import{readFileSync}from'node:fs';import{createHash}from'node:crypto';
+          const m=JSON.parse(readFileSync('.gaga/deployment-manifest.json'));
+          assert.equal(m.sourceCommit,process.env.GITHUB_SHA);
+          for(const f of m.files){assert.ok(/^(dist\/|worker\/bundle\.mjs$|wrangler\.jsonc$)/.test(f.path)&&!f.path.split('/').includes('..'));assert.equal(createHash('sha256').update(readFileSync(f.path)).digest('hex'),f.sha256);}
+          const config=JSON.parse(readFileSync('wrangler.jsonc'));
+          assert.equal(config.name,'consumer-blog-signature');assert.deepEqual(config.compatibility_flags,['no_nodejs_compat','no_nodejs_compat_v2']);
+          JS
+      - name: Deploy the existing preview Worker only
+        id: deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: application
+          wranglerVersion: "4.152.0"
+          command: deploy --name consumer-blog-signature-preview
+      - name: Anonymous staged assets and actual Worker Search
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: node tools/gaga/staging-verify.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: blog-arsenal-staging-evidence
+          path: ${{ runner.temp }}/staging-evidence

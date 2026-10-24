@@ -1,7 +1,7 @@
-import { isSavedItem, type SavedItem } from '@gaga/engine-web/reader';
-import { onRuntimeEvent, requestQuickActionsSync, requestToast } from '@gaga/engine-web/runtime/events';
-import { readArray, readJson, writeJson } from '@gaga/engine-web/runtime/storage';
-import { createReadingCollectionStore } from '@gaga/engine-web/runtime/reading-collection';
+import { isSavedItem, type SavedItem } from '@gaga/engine-runtime/reader';
+import { onRuntimeEvent, requestQuickActionsSync, requestToast } from '@gaga/engine-runtime/runtime/events';
+import { readArray, readJson, writeJson } from '@gaga/engine-runtime/runtime/storage';
+import { createReadingCollectionStore } from '@gaga/engine-runtime/runtime/reading-collection';
 import {
   continuityStoragePolicy,
   isContinuityStatus,

@@ -1,8 +1,8 @@
-import { createRightRailCapability } from '@gaga/engine-web/runtime/right-rail';
+import { createRightRailCapability } from '@gaga/engine-runtime/runtime/right-rail';
 import {
   requestLeftRail,
   requestQuickActionsSync
-} from '@gaga/engine-web/runtime/events';
+} from '@gaga/engine-runtime/runtime/events';
 import {
   defaultRailPreference,
   getConfiguredLeftRailState,

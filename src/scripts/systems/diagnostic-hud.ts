@@ -12,7 +12,7 @@
 import { getReadingBehaviorMetrics, subscribeReadingBehavior } from './reading-behaviour';
 import { getUnifiedScrollMetrics, readingScrollOwner } from './reading-scroll';
 import { rebindTocSpy } from './toc-spy';
-import { requestToast } from '@gaga/engine-web/runtime/events';
+import { requestToast } from '@gaga/engine-runtime/runtime/events';
 
 let hudElement: HTMLElement | null = null;
 let isVisible = false;

@@ -1,4 +1,4 @@
-import { createServiceWorkerCapability } from '@gaga/engine-web/runtime/service-worker';
+import { createServiceWorkerCapability } from '@gaga/engine-runtime/runtime/service-worker';
 
 export function initPwa() {
   void createServiceWorkerCapability({

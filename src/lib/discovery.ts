@@ -1,4 +1,4 @@
-import { absoluteUrl } from '@gaga/engine/seo';
+import { absoluteUrl } from '@gaga/engine-capabilities/seo';
 import { contentDefaults } from '../config/content';
 import { discoveryConfig } from '../config/discovery';
 import { seoConfig } from '../config/seo';

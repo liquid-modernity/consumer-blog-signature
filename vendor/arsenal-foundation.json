@@ -1,0 +1,39 @@
+{
+  "sourceCommit": "996ed1d476af528748f8d7861d941f272f5ae43b",
+  "artifacts": [
+    {
+      "name": "@gaga/arsenal-contracts",
+      "version": "0.0.0-dev.0",
+      "file": "gaga-arsenal-contracts-0.0.0-dev.0.tgz",
+      "bytes": 6972,
+      "sha256": "23f5621898dec9d26990372c905b018271ffdb61546ccbae27d54e768d4428f6",
+      "sha512": "74ccb5a431dd062b31aab5f57c73e8e1dad63b9cfdb6c3d058f86dbbb3e1196dd8899f1415e96e7d0866363fc480c3fb6594b7f2149fb2d51c5205b64ebde988",
+      "files": [
+        "LICENSE",
+        "NOTICE",
+        "README.md",
+        "dist/gaga.app.v1.schema.json",
+        "dist/index.d.ts",
+        "dist/index.js",
+        "package.json"
+      ]
+    },
+    {
+      "name": "@gaga/arsenal",
+      "version": "0.0.0-dev.0",
+      "file": "gaga-arsenal-0.0.0-dev.0.tgz",
+      "bytes": 8923,
+      "sha256": "d2812682eeaf882dc65f35aaee23568b9444fc7fcd893d9314773cf459bb8e8f",
+      "sha512": "f0e7f5427c7618664803f2636994c37ae566d15edf0bfee3c20369e32125a9a31076ca0bd7e17cd820ebad2d1cddce1f315fb4db5d655e6a4bece89236c574a9",
+      "files": [
+        "LICENSE",
+        "NOTICE",
+        "README.md",
+        "dist/compatibility.json",
+        "dist/index.d.ts",
+        "dist/index.js",
+        "package.json"
+      ]
+    }
+  ]
+}

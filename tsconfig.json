@@ -3,10 +3,24 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@config/*": ["src/config/*"],
-      "@components/*": ["src/components/*"],
-      "@lib/*": ["src/lib/*"],
-      "@scripts/*": ["src/scripts/*"]
+      "@config/*": [
+        "src/config/*"
+      ],
+      "@components/*": [
+        "src/components/*"
+      ],
+      "@lib/*": [
+        "src/lib/*"
+      ],
+      "@scripts/*": [
+        "src/scripts/*"
+      ]
     }
-  }
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    ".gaga",
+    "worker/bundle.mjs"
+  ]
 }

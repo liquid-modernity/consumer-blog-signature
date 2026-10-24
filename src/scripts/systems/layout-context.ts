@@ -1,5 +1,5 @@
-import { createLayoutContextCapability } from '@gaga/engine-web/runtime/layout-context';
-import { emitLayoutChanged } from '@gaga/engine-web/runtime/events';
+import { createLayoutContextCapability } from '@gaga/engine-runtime/runtime/layout-context';
+import { emitLayoutChanged } from '@gaga/engine-runtime/runtime/events';
 import { getLayoutMode } from '../../config/systems';
 
 let initialized = false;

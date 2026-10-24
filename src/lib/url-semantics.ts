@@ -5,9 +5,9 @@ export {
   normalizeSitePath,
   shouldOpenExternalNavigation,
   sitePathFromHref
-} from '@gaga/engine/url';
+} from '@gaga/engine-capabilities/url';
 
 export type {
   SiteUrlClassification as GagaUrlClassification,
   SiteUrlSemantics as GagaUrlSemantics
-} from '@gaga/engine/url';
+} from '@gaga/engine-capabilities/url';

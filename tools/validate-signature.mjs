@@ -74,17 +74,8 @@ if (missing.length) {
 }
 
 const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-for (const name of ['@gaga/engine', '@gaga/engine-web', '@gaga/engine-astro']) {
-  const val = pkg.dependencies?.[name];
-  if (!val || (!val.includes('0.1.6') && !val.includes('0.2.1') && !val.includes('0.3.0') && !val.includes('0.4.0'))) {
-    console.error(`${name} must be pinned to a valid GAGA release`);
-    process.exit(1);
-  }
-}
-
-if (pkg.dependencies?.['@astrojs/starlight'] || pkg.devDependencies?.['@astrojs/starlight']) {
-  console.error('Legacy Starlight dependency is not allowed in the native GAGA publishing shell.');
-  process.exit(1);
+for (const [name,version] of Object.entries({'@gaga/engine-capabilities':'0.4.0','@gaga/engine-runtime':'0.4.0','@gaga/corps-astro':'0.1.0','@gaga/corps-starlight':'0.1.0','@gaga/corps-emdash':'0.1.0','@gaga/corps-cloudflare':'0.1.0','astro':'7.3.3','@astrojs/starlight':'0.41.10'})) {
+  if(pkg.dependencies?.[name]!==version) throw Error('Incorrect public dependency: '+name);
 }
 
 function sourceFiles(root) {
@@ -98,9 +89,8 @@ function sourceFiles(root) {
 }
 
 const legacyPatterns = [
-  /starlight/i,
   /toStarlightSidebar/,
-  /--sl-/,
+  /@astrojs\/starlight\/style\//,
   /\.sl-container/
 ];
 
@@ -115,7 +105,7 @@ for (const file of sourceFiles('src')) {
 }
 
 if (legacyHits.length) {
-  console.error('Legacy Starlight surface remains in active source:', legacyHits);
+  console.error('Unexpected theme takeover in application source:', legacyHits);
   process.exit(1);
 }
 

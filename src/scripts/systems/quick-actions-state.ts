@@ -1,6 +1,6 @@
-import { createQuickActionsStateCapability, type QuickActionElement } from '@gaga/engine-web/runtime/quick-actions-state';
-import { isSavedItem } from '@gaga/engine-web/reader';
-import { readArray } from '@gaga/engine-web/runtime/storage';
+import { createQuickActionsStateCapability, type QuickActionElement } from '@gaga/engine-runtime/runtime/quick-actions-state';
+import { isSavedItem } from '@gaga/engine-runtime/reader';
+import { readArray } from '@gaga/engine-runtime/runtime/storage';
 import { actionById, actionForCommand, isGagaActionId, type GagaAction } from '../../config/actions';
 import { storageKeys, supportsGagaDock } from '../../config/systems';
 import { isSameSitePath, normalizeSitePath } from '../../lib/url-semantics';

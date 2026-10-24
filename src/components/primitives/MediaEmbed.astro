@@ -1,0 +1,61 @@
+---
+import type { GagaMediaFallback, GagaMediaPrivacy } from './types.js';
+import { isSafeEmbedSource, isSafeMediaLink } from './media-security.js';
+
+interface Props {
+  src: string;
+  title: string;
+  width: number | string;
+  height: number | string;
+  fallback: GagaMediaFallback;
+  privacy: GagaMediaPrivacy;
+  sandbox?: string;
+  allow?: string;
+  referrerPolicy?: import('astro/types').HTMLAttributes<'iframe'>['referrerpolicy'];
+  loading?: 'lazy';
+  caption?: string;
+  class?: string;
+}
+
+const {
+  src,
+  title,
+  width,
+  height,
+  fallback,
+  privacy,
+  sandbox = '',
+  allow,
+  referrerPolicy = 'strict-origin-when-cross-origin',
+  loading = 'lazy',
+  caption,
+  class: className = ''
+} = Astro.props;
+
+if (!src || !isSafeEmbedSource(src)) throw new Error('MediaEmbed requires a safe HTTP(S) or relative src.');
+if (!title) throw new Error('MediaEmbed requires an accessible title.');
+if (!width || !height) throw new Error('MediaEmbed requires width and height.');
+if (!fallback?.text || !fallback.href) throw new Error('MediaEmbed requires fallback text and href.');
+if (!isSafeMediaLink(fallback.href)) throw new Error('MediaEmbed fallback href is unsafe.');
+if (!privacy) throw new Error('MediaEmbed requires privacy classification.');
+
+const hasCaption = Boolean(caption || fallback);
+---
+<figure class:list={['gaga-media', 'gaga-media--embed', className]} data-gaga-media-kind="embed" data-gaga-media-privacy={privacy}>
+  <iframe
+    src={src}
+    title={title}
+    width={width}
+    height={height}
+    loading="lazy"
+    sandbox={sandbox}
+    allow={allow}
+    referrerpolicy={referrerPolicy}
+  ></iframe>
+  {hasCaption ? (
+    <figcaption data-gaga-media-caption>
+      {caption ? <span>{caption}</span> : null}
+      <a href={fallback.href} data-gaga-media-fallback>{fallback.text}</a>
+    </figcaption>
+  ) : null}
+</figure>

@@ -1,4 +1,4 @@
-import { onRuntimeEvent, type ToastDetail } from '@gaga/engine-web/runtime/events';
+import { onRuntimeEvent, type ToastDetail } from '@gaga/engine-runtime/runtime/events';
 
 let toastEl: HTMLElement | null = null;
 let lastPointer = { x: 24, y: 24 };

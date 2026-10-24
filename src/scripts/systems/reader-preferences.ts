@@ -1,12 +1,12 @@
-import { createReaderPreferencesCapability } from '@gaga/engine-web/runtime/reader-preferences';
+import { createReaderPreferencesCapability } from '@gaga/engine-runtime/runtime/reader-preferences';
 import {
   requestLeftRail,
   requestOutline,
   requestQuickActionsSync,
   requestReaderPanel,
   requestToast
-} from '@gaga/engine-web/runtime/events';
-import { readJson, writeJson } from '@gaga/engine-web/runtime/storage';
+} from '@gaga/engine-runtime/runtime/events';
+import { readJson, writeJson } from '@gaga/engine-runtime/runtime/storage';
 import {
   defaultReaderSfxPreference,
   defaultReaderState,

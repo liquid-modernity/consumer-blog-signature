@@ -2,7 +2,7 @@
 import { getEditorialSections } from '../../lib/editorial';
 import { toArticlePreview } from '../../lib/content';
 import { contentDefaults } from '../../config/content';
-import { resolveContentDateLocale } from '@gaga/engine/content';
+import { resolveContentDateLocale } from '@gaga/engine-capabilities/content';
 
 const sections = await getEditorialSections();
 const surfaceLocale = resolveContentDateLocale(

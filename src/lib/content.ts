@@ -7,7 +7,7 @@ import {
   type ArticlePreview,
   type ArticlePreviewOptions,
   type ArticleRecord
-} from '@gaga/engine/content';
+} from '@gaga/engine-capabilities/content';
 import { entryToHref, screenSlug } from './slug';
 import type { EditorialRole, StoryFormat } from '../config/editorial-schema';
 import { resolveCoverageAuthority, type CoverageAuthority } from '../config/coverage';

@@ -7,7 +7,7 @@ import {
   type HighlightEntity,
   type HighlightLocation
 } from './reading-knowledge';
-import { requestToast } from '@gaga/engine-web/runtime/events';
+import { requestToast } from '@gaga/engine-runtime/runtime/events';
 import { registerSiteCommand } from './site-commands';
 
 type SpeechMode = 'article' | 'selection';

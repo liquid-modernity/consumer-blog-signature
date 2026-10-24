@@ -4,7 +4,7 @@ import {
   sanitizeOutlineItems,
   type CanonicalContentMetadata,
   type ContentDateLocaleConfig
-} from '@gaga/engine/content';
+} from '@gaga/engine-capabilities/content';
 import {
   groupArticlesByMonth,
   type AuthorRecord,

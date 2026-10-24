@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createRemarkObsidianBridge } from '@gaga/engine-obsidian';
+import { createRemarkObsidianBridge } from '@gaga/engine-adapter-obsidian';
 import { contentRootConfig } from '../config/content-roots.mjs';
 
 const repositoryRoot = path.dirname(path.dirname(path.dirname(fileURLToPath(import.meta.url))));

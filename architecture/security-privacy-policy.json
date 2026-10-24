@@ -35,7 +35,8 @@
   },
   "embeds": {
     "allowedIframeFiles": [
-      "src/components/media/InteractiveEmbed.astro"
+      "src/components/media/InteractiveEmbed.astro",
+      "src/components/primitives/MediaEmbed.astro"
     ],
     "requireSandbox": true,
     "requireLazyLoading": true,

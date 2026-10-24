@@ -1,0 +1,165 @@
+{
+  "schema": "gaga.app/v1",
+  "id": "consumer-blog-signature",
+  "metadata": {
+    "title": "PAKRPP \u2014 Scalable Knowledge Publication System",
+    "type": "publication"
+  },
+  "engine": {
+    "version": "0.4.0",
+    "capabilities": ["gaga.capability.search"]
+  },
+  "integrations": [
+    {
+      "id": "publication",
+      "package": "@gaga/corps-astro",
+      "version": "0.1.0"
+    },
+    {
+      "id": "knowledge",
+      "package": "@gaga/corps-starlight",
+      "version": "0.1.0"
+    },
+    {
+      "id": "cms",
+      "package": "@gaga/corps-emdash",
+      "version": "0.1.0"
+    },
+    {
+      "id": "worker",
+      "package": "@gaga/corps-cloudflare",
+      "version": "0.1.0"
+    }
+  ],
+  "contentSources": [
+    {
+      "id": "published-content",
+      "integration": "cms",
+      "resource": "published-snapshot",
+      "environment": ["cms-origin"]
+    },
+    {
+      "id": "application-pages",
+      "integration": "publication",
+      "resource": "site-owned-documents",
+      "environment": []
+    }
+  ],
+  "routes": [
+    {
+      "id": "publication",
+      "path": "/",
+      "scope": "prefix",
+      "owner": "publication",
+      "target": "pages"
+    },
+    {
+      "id": "knowledge",
+      "path": "/knowledge",
+      "scope": "prefix",
+      "owner": "knowledge",
+      "target": "pages"
+    },
+    {
+      "id": "search-service",
+      "path": "/api/search",
+      "scope": "exact",
+      "owner": "worker",
+      "target": "api",
+      "capability": "gaga.capability.search"
+    },
+    {
+      "id": "search-index",
+      "path": "/search-index.json",
+      "scope": "exact",
+      "owner": "publication",
+      "target": "pages"
+    },
+    {
+      "id": "machine-index",
+      "path": "/machine.json",
+      "scope": "exact",
+      "owner": "publication",
+      "target": "pages"
+    },
+    {
+      "id": "agent-index",
+      "path": "/agent.json",
+      "scope": "exact",
+      "owner": "publication",
+      "target": "pages"
+    },
+    {
+      "id": "sitemap",
+      "path": "/sitemap.xml",
+      "scope": "exact",
+      "owner": "publication",
+      "target": "pages"
+    },
+    {
+      "id": "sitemap-index",
+      "path": "/sitemap-index.xml",
+      "scope": "exact",
+      "owner": "publication",
+      "target": "pages"
+    },
+    {
+      "id": "rss",
+      "path": "/rss.xml",
+      "scope": "exact",
+      "owner": "publication",
+      "target": "pages"
+    },
+    {
+      "id": "robots",
+      "path": "/robots.txt",
+      "scope": "exact",
+      "owner": "publication",
+      "target": "pages"
+    },
+    {
+      "id": "llms",
+      "path": "/llms.txt",
+      "scope": "exact",
+      "owner": "publication",
+      "target": "pages"
+    }
+  ],
+  "host": {
+    "site": "https://consumer-blog-signature.ratriatra.workers.dev",
+    "targets": [
+      {
+        "id": "pages",
+        "runtime": "build",
+        "integration": "publication"
+      },
+      {
+        "id": "api",
+        "runtime": "edge",
+        "integration": "worker"
+      }
+    ]
+  },
+  "environment": [
+    {
+      "id": "cms-origin",
+      "binding": "CMS_ORIGIN",
+      "kind": "url",
+      "required": false
+    }
+  ],
+  "build": {
+    "outputs": [
+      {
+        "target": "pages",
+        "format": "static",
+        "directory": "dist"
+      },
+      {
+        "target": "api",
+        "format": "module",
+        "directory": "worker"
+      }
+    ]
+  }
+}

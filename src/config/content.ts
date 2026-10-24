@@ -1,7 +1,7 @@
 import { siteConfig } from './site';
 import { contentRootConfig as sharedContentRootConfig } from './content-roots.mjs';
 import type { ArticlePreviewOptions } from '../lib/content';
-import type { ContentDateLocaleConfig } from '@gaga/engine/content';
+import type { ContentDateLocaleConfig } from '@gaga/engine-capabilities/content';
 
 export type GagaContentRootConfig = {
   docsRoot: string;

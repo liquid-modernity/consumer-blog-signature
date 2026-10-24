@@ -1,4 +1,4 @@
-import { onRuntimeEvent, requestLeftRail, requestOutline, requestReaderPanel, requestRightRail } from '@gaga/engine-web/runtime/events';
+import { onRuntimeEvent, requestLeftRail, requestOutline, requestReaderPanel, requestRightRail } from '@gaga/engine-runtime/runtime/events';
 import { supportsGagaDock } from '../../config/systems';
 import { activateModalIsolation, clearModalIsolation } from './modal-isolation';
 import { registerSiteCommand, runSiteCommand } from './site-commands';

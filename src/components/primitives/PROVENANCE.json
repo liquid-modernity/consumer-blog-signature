@@ -1,0 +1,61 @@
+{
+  "sourceArtifactSha256": "4ca50536ea3714d18262276c40016678c4d7b5946ef8bb67834eac7cc4bc3a0c",
+  "scope": "application-owned presentation preserved; no runtime/Engine algorithm relocation",
+  "files": [
+    {
+      "source": "package/dist/components/Button.astro",
+      "destination": "src/components/primitives/Button.astro",
+      "sha256": "c0675eb16b16fff27c52b9b17662df8fa63322f884d07813f9a19bbf0d58d0f5"
+    },
+    {
+      "source": "package/dist/components/SkipLink.astro",
+      "destination": "src/components/primitives/SkipLink.astro",
+      "sha256": "1736106372416e37aa625a5155a99bf5c19a15eb7d6c1fa2447f918fbe887d72"
+    },
+    {
+      "source": "package/dist/components/Surface.astro",
+      "destination": "src/components/primitives/Surface.astro",
+      "sha256": "045dd8c717747fdb2eced03cdf02c10a63566d00399e629bf72218e2d4a51f07"
+    },
+    {
+      "source": "package/dist/components/MediaAudio.astro",
+      "destination": "src/components/primitives/MediaAudio.astro",
+      "sha256": "c1a67de6bf9aea725d84d951636e775f20afd90a6117069a0bcc5484c9d14e50"
+    },
+    {
+      "source": "package/dist/components/MediaVideo.astro",
+      "destination": "src/components/primitives/MediaVideo.astro",
+      "sha256": "9fdc03227ea58bb0059fb062cde279b8473ec188d03bb6ba0972c911f36c9725"
+    },
+    {
+      "source": "package/dist/components/MediaEmbed.astro",
+      "destination": "src/components/primitives/MediaEmbed.astro",
+      "sha256": "87d7c4f0245cf8349319151432bea69b42851808971a615d25c916fe4c0136ee"
+    },
+    {
+      "source": "package/dist/components/MediaFigure.astro",
+      "destination": "src/components/primitives/MediaFigure.astro",
+      "sha256": "524b714a4e58c27528bf7a8875d67540ae40f4644c5ed8fc99ef52effa2b92c4"
+    },
+    {
+      "source": "package/dist/components/types.d.ts",
+      "destination": "src/components/primitives/types.d.ts",
+      "sha256": "f821a6c05a42a422a7e5ef01c453ee92dd13abda72f824b0a180c0419037412c"
+    },
+    {
+      "source": "package/dist/components/media-types.d.ts",
+      "destination": "src/components/primitives/media-types.d.ts",
+      "sha256": "ffc17374d40e771736e5bbc48b01ffb8015553708ee38ec6d2a441d081d07724"
+    },
+    {
+      "source": "package/dist/components/media-security.js",
+      "destination": "src/components/primitives/media-security.js",
+      "sha256": "f1d338c515626a4b620349bef72d34141fb4e935f2bfab400e3f7b83e5c52403"
+    },
+    {
+      "source": "package/dist/components/media-security.d.ts",
+      "destination": "src/components/primitives/media-security.d.ts",
+      "sha256": "07a691460100053717334c11b8ec1486e253c2545cd80181be2850e4364d655a"
+    }
+  ]
+}

@@ -1,5 +1,5 @@
-import { createInputModeCapability } from '@gaga/engine-web/runtime/input-mode';
-import { requestLeftRail, requestOutline, requestReaderPanel, requestToast } from '@gaga/engine-web/runtime/events';
+import { createInputModeCapability } from '@gaga/engine-runtime/runtime/input-mode';
+import { requestLeftRail, requestOutline, requestReaderPanel, requestToast } from '@gaga/engine-runtime/runtime/events';
 import { supportsGagaDock } from '../../config/systems';
 
 let initialized = false;

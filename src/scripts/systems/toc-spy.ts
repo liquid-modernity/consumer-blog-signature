@@ -1,5 +1,5 @@
-import { createTocSpyCapability, type TocSpyCapability } from '@gaga/engine-web/runtime/toc-spy';
-import { emitTocActiveChanged, onRuntimeEvent } from '@gaga/engine-web/runtime/events';
+import { createTocSpyCapability, type TocSpyCapability } from '@gaga/engine-runtime/runtime/toc-spy';
+import { emitTocActiveChanged, onRuntimeEvent } from '@gaga/engine-runtime/runtime/events';
 import { i18nConfig } from '../../config/i18n';
 import { resolveReadingScrollContext } from './reading-scroll';
 import { notifySectionChanged } from './reading-behaviour';

@@ -1,4 +1,4 @@
-import { initMotion as initEngineMotion } from '@gaga/engine-web/runtime/motion';
+import { initMotion as initEngineMotion } from '@gaga/engine-runtime/runtime/motion';
 
 const reducedMotionQuery = '(prefers-reduced-motion: reduce)';
 

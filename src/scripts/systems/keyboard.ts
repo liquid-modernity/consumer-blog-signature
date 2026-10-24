@@ -1,4 +1,4 @@
-import { createKeyboardCapability } from '@gaga/engine-web/runtime/keyboard';
+import { createKeyboardCapability } from '@gaga/engine-runtime/runtime/keyboard';
 import { keyboardActionBindings, type GagaAction } from '../../config/actions';
 import { supportsGagaDock } from '../../config/systems';
 import { runSiteCommand } from './site-commands';

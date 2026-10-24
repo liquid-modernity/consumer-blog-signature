@@ -1,7 +1,7 @@
 ---
 import { getArticles, toArticlePreview } from '../../lib/content';
 import { contentDefaults } from '../../config/content';
-import { normalizeContentMetadata, resolveContentDateLocale } from '@gaga/engine/content';
+import { normalizeContentMetadata, resolveContentDateLocale } from '@gaga/engine-capabilities/content';
 const articles = await getArticles();
 const route = Astro.locals.gagaRoute;
 const metadata = normalizeContentMetadata(route?.entry?.data ?? {});

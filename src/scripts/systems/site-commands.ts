@@ -1,4 +1,4 @@
-import { createWebCommandRegistry, type WebCommandInputSource } from '@gaga/engine-web/runtime/command-registry';
+import { createWebCommandRegistry, type WebCommandInputSource } from '@gaga/engine-runtime/runtime/command-registry';
 import {
   requestCloseTopSurface,
   requestFocusMode,
@@ -6,7 +6,7 @@ import {
   requestOutline,
   requestReaderPanel,
   requestToast
-} from '@gaga/engine-web/runtime/events';
+} from '@gaga/engine-runtime/runtime/events';
 import { actionForCommand, type GagaActionCommand } from '../../config/actions';
 import { supportsGagaDock } from '../../config/systems';
 import { isSameSitePath } from '../../lib/url-semantics';

@@ -1,7 +1,7 @@
 import {
   createElementScrollContext,
   type ScrollContext
-} from '@gaga/engine-web/runtime/scroll-context';
+} from '@gaga/engine-runtime/runtime/scroll-context';
 import { supportsGagaDock } from '../../config/systems';
 
 export type ReadingScrollContext = {

@@ -1,4 +1,4 @@
-import { createModalIsolationController } from '@gaga/engine-web/runtime/modal-isolation';
+import { createModalIsolationController } from '@gaga/engine-runtime/runtime/modal-isolation';
 import { supportsGagaDock } from '../../config/systems';
 
 type ModalIsolationOwner = string;

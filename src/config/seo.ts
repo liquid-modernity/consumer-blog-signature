@@ -1,6 +1,6 @@
 import { identityConfig } from './identity';
 import { siteConfig } from './site';
-import type { SeoContext } from '@gaga/engine/seo';
+import type { SeoContext } from '@gaga/engine-capabilities/seo';
 
 export const seoConfig = {
   canonical: {

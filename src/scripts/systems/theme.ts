@@ -7,8 +7,8 @@ import {
   themeColorScheme,
   type ThemeId
 } from '../../config/theme';
-import { readJson, writeJson } from '@gaga/engine-web/runtime/storage';
-import { requestToast } from '@gaga/engine-web/runtime/events';
+import { readJson, writeJson } from '@gaga/engine-runtime/runtime/storage';
+import { requestToast } from '@gaga/engine-runtime/runtime/events';
 
 const IDENTITY_STORAGE_KEY = 'gaga:identity:v1';
 const DESIGN_LANGUAGE_KEY = 'gaga:design-language:v1';

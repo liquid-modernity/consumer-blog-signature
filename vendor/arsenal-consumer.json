@@ -1,0 +1,23 @@
+{
+  "sourceCommit": "44b394cb2249d5ae5886bd766547dad2d13bd733",
+  "baselineSource": "996ed1d476af528748f8d7861d941f272f5ae43b",
+  "reason": "Dotted machine endpoints and explicit prefix ownership required by the actual blog. Original dev.0 artifacts retained unchanged.",
+  "artifacts": [
+    {
+      "name": "@gaga/arsenal-contracts",
+      "version": "0.0.0-dev.1",
+      "file": "gaga-arsenal-contracts-0.0.0-dev.1.tgz",
+      "sha256": "563a8ce4e944b19e50fc93850c550e2dbdf49cbb88dfe0c2eb17ad3fa6ea4924",
+      "sha512": "bc87591650fa154032ee7344026d5e5ca4be3f0824d125ef57e8c2b7239a2b3ba9d8a3276259d72d784af1d4b6d699b781dbfa1bc4772eb96f45cadd2ef81dcf"
+    },
+    {
+      "name": "@gaga/arsenal",
+      "version": "0.0.0-dev.1",
+      "file": "gaga-arsenal-0.0.0-dev.1.tgz",
+      "sha256": "983a65120a8789e739a0584abfacc5115546026b5cd7d81c2119eb2f7edc8d38",
+      "sha512": "deb437b58b37e0c32a98179225301859e44ff005293700d25d023037888a3cc94bb1949db2b11b9193b4e40892144014fa8fa0dc28acf29fa44c60d05f3e5c08"
+    }
+  ],
+  "qualificationRun": 40094534764,
+  "qualificationArtifactSha256": "9d9ba17335e0e10d7b5aeceb487f860bd272c5569e1a7d6b097a83609eb4105b"
+}

@@ -1,6 +1,6 @@
-import { createSavedReadingCapability } from '@gaga/engine-web/runtime/saved-reading';
-import { type SavedItem } from '@gaga/engine-web/reader';
-import { requestQuickActionsSync } from '@gaga/engine-web/runtime/events';
+import { createSavedReadingCapability } from '@gaga/engine-runtime/runtime/saved-reading';
+import { type SavedItem } from '@gaga/engine-runtime/reader';
+import { requestQuickActionsSync } from '@gaga/engine-runtime/runtime/events';
 import { storageKeys } from '../../config/systems';
 
 function currentItem(): SavedItem | null {

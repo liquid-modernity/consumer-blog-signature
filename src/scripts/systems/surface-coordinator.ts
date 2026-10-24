@@ -1,11 +1,11 @@
-import { createSurfaceCoordinatorCapability } from '@gaga/engine-web/runtime/surface-coordinator';
+import { createSurfaceCoordinatorCapability } from '@gaga/engine-runtime/runtime/surface-coordinator';
 import { getConfiguredLeftRailState, supportsGagaDock } from '../../config/systems';
 import {
   requestFocusMode,
   requestLeftRail,
   requestOutline,
   requestReaderPanel
-} from '@gaga/engine-web/runtime/events';
+} from '@gaga/engine-runtime/runtime/events';
 import { closeCollapsedNavChildPanel, collapsedNavChildPanelIsOpen } from './collapsed-nav';
 import { closeContextSurface, contextSurfaceIsOpen } from './context-surface';
 
