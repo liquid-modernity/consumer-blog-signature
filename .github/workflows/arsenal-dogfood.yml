@@ -71,7 +71,12 @@ jobs:
       - name: Preserve application evidence
         if: always()
         run: |
-          cp -R .gaga/*.json .gaga/*.png "$GAGA_EVIDENCE_DIRECTORY/" 2>/dev/null || true
+          node --input-type=module <<'JS'
+          import{existsSync,readdirSync,copyFileSync,cpSync}from'node:fs';
+          const destination=process.env.GAGA_EVIDENCE_DIRECTORY;
+          if(existsSync('.gaga'))for(const f of readdirSync('.gaga'))if(/\.(json|png)$/.test(f))copyFileSync('.gaga/'+f,destination+'/'+f);
+          if(existsSync('test-results'))cpSync('test-results',destination+'/browser-details',{recursive:true});
+          JS
       - uses: actions/upload-artifact@v4
         if: always()
         with:
