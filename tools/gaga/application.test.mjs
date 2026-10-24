@@ -55,3 +55,29 @@ test("a changed snapshot body digest stops content admission", async () => {
   s.documents[0].bodySha256 = "0".repeat(64);
   await assert.rejects(verifySnapshot(s), /Snapshot body changed/);
 });
+
+test("maintained CI propagates failed commands through pipes and gates staging on qualified evidence", async () => {
+  const { parse } = await import("yaml"),
+    { spawnSync } = await import("node:child_process");
+  const workflow = parse(
+    readFileSync(".github/workflows/arsenal-dogfood.yml", "utf8"),
+  );
+  for (const name of ["verify", "staging"])
+    assert.equal(workflow.jobs[name].defaults.run.shell, "bash");
+  assert.equal(workflow.jobs.staging.needs, "verify");
+  assert.equal(
+    spawnSync("/bin/bash", [
+      "--noprofile",
+      "--norc",
+      "-e",
+      "-o",
+      "pipefail",
+      "-c",
+      "false | cat >/dev/null",
+    ]).status,
+    1,
+  );
+  const guard = readFileSync("tools/gaga/deployment-manifest.mjs", "utf8");
+  assert.ok(guard.includes("browser.unexpected"));
+  assert.ok(guard.includes("audit.metadata.vulnerabilities.total"));
+});

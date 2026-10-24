@@ -8,8 +8,16 @@ test("native publication shell and Dynamic Notch remain interactive", async ({
     "native",
   );
   const toggle = page.locator("[data-gaga-action-island-toggle]");
+  const island = page.locator("[data-gaga-action-runtime]");
+  await expect(island).toBeVisible();
+  const box = await island.boundingBox();
+  if (!box) throw Error("Notch has no user-visible hit target");
+  // The preserved design reveals its toggle only AFTER tapping/clicking the capsule.
+  const options = { position: { x: 4, y: box.height / 2 } };
+  if (info.project.name === "mobile") await island.tap(options);
+  else await island.click(options);
+  await expect(island).toHaveAttribute("data-gaga-state", "expanded");
   await expect(toggle).toBeVisible();
-  await toggle.click();
   await expect(toggle).toHaveAttribute("aria-expanded", "true");
   await toggle.click();
   await expect(toggle).toHaveAttribute("aria-expanded", "false");
