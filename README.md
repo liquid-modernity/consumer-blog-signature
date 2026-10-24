@@ -1,46 +1,81 @@
-# consumer-blog-signature 0.0.1
+# consumer-blog-signature
 
-Universal, configurable, softcoded high-end blog / knowledge-publishing bootstrap. Astro is the rendering framework; Gaga Engine is the external kernel installed from Cloudsmith.
+PAKRPP's Astro publication application, composed with GAGA Arsenal, public GAGA
+Engine **0.4.0** and GAGA Corps **0.1.0**. The blog owns its visual identity,
+routes, editorial presentation, Dynamic Notch, Outline Peek and reader controls.
 
-## Signature shell
-- All reading layouts: Gaga Dynamic Notch Island v2 is top-attached for contextual actions, live reading state, and perimeter reading progress.
-- Article layouts: Gaga Dynamic Outline Peek v2 is a bottom-center semantic locator with progressive peek, expanded, and full states.
-- Desktop: vertical global navigation icon-only at the far left, context-aware left rail, main canvas, context-aware right intelligence rail.
-- Tablet large: icon global navigation, collapsed left rail, optional right intelligence rail.
-- Tablet mini / Mobile: article pages use Notch + Outline without a competing dock. Non-article compact pages use Gaga Dock v1 as a contextual workspace surface rather than a conventional bottom navigation bar.
+## Run and verify
 
-## Core contracts
-`src/config/capabilities.ts`, `routes.ts`, `actions.ts`, `experience.ts`, and `design.ts` are the product-policy authorities. Gaga Engine remains an npm dependency and is not vendored into this repository.
+Use Node **22.22.2** and npm **10.9.4** on a supported native host; CI uses Ubuntu
+24.04. The repository's scoped `.npmrc` installs public GAGA packages anonymously
+from Cloudsmith. Unpublished Arsenal packages are exact, checksum-pinned tarballs
+in `vendor/`, with their source and qualification recorded beside them.
 
-## Gaga registry
-```bash
-npm config set @gaga:registry https://npm.cloudsmith.io/gaga/gaga/
-npm install
-```
-The repository pins Gaga packages to `0.1.6`.
-
-## Local review on macOS Catalina
-Catalina is a review client, not a build machine. Put the Cloudflare preview URL in `.review-url` or export `CONSUMER_REVIEW_URL`, then double-click `run_local.command`.
-
-## Modern machine
-```bash
-npm install
+```sh
+npm ci --ignore-scripts
 npm run dev
-npm run verify
 ```
 
-## Cloudflare
-GitHub Actions builds with Node 22.19 and deploys static Astro output through Cloudflare Workers Static Assets. Configure `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, and repository variable `PUBLIC_SITE_URL`.
+```sh
+npm run verify
+npx playwright install --with-deps chromium
+npm run test:ui
+```
 
-## Important
-This is version `0.0.1`: a migration candidate derived from the supplied vehicle-blog architecture, with generic identity/content, signature shell, Gaga 0.1.6 bindings, Cloudflare CI scaffolding, and Catalina remote-review launcher. The sample content is deliberately domain-neutral and replaceable.
+`verify` validates the declaration and CMS snapshot, runs the existing signature
+checks, checks TypeScript, builds the actual blog, composes Search, validates the
+public registry dependencies and executes the Worker under native workerd.
 
+## Application declaration and ownership
 
-## GAGA 0.0.35
-Production hardening foundation added for runtime policy, content boundary, and lifecycle contracts.
+[`gaga.app.json`](gaga.app.json) declares identity, capabilities, integrations,
+content sources, route ownership, runtime targets, environment references and
+outputs. Arsenal writes an inspectable plan before reading content. The blog's
+UI policies remain in `src/config/` and its presentation remains in `src/`.
 
-## Current GAGA application integration
+- Engine supplies public Search, content/SEO utilities and browser runtime APIs.
+- Corps supplies Astro, Starlight, EmDash and Cloudflare integration boundaries.
+- Arsenal supplies validation, composition and bounded assembly at build time.
+- The deployed Worker and browser consume ordinary public Engine/Corps APIs;
+  neither requires an Arsenal application server.
 
-See [Arsenal dogfooding](docs/ARSENAL-DOGFOODING.md) for the canonical declaration,
-public Engine 0.4.0 / Corps 0.1.0 dependencies, exact unpublished Arsenal artifacts,
-read-only CMS snapshot authority, supported toolchain and verification commands.
+The blog retains its native shell. Starlight **0.41.10** supplies the document
+schema/projection; an actual Starlight rendering proof checks the integration
+without replacing the blog with a documentation theme. Astro is **7.3.3**.
+
+## Content authority
+
+Editorial content is behind the read-only EmDash connector boundary. The current
+input is explicitly a **pinned migration seed** from eight preserved published
+blog documents, not a live EmDash export. Revision, draft, metadata and body-hash
+checks reject drift. The Markdown files are snapshot bodies, not a second writable
+CMS. Live EmDash origin, ingestion and authorized export remain a provider
+activation step. Tank and Vehicle are not part of this stack.
+
+See [the migration and ownership model](docs/ARSENAL-DOGFOODING.md) for the source
+mapping, versions, snapshot refresh rules and limitations.
+
+## Runtime and deployment
+
+The application targets Workers Static Assets plus a Corps Cloudflare Search
+handler at `/api/search`. Both Node compatibility modes are disabled. The same
+assembled artifacts drive browser and Worker Search.
+
+The [dogfooding workflow](.github/workflows/arsenal-dogfood.yml) admits source and
+artifacts, requires passing consumer/browser/audit checks, then deploys only the
+existing preview Worker. Production promotion and Arsenal package publication
+are separate decisions.
+
+## Signature interface
+
+The top-attached Dynamic Notch and bottom-center Outline Peek remain application
+code. The compact brand link keeps its normal navigation behavior; hover/long-press
+reveals the Notch preview. Desktop expansion/collapse and mobile preview, article,
+Search and knowledge routes have focused browser checks. The original styles,
+frame markup, interaction source and route configuration are guarded against
+unintended migration changes.
+
+## Catalina review
+
+Catalina is a review client, not a supported native build host. Put the preview
+URL in `.review-url` or export `CONSUMER_REVIEW_URL`, then use `run_local.command`.

@@ -109,8 +109,9 @@ upstream package publication, Tank, Vehicle and redesign are out of scope.
 | Old Wrangler transitive security advisories | Application toolchain | Update owned deployment tool to 4.152.0; audit gate retained |
 | Catalina cannot run modern esbuild/workerd | Environment limitation | Fresh supported hosted build/runtime proof |
 
-Arsenal 0.1.0 readiness is decided after the hosted consumer proof. No automatic
-Arsenal publication is authorized. The actual contract changes are additive,
+The hosted consumer proof supports preparing Arsenal 0.1.0 for the contracts and
+composer packages, with gaga.app/v1 still experimental. Publication and release
+authorization remain separate. The actual contract changes are additive,
 but this task does not claim a universal application SDK or stable persisted
 application declaration compatibility.
 
@@ -119,3 +120,8 @@ A scoped Miniflare/Undici 7.30.1 security patch is locked because the current
 Wrangler dependency otherwise fails the mandatory audit. The maintained UI
 regression now checks the exact legacy class token, avoiding a pre-existing
 false match against the intentionally preserved `__header`/`__heading` classes.
+
+CI now uses explicit Bash pipefail and a deployment qualification receipt that
+requires four passing browser cases, no failures/skips/flakes, a successful
+consumer receipt and a zero-vulnerability audit. A failed consumer gate blocks
+staging. Earlier failed or misleading-green attempts remain preserved as evidence.
