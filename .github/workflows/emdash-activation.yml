@@ -7,7 +7,7 @@ on:
       operation:
         type: choice
         default: validate
-        options: [validate, provider-preflight, credential-preflight, provision]
+        options: [validate, provider-preflight, credential-preflight, provision, deploy-cms]
         description: Validation has no provider access; credential and provider preflights are read-only
       diagnostic_public_key:
         type: string
@@ -15,9 +15,12 @@ on:
 
 permissions:
   contents: read
+concurrency:
+  group: emdash-activation-${{ github.ref }}
+  cancel-in-progress: false
 jobs:
   cms:
-    if: github.event_name == 'push' || inputs.operation == 'validate' || inputs.operation == 'provision'
+    if: github.event_name == 'push' || inputs.operation == 'validate' || inputs.operation == 'provision' || inputs.operation == 'deploy-cms'
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     defaults:
@@ -71,6 +74,42 @@ jobs:
         with:
           name: emdash-preparation-evidence
           path: ${{ runner.temp }}/emdash-evidence
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: cms-worker-candidate
+          path: cms/dist-cloudflare
+          include-hidden-files: true
+          if-no-files-found: error
+  deploy:
+    needs: cms
+    if: github.event_name == 'workflow_dispatch' && inputs.operation == 'deploy-cms' && needs.cms.result == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.22.2
+      - run: npm --prefix cms ci --ignore-scripts --no-audit --no-fund
+      - uses: actions/download-artifact@v4
+        with:
+          name: cms-worker-candidate
+          path: cms/dist-cloudflare
+      - name: Admit exact stores and deploy only the dedicated CMS
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          GAGA_EVIDENCE_DIRECTORY: ${{ runner.temp }}/cms-deployment
+        run: node tools/cms/deploy.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cms-deployment-evidence
+          path: ${{ runner.temp }}/cms-deployment
+          include-hidden-files: true
   provider:
     needs: cms
     if: always() && github.event_name == 'workflow_dispatch' && (inputs.operation == 'provider-preflight' || (inputs.operation == 'provision' && needs.cms.result == 'success'))

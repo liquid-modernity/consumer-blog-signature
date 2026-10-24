@@ -3,8 +3,28 @@
   "name": "consumer-blog-signature-cms",
   "main": "src/worker.ts",
   "compatibility_date": "2026-10-22",
-  "compatibility_flags": ["nodejs_compat"],
-  "d1_databases": [{"binding": "DB", "database_name": "consumer-blog-signature-cms"}],
-  "r2_buckets": [{"binding": "MEDIA", "bucket_name": "consumer-blog-signature-cms-media"}],
-  "kv_namespaces": [{"binding": "SESSION"}]
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "consumer-blog-signature-cms",
+      "database_id": "b26b0e8a-e193-4a7d-8e1d-c553de22fd27"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "MEDIA",
+      "bucket_name": "consumer-blog-signature-cms-media"
+    }
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "SESSION",
+      "id": "a0ad6f282a314e17bbdfec6c4e0c9fa2"
+    }
+  ],
+  "workers_dev": true,
+  "preview_urls": false
 }

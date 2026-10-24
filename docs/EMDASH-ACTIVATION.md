@@ -35,7 +35,7 @@ Use **one separate CMS Worker**, `consumer-blog-signature-cms`, at:
 `https://consumer-blog-signature-cms.ratriatra.workers.dev`
 
 This is the planned `CMS_ORIGIN`; the account's `ratriatra` subdomain was verified
-by read-only API. The service has not been deployed. The existing static website
+by read-only API. Its three stores are now provisioned; CMS deployment is a separate gated action. The existing static website
 and Search Worker remain unchanged. Embedding the CMS would require replacing
 their static/no-Node runtime with stateful SSR. A separate CMS keeps the existing
 publication build/rollback path and avoids copying local admin sessions to production.
@@ -58,30 +58,16 @@ Node compatibility. Images use passthrough; sandbox plugins are disabled.
 D1 and R2 are the installed EmDash stores; KV is required by the selected Astro
 Cloudflare adapter's default session driver. No extra hostname, Images binding,
 plugin secret, Durable Object, SMTP service or second content store is required
-for this slice. No production resource has been created. Resource creation can
-use the existing workflow once its token permissions are confirmed; no replacement
-credential is inherently required.
+for this slice. Run [40135546990](https://github.com/liquid-modernity/consumer-blog-signature/actions/runs/40135546990) created exactly these three empty stores. Their exact IDs, bindings,
+source and verified receipt digest are recorded in `cms/provisioning.json`.
 
 ## Current permission checkpoint
 
-The read-only preflight verifies an active credential and the correct Workers
-subdomain. D1 listing is denied (HTTP 401, code 10000). R2 and KV listing succeed,
-which proves read/list access, not creation permission. Token name and permission
-policies cannot be inspected with this credential (HTTP 403, code 9109). Do not
-claim a complete scope inventory or infer write permissions from these reads.
-
-The user-token verification endpoint accepts the credential; the account-token
-endpoint rejects it. This indicates a user token, but its owner metadata is not
-readable. Locate the existing token under **My Profile → API Tokens**, checking
-its non-secret token ID against the private diagnostic receipt. Cloudflare supports
-updating token permissions in place; rotating/replacing it is a separate operation.
-Do not broaden API-token-management privileges just to make this diagnostic pass.
-
-The next operator step is to inspect that token's existing account scope and
-confirm **D1 Write**, **Workers R2 Storage Write**, and **Workers KV Storage Write**
-(the dashboard may label these **Edit**) for the same account. Preserve Worker
-permissions. Current evidence proves D1 access is missing; R2/KV write access is
-unproven. No token mutation or provisioning has been performed.
+The operator replaced the repository workflow secret with a dedicated User token.
+Read-only preflight [40135161538](https://github.com/liquid-modernity/consumer-blog-signature/actions/runs/40135161538)
+passed for the intended Workers account and all D1/R2/KV inventory endpoints.
+The later provisioning run confirmed creation access by creating only the three
+approved stores. Historical denied-access receipts remain preserved.
 
 ## Provisioning and production token sequence
 
@@ -93,8 +79,15 @@ It never deploys a Worker, overwrites/adopts an existing store, retries a create
 or deletes resources. Partial creation stops and records the last operation for
 provider inspection. Keep the external receipt and fill real binding IDs from it.
 
-Production CMS deployment and its first admin setup need a later explicit action;
-this task does not deploy the website or promote `main`. After that CMS is available:
+The explicitly authorized manual `deploy-cms` operation validates the current
+CMS/blog source, uploads that same run's compiled CMS artifact, rechecks the exact
+created stores, and refuses an existing CMS Worker. Wrangler automatic resource
+creation is disabled. A failed upload is never retried automatically. The workflow
+records deployment/binding/readiness evidence outside the source checkout and
+checks that unrelated Workers are unchanged. It does not deploy the publication
+website, promote `main`, create an admin or mint a token.
+
+After the dedicated CMS is available:
 
 1. Open `https://consumer-blog-signature-cms.ratriatra.workers.dev/_emdash/admin`.
    Choose the real site details/email and register the operator's own passkey.

@@ -69,4 +69,6 @@ cannot itself prove the comprehensive migration test again; the provisioning
 proof remains pinned to its originally tested export.
 
 [Production architecture and operator checklist](../docs/EMDASH-ACTIVATION.md).
-No main promotion, website deployment or production credential change is included.
+The dedicated CMS has separately authorized provision/deploy operations in the
+EmDash workflow. Store IDs are pinned in provisioning.json and wrangler.jsonc.
+No main promotion, publication website deployment or production PAT creation is included.

@@ -1,0 +1,36 @@
+{
+  "sourceCommit": "31712e3880e4d769a9c8867f9ba41388d67db4dd",
+  "runId": 40135546990,
+  "url": "https://github.com/liquid-modernity/consumer-blog-signature/actions/runs/40135546990",
+  "artifactSha256": "3449619f79ce0eaa2cd5079822465d43150cdc03ec529b09e7927666e6c602b9",
+  "receipt": {
+    "status": "PASS",
+    "mode": "provision",
+    "service": "consumer-blog-signature-cms",
+    "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+    "created": [
+      {
+        "type": "D1",
+        "binding": "DB",
+        "name": "consumer-blog-signature-cms",
+        "id": "b26b0e8a-e193-4a7d-8e1d-c553de22fd27"
+      },
+      {
+        "type": "R2",
+        "binding": "MEDIA",
+        "name": "consumer-blog-signature-cms-media",
+        "id": "consumer-blog-signature-cms-media"
+      },
+      {
+        "type": "KV",
+        "binding": "SESSION",
+        "name": "consumer-blog-signature-cms-session",
+        "id": "a0ad6f282a314e17bbdfec6c4e0c9fa2"
+      }
+    ],
+    "existing": [],
+    "resourceMutations": 3,
+    "deployments": 0,
+    "preflight": "PASS"
+  }
+}

@@ -6,8 +6,12 @@
   "databaseName": "consumer-blog-signature-cms",
   "mediaBucket": "consumer-blog-signature-cms-media",
   "sessionNamespace": "consumer-blog-signature-cms-session",
-  "bindings": {"database": "DB", "media": "MEDIA", "session": "SESSION"},
+  "bindings": {
+    "database": "DB",
+    "media": "MEDIA",
+    "session": "SESSION"
+  },
   "nodeCompatibility": true,
   "sandboxPlugins": false,
-  "provisioned": false
+  "provisioned": true
 }

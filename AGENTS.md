@@ -9,4 +9,7 @@ migration evidence. Do not edit them as a second CMS or execute remote MDX.
 Read docs/EMDASH-ACTIVATION.md before CMS or provider work. The separate CMS under
 cms/ owns its own build; keep it outside the parent TypeScript project.
 Run npm run verify on supported Node 22.22.2+/Ubuntu and npm run test:ui.
-Do not publish upstream packages or deploy production from a review branch.
+Do not publish upstream packages or deploy the production publication website from a
+review branch. The explicitly authorized dedicated CMS deployment is limited to
+`consumer-blog-signature-cms`, the stores in cms/provisioning.json and passing
+CMS validation; stop for operator admin/PAT setup afterward.
