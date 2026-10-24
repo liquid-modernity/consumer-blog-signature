@@ -1,0 +1,13 @@
+{
+  "formatVersion": 1,
+  "model": "separate-cms-worker",
+  "serviceName": "consumer-blog-signature-cms",
+  "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+  "databaseName": "consumer-blog-signature-cms",
+  "mediaBucket": "consumer-blog-signature-cms-media",
+  "sessionNamespace": "consumer-blog-signature-cms-session",
+  "bindings": {"database": "DB", "media": "MEDIA", "session": "SESSION"},
+  "nodeCompatibility": true,
+  "sandboxPlugins": false,
+  "provisioned": false
+}

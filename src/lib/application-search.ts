@@ -9,7 +9,7 @@ import {
   type SearchableArtifactDescriptor,
 } from "@gaga/engine-capabilities/search";
 import { readFileSync } from "node:fs";
-import snapshot from "../../content/emdash/snapshot.json";
+import snapshot from "../../content/emdash/published.json";
 import type { GagaDiscoveryRecord } from "./discovery";
 function publicDiscovery(
   artifact: Readonly<SearchableArtifactDescriptor>,

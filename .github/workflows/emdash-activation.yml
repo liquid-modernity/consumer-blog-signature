@@ -3,10 +3,21 @@ on:
   push:
     branches: [review/emdash-local-activation]
   workflow_dispatch:
+    inputs:
+      operation:
+        type: choice
+        default: validate
+        options: [validate, provider-preflight, credential-preflight, provision]
+        description: Validation has no provider access; credential and provider preflights are read-only
+      diagnostic_public_key:
+        type: string
+        description: Operator RSA public PEM; detailed credential evidence is encrypted
+
 permissions:
   contents: read
 jobs:
   cms:
+    if: github.event_name == 'push' || inputs.operation == 'validate' || inputs.operation == 'provision'
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     defaults:
@@ -36,6 +47,14 @@ jobs:
           node node_modules/emdash/dist/cli/index.mjs seed --validate > "$RUNNER_TEMP/emdash-evidence/seed-validation.log" 2>&1
       - name: Real CMS server build
         run: npm --prefix cms run build > "$RUNNER_TEMP/emdash-evidence/cms-build.log" 2>&1
+      - name: Separate production CMS Worker build, no deployment
+        run: npm --prefix cms run build:cloudflare > "$RUNNER_TEMP/emdash-evidence/cms-cloudflare-build.log" 2>&1
+      - name: Actual blog through the admitted real CMS export
+        env:
+          GAGA_EVIDENCE_DIRECTORY: ${{ runner.temp }}/emdash-evidence/blog
+        run: |
+          mkdir -p "$GAGA_EVIDENCE_DIRECTORY"
+          npm run verify > "$RUNNER_TEMP/emdash-evidence/blog.log" 2>&1
       - name: CMS dependency audit
         run: npm --prefix cms audit --audit-level=low --json > "$RUNNER_TEMP/emdash-evidence/cms-audit.json"
       - uses: actions/setup-go@v5
@@ -53,35 +72,57 @@ jobs:
           name: emdash-preparation-evidence
           path: ${{ runner.temp }}/emdash-evidence
   provider:
+    needs: cms
+    if: always() && github.event_name == 'workflow_dispatch' && (inputs.operation == 'provider-preflight' || (inputs.operation == 'provision' && needs.cms.result == 'success'))
     runs-on: ubuntu-24.04
     timeout-minutes: 5
+    defaults:
+      run:
+        shell: bash
     steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: 22.22.2
-      - name: Existing credential and required-resource read-only preflight
+      - name: Existing credential, whole-set admission and bounded empty-store provisioning
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          GAGA_EVIDENCE_DIRECTORY: ${{ runner.temp }}/provider-evidence
+          OPERATION: ${{ inputs.operation }}
         run: |
-          mkdir -p "$RUNNER_TEMP/provider-evidence"
-          node --input-type=module <<'JS'
-          import assert from 'node:assert/strict';
-          import {writeFileSync} from 'node:fs';
-          const token=process.env.CLOUDFLARE_API_TOKEN,account=process.env.CLOUDFLARE_ACCOUNT_ID;
-          assert.ok(token&&account,'Existing Cloudflare secrets unavailable');
-          const reads=[];
-          for(const [purpose,path] of [['token-status','/user/tokens/verify'],['workers-subdomain',`/accounts/${account}/workers/subdomain`],['d1-read',`/accounts/${account}/d1/database`],['r2-read',`/accounts/${account}/r2/buckets`]]){
-            const r=await fetch('https://api.cloudflare.com/client/v4'+path,{headers:{Authorization:'Bearer '+token},redirect:'error',signal:AbortSignal.timeout(20000)});
-            const b=await r.json();
-            reads.push({purpose,httpStatus:r.status,success:b.success===true,...(purpose==='token-status'&&b.success?{tokenStatus:b.result.status}:{}),...(purpose==='workers-subdomain'&&b.success?{subdomain:b.result.subdomain}:{}),...(!b.success?{errorCodes:(b.errors??[]).map(x=>x.code)}:{})});
-          }
-          const pass=reads.every(r=>r.success&&r.httpStatus===200);
-          writeFileSync(process.env.RUNNER_TEMP+'/provider-evidence/read-only.json',JSON.stringify({status:pass?'PASS':'OPERATOR_PERMISSION_REQUIRED',reads,resourceMutations:0,deployments:0,productionProvisioningAuthorizedByThisWorkflow:false},null,2)+'\n');
-          assert.ok(pass,'Read-only provider access incomplete; inspect the sanitized permission evidence before any provisioning');
-          JS
+          if [ "$OPERATION" = provision ]; then
+            node tools/cms/provider.mjs provision
+          else
+            node tools/cms/provider.mjs preflight
+          fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: emdash-provider-read-only
+          name: emdash-provider-evidence
           path: ${{ runner.temp }}/provider-evidence
+  credential:
+    if: github.event_name == 'workflow_dispatch' && inputs.operation == 'credential-preflight'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.22.2
+      - name: Read-only User and Account token ownership and policy inspection
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          DIAGNOSTIC_PUBLIC_KEY: ${{ inputs.diagnostic_public_key }}
+          GAGA_EVIDENCE_DIRECTORY: ${{ runner.temp }}/credential-evidence
+        run: node tools/cms/credential-preflight.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: emdash-credential-diagnostic-encrypted
+          path: ${{ runner.temp }}/credential-evidence

@@ -1,0 +1,605 @@
+{
+  "schema": "consumer.emdash-export/v1",
+  "mode": "published-emdash-export",
+  "origin": "http://localhost:4321",
+  "documents": [
+    {
+      "applicationId": "pub_002",
+      "path": "src/content/docs/akal-imitasi-sebagai-pekerja-tanpa-dignity.md",
+      "pin": {
+        "origin": "http://localhost:4321",
+        "collection": "posts",
+        "id": "01M5QT1MNH0VEA9HK83VMAWD6J",
+        "liveRevisionId": "01M5QT1MNVJ8CZ42X1E2RHFWYZ",
+        "updatedAt": "2026-10-24T20:49:05.911Z",
+        "titleField": "title",
+        "summaryField": "summary"
+      },
+      "item": {
+        "id": "01M5QT1MNH0VEA9HK83VMAWD6J",
+        "type": "posts",
+        "slug": "akal-imitasi-sebagai-pekerja-tanpa-dignity",
+        "status": "published",
+        "updatedAt": "2026-10-24T20:49:05.911Z",
+        "publishedAt": "2026-06-17T00:00:00.000Z",
+        "liveRevisionId": "01M5QT1MNVJ8CZ42X1E2RHFWYZ",
+        "draftRevisionId": null,
+        "data": {
+          "title": "Akal Imitasi sebagai Pekerja Tanpa Dignity",
+          "summary": "AI tidak dibahas sebagai makhluk, tetapi sebagai fungsi produktif tanpa tuntutan dignity yang sangat menarik bagi logika modal modern.",
+          "body": "\nAI tidak perlu dimusuhi sebagai makhluk. Ia lebih tepat dibaca sebagai fungsi produktif yang bisa bekerja tanpa lelah, tanpa upah, tanpa keluarga, tanpa rasa malu, dan tanpa tuntutan martabat.\n\n## Masalah dignity\n\nDi sinilah pertanyaannya mulai serius. Bukan apakah AI bisa berpikir seperti manusia, melainkan mengapa sistem ekonomi begitu mudah jatuh cinta pada pekerja yang tidak pernah meminta dignity.\n\nJika manusia dilihat hanya sebagai unit produktif, AI akan selalu tampak lebih bersih. Ia tidak butuh cuti. Ia tidak sakit hati. Ia tidak protes ketika pekerjaannya diukur hanya melalui output.\n\n## Logika modal modern\n\nLogika modal modern menyukai fungsi yang bisa dipanggil kapan saja. Ia menyukai kemampuan yang tidak membawa tubuh, sejarah, keluarga, dan batas psikologis.\n\nTetapi masyarakat tidak bisa dibangun hanya dari fungsi. Masyarakat membutuhkan manusia yang bisa terluka, belajar, menanggung konsekuensi, dan mengingat bahwa kerja bukan sekadar output.\n\n## Catatan akhir\n\nAkal imitasi membuka banyak kemungkinan. Namun pembacaan paling penting bukan pada kecerdasannya, melainkan pada cermin yang ia arahkan kepada cara kita selama ini memperlakukan manusia.\n",
+          "application_id": "pub_002",
+          "metadata": {
+            "subtitle": "Mengapa sistem ekonomi modern begitu mudah jatuh cinta pada fungsi produktif yang tidak pernah menuntut martabat.",
+            "contentKind": "article",
+            "contentClass": "article",
+            "contentId": "pub_002",
+            "description": "AI tidak dibahas sebagai makhluk, tetapi sebagai fungsi produktif tanpa tuntutan dignity yang sangat menarik bagi logika modal modern.",
+            "aiSummary": "AI sebagai fungsi produktif tanpa tuntutan dignity dalam logika modal modern.",
+            "publishedAt": "2026-06-17",
+            "updatedAt": "2026-06-17",
+            "readTime": "4 min",
+            "type": "essay",
+            "topics": [
+              "Teknologi",
+              "Anomali"
+            ],
+            "topicRefs": [
+              "consumer.topic.teknologi",
+              "consumer.topic.anomali"
+            ],
+            "tags": [
+              "akal-imitasi",
+              "ai-ethics",
+              "dignity-manusia"
+            ],
+            "relatedRefs": [
+              "pub_001",
+              "pub_003"
+            ],
+            "featured": true,
+            "section": "Anomali",
+            "sectionRefs": [
+              "consumer.section.anomali"
+            ],
+            "kicker": "Esai · Anomali",
+            "storyFormat": "opinion",
+            "editorialRole": "major",
+            "editorialPriority": 95,
+            "breaking": false,
+            "live": false,
+            "status": "published",
+            "visibility": "public",
+            "draft": false,
+            "noindex": false,
+            "language": "id",
+            "author": "PakRPP",
+            "authorRefs": [
+              "author.editorial-team"
+            ]
+          }
+        }
+      },
+      "bodySha256": "8df26cb6e5158871539fa874bcfe507af7a624659658f421adf01d5ef7a1d9d0"
+    },
+    {
+      "applicationId": "consumer.article.context-aware-reading",
+      "path": "src/content/docs/designing-context-aware-reading-surface.md",
+      "pin": {
+        "origin": "http://localhost:4321",
+        "collection": "posts",
+        "id": "01M5QT1MP3JQ92ZQXV9BY4978Y",
+        "liveRevisionId": "01M5QT1MP5KNV87FTZSJC58PYC",
+        "updatedAt": "2026-10-24T20:49:06.028Z",
+        "titleField": "title",
+        "summaryField": "summary"
+      },
+      "item": {
+        "id": "01M5QT1MP3JQ92ZQXV9BY4978Y",
+        "type": "posts",
+        "slug": "designing-context-aware-reading-surface",
+        "status": "published",
+        "updatedAt": "2026-10-24T20:49:06.028Z",
+        "publishedAt": "2026-10-11T00:00:00.000Z",
+        "liveRevisionId": "01M5QT1MP5KNV87FTZSJC58PYC",
+        "draftRevisionId": null,
+        "data": {
+          "title": "Designing a Context-Aware Reading Surface",
+          "summary": "A reference article showing how the signature experience composes navigation, content, and context.",
+          "body": "\nA high-end publishing surface should help readers understand where they are, what matters now, and what they can do next without forcing them to learn the interface.\n\n## Context before controls\n\nThe global navigation remains stable while contextual rails adapt to the current route. This separation prevents global actions from competing with content-specific navigation.\n\n## Progressive immersion\n\nThe main canvas can move from a compact reading measure to wide or full-bleed media. On compact screens, the Gaga Dynamic Notch and semantic Outline Peek preserve reading context while the contextual Gaga Dock stays out of immersive article mode.\n\n## Inclusive interaction\n\nMouse hover, keyboard focus, touch targets, reduced motion, semantic labels, and screen-reader metadata are treated as one interaction system rather than separate patches.\n",
+          "application_id": "consumer.article.context-aware-reading",
+          "metadata": {
+            "subtitle": "A neutral reference article for the signature bootstrap.",
+            "contentKind": "article",
+            "contentClass": "article",
+            "contentId": "consumer.article.context-aware-reading",
+            "description": "Demonstrates the article canvas, contextual rails, outline, and reader actions.",
+            "aiSummary": "A reference article about context-aware reading surfaces.",
+            "publishedAt": "2026-10-11",
+            "updatedAt": "2026-10-11",
+            "readTime": "6 min",
+            "topics": [
+              "Reader Experience"
+            ],
+            "topicRefs": [
+              "consumer.topic.experience"
+            ],
+            "tags": [
+              "design",
+              "accessibility",
+              "interaction"
+            ],
+            "relatedRefs": [
+              "consumer.article.softcoded-systems"
+            ],
+            "featured": true,
+            "section": "Experience",
+            "sectionRefs": [
+              "consumer.section.experience"
+            ],
+            "kicker": "Reader Experience",
+            "storyFormat": "analysis",
+            "editorialRole": "lead",
+            "editorialPriority": 100,
+            "breaking": false,
+            "live": false,
+            "status": "published",
+            "visibility": "public",
+            "draft": false,
+            "noindex": false,
+            "language": "id",
+            "author": "Editorial Team",
+            "authorRefs": [
+              "author.editorial-team"
+            ]
+          }
+        }
+      },
+      "bodySha256": "e04b5f1f1d1d85f03d079758b8b9db3f77f121b409c9889be7c6dde1e14ec3ec"
+    },
+    {
+      "applicationId": "pub_003",
+      "path": "src/content/docs/dialog-imajiner-pakrpp-lizzie-monopoly-akal-imitasi.md",
+      "pin": {
+        "origin": "http://localhost:4321",
+        "collection": "posts",
+        "id": "01M5QT1MPH3VH91CQPNRS3M6MM",
+        "liveRevisionId": "01M5QT1MPKN31WNYTG2PVHGW2N",
+        "updatedAt": "2026-10-24T20:49:06.110Z",
+        "titleField": "title",
+        "summaryField": "summary"
+      },
+      "item": {
+        "id": "01M5QT1MPH3VH91CQPNRS3M6MM",
+        "type": "posts",
+        "slug": "dialog-imajiner-pakrpp-lizzie-monopoly-akal-imitasi",
+        "status": "published",
+        "updatedAt": "2026-10-24T20:49:06.110Z",
+        "publishedAt": "2025-11-16T00:00:00.000Z",
+        "liveRevisionId": "01M5QT1MPKN31WNYTG2PVHGW2N",
+        "draftRevisionId": null,
+        "data": {
+          "title": "Dialog Imajiner PakRPP bersama Lizzie “Monopoly” Magie tentang Akal Imitasi",
+          "summary": "Sebuah percakapan imajiner tentang permainan, pasar, dan cara zaman membaca manusia.",
+          "body": "\nDialog ini membayangkan Lizzie Magie kembali melihat zaman yang memuja efisiensi, tetapi sering lupa bertanya siapa yang sedang dikorbankan.\n\n## Permainan yang salah dibaca\n\nMonopoly awalnya bukan sekadar permainan menang-kalah. Ia adalah kritik terhadap akumulasi yang membuat orang lupa bahwa aturan permainan menentukan siapa yang tampak pintar dan siapa yang tampak gagal.\n\n## AI dan papan baru\n\nAI menjadi papan baru. Yang tampak sebagai kemajuan teknis sering kali juga menjadi eksperimen sosial tentang distribusi kuasa, akses, dan martabat.\n",
+          "application_id": "pub_003",
+          "metadata": {
+            "subtitle": "Sebuah percakapan spekulatif tentang permainan, pasar, dan cara zaman membaca manusia.",
+            "contentKind": "article",
+            "contentClass": "article",
+            "contentId": "pub_003",
+            "description": "Sebuah percakapan imajiner tentang permainan, pasar, dan cara zaman membaca manusia.",
+            "aiSummary": "Percakapan imajiner bersama Lizzie Magie mengenai monopoli dan akal imitasi.",
+            "publishedAt": "2025-11-16",
+            "updatedAt": "2025-11-16",
+            "readTime": "5 min",
+            "type": "experiment",
+            "topics": [
+              "Anomali",
+              "Teknologi"
+            ],
+            "topicRefs": [
+              "consumer.topic.anomali",
+              "consumer.topic.teknologi"
+            ],
+            "tags": [
+              "lizzie-magie",
+              "monopoly",
+              "akal-imitasi"
+            ],
+            "relatedRefs": [
+              "pub_002",
+              "pub_005"
+            ],
+            "featured": true,
+            "section": "Anomali",
+            "sectionRefs": [
+              "consumer.section.anomali"
+            ],
+            "kicker": "Eksperimen · Anomali",
+            "storyFormat": "interview",
+            "editorialRole": "major",
+            "editorialPriority": 90,
+            "breaking": false,
+            "live": false,
+            "status": "published",
+            "visibility": "public",
+            "draft": false,
+            "noindex": false,
+            "language": "id",
+            "author": "PakRPP",
+            "authorRefs": [
+              "author.editorial-team"
+            ]
+          }
+        }
+      },
+      "bodySha256": "6e092ada7a61f84f87cc5da03a879e6cc5d4c81766c17f7988e2022025fb3b76"
+    },
+    {
+      "applicationId": "pub_004",
+      "path": "src/content/docs/esg-etika-pasar-atau-tambalan-reputasi.md",
+      "pin": {
+        "origin": "http://localhost:4321",
+        "collection": "posts",
+        "id": "01M5QT1MPRHKYNYATTRDY4NK82",
+        "liveRevisionId": "01M5QT1MPS20R0WZEN5W5B0SNK",
+        "updatedAt": "2026-10-24T20:49:06.173Z",
+        "titleField": "title",
+        "summaryField": "summary"
+      },
+      "item": {
+        "id": "01M5QT1MPRHKYNYATTRDY4NK82",
+        "type": "posts",
+        "slug": "esg-etika-pasar-atau-tambalan-reputasi",
+        "status": "published",
+        "updatedAt": "2026-10-24T20:49:06.173Z",
+        "publishedAt": "2025-06-15T00:00:00.000Z",
+        "liveRevisionId": "01M5QT1MPS20R0WZEN5W5B0SNK",
+        "draftRevisionId": null,
+        "data": {
+          "title": "ESG Etika Pasar atau Tambalan Reputasi",
+          "summary": "Catatan tentang keberlanjutan, bahasa reputasi, dan etika yang sering dijadikan laporan.",
+          "body": "\nESG sering terdengar sebagai bahasa masa depan. Tetapi bahasa masa depan bisa berubah menjadi kosmetik jika ia hanya menambal reputasi tanpa mengubah cara organisasi mengambil keputusan.\n\n## Ukuran dan keberanian\n\nUkuran penting, tetapi ukuran tidak boleh menggantikan keberanian moral. Laporan yang rapi tidak otomatis membuat praktik menjadi adil.\n",
+          "application_id": "pub_004",
+          "metadata": {
+            "subtitle": "Catatan kritis tentang keberlanjutan, bahasa reputasi, dan etika yang sering direduksi menjadi laporan kepatuhan.",
+            "contentKind": "article",
+            "contentClass": "article",
+            "contentId": "pub_004",
+            "description": "Catatan tentang keberlanjutan, bahasa reputasi, dan etika yang sering dijadikan laporan.",
+            "aiSummary": "Analisis kritis mengenai pelaporan ESG antara substansi etika dan kosmetik reputasi.",
+            "publishedAt": "2025-06-15",
+            "updatedAt": "2025-06-15",
+            "readTime": "4 min",
+            "type": "analysis",
+            "topics": [
+              "Pelaporan"
+            ],
+            "topicRefs": [
+              "consumer.topic.pelaporan"
+            ],
+            "tags": [
+              "esg",
+              "etika",
+              "reputasi",
+              "reporting"
+            ],
+            "relatedRefs": [
+              "pub_001"
+            ],
+            "featured": false,
+            "section": "Pelaporan",
+            "sectionRefs": [
+              "consumer.section.pelaporan"
+            ],
+            "kicker": "Analisis · Pelaporan",
+            "storyFormat": "analysis",
+            "editorialRole": "standard",
+            "editorialPriority": 85,
+            "breaking": false,
+            "live": false,
+            "status": "published",
+            "visibility": "public",
+            "draft": false,
+            "noindex": false,
+            "language": "id",
+            "author": "PakRPP",
+            "authorRefs": [
+              "author.editorial-team"
+            ]
+          }
+        }
+      },
+      "bodySha256": "62b960620e7f69fcf375ad4489981b481bdaba67bb71dc5026085505c1e61419"
+    },
+    {
+      "applicationId": "pub_005",
+      "path": "src/content/docs/karsa-karya-kesejahteraan-antitesis-monopoly-dari-level-rw.md",
+      "pin": {
+        "origin": "http://localhost:4321",
+        "collection": "posts",
+        "id": "01M5QT1MPYYYZ46MXDXNA8DV4H",
+        "liveRevisionId": "01M5QT1MQ2WJ7QQN2GGGDA1MWB",
+        "updatedAt": "2026-10-24T20:49:06.236Z",
+        "titleField": "title",
+        "summaryField": "summary"
+      },
+      "item": {
+        "id": "01M5QT1MPYYYZ46MXDXNA8DV4H",
+        "type": "posts",
+        "slug": "karsa-karya-kesejahteraan-antitesis-monopoly-dari-level-rw",
+        "status": "published",
+        "updatedAt": "2026-10-24T20:49:06.236Z",
+        "publishedAt": "2024-09-14T00:00:00.000Z",
+        "liveRevisionId": "01M5QT1MQ2WJ7QQN2GGGDA1MWB",
+        "draftRevisionId": null,
+        "data": {
+          "title": "Karsa Karya Kesejahteraan Antitesis Monopoly dari Level RW",
+          "summary": "Kesejahteraan lokal sebagai antitesis permainan akumulasi yang memusat.",
+          "body": "\nJika Monopoly menggambarkan akumulasi yang membuat ruang hidup menyempit, maka level RW bisa dibaca sebagai laboratorium kecil untuk merawat arus kesejahteraan yang lebih menyebar.\n\n## Dari dekat\n\nPerubahan besar sering gagal karena terlalu jauh dari denyut warga. Level RW memberi kemungkinan untuk melihat kebutuhan, aset, dan gotong royong dengan lebih dekat.\n",
+          "application_id": "pub_005",
+          "metadata": {
+            "subtitle": "Kesejahteraan lokal sebagai laboratorium warga dan antitesis terhadap permainan akumulasi yang memusat.",
+            "contentKind": "article",
+            "contentClass": "article",
+            "contentId": "pub_005",
+            "description": "Kesejahteraan lokal sebagai antitesis permainan akumulasi yang memusat.",
+            "aiSummary": "Studi kasus kesejahteraan tingkat RW sebagai antitesis permainan akumulasi Monopoly.",
+            "publishedAt": "2024-09-14",
+            "updatedAt": "2024-09-14",
+            "readTime": "6 min",
+            "type": "case-study",
+            "topics": [
+              "Anomali",
+              "Pelaporan"
+            ],
+            "topicRefs": [
+              "consumer.topic.anomali",
+              "consumer.topic.pelaporan"
+            ],
+            "tags": [
+              "rw",
+              "kesejahteraan",
+              "monopoly"
+            ],
+            "relatedRefs": [
+              "pub_003"
+            ],
+            "featured": false,
+            "section": "Anomali",
+            "sectionRefs": [
+              "consumer.section.anomali"
+            ],
+            "kicker": "Studi Kasus · Anomali",
+            "storyFormat": "explainer",
+            "editorialRole": "standard",
+            "editorialPriority": 80,
+            "breaking": false,
+            "live": false,
+            "status": "published",
+            "visibility": "public",
+            "draft": false,
+            "noindex": false,
+            "language": "id",
+            "author": "PakRPP",
+            "authorRefs": [
+              "author.editorial-team"
+            ]
+          }
+        }
+      },
+      "bodySha256": "c0c87f0670b2c0fcc37b6b5f4e3338e6061acb7f63e8f814744492a0cf9c9300"
+    },
+    {
+      "applicationId": "pub_001",
+      "path": "src/content/docs/mengapa-ai-bukan-bukti.md",
+      "pin": {
+        "origin": "http://localhost:4321",
+        "collection": "posts",
+        "id": "01M5QT1MQ7RQWHPC3YZ7WTRXBV",
+        "liveRevisionId": "01M5QT1MQ90MW2W4NM7MT2F52X",
+        "updatedAt": "2026-10-24T20:49:06.293Z",
+        "titleField": "title",
+        "summaryField": "summary"
+      },
+      "item": {
+        "id": "01M5QT1MQ7RQWHPC3YZ7WTRXBV",
+        "type": "posts",
+        "slug": "mengapa-ai-bukan-bukti",
+        "status": "published",
+        "updatedAt": "2026-10-24T20:49:06.293Z",
+        "publishedAt": "2026-10-19T00:00:00.000Z",
+        "liveRevisionId": "01M5QT1MQ90MW2W4NM7MT2F52X",
+        "draftRevisionId": null,
+        "data": {
+          "title": "Kecerdasan Buatan Boleh Membantu Pelaporan, tetapi Keluarannya Bukan Bukti",
+          "summary": "Keluaran model bahasa dapat mempercepat strukturisasi dokumen, namun bukti tetap menuntut keterlacakan sumber primer, tanggung jawab subjek hukum, dan verifikasi independen.",
+          "body": "\nKecerdasan buatan telah masuk ke hampir setiap tahapan kerja administratif: merangkum notula, menyusun draf laporan, hingga memetakan kepatuhan regulasi. Efisiensi ini nyata, tetapi menyimpan jebakan serius ketika kelancaran bahasa disamakan dengan kebenaran faktual.\n\n## Narasi yang rapi bukan bukti\n\nDalam tata kelola pelaporan, bukti memiliki syarat ketat: ia harus dapat ditelusuri ke kejadian asal, memiliki pencatat yang dapat dimintai pertanggungjawaban, dan tahan terhadap uji silang. Keluaran model generatif bekerja dengan prinsip yang sama sekali berbeda—ia memprediksi rangkaian kata yang paling masuk akal secara statistik.\n\nParagraf yang terdengar meyakinkan bukanlah bukti bahwa suatu prosedur telah dijalankan di lapangan. Ketika organisasi menyerahkan validasi substansi kepada mesin, laporan berubah menjadi artefak estetika birokrasi.\n\n## Prinsip pemisahan fungsi dalam pelaporan\n\nAgar teknologi tetap memperkuat integritas institusi tanpa merusak akuntabilitas, tiga batas utama harus dijaga:\n\n1. **Bukti primer mendahului sintesis**: Rekaman transaksi, log sistem, berita acara, dan dokumen sumber harus dikunci sebelum proses peringkasan berbantuan AI dilakukan.\n2. **Keterlacakan klaim ke sumber**: Setiap pernyataan kuantitatif atau klaim kepatuhan di dalam laporan wajib merujuk pada artefak bukti spesifik, bukan hasil interpolasi model.\n3. **Penandatangan memikul beban verifikasi**: Mesin tidak memiliki kedudukan hukum maupun beban moral. Tanggung jawab atas keabsahan laporan tetap melekat penuh pada subjek manusia yang mengesahkannya.\n\n## Penutup\n\nGunakan kecerdasan buatan untuk memperjelas struktur, menemukan ketidakkonsistenan redaksional, dan mempercepat penelusuran dokumen. Namun jangan pernah mengizinkan keluaran algoritmik menggantikan rantai bukti.\n",
+          "application_id": "pub_001",
+          "metadata": {
+            "subtitle": "Membedakan sintesis probabilistik dari rantai bukti audit dalam tata kelola pelaporan modern.",
+            "contentKind": "article",
+            "contentClass": "article",
+            "contentId": "pub_001",
+            "description": "Analisis mengenai batas epistemik antara bantuan penyusunan laporan oleh kecerdasan buatan dan bukti yang dapat dipertanggungjawabkan secara audit.",
+            "aiSummary": "Analisis batas antara sintesis AI dan bukti pelaporan yang sah.",
+            "publishedAt": "2026-10-19",
+            "updatedAt": "2026-10-19",
+            "readTime": "6 min",
+            "type": "analysis",
+            "topics": [
+              "Pelaporan",
+              "Teknologi"
+            ],
+            "topicRefs": [
+              "consumer.topic.pelaporan",
+              "consumer.topic.teknologi"
+            ],
+            "tags": [
+              "ai",
+              "evidence",
+              "reporting"
+            ],
+            "relatedRefs": [
+              "pub_002",
+              "pub_004"
+            ],
+            "featured": true,
+            "section": "Pelaporan",
+            "sectionRefs": [
+              "consumer.section.pelaporan"
+            ],
+            "kicker": "Analisis · Pelaporan",
+            "storyFormat": "analysis",
+            "editorialRole": "lead",
+            "editorialPriority": 100,
+            "breaking": false,
+            "live": false,
+            "status": "published",
+            "visibility": "public",
+            "draft": false,
+            "noindex": false,
+            "language": "id",
+            "author": "PakRPP",
+            "authorRefs": [
+              "author.editorial-team"
+            ]
+          }
+        }
+      },
+      "bodySha256": "179191c6534a421abb6408a5f60678afc95ff6ec887c0c956e339d05c5aa4d9d"
+    },
+    {
+      "applicationId": "consumer.article.softcoded-systems",
+      "path": "src/content/docs/softcoded-systems-scale-better-than-theme-forks.md",
+      "pin": {
+        "origin": "http://localhost:4321",
+        "collection": "posts",
+        "id": "01M5QT1MQP0GQNHXJ9H6NFNZ1S",
+        "liveRevisionId": "01M5QT1MQRKFPQC69N5YYE80P7",
+        "updatedAt": "2026-10-24T20:49:06.355Z",
+        "titleField": "title",
+        "summaryField": "summary"
+      },
+      "item": {
+        "id": "01M5QT1MQP0GQNHXJ9H6NFNZ1S",
+        "type": "posts",
+        "slug": "softcoded-systems-scale-better-than-theme-forks",
+        "status": "published",
+        "updatedAt": "2026-10-24T20:49:06.355Z",
+        "publishedAt": "2026-10-10T00:00:00.000Z",
+        "liveRevisionId": "01M5QT1MQRKFPQC69N5YYE80P7",
+        "draftRevisionId": null,
+        "data": {
+          "title": "Softcoded Systems Scale Better Than Theme Forks",
+          "summary": "Why configuration, semantic tokens, and registries are preferable to repeated forks.",
+          "body": "\nA commercial bootstrap should allow identity, routes, capabilities, themes, and interaction policies to change independently.\n\n## Registries as authority\n\nCapability, action, route, and design contracts provide one place to declare product decisions. Components consume those contracts instead of embedding site assumptions.\n\n## Semantic tokens\n\nComponents ask for roles such as surface, text, border, accent, motion, and focus. Blueprintism, editorial, brutalism, and other design languages can then reinterpret those roles without changing component logic.\n\n## Kernel boundary\n\nGaga Engine owns reusable mechanics. The consumer application owns composition, content, and expression.\n",
+          "application_id": "consumer.article.softcoded-systems",
+          "metadata": {
+            "subtitle": "Configuration should express product decisions without duplicating mechanics.",
+            "contentKind": "article",
+            "contentClass": "article",
+            "contentId": "consumer.article.softcoded-systems",
+            "description": "Shows the signature configuration and token philosophy.",
+            "aiSummary": "A reference article about softcoded design systems.",
+            "publishedAt": "2026-10-10",
+            "updatedAt": "2026-10-11",
+            "readTime": "5 min",
+            "topics": [
+              "Publishing Systems"
+            ],
+            "topicRefs": [
+              "consumer.topic.publishing"
+            ],
+            "tags": [
+              "architecture",
+              "tokens",
+              "configuration"
+            ],
+            "relatedRefs": [
+              "consumer.article.context-aware-reading"
+            ],
+            "featured": true,
+            "section": "Systems",
+            "sectionRefs": [
+              "consumer.section.systems"
+            ],
+            "kicker": "Publishing Systems",
+            "storyFormat": "explainer",
+            "editorialRole": "major",
+            "editorialPriority": 80,
+            "breaking": false,
+            "live": false,
+            "status": "published",
+            "visibility": "public",
+            "draft": false,
+            "noindex": false,
+            "language": "id",
+            "author": "Editorial Team",
+            "authorRefs": [
+              "author.editorial-team"
+            ]
+          }
+        }
+      },
+      "bodySha256": "ec86daf5314f3446f93a3e006d23abc740034fade2d19dde15b095eb21e5065f"
+    },
+    {
+      "applicationId": "author.editorial-team",
+      "path": "src/content/docs/authors/editorial-team.md",
+      "pin": {
+        "origin": "http://localhost:4321",
+        "collection": "authors",
+        "id": "01M5QT1MQY2YF4MAFPVMCK01PY",
+        "liveRevisionId": "01M5QT1MR0GH1BK10W10T9EF4J",
+        "updatedAt": "2026-10-24T20:36:13.183Z",
+        "titleField": "title",
+        "summaryField": "summary"
+      },
+      "item": {
+        "id": "01M5QT1MQY2YF4MAFPVMCK01PY",
+        "type": "authors",
+        "slug": "editorial-team",
+        "status": "published",
+        "updatedAt": "2026-10-24T20:36:13.183Z",
+        "publishedAt": "2026-10-24T20:36:13.182Z",
+        "liveRevisionId": "01M5QT1MR0GH1BK10W10T9EF4J",
+        "draftRevisionId": null,
+        "data": {
+          "title": "Editorial Team",
+          "summary": "Replace this profile with your own authors or contributors.",
+          "body": "# Editorial Team\n\nA replaceable example author profile for the consumer signature.\n",
+          "application_id": "author.editorial-team",
+          "metadata": {
+            "contentKind": "author",
+            "contentId": "author.editorial-team",
+            "description": "Default example author identity.",
+            "topics": [
+              "Publishing",
+              "Design"
+            ],
+            "tags": [
+              "example"
+            ],
+            "status": "published",
+            "visibility": "public",
+            "draft": false,
+            "noindex": false,
+            "language": "id",
+            "author": "Editorial Team",
+            "authorRefs": [
+              "author.editorial-team"
+            ]
+          }
+        }
+      },
+      "bodySha256": "b7736a6e134f0d2b4adecc12c6d063bf9b6ef687d73e22249f37f2bcd8a52fdd"
+    }
+  ],
+  "provenance": {
+    "emdashVersion": "1.3.1",
+    "liveEmDashExportVerified": true,
+    "realProviderReads": 37
+  }
+}

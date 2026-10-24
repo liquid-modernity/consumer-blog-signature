@@ -6,6 +6,7 @@ import {readEmDashPublished} from '@gaga/corps-emdash';
 import {composeApplication,assembleApplication} from '@gaga/arsenal';
 import {searchCapabilityId,defineQuery,executeSearchReference} from '@gaga/engine-capabilities/search';
 import {root,hash} from './migration.mjs';
+import {writePublishedExport} from './export.mjs';
 const origin=process.env.CMS_ORIGIN,token=process.env.CMS_LOCAL_TOKEN;
 assert.equal(origin,'http://localhost:4321','Local verification is restricted to the declared loopback CMS');
 assert.ok(typeof token==='string'&&/^ec_pat_[A-Za-z0-9_-]+$/.test(token),'Complete local admin setup and put the local content:read/content:write PAT in .env.cms.local; never send it in chat');
@@ -50,6 +51,8 @@ try{
  await api('content/posts/'+probe.id,'PUT',{_rev:published._rev,data:{...published.item.data,title:'Unpublished local probe edit'}});
  const dirty=(await api('content/posts/'+probe.id)).item;
  assert.equal((await readEmDashPublished(pinFor(dirty,'posts'),host)).code,'draft-overlay');
+ await api('content/posts/'+probe.id+'/publish','POST',{});
+ assert.equal((await readEmDashPublished(pinFor((await api('content/posts/'+probe.id)).item,'posts'),host)).status,'projected');
  assert.equal((await readEmDashPublished(oldPin,host)).code,'stale-source');
  const denied=await readEmDashPublished(records[0].pin,{...host,authorizeRead:async()=>({decision:'DENY'}),readRaw:async()=>{throw Error('Denied host must perform zero reads');}});assert.equal(denied.code,'read-denied');
  for(const bearer of [null,'ec_pat_invalid_local_negative_control'])assert.ok([401,403].includes((await request('content/posts/'+records.find(x=>x.pin.collection==='posts').pin.id,'GET',undefined,bearer)).status));
@@ -64,5 +67,6 @@ const search=executeSearchReference({id:'live-local-cms',query:defineQuery({id:'
 const output=resolve(root,'.gaga/cms');mkdirSync(output,{recursive:true});
 const receipt={status:'PASS',classification:'REAL_LOCAL_EMDASH_API',origin,emdash:'1.3.1',records:records.map(({item,...x})=>({...x,providerPublishedAt:item.publishedAt})),realProviderReads:realReads,rawProviderResponses:true,fixturesUsedAsProvider:false,bodyIntegrity:true,metadataIdentityTaxonomyAuthorsPreserved:true,stableRevisions:true,draftExcluded:true,draftOverlayRejected:true,staleRejected:true,deniedBeforeProviderRead:true,unauthorizedRejected:true,composition:'PASS',engineSearch:{status:search.status,matchedArtifactIds:search.output.matchedArtifactIds},productionProvisioningPerformed:false};
 writeFileSync(resolve(output,'published.json'),JSON.stringify({schema:'consumer.emdash-export/v1',mode:'published-emdash-export',origin,documents:records,provenance:{emdashVersion:'1.3.1',realProviderReads:realReads,liveEmDashExportVerified:true}},null,2)+'\n');
+writePublishedExport(records,{origin,realProviderReads:realReads});
 writeFileSync(resolve(output,'local-receipt.json'),JSON.stringify(receipt,null,2)+'\n');
 console.log(JSON.stringify(receipt,null,2));

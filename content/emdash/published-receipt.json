@@ -1,0 +1,115 @@
+{
+  "status": "PASS",
+  "classification": "REAL_EMDASH_API_EXPORT",
+  "origin": "http://localhost:4321",
+  "exportSha256": "fcdae20b97773707cad626bf5844fbf41c88e3ae17a643f8071ac04b14025aa9",
+  "realProviderReads": 37,
+  "records": [
+    {
+      "applicationId": "pub_002",
+      "pin": {
+        "origin": "http://localhost:4321",
+        "collection": "posts",
+        "id": "01M5QT1MNH0VEA9HK83VMAWD6J",
+        "liveRevisionId": "01M5QT1MNVJ8CZ42X1E2RHFWYZ",
+        "updatedAt": "2026-10-24T20:49:05.911Z",
+        "titleField": "title",
+        "summaryField": "summary"
+      },
+      "bodySha256": "8df26cb6e5158871539fa874bcfe507af7a624659658f421adf01d5ef7a1d9d0"
+    },
+    {
+      "applicationId": "consumer.article.context-aware-reading",
+      "pin": {
+        "origin": "http://localhost:4321",
+        "collection": "posts",
+        "id": "01M5QT1MP3JQ92ZQXV9BY4978Y",
+        "liveRevisionId": "01M5QT1MP5KNV87FTZSJC58PYC",
+        "updatedAt": "2026-10-24T20:49:06.028Z",
+        "titleField": "title",
+        "summaryField": "summary"
+      },
+      "bodySha256": "e04b5f1f1d1d85f03d079758b8b9db3f77f121b409c9889be7c6dde1e14ec3ec"
+    },
+    {
+      "applicationId": "pub_003",
+      "pin": {
+        "origin": "http://localhost:4321",
+        "collection": "posts",
+        "id": "01M5QT1MPH3VH91CQPNRS3M6MM",
+        "liveRevisionId": "01M5QT1MPKN31WNYTG2PVHGW2N",
+        "updatedAt": "2026-10-24T20:49:06.110Z",
+        "titleField": "title",
+        "summaryField": "summary"
+      },
+      "bodySha256": "6e092ada7a61f84f87cc5da03a879e6cc5d4c81766c17f7988e2022025fb3b76"
+    },
+    {
+      "applicationId": "pub_004",
+      "pin": {
+        "origin": "http://localhost:4321",
+        "collection": "posts",
+        "id": "01M5QT1MPRHKYNYATTRDY4NK82",
+        "liveRevisionId": "01M5QT1MPS20R0WZEN5W5B0SNK",
+        "updatedAt": "2026-10-24T20:49:06.173Z",
+        "titleField": "title",
+        "summaryField": "summary"
+      },
+      "bodySha256": "62b960620e7f69fcf375ad4489981b481bdaba67bb71dc5026085505c1e61419"
+    },
+    {
+      "applicationId": "pub_005",
+      "pin": {
+        "origin": "http://localhost:4321",
+        "collection": "posts",
+        "id": "01M5QT1MPYYYZ46MXDXNA8DV4H",
+        "liveRevisionId": "01M5QT1MQ2WJ7QQN2GGGDA1MWB",
+        "updatedAt": "2026-10-24T20:49:06.236Z",
+        "titleField": "title",
+        "summaryField": "summary"
+      },
+      "bodySha256": "c0c87f0670b2c0fcc37b6b5f4e3338e6061acb7f63e8f814744492a0cf9c9300"
+    },
+    {
+      "applicationId": "pub_001",
+      "pin": {
+        "origin": "http://localhost:4321",
+        "collection": "posts",
+        "id": "01M5QT1MQ7RQWHPC3YZ7WTRXBV",
+        "liveRevisionId": "01M5QT1MQ90MW2W4NM7MT2F52X",
+        "updatedAt": "2026-10-24T20:49:06.293Z",
+        "titleField": "title",
+        "summaryField": "summary"
+      },
+      "bodySha256": "179191c6534a421abb6408a5f60678afc95ff6ec887c0c956e339d05c5aa4d9d"
+    },
+    {
+      "applicationId": "consumer.article.softcoded-systems",
+      "pin": {
+        "origin": "http://localhost:4321",
+        "collection": "posts",
+        "id": "01M5QT1MQP0GQNHXJ9H6NFNZ1S",
+        "liveRevisionId": "01M5QT1MQRKFPQC69N5YYE80P7",
+        "updatedAt": "2026-10-24T20:49:06.355Z",
+        "titleField": "title",
+        "summaryField": "summary"
+      },
+      "bodySha256": "ec86daf5314f3446f93a3e006d23abc740034fade2d19dde15b095eb21e5065f"
+    },
+    {
+      "applicationId": "author.editorial-team",
+      "pin": {
+        "origin": "http://localhost:4321",
+        "collection": "authors",
+        "id": "01M5QT1MQY2YF4MAFPVMCK01PY",
+        "liveRevisionId": "01M5QT1MR0GH1BK10W10T9EF4J",
+        "updatedAt": "2026-10-24T20:36:13.183Z",
+        "titleField": "title",
+        "summaryField": "summary"
+      },
+      "bodySha256": "b7736a6e134f0d2b4adecc12c6d063bf9b6ef687d73e22249f37f2bcd8a52fdd"
+    }
+  ],
+  "credentialsIncluded": false,
+  "freshness": "Recorded revision pins; refresh explicitly before rebuild. This receipt does not establish perpetual freshness."
+}

@@ -35,3 +35,5 @@ playwright-report/
 # Local EmDash database, uploads and sessions
 cms/.data/
 cms/.emdash/
+cms/dist-cloudflare/
+cms/emdash-env.d.ts

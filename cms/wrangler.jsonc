@@ -1,0 +1,10 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "consumer-blog-signature-cms",
+  "main": "src/worker.ts",
+  "compatibility_date": "2026-10-22",
+  "compatibility_flags": ["nodejs_compat"],
+  "d1_databases": [{"binding": "DB", "database_name": "consumer-blog-signature-cms"}],
+  "r2_buckets": [{"binding": "MEDIA", "bucket_name": "consumer-blog-signature-cms-media"}],
+  "kv_namespaces": [{"binding": "SESSION"}]
+}

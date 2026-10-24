@@ -1,0 +1,157 @@
+{
+  "status": "PASS",
+  "classification": "REAL_LOCAL_EMDASH_API",
+  "origin": "http://localhost:4321",
+  "emdash": "1.3.1",
+  "records": [
+    {
+      "applicationId": "pub_002",
+      "originalPath": "src/content/docs/akal-imitasi-sebagai-pekerja-tanpa-dignity.md",
+      "pin": {
+        "origin": "http://localhost:4321",
+        "collection": "posts",
+        "id": "01M5QT1MNH0VEA9HK83VMAWD6J",
+        "liveRevisionId": "01M5QT1MNVJ8CZ42X1E2RHFWYZ",
+        "updatedAt": "2026-10-24T20:49:05.911Z",
+        "titleField": "title",
+        "summaryField": "summary"
+      },
+      "bodySha256": "8df26cb6e5158871539fa874bcfe507af7a624659658f421adf01d5ef7a1d9d0",
+      "sourceSha256": "d0608aab24900e470356f5a0d4c508e38dc36d8dcb88822d1441de50a87fe44c",
+      "providerPublishedAt": "2026-06-17T00:00:00.000Z"
+    },
+    {
+      "applicationId": "consumer.article.context-aware-reading",
+      "originalPath": "src/content/docs/designing-context-aware-reading-surface.md",
+      "pin": {
+        "origin": "http://localhost:4321",
+        "collection": "posts",
+        "id": "01M5QT1MP3JQ92ZQXV9BY4978Y",
+        "liveRevisionId": "01M5QT1MP5KNV87FTZSJC58PYC",
+        "updatedAt": "2026-10-24T20:49:06.028Z",
+        "titleField": "title",
+        "summaryField": "summary"
+      },
+      "bodySha256": "e04b5f1f1d1d85f03d079758b8b9db3f77f121b409c9889be7c6dde1e14ec3ec",
+      "sourceSha256": "cf3ca78cec5aabb6ceef60f5cd2086cd504932a27822e00dd69de7189577ecfb",
+      "providerPublishedAt": "2026-10-11T00:00:00.000Z"
+    },
+    {
+      "applicationId": "pub_003",
+      "originalPath": "src/content/docs/dialog-imajiner-pakrpp-lizzie-monopoly-akal-imitasi.md",
+      "pin": {
+        "origin": "http://localhost:4321",
+        "collection": "posts",
+        "id": "01M5QT1MPH3VH91CQPNRS3M6MM",
+        "liveRevisionId": "01M5QT1MPKN31WNYTG2PVHGW2N",
+        "updatedAt": "2026-10-24T20:49:06.110Z",
+        "titleField": "title",
+        "summaryField": "summary"
+      },
+      "bodySha256": "6e092ada7a61f84f87cc5da03a879e6cc5d4c81766c17f7988e2022025fb3b76",
+      "sourceSha256": "0777d538a53296d34e789dae9b29073a97fa7d377148fccf7966f3f036674e0f",
+      "providerPublishedAt": "2025-11-16T00:00:00.000Z"
+    },
+    {
+      "applicationId": "pub_004",
+      "originalPath": "src/content/docs/esg-etika-pasar-atau-tambalan-reputasi.md",
+      "pin": {
+        "origin": "http://localhost:4321",
+        "collection": "posts",
+        "id": "01M5QT1MPRHKYNYATTRDY4NK82",
+        "liveRevisionId": "01M5QT1MPS20R0WZEN5W5B0SNK",
+        "updatedAt": "2026-10-24T20:49:06.173Z",
+        "titleField": "title",
+        "summaryField": "summary"
+      },
+      "bodySha256": "62b960620e7f69fcf375ad4489981b481bdaba67bb71dc5026085505c1e61419",
+      "sourceSha256": "c9d0e50209875e3160279f3150a8a54f80f6a252073095ce0567bc379adc7f7f",
+      "providerPublishedAt": "2025-06-15T00:00:00.000Z"
+    },
+    {
+      "applicationId": "pub_005",
+      "originalPath": "src/content/docs/karsa-karya-kesejahteraan-antitesis-monopoly-dari-level-rw.md",
+      "pin": {
+        "origin": "http://localhost:4321",
+        "collection": "posts",
+        "id": "01M5QT1MPYYYZ46MXDXNA8DV4H",
+        "liveRevisionId": "01M5QT1MQ2WJ7QQN2GGGDA1MWB",
+        "updatedAt": "2026-10-24T20:49:06.236Z",
+        "titleField": "title",
+        "summaryField": "summary"
+      },
+      "bodySha256": "c0c87f0670b2c0fcc37b6b5f4e3338e6061acb7f63e8f814744492a0cf9c9300",
+      "sourceSha256": "a4f533fed21ec7f71f0b3dcf9937642fb09cd94376fe035af93315ac0e20e6e0",
+      "providerPublishedAt": "2024-09-14T00:00:00.000Z"
+    },
+    {
+      "applicationId": "pub_001",
+      "originalPath": "src/content/docs/mengapa-ai-bukan-bukti.md",
+      "pin": {
+        "origin": "http://localhost:4321",
+        "collection": "posts",
+        "id": "01M5QT1MQ7RQWHPC3YZ7WTRXBV",
+        "liveRevisionId": "01M5QT1MQ90MW2W4NM7MT2F52X",
+        "updatedAt": "2026-10-24T20:49:06.293Z",
+        "titleField": "title",
+        "summaryField": "summary"
+      },
+      "bodySha256": "179191c6534a421abb6408a5f60678afc95ff6ec887c0c956e339d05c5aa4d9d",
+      "sourceSha256": "620fc6bc32a80d3f390cbf033de119121f7e24ed203415c158e3a439c64794e1",
+      "providerPublishedAt": "2026-10-19T00:00:00.000Z"
+    },
+    {
+      "applicationId": "consumer.article.softcoded-systems",
+      "originalPath": "src/content/docs/softcoded-systems-scale-better-than-theme-forks.md",
+      "pin": {
+        "origin": "http://localhost:4321",
+        "collection": "posts",
+        "id": "01M5QT1MQP0GQNHXJ9H6NFNZ1S",
+        "liveRevisionId": "01M5QT1MQRKFPQC69N5YYE80P7",
+        "updatedAt": "2026-10-24T20:49:06.355Z",
+        "titleField": "title",
+        "summaryField": "summary"
+      },
+      "bodySha256": "ec86daf5314f3446f93a3e006d23abc740034fade2d19dde15b095eb21e5065f",
+      "sourceSha256": "5c803d7712993afd13a1eabcc0e50029a7281c60c9a468122d2997c9a1947132",
+      "providerPublishedAt": "2026-10-10T00:00:00.000Z"
+    },
+    {
+      "applicationId": "author.editorial-team",
+      "originalPath": "src/content/docs/authors/editorial-team.md",
+      "pin": {
+        "origin": "http://localhost:4321",
+        "collection": "authors",
+        "id": "01M5QT1MQY2YF4MAFPVMCK01PY",
+        "liveRevisionId": "01M5QT1MR0GH1BK10W10T9EF4J",
+        "updatedAt": "2026-10-24T20:36:13.183Z",
+        "titleField": "title",
+        "summaryField": "summary"
+      },
+      "bodySha256": "b7736a6e134f0d2b4adecc12c6d063bf9b6ef687d73e22249f37f2bcd8a52fdd",
+      "sourceSha256": "08c5abbdda951c26759f71b24def879bc63d2dce767d8d6d9fea0fe40d966320",
+      "providerPublishedAt": "2026-10-24T20:36:13.182Z"
+    }
+  ],
+  "realProviderReads": 37,
+  "rawProviderResponses": true,
+  "fixturesUsedAsProvider": false,
+  "bodyIntegrity": true,
+  "metadataIdentityTaxonomyAuthorsPreserved": true,
+  "stableRevisions": true,
+  "draftExcluded": true,
+  "draftOverlayRejected": true,
+  "staleRejected": true,
+  "deniedBeforeProviderRead": true,
+  "unauthorizedRejected": true,
+  "composition": "PASS",
+  "engineSearch": {
+    "status": "succeeded",
+    "matchedArtifactIds": [
+      "http://localhost:4321/_emdash/api/content/posts/01M5QT1MNH0VEA9HK83VMAWD6J",
+      "http://localhost:4321/_emdash/api/content/posts/01M5QT1MPH3VH91CQPNRS3M6MM"
+    ]
+  },
+  "productionProvisioningPerformed": false,
+  "exportSha256": "fcdae20b97773707cad626bf5844fbf41c88e3ae17a643f8071ac04b14025aa9"
+}

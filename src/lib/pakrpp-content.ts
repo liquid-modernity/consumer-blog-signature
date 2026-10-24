@@ -441,7 +441,7 @@ export async function getSystematicKnowledgeIndex(): Promise<KnowledgeIndexLette
 
 export const localContentAdapter: ContentProviderAdapter = {
   providerId: 'emdash-cms',
-  providerName: 'Read-only EmDash pinned publication snapshot',
+  providerName: 'Read-only admitted EmDash published export',
   async getPublications() {
     return toCanonicalPublications();
   },

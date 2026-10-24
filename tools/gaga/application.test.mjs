@@ -21,10 +21,10 @@ test("real machine endpoints and namespaces validate deterministically", () => {
 test("published CMS snapshot retains the preserved application bodies and explicit provider/application identity mapping", async () => {
   const r = await verifySnapshot();
   assert.equal(r.artifacts.length, 8);
-  assert.equal(r.snapshot.provenance.liveEmDashExportVerified, false);
+  assert.equal(r.snapshot.provenance.liveEmDashExportVerified, true);
   assert.ok(
     r.snapshot.documents.every(
-      (x) => x.applicationId === x.item.data.contentId,
+      (x) => x.applicationId === x.item.data.metadata.contentId,
     ),
   );
 });
@@ -53,7 +53,7 @@ test("stale, draft and denied CMS reads fail, without fallback or unauthorized r
 test("a changed snapshot body digest stops content admission", async () => {
   const s = structuredClone(readSnapshot());
   s.documents[0].bodySha256 = "0".repeat(64);
-  await assert.rejects(verifySnapshot(s), /Snapshot body changed/);
+  await assert.rejects(verifySnapshot(s), /Export differs|CMS export body changed/);
 });
 
 test("maintained CI propagates failed commands through pipes and gates staging on qualified evidence", async () => {

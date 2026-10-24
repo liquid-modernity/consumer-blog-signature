@@ -7,7 +7,9 @@
   },
   "engine": {
     "version": "0.4.0",
-    "capabilities": ["gaga.capability.search"]
+    "capabilities": [
+      "gaga.capability.search"
+    ]
   },
   "integrations": [
     {
@@ -35,8 +37,10 @@
     {
       "id": "published-content",
       "integration": "cms",
-      "resource": "published-snapshot",
-      "environment": ["cms-origin"]
+      "resource": "published-export",
+      "environment": [
+        "cms-origin"
+      ]
     },
     {
       "id": "application-pages",
