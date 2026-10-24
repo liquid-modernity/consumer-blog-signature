@@ -19,6 +19,7 @@ jobs:
     env:
       ASTRO_TELEMETRY_DISABLED: "1"
       ASTRO_DEV_BACKGROUND: "1"
+      PUBLIC_GIT_SHA: ${{ github.sha }}
       WRANGLER_SEND_METRICS: "false"
     steps:
       - uses: actions/checkout@v4
