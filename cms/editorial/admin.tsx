@@ -33,6 +33,7 @@ function StudioBody({ value = [], onChange, label, id }: Props) {
       Array<{ id: string; data: Record<string, unknown> }>
     >([]),
     [error, setError] = useState("");
+  const previewWindow = useRef<Window | null>(null);
   const frame = useRef<HTMLIFrameElement>(null),
     draft = useRef(value);
   draft.current = value;
@@ -40,19 +41,27 @@ function StudioBody({ value = [], onChange, label, id }: Props) {
   try {
     analysis = analyzeEditorial(value, {}, { sections });
   } catch {}
-  const sendPreview = () =>
-    frame.current?.contentWindow?.postMessage(
+  const sendPreview = () => {
+    if (
+      !frame.current?.contentWindow ||
+      previewWindow.current !== frame.current.contentWindow
+    )
+      return;
+    frame.current.contentWindow.postMessage(
       { type: "pakrpp.editorial-preview/v1", body: draft.current, sections },
       "http://localhost:3000",
     );
+  };
   useEffect(() => {
     const ready = (event: MessageEvent) => {
       if (
         event.origin === "http://localhost:3000" &&
         event.source === frame.current?.contentWindow &&
         event.data?.type === "pakrpp.preview-ready"
-      )
+      ) {
+        previewWindow.current = frame.current?.contentWindow ?? null;
         sendPreview();
+      }
     };
     window.addEventListener("message", ready);
     return () => window.removeEventListener("message", ready);

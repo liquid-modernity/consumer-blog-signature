@@ -1,6 +1,14 @@
 import { test, expect, type Page } from "@playwright/test";
 import { mkdirSync, writeFileSync, readFileSync } from "node:fs";
 import { richFixture } from "../fixture.mjs";
+import { readEmDashPublished } from "@gaga/corps-emdash";
+import { composeApplication, assembleApplication } from "@gaga/arsenal";
+import {
+  searchCapabilityId,
+  defineQuery,
+  executeSearchReference,
+} from "@gaga/engine-capabilities/search";
+import { withEditorialText } from "../../../editorial/search.mjs";
 import { markdownToPortableText } from "../../../editorial/markdown.mjs";
 import { validatePortableText } from "../../../editorial/portable-text.mjs";
 async function api(page: Page, path: string, method = "GET", body?: unknown) {
@@ -52,12 +60,24 @@ test("real local EmDash studio: rich edits, blocks, revision/publishing and PAKR
     "/_emdash/api/setup/dev-bypass?content=1&redirect=/_emdash/admin",
   );
   await page.waitForURL(/\/_emdash\/admin(?:\/)?$/);
-  await page.waitForLoadState("networkidle");
-  const welcome = page.getByRole("button", {
-    name: "Get Started",
-    exact: true,
-  });
-  if (await welcome.isVisible()) await welcome.click();
+  const me = await api(page, "auth/me");
+  if (me.isFirstLogin) {
+    const welcome = page.getByRole("button", {
+      name: "Get Started",
+      exact: true,
+    });
+    await expect(welcome).toBeVisible({ timeout: 30000 });
+    const dismissed = page.waitForResponse(
+      (r) =>
+        r.request().method() === "POST" &&
+        new URL(r.url()).pathname === "/_emdash/api/auth/me" &&
+        r.status() === 200,
+    );
+    await welcome.click();
+    await dismissed;
+    await expect(welcome).toBeHidden();
+    expect((await api(page, "auth/me")).isFirstLogin).toBe(false);
+  }
   const newPage = await api(page, "content/pages", "POST", {
     slug: "studio-page-" + Date.now(),
     data: {
@@ -330,6 +350,98 @@ test("real local EmDash studio: rich edits, blocks, revision/publishing and PAKR
     { _rev: (await api(page, "content/posts/" + id))._rev },
   );
   expect(secondPublished.item.liveRevisionId).not.toBe(firstPublishedRevision);
+  const origin = "http://localhost:4322",
+    item = (await api(page, "content/posts/" + id)).item;
+  const pin = {
+    origin,
+    collection: "posts",
+    id: item.id,
+    liveRevisionId: item.liveRevisionId,
+    updatedAt: item.updatedAt,
+    titleField: "title",
+    summaryField: "summary",
+  };
+  const projection = await readEmDashPublished(pin, {
+    origin,
+    authorizeRead: async (resource) => ({ decision: "ALLOW", resource }),
+    readRaw: async (collection, id) =>
+      (await api(page, "content/" + collection + "/" + id)).item,
+  });
+  expect(projection.status).toBe("projected");
+  if (projection.status !== "projected")
+    throw Error("Actual rich CMS revision rejected");
+  const declaration = readFileSync("gaga.app.json", "utf8"),
+    declared = JSON.parse(declaration);
+  const names = [
+    "@gaga/engine-contracts",
+    "@gaga/engine-capabilities",
+    "astro",
+    "@astrojs/starlight",
+    ...declared.integrations.map((x: { package: string }) => x.package),
+  ];
+  const installed = Object.fromEntries(
+    names.map((name) => {
+      const p = JSON.parse(
+        readFileSync("node_modules/" + name + "/package.json", "utf8"),
+      );
+      return [name, { version: p.version, dependencies: p.dependencies ?? {} }];
+    }),
+  );
+  const composed = composeApplication(declaration, {
+    installed,
+    capabilities: [searchCapabilityId],
+    runtimes: ["build", "edge"],
+    bindings: ["CMS_ORIGIN"],
+  });
+  expect(composed.ok).toBe(true);
+  if (!composed.ok) throw Error("Application composition failed");
+  const sectionMap = Object.fromEntries(
+    sections.items.map((x: any) => [x.id, x.data.body]),
+  );
+  const richArtifact = withEditorialText(projection, item.data.body, {
+    sections: sectionMap,
+  });
+  const assembly = await assembleApplication(composed.value, {
+    "published-content": async () => [richArtifact],
+    "application-pages": async () => [],
+  });
+  expect(assembly.ok).toBe(true);
+  if (!assembly.ok) throw Error("Application assembly failed");
+  const richSearch = executeSearchReference({
+    id: "local-rich-cms",
+    query: defineQuery({
+      id: "body-query",
+      text: "calibrated-astronomy",
+      filters: [],
+      facets: [],
+      scope: [],
+      constraints: [],
+      diagnostics: [],
+    }),
+    artifacts: assembly.value.artifacts,
+    limitations: [],
+    diagnostics: [],
+  });
+  expect(richSearch.status).toBe("succeeded");
+  expect(richSearch.output?.results.length).toBe(1);
+  writeFileSync(
+    ".gaga/editorial/real-rich-search.json",
+    JSON.stringify(
+      {
+        status: "PASS",
+        source: "REAL_LOCAL_EMDASH_REST",
+        pin,
+        corps: "PASS",
+        arsenal: "PASS",
+        engineSearch: "PASS",
+        query: "calibrated-astronomy",
+        artifactCount: assembly.value.artifacts.length,
+        productionMutations: 0,
+      },
+      null,
+      2,
+    ) + "\n",
+  );
   const revisions = await api(
     page,
     "content/posts/" + id + "/revisions?limit=100",
