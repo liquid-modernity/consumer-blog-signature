@@ -25,8 +25,6 @@ export default defineConfig({
       url: "http://localhost:4322/",
       reuseExistingServer: !process.env.CI,
       timeout: 180000,
-      // Cold native admin modules can take longer than the default five-second assertion window.
-      expect: { timeout: 15000 },
       env: { ASTRO_DEV_BACKGROUND: "1" },
     },
     {
@@ -34,8 +32,6 @@ export default defineConfig({
       url: "http://localhost:3000/",
       reuseExistingServer: !process.env.CI,
       timeout: 180000,
-      // Cold native admin modules can take longer than the default five-second assertion window.
-      expect: { timeout: 15000 },
       env: { ASTRO_DEV_BACKGROUND: "1" },
     },
   ],
