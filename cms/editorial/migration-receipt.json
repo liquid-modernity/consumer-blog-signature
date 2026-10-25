@@ -1,0 +1,333 @@
+{
+  "schema": "consumer.rich-migration-receipt/v1",
+  "status": "PASS",
+  "sourceSetSha256": "de2abab7a30e1ec7201054ba064b76cf3f031d7263bc436bf28987453ffb2275",
+  "planSha256": "9fb54b859fa8143c86e6a0eeefd17008070e0c83836ae13fc1d407e484ebb208",
+  "qualification": {
+    "status": "PASS",
+    "planSha256": "9fb54b859fa8143c86e6a0eeefd17008070e0c83836ae13fc1d407e484ebb208",
+    "sourceSetSha256": "de2abab7a30e1ec7201054ba064b76cf3f031d7263bc436bf28987453ffb2275",
+    "qualificationRun": 40211972548,
+    "qualificationSource": "720d7fe65741810fb9af9de19902a606d97afc98",
+    "currentSource": "8ff8872f745fd6c344d9ddfe838dac63670359a2",
+    "productionWritesAuthorized": true,
+    "backupVerified": true,
+    "backupReceiptSha256": "44472c240d8fc0ebab7e3cbff563b953064bba7721d9203dd85cfed1bc73736c",
+    "workflowFreezeVerified": true,
+    "freezeReceiptSha256": "8e851dac9474b67ea2c050b60e248c57077c51baa8c2110c1298138815639df8"
+  },
+  "schemaWrites": 30,
+  "contentWrites": 16,
+  "productionContentCreates": 0,
+  "historicalRevisionsPreserved": true,
+  "markdownArchivePreserved": true,
+  "repeatedReadsStable": true,
+  "pagesCreated": 0,
+  "referencesCreated": 0,
+  "sectionsCreated": 0,
+  "exportSha256": "9caa6924b6ebbbc4d545cbee4f4fa8996ec30036c998aed114f951088dd0e37d",
+  "records": [
+    {
+      "applicationId": "author.editorial-team",
+      "pin": {
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "collection": "authors",
+        "id": "01M5RYDB6VGATHN3HWS5NX8FWF",
+        "liveRevisionId": "01M5SZNQQRSMF7XRS1VNCRC7QR",
+        "updatedAt": "2026-10-25T16:53:16.216Z",
+        "titleField": "title",
+        "summaryField": "summary"
+      },
+      "previousPin": {
+        "collection": "authors",
+        "id": "01M5RYDB6VGATHN3HWS5NX8FWF",
+        "liveRevisionId": "01M5RYDN6NXX24ARJCXMMP2ZQH",
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "summaryField": "summary",
+        "titleField": "title",
+        "updatedAt": "2026-10-25T07:11:55.189Z"
+      },
+      "previousReviewedPin": {
+        "collection": "authors",
+        "id": "01M5RYDB6VGATHN3HWS5NX8FWF",
+        "liveRevisionId": "01M5RYDN6NXX24ARJCXMMP2ZQH",
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "summaryField": "summary",
+        "titleField": "title",
+        "updatedAt": "2026-10-25T07:11:55.189Z"
+      },
+      "markdownSha256": "b7736a6e134f0d2b4adecc12c6d063bf9b6ef687d73e22249f37f2bcd8a52fdd",
+      "portableTextSha256": "ca96d0d24072a8ebacb74ca640b086752e6f84520985cb9b231dd5641045b4b5",
+      "migratedAt": "2026-10-25T16:53:16.216Z",
+      "canonicalBodyField": "content",
+      "dataSha256": "4a2a69141f70ecceb8a6df1481b23c8469548b73d063e8cc8a897a5e9e2a066a",
+      "authorReferences": []
+    },
+    {
+      "applicationId": "pub_002",
+      "pin": {
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "collection": "posts",
+        "id": "01M5RYE04XBXXG8A1999AVVZW9",
+        "liveRevisionId": "01M5SZPMRSPVGT36HJSW3C0M51",
+        "updatedAt": "2026-10-25T16:53:48.579Z",
+        "titleField": "title",
+        "summaryField": "summary"
+      },
+      "previousPin": {
+        "collection": "posts",
+        "id": "01M5RYE04XBXXG8A1999AVVZW9",
+        "liveRevisionId": "01M5RYEA38WH60QXYDXJJ5MWCG",
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "summaryField": "summary",
+        "titleField": "title",
+        "updatedAt": "2026-10-25T07:12:16.580Z"
+      },
+      "previousReviewedPin": {
+        "collection": "posts",
+        "id": "01M5RYE04XBXXG8A1999AVVZW9",
+        "liveRevisionId": "01M5RYEA38WH60QXYDXJJ5MWCG",
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "summaryField": "summary",
+        "titleField": "title",
+        "updatedAt": "2026-10-25T07:12:16.580Z"
+      },
+      "markdownSha256": "8df26cb6e5158871539fa874bcfe507af7a624659658f421adf01d5ef7a1d9d0",
+      "portableTextSha256": "d63ba7b2804927927d4bab3e62401301392e71e6c1a2b87e7bafcf35c481db31",
+      "migratedAt": "2026-10-25T16:53:48.579Z",
+      "canonicalBodyField": "content",
+      "dataSha256": "e6f8a8a643d62ddf3109596809eec6a865a7b28c17fd5f12eb0d2618cd9d3567",
+      "authorReferences": [
+        "01M5RYDB6VGATHN3HWS5NX8FWF"
+      ]
+    },
+    {
+      "applicationId": "consumer.article.context-aware-reading",
+      "pin": {
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "collection": "posts",
+        "id": "01M5RYEND738V6RF6QM0MK973Q",
+        "liveRevisionId": "01M5SZQSXM5VWF136VWDF0MM8Z",
+        "updatedAt": "2026-10-25T16:54:26.611Z",
+        "titleField": "title",
+        "summaryField": "summary"
+      },
+      "previousPin": {
+        "collection": "posts",
+        "id": "01M5RYEND738V6RF6QM0MK973Q",
+        "liveRevisionId": "01M5RYEZCTJZNNA9Z1ABVG2BR7",
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "summaryField": "summary",
+        "titleField": "title",
+        "updatedAt": "2026-10-25T07:12:38.388Z"
+      },
+      "previousReviewedPin": {
+        "collection": "posts",
+        "id": "01M5RYEND738V6RF6QM0MK973Q",
+        "liveRevisionId": "01M5RYEZCTJZNNA9Z1ABVG2BR7",
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "summaryField": "summary",
+        "titleField": "title",
+        "updatedAt": "2026-10-25T07:12:38.388Z"
+      },
+      "markdownSha256": "e04b5f1f1d1d85f03d079758b8b9db3f77f121b409c9889be7c6dde1e14ec3ec",
+      "portableTextSha256": "602b434bafb66a74978fb451a62ee91c86f301382967677eb860493e50b7eb2a",
+      "migratedAt": "2026-10-25T16:54:26.611Z",
+      "canonicalBodyField": "content",
+      "dataSha256": "0529bb537f1913654bc89b096a588bdf4570e8e02f002966601eef37a20b47e3",
+      "authorReferences": [
+        "01M5RYDB6VGATHN3HWS5NX8FWF"
+      ]
+    },
+    {
+      "applicationId": "pub_003",
+      "pin": {
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "collection": "posts",
+        "id": "01M5RYFA4GWC7Q3GSXAKRWEM5R",
+        "liveRevisionId": "01M5SZRYX6TFR9NM7RD9D9ZXT5",
+        "updatedAt": "2026-10-25T16:55:04.558Z",
+        "titleField": "title",
+        "summaryField": "summary"
+      },
+      "previousPin": {
+        "collection": "posts",
+        "id": "01M5RYFA4GWC7Q3GSXAKRWEM5R",
+        "liveRevisionId": "01M5RYFMBM063RB7W1NMP1SS9C",
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "summaryField": "summary",
+        "titleField": "title",
+        "updatedAt": "2026-10-25T07:12:59.859Z"
+      },
+      "previousReviewedPin": {
+        "collection": "posts",
+        "id": "01M5RYFA4GWC7Q3GSXAKRWEM5R",
+        "liveRevisionId": "01M5RYFMBM063RB7W1NMP1SS9C",
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "summaryField": "summary",
+        "titleField": "title",
+        "updatedAt": "2026-10-25T07:12:59.859Z"
+      },
+      "markdownSha256": "6e092ada7a61f84f87cc5da03a879e6cc5d4c81766c17f7988e2022025fb3b76",
+      "portableTextSha256": "2fc14b133bcd084b71362da72a3aa97bf07a0ce26ff142a406f6850a1513c77c",
+      "migratedAt": "2026-10-25T16:55:04.558Z",
+      "canonicalBodyField": "content",
+      "dataSha256": "1cc51ccf894415ed8955cb0979cfef0aebb1fd2adfaa00ce18c390cb3204ea9e",
+      "authorReferences": [
+        "01M5RYDB6VGATHN3HWS5NX8FWF"
+      ]
+    },
+    {
+      "applicationId": "pub_004",
+      "pin": {
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "collection": "posts",
+        "id": "01M5RYFZ456BXQ8B03WKK42K3H",
+        "liveRevisionId": "01M5SZT47H5N6ZBWCVN38TQCW4",
+        "updatedAt": "2026-10-25T16:55:42.686Z",
+        "titleField": "title",
+        "summaryField": "summary"
+      },
+      "previousPin": {
+        "collection": "posts",
+        "id": "01M5RYFZ456BXQ8B03WKK42K3H",
+        "liveRevisionId": "01M5RYG9HRXRDEM53RJZBG3BKN",
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "summaryField": "summary",
+        "titleField": "title",
+        "updatedAt": "2026-10-25T07:13:21.562Z"
+      },
+      "previousReviewedPin": {
+        "collection": "posts",
+        "id": "01M5RYFZ456BXQ8B03WKK42K3H",
+        "liveRevisionId": "01M5RYG9HRXRDEM53RJZBG3BKN",
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "summaryField": "summary",
+        "titleField": "title",
+        "updatedAt": "2026-10-25T07:13:21.562Z"
+      },
+      "markdownSha256": "62b960620e7f69fcf375ad4489981b481bdaba67bb71dc5026085505c1e61419",
+      "portableTextSha256": "396569bfce2cbd03b23e65020473e91bc19383582d5fdff2b7b194cd633782be",
+      "migratedAt": "2026-10-25T16:55:42.686Z",
+      "canonicalBodyField": "content",
+      "dataSha256": "81857055d7ed488fda251a9675c91dc932b0c30dc7377f40e8af26d87cd6b586",
+      "authorReferences": [
+        "01M5RYDB6VGATHN3HWS5NX8FWF"
+      ]
+    },
+    {
+      "applicationId": "pub_005",
+      "pin": {
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "collection": "posts",
+        "id": "01M5RYGM5ENY3WY3F38B6QPF8B",
+        "liveRevisionId": "01M5SZV9VDAAE6CA512MYB1AH6",
+        "updatedAt": "2026-10-25T16:56:20.960Z",
+        "titleField": "title",
+        "summaryField": "summary"
+      },
+      "previousPin": {
+        "collection": "posts",
+        "id": "01M5RYGM5ENY3WY3F38B6QPF8B",
+        "liveRevisionId": "01M5RYGY30G4QKTZZKR1G05PG9",
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "summaryField": "summary",
+        "titleField": "title",
+        "updatedAt": "2026-10-25T07:13:42.584Z"
+      },
+      "previousReviewedPin": {
+        "collection": "posts",
+        "id": "01M5RYGM5ENY3WY3F38B6QPF8B",
+        "liveRevisionId": "01M5RYGY30G4QKTZZKR1G05PG9",
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "summaryField": "summary",
+        "titleField": "title",
+        "updatedAt": "2026-10-25T07:13:42.584Z"
+      },
+      "markdownSha256": "c0c87f0670b2c0fcc37b6b5f4e3338e6061acb7f63e8f814744492a0cf9c9300",
+      "portableTextSha256": "c959e47daf92e76abf6347a38263f8fbd58cb71b0fb6712b95482c1158c33330",
+      "migratedAt": "2026-10-25T16:56:20.960Z",
+      "canonicalBodyField": "content",
+      "dataSha256": "7f7c47f55f0ae8636d462ca53047d257a41c7a1d440785b7fea5b23bc0722ab8",
+      "authorReferences": [
+        "01M5RYDB6VGATHN3HWS5NX8FWF"
+      ]
+    },
+    {
+      "applicationId": "pub_001",
+      "pin": {
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "collection": "posts",
+        "id": "01M5RYH99AW0EQMQEGGGH5JTRX",
+        "liveRevisionId": "01M5SZWEW2ZTYTPMEPF6DZ86NV",
+        "updatedAt": "2026-10-25T16:56:59.284Z",
+        "titleField": "title",
+        "summaryField": "summary"
+      },
+      "previousPin": {
+        "collection": "posts",
+        "id": "01M5RYH99AW0EQMQEGGGH5JTRX",
+        "liveRevisionId": "01M5RYHKJB2TYWBTNKJ436S6R3",
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "summaryField": "summary",
+        "titleField": "title",
+        "updatedAt": "2026-10-25T07:14:04.243Z"
+      },
+      "previousReviewedPin": {
+        "collection": "posts",
+        "id": "01M5RYH99AW0EQMQEGGGH5JTRX",
+        "liveRevisionId": "01M5RYHKJB2TYWBTNKJ436S6R3",
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "summaryField": "summary",
+        "titleField": "title",
+        "updatedAt": "2026-10-25T07:14:04.243Z"
+      },
+      "markdownSha256": "179191c6534a421abb6408a5f60678afc95ff6ec887c0c956e339d05c5aa4d9d",
+      "portableTextSha256": "fd02554a9a9ebbfd3a98f6fd97f1efe0321188a2c4c24f24b583876ac33a7e04",
+      "migratedAt": "2026-10-25T16:56:59.284Z",
+      "canonicalBodyField": "content",
+      "dataSha256": "3cea50b7a98e8b0ff1d795a4e8bc9498957a47e8cdc7bf64f2b8b6635071ce83",
+      "authorReferences": [
+        "01M5RYDB6VGATHN3HWS5NX8FWF"
+      ]
+    },
+    {
+      "applicationId": "consumer.article.softcoded-systems",
+      "pin": {
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "collection": "posts",
+        "id": "01M5RYHYBT0NZBM5N0MTEJHBH7",
+        "liveRevisionId": "01M5SZXKP3H3HCPBD2FTHBNBVC",
+        "updatedAt": "2026-10-25T16:57:37.279Z",
+        "titleField": "title",
+        "summaryField": "summary"
+      },
+      "previousPin": {
+        "collection": "posts",
+        "id": "01M5RYHYBT0NZBM5N0MTEJHBH7",
+        "liveRevisionId": "01M5S1YZCPHZ5HPA8Q9XQNMEB1",
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "summaryField": "summary",
+        "titleField": "title",
+        "updatedAt": "2026-10-25T08:13:58.430Z"
+      },
+      "previousReviewedPin": {
+        "collection": "posts",
+        "id": "01M5RYHYBT0NZBM5N0MTEJHBH7",
+        "liveRevisionId": "01M5RYJ86S0M7277DW66A1D69T",
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "summaryField": "summary",
+        "titleField": "title",
+        "updatedAt": "2026-10-25T07:14:25.719Z"
+      },
+      "markdownSha256": "e1c387075c660c20532e4c35ce74c0b3a4c412ff2f196d62b648ca6d7e4986c8",
+      "portableTextSha256": "edfefc2c8a3556714992ec2edbfa7cbdbf29f01230dc0c275af6f1043d63f591",
+      "migratedAt": "2026-10-25T16:57:37.279Z",
+      "canonicalBodyField": "content",
+      "dataSha256": "a75623b6ba29888de43c58983e9c73223434cb3a1861ae7a75e6d065403d9e0b",
+      "authorReferences": [
+        "01M5RYDB6VGATHN3HWS5NX8FWF"
+      ]
+    }
+  ]
+}
