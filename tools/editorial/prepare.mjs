@@ -52,7 +52,7 @@ for (const document of published.documents) {
         legacyMetadata: metadata,
         migratedFrom: {
           pin: document.pin,
-          markdownSha256: document.bodySha256,
+          markdownSha256: sha(data.body),
         },
       },
     };

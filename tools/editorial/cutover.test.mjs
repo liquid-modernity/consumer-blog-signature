@@ -113,3 +113,20 @@ test("whole-set schema preflight failure produces zero writes", async () => {
     globalThis.location = oldLocation;
   }
 });
+
+// Published rich-body hashes and historical Markdown hashes are separate identities.
+test("local rehearsal seed retains the archive Markdown hash after rich export admission", async () => {
+  const { execFileSync } = await import("node:child_process");
+  execFileSync(process.execPath, ["tools/editorial/prepare.mjs"]);
+  const published = JSON.parse(readFileSync("content/emdash/published.json")),
+    seed = JSON.parse(readFileSync(".gaga/editorial/seed.json"));
+  for (const d of published.documents) {
+    const local = seed.content[d.pin.collection].find(
+      (r) => r.id === d.applicationId,
+    );
+    assert.equal(
+      local.data.integration.migratedFrom.markdownSha256,
+      digest(d.item.data.body),
+    );
+  }
+});
