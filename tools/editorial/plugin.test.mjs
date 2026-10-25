@@ -61,3 +61,35 @@ test("native human authoring receives managed identity without migration JSON", 
     save({ collection: "posts", content: { body, editorial: { tags: [{}] } } }),
   );
 });
+
+test("managed legacy constraints support new rich authoring through public schema discovery", async () => {
+  const content = markdownToPortableText("New rich record").blocks;
+  const ctx = {
+    schema: {
+      getCollection: async () => ({
+        fields: ["content", "body", "metadata", "application_id"].map(
+          (slug) => ({ slug }),
+        ),
+      }),
+    },
+  };
+  const r = await save(
+    {
+      collection: "posts",
+      isNew: true,
+      content: { title: "New record", content },
+    },
+    ctx,
+  );
+  assert.equal(r.integration.canonicalBodyField, "content");
+  assert.equal(r.application_id, r.integration.applicationId);
+  assert.equal(r.body, "New rich record");
+  assert.equal(
+    r.integration.migratedFrom.sourceKind,
+    "rich-creation-compatibility-snapshot",
+  );
+  assert.equal(
+    r.integration.migratedFrom.markdownSha256,
+    createHash("sha256").update(r.body).digest("hex"),
+  );
+});

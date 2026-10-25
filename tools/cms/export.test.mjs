@@ -5,7 +5,7 @@ import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {pathToFileURL} from 'node:url';
 test('export excludes private provider fields; check mode never rewrites a mismatched export',async()=>{
- const dir=mkdtempSync(join(tmpdir(),'cms-export-'));mkdirSync(join(dir,'content/emdash'),{recursive:true});copyFileSync('tools/cms/export.mjs',join(dir,'export.mjs'));
+ const dir=mkdtempSync(join(tmpdir(),'cms-export-'));mkdirSync(join(dir,'content/emdash'),{recursive:true});writeFileSync(join(dir,'export.mjs'),readFileSync('tools/cms/export.mjs','utf8').replace('../../editorial/portable-text.mjs',pathToFileURL(join(process.cwd(),'editorial/portable-text.mjs')).href));
  writeFileSync(join(dir,'migration.mjs'),`import{createHash}from'node:crypto';export const root=${JSON.stringify(dir)};export const hash=x=>createHash('sha256').update(x).digest('hex');`);
  try{const {writePublishedExport}=await import(pathToFileURL(join(dir,'export.mjs')));const records=[{applicationId:'public.id',originalPath:'src/content/docs/a.md',pin:{origin:'https://public.example',id:'native-id'},item:{id:'native-id',status:'published',draftRevisionId:null,data:{application_id:'public.id',body:'Public body'},authorId:'PRIVATE_USER',password:'PRIVATE_SECRET',session:'PRIVATE_SESSION'}}];
   const context={origin:'https://public.example',realProviderReads:2};writePublishedExport(records,context);

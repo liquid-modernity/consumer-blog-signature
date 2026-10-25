@@ -3,6 +3,18 @@ on:
   push:
     branches: [review/rich-editorial-studio-v1]
   workflow_dispatch:
+    inputs:
+      operation:
+        type: choice
+        default: qualify
+        options: [qualify, production-preflight, production-backup, deploy-cms]
+      qualification_run:
+        type: string
+        description: Exact successful qualification run for CMS upload
+      freeze_confirmed:
+        type: boolean
+        default: false
+        description: Operator edits paused and production workflows frozen
 permissions:
   contents: read
 concurrency:
@@ -10,6 +22,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   verify:
+    if: github.event_name == 'push' || inputs.operation == 'qualify'
     runs-on: ubuntu-24.04
     timeout-minutes: 40
     defaults:
@@ -49,13 +62,15 @@ jobs:
           npm run editorial:prepare
           cd cms
           node node_modules/emdash/dist/cli/index.mjs seed ../.gaga/editorial/seed.json --validate
+      - name: Current production cutover plan admission
+        run: node tools/editorial/cutover-plan.mjs
       - name: Strict application and CMS TypeScript
         run: |
           npx tsc --noEmit -p cms/tsconfig.json
           npm run check | tee "$GAGA_EVIDENCE_DIRECTORY/types.log"
       - name: Publication build and public-package Search/Starlight/workerd proof
         run: |
-          npm run build | tee "$GAGA_EVIDENCE_DIRECTORY/build.log"
+          PUBLIC_BUILD_TIME="$(git show -s --format=%cI HEAD)" npm run build | tee "$GAGA_EVIDENCE_DIRECTORY/build.log"
           npm run test:consumer | tee "$GAGA_EVIDENCE_DIRECTORY/consumer.log"
       - name: Native editor, persistence, media, revisions and real PAKRPP preview
         run: |
@@ -68,7 +83,20 @@ jobs:
       - name: Compiled CMS first request under local native workerd only
         env:
           GAGA_CMS_RUNTIME_CONFIG: cms/dist-editorial-cloudflare/server/wrangler.json
-        run: node tools/cms/runtime-proof.mjs
+        run: |
+          node tools/cms/runtime-proof.mjs
+          cp "$GAGA_EVIDENCE_DIRECTORY/runtime.json" "$GAGA_EVIDENCE_DIRECTORY/studio-runtime.json"
+          cp "$GAGA_EVIDENCE_DIRECTORY/runtime.log" "$GAGA_EVIDENCE_DIRECTORY/studio-runtime.log"
+      - name: Compile production CMS from the same public native plugin, no deployment
+        working-directory: cms
+        run: npm run build:cloudflare > "$GAGA_EVIDENCE_DIRECTORY/production-cms-build.log" 2>&1
+      - name: Production CMS artifact startup under native local workerd
+        run: |
+          node tools/cms/runtime-proof.mjs
+          cp "$GAGA_EVIDENCE_DIRECTORY/runtime.json" "$GAGA_EVIDENCE_DIRECTORY/production-cms-runtime.json"
+          cp "$GAGA_EVIDENCE_DIRECTORY/runtime.log" "$GAGA_EVIDENCE_DIRECTORY/production-cms-runtime.log"
+      - name: Official EmDash bytes after all compilation and local runtime tests
+        run: python3 tools/editorial/upstream-integrity.py
       - name: Zero-vulnerability dependency audit
         run: |
           npm audit --audit-level=low --json > "$GAGA_EVIDENCE_DIRECTORY/audit.json"
@@ -80,6 +108,32 @@ jobs:
         run: |
           go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.7 -shellcheck= .github/workflows/editorial-studio.yml
           git diff --exit-code
+      - name: Seal publication candidate; no deployment
+        env:
+          GAGA_PRODUCTION_QUALIFICATION: "1"
+        run: node tools/gaga/deployment-manifest.mjs
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: qualified-rich-publication-artifact
+          path: |
+            dist
+            worker/bundle.mjs
+            wrangler.jsonc
+            .gaga/deployment-manifest.json
+          include-hidden-files: true
+          if-no-files-found: error
+      - name: Seal exact CMS artifact and reusable controller/input scope
+        run: node tools/editorial/cms-artifact.mjs
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: qualified-rich-cms-artifact
+          path: |
+            cms/dist-cloudflare
+            .gaga/cms-qualified.json
+          include-hidden-files: true
+          if-no-files-found: error
       - name: Preserve sanitized reports and screenshots; no databases or sessions
         if: always()
         run: |
@@ -95,3 +149,68 @@ jobs:
           name: rich-editorial-studio-evidence
           path: ${{ runner.temp }}/editorial-evidence
           if-no-files-found: error
+
+  production:
+    if: github.event_name == 'workflow_dispatch' && inputs.operation != 'qualify'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      actions: read
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.22.2
+      - name: Locked public tools and external evidence
+        run: |
+          printf 'GAGA_EVIDENCE_DIRECTORY=%s/rich-production\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/rich-production"
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm ci --prefix cms --ignore-scripts --no-audit --no-fund
+      - name: Admit the exact qualified artifact without rebuilding
+        if: inputs.operation == 'deploy-cms'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          QUALIFICATION_RUN: ${{ inputs.qualification_run }}
+        run: python3 tools/editorial/admit-cms-artifact.py
+      - name: Recheck admitted production content with the unchanged read-only PAT
+        env:
+          CMS_ORIGIN: ${{ vars.CMS_ORIGIN }}
+          CMS_READ_TOKEN: ${{ secrets.CMS_READ_TOKEN }}
+        run: node tools/cms/refresh.mjs --check
+      - name: Bounded provider operation; no publication Worker deployment
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          OPERATION: ${{ inputs.operation }}
+          GAGA_EDITORIAL_FREEZE_CONFIRMED: ${{ inputs.freeze_confirmed }}
+          GAGA_CMS_ARTIFACT_ADMISSION: ${{ runner.temp }}/rich-production/artifact-admission.json
+        run: |
+          case "$OPERATION" in
+            production-preflight) node tools/editorial/production-control.mjs inspect ;;
+            production-backup) node tools/editorial/production-control.mjs backup ;;
+            deploy-cms) node tools/editorial/production-control.mjs deploy-cms ;;
+            *) exit 1 ;;
+          esac
+      - name: Read-only post-operation production content admission
+        if: success()
+        env:
+          CMS_ORIGIN: ${{ vars.CMS_ORIGIN }}
+          CMS_READ_TOKEN: ${{ secrets.CMS_READ_TOKEN }}
+        run: node tools/cms/refresh.mjs --check
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rich-production-evidence
+          path: |
+            ${{ runner.temp }}/rich-production/production-*.json
+            ${{ runner.temp }}/rich-production/artifact-admission.json
+            ${{ runner.temp }}/rich-production/cms-*.log
+          if-no-files-found: warn

@@ -2,11 +2,13 @@ import assert from 'node:assert/strict';
 import {readFileSync,writeFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {root,hash} from './migration.mjs';
+import {editorialBody} from '../../editorial/portable-text.mjs';
 export function writePublishedExport(records,{origin,realProviderReads,check=false}){
  const documents=records.map(r=>{
   const item=Object.fromEntries(['id','type','slug','status','updatedAt','publishedAt','liveRevisionId','draftRevisionId','data'].map(k=>[k,r.item[k]]));
   assert.ok(item.status==='published'&&item.draftRevisionId===null,'Only clean published records may be exported');assert.equal(item.data.application_id,r.applicationId);
-  return {applicationId:r.applicationId,path:r.originalPath,pin:r.pin,item,bodySha256:hash(item.data.body)};
+  const {origin,collection,id,liveRevisionId,updatedAt,titleField,summaryField}=r.pin;
+  return {applicationId:r.applicationId,path:r.originalPath,pin:{origin,collection,id,liveRevisionId,updatedAt,titleField,summaryField},item,bodySha256:hash(typeof editorialBody(item.data)==='string'?editorialBody(item.data):JSON.stringify(editorialBody(item.data)))};
  });
  const output={schema:'consumer.emdash-export/v1',mode:'published-emdash-export',origin,documents,provenance:{emdashVersion:'1.3.1',liveEmDashExportVerified:true,realProviderReads}};
  const bytes=JSON.stringify(output,null,2)+'\n';

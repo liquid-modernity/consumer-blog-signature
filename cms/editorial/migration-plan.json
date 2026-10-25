@@ -1,0 +1,2456 @@
+{
+  "schema": "consumer.rich-production-cutover/v1",
+  "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+  "sourceSetSha256": "de2abab7a30e1ec7201054ba064b76cf3f031d7263bc436bf28987453ffb2275",
+  "reviewedImplementation": "fded72b8f126c1f740583efa84d5dca3bbb7104b",
+  "reviewQualification": 40195752139,
+  "expectedMain": "6827195c5d2e04efe26656ae4372d449481d2979",
+  "rollback": {
+    "cmsWorker": "0bf4b66d-23bb-435f-8b14-0b2d7e64fd13",
+    "publicationWorker": "af6c1291-c509-4095-b7c1-a77c9007a390",
+    "d1": "b26b0e8a-e193-4a7d-8e1d-c553de22fd27",
+    "r2": "consumer-blog-signature-cms-media",
+    "kv": "a0ad6f282a314e17bbdfec6c4e0c9fa2",
+    "requiresPreMutationRecoverableBackup": true,
+    "requiresJournalAndNoNewOperatorEdits": true
+  },
+  "schemaOperations": [
+    {
+      "method": "POST",
+      "path": "schema/collections/authors/fields",
+      "body": {
+        "slug": "content",
+        "label": "Profile",
+        "type": "portableText",
+        "widget": "pakrpp-studio:body"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "schema/collections/authors/fields",
+      "body": {
+        "slug": "integration",
+        "label": "Integration identity",
+        "type": "json",
+        "widget": "pakrpp-studio:integration"
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "schema/collections/authors/fields/body",
+      "body": {
+        "label": "Markdown migration archive",
+        "widget": "pakrpp-studio:integration"
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "schema/collections/authors/fields/metadata",
+      "body": {
+        "label": "Legacy metadata archive",
+        "widget": "pakrpp-studio:integration"
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "schema/collections/authors/fields/application_id",
+      "body": {
+        "label": "Application identity — managed",
+        "widget": "pakrpp-studio:integration"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "schema/collections/posts/fields",
+      "body": {
+        "slug": "content",
+        "label": "Main Content",
+        "type": "portableText",
+        "widget": "pakrpp-studio:body"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "schema/collections/posts/fields",
+      "body": {
+        "slug": "authors",
+        "label": "Authors",
+        "type": "reference",
+        "validation": {
+          "targetCollection": "authors",
+          "multiple": true
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "schema/collections/posts/fields",
+      "body": {
+        "slug": "editorial",
+        "label": "Editorial settings",
+        "type": "json",
+        "widget": "pakrpp-studio:metadata"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "schema/collections/posts/fields",
+      "body": {
+        "slug": "integration",
+        "label": "Integration identity",
+        "type": "json",
+        "widget": "pakrpp-studio:integration"
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "schema/collections/posts/fields/body",
+      "body": {
+        "label": "Markdown migration archive",
+        "widget": "pakrpp-studio:integration"
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "schema/collections/posts/fields/metadata",
+      "body": {
+        "label": "Legacy metadata archive",
+        "widget": "pakrpp-studio:integration"
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "schema/collections/posts/fields/application_id",
+      "body": {
+        "label": "Application identity — managed",
+        "widget": "pakrpp-studio:integration"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "schema/collections",
+      "body": {
+        "slug": "pages",
+        "label": "Pages",
+        "routable": false,
+        "supports": [
+          "drafts",
+          "revisions",
+          "seo"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "schema/collections/pages/fields",
+      "body": {
+        "slug": "title",
+        "label": "Title",
+        "type": "string",
+        "required": true,
+        "searchable": true
+      }
+    },
+    {
+      "method": "POST",
+      "path": "schema/collections/pages/fields",
+      "body": {
+        "slug": "summary",
+        "label": "Dek / Summary",
+        "type": "text"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "schema/collections/pages/fields",
+      "body": {
+        "slug": "body",
+        "label": "Main Content",
+        "type": "portableText",
+        "required": true,
+        "widget": "pakrpp-studio:body"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "schema/collections/pages/fields",
+      "body": {
+        "slug": "authors",
+        "label": "Authors",
+        "type": "reference",
+        "validation": {
+          "targetCollection": "authors"
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "schema/collections/pages/fields",
+      "body": {
+        "slug": "editorial",
+        "label": "Editorial settings",
+        "type": "json",
+        "widget": "pakrpp-studio:metadata"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "schema/collections/pages/fields",
+      "body": {
+        "slug": "integration",
+        "label": "Integration identity",
+        "type": "json",
+        "widget": "pakrpp-studio:integration",
+        "required": true
+      }
+    },
+    {
+      "method": "POST",
+      "path": "schema/collections",
+      "body": {
+        "slug": "references",
+        "label": "Reference library",
+        "routable": false,
+        "supports": [
+          "drafts",
+          "revisions"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "schema/collections/references/fields",
+      "body": {
+        "slug": "title",
+        "label": "Title",
+        "type": "string"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "schema/collections/references/fields",
+      "body": {
+        "slug": "authors",
+        "label": "Authors",
+        "type": "string"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "schema/collections/references/fields",
+      "body": {
+        "slug": "publication",
+        "label": "Publication",
+        "type": "string"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "schema/collections/references/fields",
+      "body": {
+        "slug": "date",
+        "label": "Date",
+        "type": "string"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "schema/collections/references/fields",
+      "body": {
+        "slug": "url",
+        "label": "Url",
+        "type": "string"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "schema/collections/references/fields",
+      "body": {
+        "slug": "doi",
+        "label": "DOI",
+        "type": "string"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "schema/collections/references/fields",
+      "body": {
+        "slug": "accessed",
+        "label": "Access Date",
+        "type": "string"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "schema/collections",
+      "body": {
+        "slug": "sections",
+        "label": "Reusable sections",
+        "routable": false,
+        "supports": [
+          "drafts",
+          "revisions"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "schema/collections/sections/fields",
+      "body": {
+        "slug": "title",
+        "label": "Title",
+        "type": "string",
+        "required": true
+      }
+    },
+    {
+      "method": "POST",
+      "path": "schema/collections/sections/fields",
+      "body": {
+        "slug": "body",
+        "label": "Section content",
+        "type": "portableText",
+        "widget": "pakrpp-studio:body"
+      }
+    }
+  ],
+  "records": [
+    {
+      "applicationId": "author.editorial-team",
+      "collection": "authors",
+      "contentId": "01M5RYDB6VGATHN3HWS5NX8FWF",
+      "before": {
+        "data": {
+          "application_id": "author.editorial-team",
+          "body": "# Editorial Team\n\nA replaceable example author profile for the consumer signature.\n",
+          "metadata": {
+            "author": "Editorial Team",
+            "authorRefs": [
+              "author.editorial-team"
+            ],
+            "contentId": "author.editorial-team",
+            "contentKind": "author",
+            "description": "Default example author identity.",
+            "draft": false,
+            "language": "id",
+            "noindex": false,
+            "status": "published",
+            "tags": [
+              "example"
+            ],
+            "topics": [
+              "Publishing",
+              "Design"
+            ],
+            "visibility": "public"
+          },
+          "summary": "Replace this profile with your own authors or contributors.",
+          "title": "Editorial Team"
+        },
+        "draftRevisionId": null,
+        "id": "01M5RYDB6VGATHN3HWS5NX8FWF",
+        "liveRevisionId": "01M5RYDN6NXX24ARJCXMMP2ZQH",
+        "publishedAt": "2026-10-24T20:36:13.182Z",
+        "slug": "editorial-team",
+        "status": "published",
+        "type": "authors",
+        "updatedAt": "2026-10-25T07:11:55.189Z"
+      },
+      "pin": {
+        "collection": "authors",
+        "id": "01M5RYDB6VGATHN3HWS5NX8FWF",
+        "liveRevisionId": "01M5RYDN6NXX24ARJCXMMP2ZQH",
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "summaryField": "summary",
+        "titleField": "title",
+        "updatedAt": "2026-10-25T07:11:55.189Z"
+      },
+      "previousReviewedPin": {
+        "collection": "authors",
+        "id": "01M5RYDB6VGATHN3HWS5NX8FWF",
+        "liveRevisionId": "01M5RYDN6NXX24ARJCXMMP2ZQH",
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "summaryField": "summary",
+        "titleField": "title",
+        "updatedAt": "2026-10-25T07:11:55.189Z"
+      },
+      "markdownSha256": "b7736a6e134f0d2b4adecc12c6d063bf9b6ef687d73e22249f37f2bcd8a52fdd",
+      "portableTextSha256": "ca96d0d24072a8ebacb74ca640b086752e6f84520985cb9b231dd5641045b4b5",
+      "data": {
+        "content": [
+          {
+            "_type": "block",
+            "_key": "m00002",
+            "style": "h1",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00001",
+                "text": "Editorial Team",
+                "marks": []
+              }
+            ],
+            "markDefs": []
+          },
+          {
+            "_type": "block",
+            "_key": "m00004",
+            "style": "normal",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00003",
+                "text": "A replaceable example author profile for the consumer signature.",
+                "marks": []
+              }
+            ],
+            "markDefs": []
+          }
+        ],
+        "integration": {
+          "applicationId": "author.editorial-team",
+          "editorialSchema": "pakrpp.editorial/v1",
+          "canonicalBodyField": "content",
+          "legacyMetadata": {
+            "author": "Editorial Team",
+            "authorRefs": [
+              "author.editorial-team"
+            ],
+            "contentId": "author.editorial-team",
+            "contentKind": "author",
+            "description": "Default example author identity.",
+            "draft": false,
+            "language": "id",
+            "noindex": false,
+            "status": "published",
+            "tags": [
+              "example"
+            ],
+            "topics": [
+              "Publishing",
+              "Design"
+            ],
+            "visibility": "public"
+          },
+          "migratedFrom": {
+            "pin": {
+              "collection": "authors",
+              "id": "01M5RYDB6VGATHN3HWS5NX8FWF",
+              "liveRevisionId": "01M5RYDN6NXX24ARJCXMMP2ZQH",
+              "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+              "summaryField": "summary",
+              "titleField": "title",
+              "updatedAt": "2026-10-25T07:11:55.189Z"
+            },
+            "previousReviewedPin": {
+              "collection": "authors",
+              "id": "01M5RYDB6VGATHN3HWS5NX8FWF",
+              "liveRevisionId": "01M5RYDN6NXX24ARJCXMMP2ZQH",
+              "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+              "summaryField": "summary",
+              "titleField": "title",
+              "updatedAt": "2026-10-25T07:11:55.189Z"
+            },
+            "markdownSha256": "b7736a6e134f0d2b4adecc12c6d063bf9b6ef687d73e22249f37f2bcd8a52fdd",
+            "sourceSetSha256": "de2abab7a30e1ec7201054ba064b76cf3f031d7263bc436bf28987453ffb2275"
+          }
+        }
+      },
+      "textEquivalent": true
+    },
+    {
+      "applicationId": "pub_002",
+      "collection": "posts",
+      "contentId": "01M5RYE04XBXXG8A1999AVVZW9",
+      "before": {
+        "data": {
+          "application_id": "pub_002",
+          "body": "\nAI tidak perlu dimusuhi sebagai makhluk. Ia lebih tepat dibaca sebagai fungsi produktif yang bisa bekerja tanpa lelah, tanpa upah, tanpa keluarga, tanpa rasa malu, dan tanpa tuntutan martabat.\n\n## Masalah dignity\n\nDi sinilah pertanyaannya mulai serius. Bukan apakah AI bisa berpikir seperti manusia, melainkan mengapa sistem ekonomi begitu mudah jatuh cinta pada pekerja yang tidak pernah meminta dignity.\n\nJika manusia dilihat hanya sebagai unit produktif, AI akan selalu tampak lebih bersih. Ia tidak butuh cuti. Ia tidak sakit hati. Ia tidak protes ketika pekerjaannya diukur hanya melalui output.\n\n## Logika modal modern\n\nLogika modal modern menyukai fungsi yang bisa dipanggil kapan saja. Ia menyukai kemampuan yang tidak membawa tubuh, sejarah, keluarga, dan batas psikologis.\n\nTetapi masyarakat tidak bisa dibangun hanya dari fungsi. Masyarakat membutuhkan manusia yang bisa terluka, belajar, menanggung konsekuensi, dan mengingat bahwa kerja bukan sekadar output.\n\n## Catatan akhir\n\nAkal imitasi membuka banyak kemungkinan. Namun pembacaan paling penting bukan pada kecerdasannya, melainkan pada cermin yang ia arahkan kepada cara kita selama ini memperlakukan manusia.\n",
+          "metadata": {
+            "aiSummary": "AI sebagai fungsi produktif tanpa tuntutan dignity dalam logika modal modern.",
+            "author": "PakRPP",
+            "authorRefs": [
+              "author.editorial-team"
+            ],
+            "breaking": false,
+            "contentClass": "article",
+            "contentId": "pub_002",
+            "contentKind": "article",
+            "description": "AI tidak dibahas sebagai makhluk, tetapi sebagai fungsi produktif tanpa tuntutan dignity yang sangat menarik bagi logika modal modern.",
+            "draft": false,
+            "editorialPriority": 95,
+            "editorialRole": "major",
+            "featured": true,
+            "kicker": "Esai · Anomali",
+            "language": "id",
+            "live": false,
+            "noindex": false,
+            "publishedAt": "2026-06-17",
+            "readTime": "4 min",
+            "relatedRefs": [
+              "pub_001",
+              "pub_003"
+            ],
+            "section": "Anomali",
+            "sectionRefs": [
+              "consumer.section.anomali"
+            ],
+            "status": "published",
+            "storyFormat": "opinion",
+            "subtitle": "Mengapa sistem ekonomi modern begitu mudah jatuh cinta pada fungsi produktif yang tidak pernah menuntut martabat.",
+            "tags": [
+              "akal-imitasi",
+              "ai-ethics",
+              "dignity-manusia"
+            ],
+            "topicRefs": [
+              "consumer.topic.teknologi",
+              "consumer.topic.anomali"
+            ],
+            "topics": [
+              "Teknologi",
+              "Anomali"
+            ],
+            "type": "essay",
+            "updatedAt": "2026-06-17",
+            "visibility": "public"
+          },
+          "summary": "AI tidak dibahas sebagai makhluk, tetapi sebagai fungsi produktif tanpa tuntutan dignity yang sangat menarik bagi logika modal modern.",
+          "title": "Akal Imitasi sebagai Pekerja Tanpa Dignity"
+        },
+        "draftRevisionId": null,
+        "id": "01M5RYE04XBXXG8A1999AVVZW9",
+        "liveRevisionId": "01M5RYEA38WH60QXYDXJJ5MWCG",
+        "publishedAt": "2026-06-17T00:00:00.000Z",
+        "slug": "akal-imitasi-sebagai-pekerja-tanpa-dignity",
+        "status": "published",
+        "type": "posts",
+        "updatedAt": "2026-10-25T07:12:16.580Z"
+      },
+      "pin": {
+        "collection": "posts",
+        "id": "01M5RYE04XBXXG8A1999AVVZW9",
+        "liveRevisionId": "01M5RYEA38WH60QXYDXJJ5MWCG",
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "summaryField": "summary",
+        "titleField": "title",
+        "updatedAt": "2026-10-25T07:12:16.580Z"
+      },
+      "previousReviewedPin": {
+        "collection": "posts",
+        "id": "01M5RYE04XBXXG8A1999AVVZW9",
+        "liveRevisionId": "01M5RYEA38WH60QXYDXJJ5MWCG",
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "summaryField": "summary",
+        "titleField": "title",
+        "updatedAt": "2026-10-25T07:12:16.580Z"
+      },
+      "markdownSha256": "8df26cb6e5158871539fa874bcfe507af7a624659658f421adf01d5ef7a1d9d0",
+      "portableTextSha256": "d63ba7b2804927927d4bab3e62401301392e71e6c1a2b87e7bafcf35c481db31",
+      "data": {
+        "content": [
+          {
+            "_type": "block",
+            "_key": "m00002",
+            "style": "normal",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00001",
+                "text": "AI tidak perlu dimusuhi sebagai makhluk. Ia lebih tepat dibaca sebagai fungsi produktif yang bisa bekerja tanpa lelah, tanpa upah, tanpa keluarga, tanpa rasa malu, dan tanpa tuntutan martabat.",
+                "marks": []
+              }
+            ],
+            "markDefs": []
+          },
+          {
+            "_type": "block",
+            "_key": "m00004",
+            "style": "h2",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00003",
+                "text": "Masalah dignity",
+                "marks": []
+              }
+            ],
+            "markDefs": []
+          },
+          {
+            "_type": "block",
+            "_key": "m00006",
+            "style": "normal",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00005",
+                "text": "Di sinilah pertanyaannya mulai serius. Bukan apakah AI bisa berpikir seperti manusia, melainkan mengapa sistem ekonomi begitu mudah jatuh cinta pada pekerja yang tidak pernah meminta dignity.",
+                "marks": []
+              }
+            ],
+            "markDefs": []
+          },
+          {
+            "_type": "block",
+            "_key": "m00008",
+            "style": "normal",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00007",
+                "text": "Jika manusia dilihat hanya sebagai unit produktif, AI akan selalu tampak lebih bersih. Ia tidak butuh cuti. Ia tidak sakit hati. Ia tidak protes ketika pekerjaannya diukur hanya melalui output.",
+                "marks": []
+              }
+            ],
+            "markDefs": []
+          },
+          {
+            "_type": "block",
+            "_key": "m00010",
+            "style": "h2",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00009",
+                "text": "Logika modal modern",
+                "marks": []
+              }
+            ],
+            "markDefs": []
+          },
+          {
+            "_type": "block",
+            "_key": "m00012",
+            "style": "normal",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00011",
+                "text": "Logika modal modern menyukai fungsi yang bisa dipanggil kapan saja. Ia menyukai kemampuan yang tidak membawa tubuh, sejarah, keluarga, dan batas psikologis.",
+                "marks": []
+              }
+            ],
+            "markDefs": []
+          },
+          {
+            "_type": "block",
+            "_key": "m00014",
+            "style": "normal",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00013",
+                "text": "Tetapi masyarakat tidak bisa dibangun hanya dari fungsi. Masyarakat membutuhkan manusia yang bisa terluka, belajar, menanggung konsekuensi, dan mengingat bahwa kerja bukan sekadar output.",
+                "marks": []
+              }
+            ],
+            "markDefs": []
+          },
+          {
+            "_type": "block",
+            "_key": "m00016",
+            "style": "h2",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00015",
+                "text": "Catatan akhir",
+                "marks": []
+              }
+            ],
+            "markDefs": []
+          },
+          {
+            "_type": "block",
+            "_key": "m00018",
+            "style": "normal",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00017",
+                "text": "Akal imitasi membuka banyak kemungkinan. Namun pembacaan paling penting bukan pada kecerdasannya, melainkan pada cermin yang ia arahkan kepada cara kita selama ini memperlakukan manusia.",
+                "marks": []
+              }
+            ],
+            "markDefs": []
+          }
+        ],
+        "integration": {
+          "applicationId": "pub_002",
+          "editorialSchema": "pakrpp.editorial/v1",
+          "canonicalBodyField": "content",
+          "legacyMetadata": {
+            "aiSummary": "AI sebagai fungsi produktif tanpa tuntutan dignity dalam logika modal modern.",
+            "author": "PakRPP",
+            "authorRefs": [
+              "author.editorial-team"
+            ],
+            "breaking": false,
+            "contentClass": "article",
+            "contentId": "pub_002",
+            "contentKind": "article",
+            "description": "AI tidak dibahas sebagai makhluk, tetapi sebagai fungsi produktif tanpa tuntutan dignity yang sangat menarik bagi logika modal modern.",
+            "draft": false,
+            "editorialPriority": 95,
+            "editorialRole": "major",
+            "featured": true,
+            "kicker": "Esai · Anomali",
+            "language": "id",
+            "live": false,
+            "noindex": false,
+            "publishedAt": "2026-06-17",
+            "readTime": "4 min",
+            "relatedRefs": [
+              "pub_001",
+              "pub_003"
+            ],
+            "section": "Anomali",
+            "sectionRefs": [
+              "consumer.section.anomali"
+            ],
+            "status": "published",
+            "storyFormat": "opinion",
+            "subtitle": "Mengapa sistem ekonomi modern begitu mudah jatuh cinta pada fungsi produktif yang tidak pernah menuntut martabat.",
+            "tags": [
+              "akal-imitasi",
+              "ai-ethics",
+              "dignity-manusia"
+            ],
+            "topicRefs": [
+              "consumer.topic.teknologi",
+              "consumer.topic.anomali"
+            ],
+            "topics": [
+              "Teknologi",
+              "Anomali"
+            ],
+            "type": "essay",
+            "updatedAt": "2026-06-17",
+            "visibility": "public"
+          },
+          "migratedFrom": {
+            "pin": {
+              "collection": "posts",
+              "id": "01M5RYE04XBXXG8A1999AVVZW9",
+              "liveRevisionId": "01M5RYEA38WH60QXYDXJJ5MWCG",
+              "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+              "summaryField": "summary",
+              "titleField": "title",
+              "updatedAt": "2026-10-25T07:12:16.580Z"
+            },
+            "previousReviewedPin": {
+              "collection": "posts",
+              "id": "01M5RYE04XBXXG8A1999AVVZW9",
+              "liveRevisionId": "01M5RYEA38WH60QXYDXJJ5MWCG",
+              "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+              "summaryField": "summary",
+              "titleField": "title",
+              "updatedAt": "2026-10-25T07:12:16.580Z"
+            },
+            "markdownSha256": "8df26cb6e5158871539fa874bcfe507af7a624659658f421adf01d5ef7a1d9d0",
+            "sourceSetSha256": "de2abab7a30e1ec7201054ba064b76cf3f031d7263bc436bf28987453ffb2275"
+          }
+        },
+        "editorial": {
+          "topics": [
+            "Teknologi",
+            "Anomali"
+          ],
+          "tags": [
+            "akal-imitasi",
+            "ai-ethics",
+            "dignity-manusia"
+          ],
+          "publicationDate": "2026-06-17T00:00:00.000Z",
+          "updatedDate": "2026-06-17T00:00:00.000Z",
+          "language": "id",
+          "seoTitle": "",
+          "seoDescription": "AI tidak dibahas sebagai makhluk, tetapi sebagai fungsi produktif tanpa tuntutan dignity yang sangat menarik bagi logika modal modern.",
+          "canonicalUrl": ""
+        }
+      },
+      "textEquivalent": true,
+      "references": {
+        "authors": [
+          "01M5RYDB6VGATHN3HWS5NX8FWF"
+        ]
+      }
+    },
+    {
+      "applicationId": "consumer.article.context-aware-reading",
+      "collection": "posts",
+      "contentId": "01M5RYEND738V6RF6QM0MK973Q",
+      "before": {
+        "data": {
+          "application_id": "consumer.article.context-aware-reading",
+          "body": "\nA high-end publishing surface should help readers understand where they are, what matters now, and what they can do next without forcing them to learn the interface.\n\n## Context before controls\n\nThe global navigation remains stable while contextual rails adapt to the current route. This separation prevents global actions from competing with content-specific navigation.\n\n## Progressive immersion\n\nThe main canvas can move from a compact reading measure to wide or full-bleed media. On compact screens, the Gaga Dynamic Notch and semantic Outline Peek preserve reading context while the contextual Gaga Dock stays out of immersive article mode.\n\n## Inclusive interaction\n\nMouse hover, keyboard focus, touch targets, reduced motion, semantic labels, and screen-reader metadata are treated as one interaction system rather than separate patches.\n",
+          "metadata": {
+            "aiSummary": "A reference article about context-aware reading surfaces.",
+            "author": "Editorial Team",
+            "authorRefs": [
+              "author.editorial-team"
+            ],
+            "breaking": false,
+            "contentClass": "article",
+            "contentId": "consumer.article.context-aware-reading",
+            "contentKind": "article",
+            "description": "Demonstrates the article canvas, contextual rails, outline, and reader actions.",
+            "draft": false,
+            "editorialPriority": 100,
+            "editorialRole": "lead",
+            "featured": true,
+            "kicker": "Reader Experience",
+            "language": "id",
+            "live": false,
+            "noindex": false,
+            "publishedAt": "2026-10-11",
+            "readTime": "6 min",
+            "relatedRefs": [
+              "consumer.article.softcoded-systems"
+            ],
+            "section": "Experience",
+            "sectionRefs": [
+              "consumer.section.experience"
+            ],
+            "status": "published",
+            "storyFormat": "analysis",
+            "subtitle": "A neutral reference article for the signature bootstrap.",
+            "tags": [
+              "design",
+              "accessibility",
+              "interaction"
+            ],
+            "topicRefs": [
+              "consumer.topic.experience"
+            ],
+            "topics": [
+              "Reader Experience"
+            ],
+            "updatedAt": "2026-10-11",
+            "visibility": "public"
+          },
+          "summary": "A reference article showing how the signature experience composes navigation, content, and context.",
+          "title": "Designing a Context-Aware Reading Surface"
+        },
+        "draftRevisionId": null,
+        "id": "01M5RYEND738V6RF6QM0MK973Q",
+        "liveRevisionId": "01M5RYEZCTJZNNA9Z1ABVG2BR7",
+        "publishedAt": "2026-10-11T00:00:00.000Z",
+        "slug": "designing-context-aware-reading-surface",
+        "status": "published",
+        "type": "posts",
+        "updatedAt": "2026-10-25T07:12:38.388Z"
+      },
+      "pin": {
+        "collection": "posts",
+        "id": "01M5RYEND738V6RF6QM0MK973Q",
+        "liveRevisionId": "01M5RYEZCTJZNNA9Z1ABVG2BR7",
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "summaryField": "summary",
+        "titleField": "title",
+        "updatedAt": "2026-10-25T07:12:38.388Z"
+      },
+      "previousReviewedPin": {
+        "collection": "posts",
+        "id": "01M5RYEND738V6RF6QM0MK973Q",
+        "liveRevisionId": "01M5RYEZCTJZNNA9Z1ABVG2BR7",
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "summaryField": "summary",
+        "titleField": "title",
+        "updatedAt": "2026-10-25T07:12:38.388Z"
+      },
+      "markdownSha256": "e04b5f1f1d1d85f03d079758b8b9db3f77f121b409c9889be7c6dde1e14ec3ec",
+      "portableTextSha256": "602b434bafb66a74978fb451a62ee91c86f301382967677eb860493e50b7eb2a",
+      "data": {
+        "content": [
+          {
+            "_type": "block",
+            "_key": "m00002",
+            "style": "normal",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00001",
+                "text": "A high-end publishing surface should help readers understand where they are, what matters now, and what they can do next without forcing them to learn the interface.",
+                "marks": []
+              }
+            ],
+            "markDefs": []
+          },
+          {
+            "_type": "block",
+            "_key": "m00004",
+            "style": "h2",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00003",
+                "text": "Context before controls",
+                "marks": []
+              }
+            ],
+            "markDefs": []
+          },
+          {
+            "_type": "block",
+            "_key": "m00006",
+            "style": "normal",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00005",
+                "text": "The global navigation remains stable while contextual rails adapt to the current route. This separation prevents global actions from competing with content-specific navigation.",
+                "marks": []
+              }
+            ],
+            "markDefs": []
+          },
+          {
+            "_type": "block",
+            "_key": "m00008",
+            "style": "h2",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00007",
+                "text": "Progressive immersion",
+                "marks": []
+              }
+            ],
+            "markDefs": []
+          },
+          {
+            "_type": "block",
+            "_key": "m00010",
+            "style": "normal",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00009",
+                "text": "The main canvas can move from a compact reading measure to wide or full-bleed media. On compact screens, the Gaga Dynamic Notch and semantic Outline Peek preserve reading context while the contextual Gaga Dock stays out of immersive article mode.",
+                "marks": []
+              }
+            ],
+            "markDefs": []
+          },
+          {
+            "_type": "block",
+            "_key": "m00012",
+            "style": "h2",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00011",
+                "text": "Inclusive interaction",
+                "marks": []
+              }
+            ],
+            "markDefs": []
+          },
+          {
+            "_type": "block",
+            "_key": "m00014",
+            "style": "normal",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00013",
+                "text": "Mouse hover, keyboard focus, touch targets, reduced motion, semantic labels, and screen-reader metadata are treated as one interaction system rather than separate patches.",
+                "marks": []
+              }
+            ],
+            "markDefs": []
+          }
+        ],
+        "integration": {
+          "applicationId": "consumer.article.context-aware-reading",
+          "editorialSchema": "pakrpp.editorial/v1",
+          "canonicalBodyField": "content",
+          "legacyMetadata": {
+            "aiSummary": "A reference article about context-aware reading surfaces.",
+            "author": "Editorial Team",
+            "authorRefs": [
+              "author.editorial-team"
+            ],
+            "breaking": false,
+            "contentClass": "article",
+            "contentId": "consumer.article.context-aware-reading",
+            "contentKind": "article",
+            "description": "Demonstrates the article canvas, contextual rails, outline, and reader actions.",
+            "draft": false,
+            "editorialPriority": 100,
+            "editorialRole": "lead",
+            "featured": true,
+            "kicker": "Reader Experience",
+            "language": "id",
+            "live": false,
+            "noindex": false,
+            "publishedAt": "2026-10-11",
+            "readTime": "6 min",
+            "relatedRefs": [
+              "consumer.article.softcoded-systems"
+            ],
+            "section": "Experience",
+            "sectionRefs": [
+              "consumer.section.experience"
+            ],
+            "status": "published",
+            "storyFormat": "analysis",
+            "subtitle": "A neutral reference article for the signature bootstrap.",
+            "tags": [
+              "design",
+              "accessibility",
+              "interaction"
+            ],
+            "topicRefs": [
+              "consumer.topic.experience"
+            ],
+            "topics": [
+              "Reader Experience"
+            ],
+            "updatedAt": "2026-10-11",
+            "visibility": "public"
+          },
+          "migratedFrom": {
+            "pin": {
+              "collection": "posts",
+              "id": "01M5RYEND738V6RF6QM0MK973Q",
+              "liveRevisionId": "01M5RYEZCTJZNNA9Z1ABVG2BR7",
+              "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+              "summaryField": "summary",
+              "titleField": "title",
+              "updatedAt": "2026-10-25T07:12:38.388Z"
+            },
+            "previousReviewedPin": {
+              "collection": "posts",
+              "id": "01M5RYEND738V6RF6QM0MK973Q",
+              "liveRevisionId": "01M5RYEZCTJZNNA9Z1ABVG2BR7",
+              "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+              "summaryField": "summary",
+              "titleField": "title",
+              "updatedAt": "2026-10-25T07:12:38.388Z"
+            },
+            "markdownSha256": "e04b5f1f1d1d85f03d079758b8b9db3f77f121b409c9889be7c6dde1e14ec3ec",
+            "sourceSetSha256": "de2abab7a30e1ec7201054ba064b76cf3f031d7263bc436bf28987453ffb2275"
+          }
+        },
+        "editorial": {
+          "topics": [
+            "Reader Experience"
+          ],
+          "tags": [
+            "design",
+            "accessibility",
+            "interaction"
+          ],
+          "publicationDate": "2026-10-11T00:00:00.000Z",
+          "updatedDate": "2026-10-11T00:00:00.000Z",
+          "language": "id",
+          "seoTitle": "",
+          "seoDescription": "A reference article showing how the signature experience composes navigation, content, and context.",
+          "canonicalUrl": ""
+        }
+      },
+      "textEquivalent": true,
+      "references": {
+        "authors": [
+          "01M5RYDB6VGATHN3HWS5NX8FWF"
+        ]
+      }
+    },
+    {
+      "applicationId": "pub_003",
+      "collection": "posts",
+      "contentId": "01M5RYFA4GWC7Q3GSXAKRWEM5R",
+      "before": {
+        "data": {
+          "application_id": "pub_003",
+          "body": "\nDialog ini membayangkan Lizzie Magie kembali melihat zaman yang memuja efisiensi, tetapi sering lupa bertanya siapa yang sedang dikorbankan.\n\n## Permainan yang salah dibaca\n\nMonopoly awalnya bukan sekadar permainan menang-kalah. Ia adalah kritik terhadap akumulasi yang membuat orang lupa bahwa aturan permainan menentukan siapa yang tampak pintar dan siapa yang tampak gagal.\n\n## AI dan papan baru\n\nAI menjadi papan baru. Yang tampak sebagai kemajuan teknis sering kali juga menjadi eksperimen sosial tentang distribusi kuasa, akses, dan martabat.\n",
+          "metadata": {
+            "aiSummary": "Percakapan imajiner bersama Lizzie Magie mengenai monopoli dan akal imitasi.",
+            "author": "PakRPP",
+            "authorRefs": [
+              "author.editorial-team"
+            ],
+            "breaking": false,
+            "contentClass": "article",
+            "contentId": "pub_003",
+            "contentKind": "article",
+            "description": "Sebuah percakapan imajiner tentang permainan, pasar, dan cara zaman membaca manusia.",
+            "draft": false,
+            "editorialPriority": 90,
+            "editorialRole": "major",
+            "featured": true,
+            "kicker": "Eksperimen · Anomali",
+            "language": "id",
+            "live": false,
+            "noindex": false,
+            "publishedAt": "2025-11-16",
+            "readTime": "5 min",
+            "relatedRefs": [
+              "pub_002",
+              "pub_005"
+            ],
+            "section": "Anomali",
+            "sectionRefs": [
+              "consumer.section.anomali"
+            ],
+            "status": "published",
+            "storyFormat": "interview",
+            "subtitle": "Sebuah percakapan spekulatif tentang permainan, pasar, dan cara zaman membaca manusia.",
+            "tags": [
+              "lizzie-magie",
+              "monopoly",
+              "akal-imitasi"
+            ],
+            "topicRefs": [
+              "consumer.topic.anomali",
+              "consumer.topic.teknologi"
+            ],
+            "topics": [
+              "Anomali",
+              "Teknologi"
+            ],
+            "type": "experiment",
+            "updatedAt": "2025-11-16",
+            "visibility": "public"
+          },
+          "summary": "Sebuah percakapan imajiner tentang permainan, pasar, dan cara zaman membaca manusia.",
+          "title": "Dialog Imajiner PakRPP bersama Lizzie “Monopoly” Magie tentang Akal Imitasi"
+        },
+        "draftRevisionId": null,
+        "id": "01M5RYFA4GWC7Q3GSXAKRWEM5R",
+        "liveRevisionId": "01M5RYFMBM063RB7W1NMP1SS9C",
+        "publishedAt": "2025-11-16T00:00:00.000Z",
+        "slug": "dialog-imajiner-pakrpp-lizzie-monopoly-akal-imitasi",
+        "status": "published",
+        "type": "posts",
+        "updatedAt": "2026-10-25T07:12:59.859Z"
+      },
+      "pin": {
+        "collection": "posts",
+        "id": "01M5RYFA4GWC7Q3GSXAKRWEM5R",
+        "liveRevisionId": "01M5RYFMBM063RB7W1NMP1SS9C",
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "summaryField": "summary",
+        "titleField": "title",
+        "updatedAt": "2026-10-25T07:12:59.859Z"
+      },
+      "previousReviewedPin": {
+        "collection": "posts",
+        "id": "01M5RYFA4GWC7Q3GSXAKRWEM5R",
+        "liveRevisionId": "01M5RYFMBM063RB7W1NMP1SS9C",
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "summaryField": "summary",
+        "titleField": "title",
+        "updatedAt": "2026-10-25T07:12:59.859Z"
+      },
+      "markdownSha256": "6e092ada7a61f84f87cc5da03a879e6cc5d4c81766c17f7988e2022025fb3b76",
+      "portableTextSha256": "2fc14b133bcd084b71362da72a3aa97bf07a0ce26ff142a406f6850a1513c77c",
+      "data": {
+        "content": [
+          {
+            "_type": "block",
+            "_key": "m00002",
+            "style": "normal",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00001",
+                "text": "Dialog ini membayangkan Lizzie Magie kembali melihat zaman yang memuja efisiensi, tetapi sering lupa bertanya siapa yang sedang dikorbankan.",
+                "marks": []
+              }
+            ],
+            "markDefs": []
+          },
+          {
+            "_type": "block",
+            "_key": "m00004",
+            "style": "h2",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00003",
+                "text": "Permainan yang salah dibaca",
+                "marks": []
+              }
+            ],
+            "markDefs": []
+          },
+          {
+            "_type": "block",
+            "_key": "m00006",
+            "style": "normal",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00005",
+                "text": "Monopoly awalnya bukan sekadar permainan menang-kalah. Ia adalah kritik terhadap akumulasi yang membuat orang lupa bahwa aturan permainan menentukan siapa yang tampak pintar dan siapa yang tampak gagal.",
+                "marks": []
+              }
+            ],
+            "markDefs": []
+          },
+          {
+            "_type": "block",
+            "_key": "m00008",
+            "style": "h2",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00007",
+                "text": "AI dan papan baru",
+                "marks": []
+              }
+            ],
+            "markDefs": []
+          },
+          {
+            "_type": "block",
+            "_key": "m00010",
+            "style": "normal",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00009",
+                "text": "AI menjadi papan baru. Yang tampak sebagai kemajuan teknis sering kali juga menjadi eksperimen sosial tentang distribusi kuasa, akses, dan martabat.",
+                "marks": []
+              }
+            ],
+            "markDefs": []
+          }
+        ],
+        "integration": {
+          "applicationId": "pub_003",
+          "editorialSchema": "pakrpp.editorial/v1",
+          "canonicalBodyField": "content",
+          "legacyMetadata": {
+            "aiSummary": "Percakapan imajiner bersama Lizzie Magie mengenai monopoli dan akal imitasi.",
+            "author": "PakRPP",
+            "authorRefs": [
+              "author.editorial-team"
+            ],
+            "breaking": false,
+            "contentClass": "article",
+            "contentId": "pub_003",
+            "contentKind": "article",
+            "description": "Sebuah percakapan imajiner tentang permainan, pasar, dan cara zaman membaca manusia.",
+            "draft": false,
+            "editorialPriority": 90,
+            "editorialRole": "major",
+            "featured": true,
+            "kicker": "Eksperimen · Anomali",
+            "language": "id",
+            "live": false,
+            "noindex": false,
+            "publishedAt": "2025-11-16",
+            "readTime": "5 min",
+            "relatedRefs": [
+              "pub_002",
+              "pub_005"
+            ],
+            "section": "Anomali",
+            "sectionRefs": [
+              "consumer.section.anomali"
+            ],
+            "status": "published",
+            "storyFormat": "interview",
+            "subtitle": "Sebuah percakapan spekulatif tentang permainan, pasar, dan cara zaman membaca manusia.",
+            "tags": [
+              "lizzie-magie",
+              "monopoly",
+              "akal-imitasi"
+            ],
+            "topicRefs": [
+              "consumer.topic.anomali",
+              "consumer.topic.teknologi"
+            ],
+            "topics": [
+              "Anomali",
+              "Teknologi"
+            ],
+            "type": "experiment",
+            "updatedAt": "2025-11-16",
+            "visibility": "public"
+          },
+          "migratedFrom": {
+            "pin": {
+              "collection": "posts",
+              "id": "01M5RYFA4GWC7Q3GSXAKRWEM5R",
+              "liveRevisionId": "01M5RYFMBM063RB7W1NMP1SS9C",
+              "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+              "summaryField": "summary",
+              "titleField": "title",
+              "updatedAt": "2026-10-25T07:12:59.859Z"
+            },
+            "previousReviewedPin": {
+              "collection": "posts",
+              "id": "01M5RYFA4GWC7Q3GSXAKRWEM5R",
+              "liveRevisionId": "01M5RYFMBM063RB7W1NMP1SS9C",
+              "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+              "summaryField": "summary",
+              "titleField": "title",
+              "updatedAt": "2026-10-25T07:12:59.859Z"
+            },
+            "markdownSha256": "6e092ada7a61f84f87cc5da03a879e6cc5d4c81766c17f7988e2022025fb3b76",
+            "sourceSetSha256": "de2abab7a30e1ec7201054ba064b76cf3f031d7263bc436bf28987453ffb2275"
+          }
+        },
+        "editorial": {
+          "topics": [
+            "Anomali",
+            "Teknologi"
+          ],
+          "tags": [
+            "lizzie-magie",
+            "monopoly",
+            "akal-imitasi"
+          ],
+          "publicationDate": "2025-11-16T00:00:00.000Z",
+          "updatedDate": "2025-11-16T00:00:00.000Z",
+          "language": "id",
+          "seoTitle": "",
+          "seoDescription": "Sebuah percakapan imajiner tentang permainan, pasar, dan cara zaman membaca manusia.",
+          "canonicalUrl": ""
+        }
+      },
+      "textEquivalent": true,
+      "references": {
+        "authors": [
+          "01M5RYDB6VGATHN3HWS5NX8FWF"
+        ]
+      }
+    },
+    {
+      "applicationId": "pub_004",
+      "collection": "posts",
+      "contentId": "01M5RYFZ456BXQ8B03WKK42K3H",
+      "before": {
+        "data": {
+          "application_id": "pub_004",
+          "body": "\nESG sering terdengar sebagai bahasa masa depan. Tetapi bahasa masa depan bisa berubah menjadi kosmetik jika ia hanya menambal reputasi tanpa mengubah cara organisasi mengambil keputusan.\n\n## Ukuran dan keberanian\n\nUkuran penting, tetapi ukuran tidak boleh menggantikan keberanian moral. Laporan yang rapi tidak otomatis membuat praktik menjadi adil.\n",
+          "metadata": {
+            "aiSummary": "Analisis kritis mengenai pelaporan ESG antara substansi etika dan kosmetik reputasi.",
+            "author": "PakRPP",
+            "authorRefs": [
+              "author.editorial-team"
+            ],
+            "breaking": false,
+            "contentClass": "article",
+            "contentId": "pub_004",
+            "contentKind": "article",
+            "description": "Catatan tentang keberlanjutan, bahasa reputasi, dan etika yang sering dijadikan laporan.",
+            "draft": false,
+            "editorialPriority": 85,
+            "editorialRole": "standard",
+            "featured": false,
+            "kicker": "Analisis · Pelaporan",
+            "language": "id",
+            "live": false,
+            "noindex": false,
+            "publishedAt": "2025-06-15",
+            "readTime": "4 min",
+            "relatedRefs": [
+              "pub_001"
+            ],
+            "section": "Pelaporan",
+            "sectionRefs": [
+              "consumer.section.pelaporan"
+            ],
+            "status": "published",
+            "storyFormat": "analysis",
+            "subtitle": "Catatan kritis tentang keberlanjutan, bahasa reputasi, dan etika yang sering direduksi menjadi laporan kepatuhan.",
+            "tags": [
+              "esg",
+              "etika",
+              "reputasi",
+              "reporting"
+            ],
+            "topicRefs": [
+              "consumer.topic.pelaporan"
+            ],
+            "topics": [
+              "Pelaporan"
+            ],
+            "type": "analysis",
+            "updatedAt": "2025-06-15",
+            "visibility": "public"
+          },
+          "summary": "Catatan tentang keberlanjutan, bahasa reputasi, dan etika yang sering dijadikan laporan.",
+          "title": "ESG Etika Pasar atau Tambalan Reputasi"
+        },
+        "draftRevisionId": null,
+        "id": "01M5RYFZ456BXQ8B03WKK42K3H",
+        "liveRevisionId": "01M5RYG9HRXRDEM53RJZBG3BKN",
+        "publishedAt": "2025-06-15T00:00:00.000Z",
+        "slug": "esg-etika-pasar-atau-tambalan-reputasi",
+        "status": "published",
+        "type": "posts",
+        "updatedAt": "2026-10-25T07:13:21.562Z"
+      },
+      "pin": {
+        "collection": "posts",
+        "id": "01M5RYFZ456BXQ8B03WKK42K3H",
+        "liveRevisionId": "01M5RYG9HRXRDEM53RJZBG3BKN",
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "summaryField": "summary",
+        "titleField": "title",
+        "updatedAt": "2026-10-25T07:13:21.562Z"
+      },
+      "previousReviewedPin": {
+        "collection": "posts",
+        "id": "01M5RYFZ456BXQ8B03WKK42K3H",
+        "liveRevisionId": "01M5RYG9HRXRDEM53RJZBG3BKN",
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "summaryField": "summary",
+        "titleField": "title",
+        "updatedAt": "2026-10-25T07:13:21.562Z"
+      },
+      "markdownSha256": "62b960620e7f69fcf375ad4489981b481bdaba67bb71dc5026085505c1e61419",
+      "portableTextSha256": "396569bfce2cbd03b23e65020473e91bc19383582d5fdff2b7b194cd633782be",
+      "data": {
+        "content": [
+          {
+            "_type": "block",
+            "_key": "m00002",
+            "style": "normal",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00001",
+                "text": "ESG sering terdengar sebagai bahasa masa depan. Tetapi bahasa masa depan bisa berubah menjadi kosmetik jika ia hanya menambal reputasi tanpa mengubah cara organisasi mengambil keputusan.",
+                "marks": []
+              }
+            ],
+            "markDefs": []
+          },
+          {
+            "_type": "block",
+            "_key": "m00004",
+            "style": "h2",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00003",
+                "text": "Ukuran dan keberanian",
+                "marks": []
+              }
+            ],
+            "markDefs": []
+          },
+          {
+            "_type": "block",
+            "_key": "m00006",
+            "style": "normal",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00005",
+                "text": "Ukuran penting, tetapi ukuran tidak boleh menggantikan keberanian moral. Laporan yang rapi tidak otomatis membuat praktik menjadi adil.",
+                "marks": []
+              }
+            ],
+            "markDefs": []
+          }
+        ],
+        "integration": {
+          "applicationId": "pub_004",
+          "editorialSchema": "pakrpp.editorial/v1",
+          "canonicalBodyField": "content",
+          "legacyMetadata": {
+            "aiSummary": "Analisis kritis mengenai pelaporan ESG antara substansi etika dan kosmetik reputasi.",
+            "author": "PakRPP",
+            "authorRefs": [
+              "author.editorial-team"
+            ],
+            "breaking": false,
+            "contentClass": "article",
+            "contentId": "pub_004",
+            "contentKind": "article",
+            "description": "Catatan tentang keberlanjutan, bahasa reputasi, dan etika yang sering dijadikan laporan.",
+            "draft": false,
+            "editorialPriority": 85,
+            "editorialRole": "standard",
+            "featured": false,
+            "kicker": "Analisis · Pelaporan",
+            "language": "id",
+            "live": false,
+            "noindex": false,
+            "publishedAt": "2025-06-15",
+            "readTime": "4 min",
+            "relatedRefs": [
+              "pub_001"
+            ],
+            "section": "Pelaporan",
+            "sectionRefs": [
+              "consumer.section.pelaporan"
+            ],
+            "status": "published",
+            "storyFormat": "analysis",
+            "subtitle": "Catatan kritis tentang keberlanjutan, bahasa reputasi, dan etika yang sering direduksi menjadi laporan kepatuhan.",
+            "tags": [
+              "esg",
+              "etika",
+              "reputasi",
+              "reporting"
+            ],
+            "topicRefs": [
+              "consumer.topic.pelaporan"
+            ],
+            "topics": [
+              "Pelaporan"
+            ],
+            "type": "analysis",
+            "updatedAt": "2025-06-15",
+            "visibility": "public"
+          },
+          "migratedFrom": {
+            "pin": {
+              "collection": "posts",
+              "id": "01M5RYFZ456BXQ8B03WKK42K3H",
+              "liveRevisionId": "01M5RYG9HRXRDEM53RJZBG3BKN",
+              "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+              "summaryField": "summary",
+              "titleField": "title",
+              "updatedAt": "2026-10-25T07:13:21.562Z"
+            },
+            "previousReviewedPin": {
+              "collection": "posts",
+              "id": "01M5RYFZ456BXQ8B03WKK42K3H",
+              "liveRevisionId": "01M5RYG9HRXRDEM53RJZBG3BKN",
+              "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+              "summaryField": "summary",
+              "titleField": "title",
+              "updatedAt": "2026-10-25T07:13:21.562Z"
+            },
+            "markdownSha256": "62b960620e7f69fcf375ad4489981b481bdaba67bb71dc5026085505c1e61419",
+            "sourceSetSha256": "de2abab7a30e1ec7201054ba064b76cf3f031d7263bc436bf28987453ffb2275"
+          }
+        },
+        "editorial": {
+          "topics": [
+            "Pelaporan"
+          ],
+          "tags": [
+            "esg",
+            "etika",
+            "reputasi",
+            "reporting"
+          ],
+          "publicationDate": "2025-06-15T00:00:00.000Z",
+          "updatedDate": "2025-06-15T00:00:00.000Z",
+          "language": "id",
+          "seoTitle": "",
+          "seoDescription": "Catatan tentang keberlanjutan, bahasa reputasi, dan etika yang sering dijadikan laporan.",
+          "canonicalUrl": ""
+        }
+      },
+      "textEquivalent": true,
+      "references": {
+        "authors": [
+          "01M5RYDB6VGATHN3HWS5NX8FWF"
+        ]
+      }
+    },
+    {
+      "applicationId": "pub_005",
+      "collection": "posts",
+      "contentId": "01M5RYGM5ENY3WY3F38B6QPF8B",
+      "before": {
+        "data": {
+          "application_id": "pub_005",
+          "body": "\nJika Monopoly menggambarkan akumulasi yang membuat ruang hidup menyempit, maka level RW bisa dibaca sebagai laboratorium kecil untuk merawat arus kesejahteraan yang lebih menyebar.\n\n## Dari dekat\n\nPerubahan besar sering gagal karena terlalu jauh dari denyut warga. Level RW memberi kemungkinan untuk melihat kebutuhan, aset, dan gotong royong dengan lebih dekat.\n",
+          "metadata": {
+            "aiSummary": "Studi kasus kesejahteraan tingkat RW sebagai antitesis permainan akumulasi Monopoly.",
+            "author": "PakRPP",
+            "authorRefs": [
+              "author.editorial-team"
+            ],
+            "breaking": false,
+            "contentClass": "article",
+            "contentId": "pub_005",
+            "contentKind": "article",
+            "description": "Kesejahteraan lokal sebagai antitesis permainan akumulasi yang memusat.",
+            "draft": false,
+            "editorialPriority": 80,
+            "editorialRole": "standard",
+            "featured": false,
+            "kicker": "Studi Kasus · Anomali",
+            "language": "id",
+            "live": false,
+            "noindex": false,
+            "publishedAt": "2024-09-14",
+            "readTime": "6 min",
+            "relatedRefs": [
+              "pub_003"
+            ],
+            "section": "Anomali",
+            "sectionRefs": [
+              "consumer.section.anomali"
+            ],
+            "status": "published",
+            "storyFormat": "explainer",
+            "subtitle": "Kesejahteraan lokal sebagai laboratorium warga dan antitesis terhadap permainan akumulasi yang memusat.",
+            "tags": [
+              "rw",
+              "kesejahteraan",
+              "monopoly"
+            ],
+            "topicRefs": [
+              "consumer.topic.anomali",
+              "consumer.topic.pelaporan"
+            ],
+            "topics": [
+              "Anomali",
+              "Pelaporan"
+            ],
+            "type": "case-study",
+            "updatedAt": "2024-09-14",
+            "visibility": "public"
+          },
+          "summary": "Kesejahteraan lokal sebagai antitesis permainan akumulasi yang memusat.",
+          "title": "Karsa Karya Kesejahteraan Antitesis Monopoly dari Level RW"
+        },
+        "draftRevisionId": null,
+        "id": "01M5RYGM5ENY3WY3F38B6QPF8B",
+        "liveRevisionId": "01M5RYGY30G4QKTZZKR1G05PG9",
+        "publishedAt": "2024-09-14T00:00:00.000Z",
+        "slug": "karsa-karya-kesejahteraan-antitesis-monopoly-dari-level-rw",
+        "status": "published",
+        "type": "posts",
+        "updatedAt": "2026-10-25T07:13:42.584Z"
+      },
+      "pin": {
+        "collection": "posts",
+        "id": "01M5RYGM5ENY3WY3F38B6QPF8B",
+        "liveRevisionId": "01M5RYGY30G4QKTZZKR1G05PG9",
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "summaryField": "summary",
+        "titleField": "title",
+        "updatedAt": "2026-10-25T07:13:42.584Z"
+      },
+      "previousReviewedPin": {
+        "collection": "posts",
+        "id": "01M5RYGM5ENY3WY3F38B6QPF8B",
+        "liveRevisionId": "01M5RYGY30G4QKTZZKR1G05PG9",
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "summaryField": "summary",
+        "titleField": "title",
+        "updatedAt": "2026-10-25T07:13:42.584Z"
+      },
+      "markdownSha256": "c0c87f0670b2c0fcc37b6b5f4e3338e6061acb7f63e8f814744492a0cf9c9300",
+      "portableTextSha256": "c959e47daf92e76abf6347a38263f8fbd58cb71b0fb6712b95482c1158c33330",
+      "data": {
+        "content": [
+          {
+            "_type": "block",
+            "_key": "m00002",
+            "style": "normal",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00001",
+                "text": "Jika Monopoly menggambarkan akumulasi yang membuat ruang hidup menyempit, maka level RW bisa dibaca sebagai laboratorium kecil untuk merawat arus kesejahteraan yang lebih menyebar.",
+                "marks": []
+              }
+            ],
+            "markDefs": []
+          },
+          {
+            "_type": "block",
+            "_key": "m00004",
+            "style": "h2",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00003",
+                "text": "Dari dekat",
+                "marks": []
+              }
+            ],
+            "markDefs": []
+          },
+          {
+            "_type": "block",
+            "_key": "m00006",
+            "style": "normal",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00005",
+                "text": "Perubahan besar sering gagal karena terlalu jauh dari denyut warga. Level RW memberi kemungkinan untuk melihat kebutuhan, aset, dan gotong royong dengan lebih dekat.",
+                "marks": []
+              }
+            ],
+            "markDefs": []
+          }
+        ],
+        "integration": {
+          "applicationId": "pub_005",
+          "editorialSchema": "pakrpp.editorial/v1",
+          "canonicalBodyField": "content",
+          "legacyMetadata": {
+            "aiSummary": "Studi kasus kesejahteraan tingkat RW sebagai antitesis permainan akumulasi Monopoly.",
+            "author": "PakRPP",
+            "authorRefs": [
+              "author.editorial-team"
+            ],
+            "breaking": false,
+            "contentClass": "article",
+            "contentId": "pub_005",
+            "contentKind": "article",
+            "description": "Kesejahteraan lokal sebagai antitesis permainan akumulasi yang memusat.",
+            "draft": false,
+            "editorialPriority": 80,
+            "editorialRole": "standard",
+            "featured": false,
+            "kicker": "Studi Kasus · Anomali",
+            "language": "id",
+            "live": false,
+            "noindex": false,
+            "publishedAt": "2024-09-14",
+            "readTime": "6 min",
+            "relatedRefs": [
+              "pub_003"
+            ],
+            "section": "Anomali",
+            "sectionRefs": [
+              "consumer.section.anomali"
+            ],
+            "status": "published",
+            "storyFormat": "explainer",
+            "subtitle": "Kesejahteraan lokal sebagai laboratorium warga dan antitesis terhadap permainan akumulasi yang memusat.",
+            "tags": [
+              "rw",
+              "kesejahteraan",
+              "monopoly"
+            ],
+            "topicRefs": [
+              "consumer.topic.anomali",
+              "consumer.topic.pelaporan"
+            ],
+            "topics": [
+              "Anomali",
+              "Pelaporan"
+            ],
+            "type": "case-study",
+            "updatedAt": "2024-09-14",
+            "visibility": "public"
+          },
+          "migratedFrom": {
+            "pin": {
+              "collection": "posts",
+              "id": "01M5RYGM5ENY3WY3F38B6QPF8B",
+              "liveRevisionId": "01M5RYGY30G4QKTZZKR1G05PG9",
+              "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+              "summaryField": "summary",
+              "titleField": "title",
+              "updatedAt": "2026-10-25T07:13:42.584Z"
+            },
+            "previousReviewedPin": {
+              "collection": "posts",
+              "id": "01M5RYGM5ENY3WY3F38B6QPF8B",
+              "liveRevisionId": "01M5RYGY30G4QKTZZKR1G05PG9",
+              "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+              "summaryField": "summary",
+              "titleField": "title",
+              "updatedAt": "2026-10-25T07:13:42.584Z"
+            },
+            "markdownSha256": "c0c87f0670b2c0fcc37b6b5f4e3338e6061acb7f63e8f814744492a0cf9c9300",
+            "sourceSetSha256": "de2abab7a30e1ec7201054ba064b76cf3f031d7263bc436bf28987453ffb2275"
+          }
+        },
+        "editorial": {
+          "topics": [
+            "Anomali",
+            "Pelaporan"
+          ],
+          "tags": [
+            "rw",
+            "kesejahteraan",
+            "monopoly"
+          ],
+          "publicationDate": "2024-09-14T00:00:00.000Z",
+          "updatedDate": "2024-09-14T00:00:00.000Z",
+          "language": "id",
+          "seoTitle": "",
+          "seoDescription": "Kesejahteraan lokal sebagai antitesis permainan akumulasi yang memusat.",
+          "canonicalUrl": ""
+        }
+      },
+      "textEquivalent": true,
+      "references": {
+        "authors": [
+          "01M5RYDB6VGATHN3HWS5NX8FWF"
+        ]
+      }
+    },
+    {
+      "applicationId": "pub_001",
+      "collection": "posts",
+      "contentId": "01M5RYH99AW0EQMQEGGGH5JTRX",
+      "before": {
+        "data": {
+          "application_id": "pub_001",
+          "body": "\nKecerdasan buatan telah masuk ke hampir setiap tahapan kerja administratif: merangkum notula, menyusun draf laporan, hingga memetakan kepatuhan regulasi. Efisiensi ini nyata, tetapi menyimpan jebakan serius ketika kelancaran bahasa disamakan dengan kebenaran faktual.\n\n## Narasi yang rapi bukan bukti\n\nDalam tata kelola pelaporan, bukti memiliki syarat ketat: ia harus dapat ditelusuri ke kejadian asal, memiliki pencatat yang dapat dimintai pertanggungjawaban, dan tahan terhadap uji silang. Keluaran model generatif bekerja dengan prinsip yang sama sekali berbeda—ia memprediksi rangkaian kata yang paling masuk akal secara statistik.\n\nParagraf yang terdengar meyakinkan bukanlah bukti bahwa suatu prosedur telah dijalankan di lapangan. Ketika organisasi menyerahkan validasi substansi kepada mesin, laporan berubah menjadi artefak estetika birokrasi.\n\n## Prinsip pemisahan fungsi dalam pelaporan\n\nAgar teknologi tetap memperkuat integritas institusi tanpa merusak akuntabilitas, tiga batas utama harus dijaga:\n\n1. **Bukti primer mendahului sintesis**: Rekaman transaksi, log sistem, berita acara, dan dokumen sumber harus dikunci sebelum proses peringkasan berbantuan AI dilakukan.\n2. **Keterlacakan klaim ke sumber**: Setiap pernyataan kuantitatif atau klaim kepatuhan di dalam laporan wajib merujuk pada artefak bukti spesifik, bukan hasil interpolasi model.\n3. **Penandatangan memikul beban verifikasi**: Mesin tidak memiliki kedudukan hukum maupun beban moral. Tanggung jawab atas keabsahan laporan tetap melekat penuh pada subjek manusia yang mengesahkannya.\n\n## Penutup\n\nGunakan kecerdasan buatan untuk memperjelas struktur, menemukan ketidakkonsistenan redaksional, dan mempercepat penelusuran dokumen. Namun jangan pernah mengizinkan keluaran algoritmik menggantikan rantai bukti.\n",
+          "metadata": {
+            "aiSummary": "Analisis batas antara sintesis AI dan bukti pelaporan yang sah.",
+            "author": "PakRPP",
+            "authorRefs": [
+              "author.editorial-team"
+            ],
+            "breaking": false,
+            "contentClass": "article",
+            "contentId": "pub_001",
+            "contentKind": "article",
+            "description": "Analisis mengenai batas epistemik antara bantuan penyusunan laporan oleh kecerdasan buatan dan bukti yang dapat dipertanggungjawabkan secara audit.",
+            "draft": false,
+            "editorialPriority": 100,
+            "editorialRole": "lead",
+            "featured": true,
+            "kicker": "Analisis · Pelaporan",
+            "language": "id",
+            "live": false,
+            "noindex": false,
+            "publishedAt": "2026-10-19",
+            "readTime": "6 min",
+            "relatedRefs": [
+              "pub_002",
+              "pub_004"
+            ],
+            "section": "Pelaporan",
+            "sectionRefs": [
+              "consumer.section.pelaporan"
+            ],
+            "status": "published",
+            "storyFormat": "analysis",
+            "subtitle": "Membedakan sintesis probabilistik dari rantai bukti audit dalam tata kelola pelaporan modern.",
+            "tags": [
+              "ai",
+              "evidence",
+              "reporting"
+            ],
+            "topicRefs": [
+              "consumer.topic.pelaporan",
+              "consumer.topic.teknologi"
+            ],
+            "topics": [
+              "Pelaporan",
+              "Teknologi"
+            ],
+            "type": "analysis",
+            "updatedAt": "2026-10-19",
+            "visibility": "public"
+          },
+          "summary": "Keluaran model bahasa dapat mempercepat strukturisasi dokumen, namun bukti tetap menuntut keterlacakan sumber primer, tanggung jawab subjek hukum, dan verifikasi independen.",
+          "title": "Kecerdasan Buatan Boleh Membantu Pelaporan, tetapi Keluarannya Bukan Bukti"
+        },
+        "draftRevisionId": null,
+        "id": "01M5RYH99AW0EQMQEGGGH5JTRX",
+        "liveRevisionId": "01M5RYHKJB2TYWBTNKJ436S6R3",
+        "publishedAt": "2026-10-19T00:00:00.000Z",
+        "slug": "mengapa-ai-bukan-bukti",
+        "status": "published",
+        "type": "posts",
+        "updatedAt": "2026-10-25T07:14:04.243Z"
+      },
+      "pin": {
+        "collection": "posts",
+        "id": "01M5RYH99AW0EQMQEGGGH5JTRX",
+        "liveRevisionId": "01M5RYHKJB2TYWBTNKJ436S6R3",
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "summaryField": "summary",
+        "titleField": "title",
+        "updatedAt": "2026-10-25T07:14:04.243Z"
+      },
+      "previousReviewedPin": {
+        "collection": "posts",
+        "id": "01M5RYH99AW0EQMQEGGGH5JTRX",
+        "liveRevisionId": "01M5RYHKJB2TYWBTNKJ436S6R3",
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "summaryField": "summary",
+        "titleField": "title",
+        "updatedAt": "2026-10-25T07:14:04.243Z"
+      },
+      "markdownSha256": "179191c6534a421abb6408a5f60678afc95ff6ec887c0c956e339d05c5aa4d9d",
+      "portableTextSha256": "fd02554a9a9ebbfd3a98f6fd97f1efe0321188a2c4c24f24b583876ac33a7e04",
+      "data": {
+        "content": [
+          {
+            "_type": "block",
+            "_key": "m00002",
+            "style": "normal",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00001",
+                "text": "Kecerdasan buatan telah masuk ke hampir setiap tahapan kerja administratif: merangkum notula, menyusun draf laporan, hingga memetakan kepatuhan regulasi. Efisiensi ini nyata, tetapi menyimpan jebakan serius ketika kelancaran bahasa disamakan dengan kebenaran faktual.",
+                "marks": []
+              }
+            ],
+            "markDefs": []
+          },
+          {
+            "_type": "block",
+            "_key": "m00004",
+            "style": "h2",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00003",
+                "text": "Narasi yang rapi bukan bukti",
+                "marks": []
+              }
+            ],
+            "markDefs": []
+          },
+          {
+            "_type": "block",
+            "_key": "m00006",
+            "style": "normal",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00005",
+                "text": "Dalam tata kelola pelaporan, bukti memiliki syarat ketat: ia harus dapat ditelusuri ke kejadian asal, memiliki pencatat yang dapat dimintai pertanggungjawaban, dan tahan terhadap uji silang. Keluaran model generatif bekerja dengan prinsip yang sama sekali berbeda—ia memprediksi rangkaian kata yang paling masuk akal secara statistik.",
+                "marks": []
+              }
+            ],
+            "markDefs": []
+          },
+          {
+            "_type": "block",
+            "_key": "m00008",
+            "style": "normal",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00007",
+                "text": "Paragraf yang terdengar meyakinkan bukanlah bukti bahwa suatu prosedur telah dijalankan di lapangan. Ketika organisasi menyerahkan validasi substansi kepada mesin, laporan berubah menjadi artefak estetika birokrasi.",
+                "marks": []
+              }
+            ],
+            "markDefs": []
+          },
+          {
+            "_type": "block",
+            "_key": "m00010",
+            "style": "h2",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00009",
+                "text": "Prinsip pemisahan fungsi dalam pelaporan",
+                "marks": []
+              }
+            ],
+            "markDefs": []
+          },
+          {
+            "_type": "block",
+            "_key": "m00012",
+            "style": "normal",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00011",
+                "text": "Agar teknologi tetap memperkuat integritas institusi tanpa merusak akuntabilitas, tiga batas utama harus dijaga:",
+                "marks": []
+              }
+            ],
+            "markDefs": []
+          },
+          {
+            "_type": "block",
+            "_key": "m00015",
+            "style": "normal",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00013",
+                "text": "Bukti primer mendahului sintesis",
+                "marks": [
+                  "strong"
+                ]
+              },
+              {
+                "_type": "span",
+                "_key": "m00014",
+                "text": ": Rekaman transaksi, log sistem, berita acara, dan dokumen sumber harus dikunci sebelum proses peringkasan berbantuan AI dilakukan.",
+                "marks": []
+              }
+            ],
+            "markDefs": [],
+            "listItem": "number",
+            "level": 1,
+            "listStart": 1
+          },
+          {
+            "_type": "block",
+            "_key": "m00018",
+            "style": "normal",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00016",
+                "text": "Keterlacakan klaim ke sumber",
+                "marks": [
+                  "strong"
+                ]
+              },
+              {
+                "_type": "span",
+                "_key": "m00017",
+                "text": ": Setiap pernyataan kuantitatif atau klaim kepatuhan di dalam laporan wajib merujuk pada artefak bukti spesifik, bukan hasil interpolasi model.",
+                "marks": []
+              }
+            ],
+            "markDefs": [],
+            "listItem": "number",
+            "level": 1,
+            "listStart": 1
+          },
+          {
+            "_type": "block",
+            "_key": "m00021",
+            "style": "normal",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00019",
+                "text": "Penandatangan memikul beban verifikasi",
+                "marks": [
+                  "strong"
+                ]
+              },
+              {
+                "_type": "span",
+                "_key": "m00020",
+                "text": ": Mesin tidak memiliki kedudukan hukum maupun beban moral. Tanggung jawab atas keabsahan laporan tetap melekat penuh pada subjek manusia yang mengesahkannya.",
+                "marks": []
+              }
+            ],
+            "markDefs": [],
+            "listItem": "number",
+            "level": 1,
+            "listStart": 1
+          },
+          {
+            "_type": "block",
+            "_key": "m00023",
+            "style": "h2",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00022",
+                "text": "Penutup",
+                "marks": []
+              }
+            ],
+            "markDefs": []
+          },
+          {
+            "_type": "block",
+            "_key": "m00025",
+            "style": "normal",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00024",
+                "text": "Gunakan kecerdasan buatan untuk memperjelas struktur, menemukan ketidakkonsistenan redaksional, dan mempercepat penelusuran dokumen. Namun jangan pernah mengizinkan keluaran algoritmik menggantikan rantai bukti.",
+                "marks": []
+              }
+            ],
+            "markDefs": []
+          }
+        ],
+        "integration": {
+          "applicationId": "pub_001",
+          "editorialSchema": "pakrpp.editorial/v1",
+          "canonicalBodyField": "content",
+          "legacyMetadata": {
+            "aiSummary": "Analisis batas antara sintesis AI dan bukti pelaporan yang sah.",
+            "author": "PakRPP",
+            "authorRefs": [
+              "author.editorial-team"
+            ],
+            "breaking": false,
+            "contentClass": "article",
+            "contentId": "pub_001",
+            "contentKind": "article",
+            "description": "Analisis mengenai batas epistemik antara bantuan penyusunan laporan oleh kecerdasan buatan dan bukti yang dapat dipertanggungjawabkan secara audit.",
+            "draft": false,
+            "editorialPriority": 100,
+            "editorialRole": "lead",
+            "featured": true,
+            "kicker": "Analisis · Pelaporan",
+            "language": "id",
+            "live": false,
+            "noindex": false,
+            "publishedAt": "2026-10-19",
+            "readTime": "6 min",
+            "relatedRefs": [
+              "pub_002",
+              "pub_004"
+            ],
+            "section": "Pelaporan",
+            "sectionRefs": [
+              "consumer.section.pelaporan"
+            ],
+            "status": "published",
+            "storyFormat": "analysis",
+            "subtitle": "Membedakan sintesis probabilistik dari rantai bukti audit dalam tata kelola pelaporan modern.",
+            "tags": [
+              "ai",
+              "evidence",
+              "reporting"
+            ],
+            "topicRefs": [
+              "consumer.topic.pelaporan",
+              "consumer.topic.teknologi"
+            ],
+            "topics": [
+              "Pelaporan",
+              "Teknologi"
+            ],
+            "type": "analysis",
+            "updatedAt": "2026-10-19",
+            "visibility": "public"
+          },
+          "migratedFrom": {
+            "pin": {
+              "collection": "posts",
+              "id": "01M5RYH99AW0EQMQEGGGH5JTRX",
+              "liveRevisionId": "01M5RYHKJB2TYWBTNKJ436S6R3",
+              "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+              "summaryField": "summary",
+              "titleField": "title",
+              "updatedAt": "2026-10-25T07:14:04.243Z"
+            },
+            "previousReviewedPin": {
+              "collection": "posts",
+              "id": "01M5RYH99AW0EQMQEGGGH5JTRX",
+              "liveRevisionId": "01M5RYHKJB2TYWBTNKJ436S6R3",
+              "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+              "summaryField": "summary",
+              "titleField": "title",
+              "updatedAt": "2026-10-25T07:14:04.243Z"
+            },
+            "markdownSha256": "179191c6534a421abb6408a5f60678afc95ff6ec887c0c956e339d05c5aa4d9d",
+            "sourceSetSha256": "de2abab7a30e1ec7201054ba064b76cf3f031d7263bc436bf28987453ffb2275"
+          }
+        },
+        "editorial": {
+          "topics": [
+            "Pelaporan",
+            "Teknologi"
+          ],
+          "tags": [
+            "ai",
+            "evidence",
+            "reporting"
+          ],
+          "publicationDate": "2026-10-19T00:00:00.000Z",
+          "updatedDate": "2026-10-19T00:00:00.000Z",
+          "language": "id",
+          "seoTitle": "",
+          "seoDescription": "Keluaran model bahasa dapat mempercepat strukturisasi dokumen, namun bukti tetap menuntut keterlacakan sumber primer, tanggung jawab subjek hukum, dan verifikasi independen.",
+          "canonicalUrl": ""
+        }
+      },
+      "textEquivalent": true,
+      "references": {
+        "authors": [
+          "01M5RYDB6VGATHN3HWS5NX8FWF"
+        ]
+      }
+    },
+    {
+      "applicationId": "consumer.article.softcoded-systems",
+      "collection": "posts",
+      "contentId": "01M5RYHYBT0NZBM5N0MTEJHBH7",
+      "before": {
+        "data": {
+          "application_id": "consumer.article.softcoded-systems",
+          "body": "\nYA commercial bootstrap should allow identity, routes, capabilities, themes, and interaction policies to change independently.\n\n## Registries as authority\n\nCapability, action, route, and design contracts provide one place to declare product decisions. Components consume those contracts instead of embedding site assumptions.\n\n## Semantic tokens\n\nComponents ask for roles such as surface, text, border, accent, motion, and focus. Blueprintism, editorial, brutalism, and other design languages can then reinterpret those roles without changing component logic.\n\n## Kernel boundary\n\nGaga Engine owns reusable mechanics. The consumer application owns composition, content, and expression.\n",
+          "metadata": {
+            "aiSummary": "A reference article about softcoded design systems.",
+            "author": "Editorial Team",
+            "authorRefs": [
+              "author.editorial-team"
+            ],
+            "breaking": false,
+            "contentClass": "article",
+            "contentId": "consumer.article.softcoded-systems",
+            "contentKind": "article",
+            "description": "Shows the signature configuration and token philosophy.",
+            "draft": false,
+            "editorialPriority": 80,
+            "editorialRole": "major",
+            "featured": true,
+            "kicker": "Publishing Systems",
+            "language": "id",
+            "live": false,
+            "noindex": false,
+            "publishedAt": "2026-10-10",
+            "readTime": "5 min",
+            "relatedRefs": [
+              "consumer.article.context-aware-reading"
+            ],
+            "section": "Systems",
+            "sectionRefs": [
+              "consumer.section.systems"
+            ],
+            "status": "published",
+            "storyFormat": "explainer",
+            "subtitle": "Configuration should express product decisions without duplicating mechanics.",
+            "tags": [
+              "architecture",
+              "tokens",
+              "configuration"
+            ],
+            "topicRefs": [
+              "consumer.topic.publishing"
+            ],
+            "topics": [
+              "Publishing Systems"
+            ],
+            "updatedAt": "2026-10-11",
+            "visibility": "public"
+          },
+          "summary": "YWhy configuration, semantic tokens, and registries are preferable to repeated forks.",
+          "title": "Softcoded Systems Scale Better Than Theme ForksY"
+        },
+        "draftRevisionId": null,
+        "id": "01M5RYHYBT0NZBM5N0MTEJHBH7",
+        "liveRevisionId": "01M5S1YZCPHZ5HPA8Q9XQNMEB1",
+        "publishedAt": "2026-10-10T00:00:00.000Z",
+        "slug": "softcoded-systems-scale-better-than-theme-forks",
+        "status": "published",
+        "type": "posts",
+        "updatedAt": "2026-10-25T08:13:58.430Z"
+      },
+      "pin": {
+        "collection": "posts",
+        "id": "01M5RYHYBT0NZBM5N0MTEJHBH7",
+        "liveRevisionId": "01M5S1YZCPHZ5HPA8Q9XQNMEB1",
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "summaryField": "summary",
+        "titleField": "title",
+        "updatedAt": "2026-10-25T08:13:58.430Z"
+      },
+      "previousReviewedPin": {
+        "collection": "posts",
+        "id": "01M5RYHYBT0NZBM5N0MTEJHBH7",
+        "liveRevisionId": "01M5RYJ86S0M7277DW66A1D69T",
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "summaryField": "summary",
+        "titleField": "title",
+        "updatedAt": "2026-10-25T07:14:25.719Z"
+      },
+      "markdownSha256": "e1c387075c660c20532e4c35ce74c0b3a4c412ff2f196d62b648ca6d7e4986c8",
+      "portableTextSha256": "edfefc2c8a3556714992ec2edbfa7cbdbf29f01230dc0c275af6f1043d63f591",
+      "data": {
+        "content": [
+          {
+            "_type": "block",
+            "_key": "m00002",
+            "style": "normal",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00001",
+                "text": "YA commercial bootstrap should allow identity, routes, capabilities, themes, and interaction policies to change independently.",
+                "marks": []
+              }
+            ],
+            "markDefs": []
+          },
+          {
+            "_type": "block",
+            "_key": "m00004",
+            "style": "h2",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00003",
+                "text": "Registries as authority",
+                "marks": []
+              }
+            ],
+            "markDefs": []
+          },
+          {
+            "_type": "block",
+            "_key": "m00006",
+            "style": "normal",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00005",
+                "text": "Capability, action, route, and design contracts provide one place to declare product decisions. Components consume those contracts instead of embedding site assumptions.",
+                "marks": []
+              }
+            ],
+            "markDefs": []
+          },
+          {
+            "_type": "block",
+            "_key": "m00008",
+            "style": "h2",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00007",
+                "text": "Semantic tokens",
+                "marks": []
+              }
+            ],
+            "markDefs": []
+          },
+          {
+            "_type": "block",
+            "_key": "m00010",
+            "style": "normal",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00009",
+                "text": "Components ask for roles such as surface, text, border, accent, motion, and focus. Blueprintism, editorial, brutalism, and other design languages can then reinterpret those roles without changing component logic.",
+                "marks": []
+              }
+            ],
+            "markDefs": []
+          },
+          {
+            "_type": "block",
+            "_key": "m00012",
+            "style": "h2",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00011",
+                "text": "Kernel boundary",
+                "marks": []
+              }
+            ],
+            "markDefs": []
+          },
+          {
+            "_type": "block",
+            "_key": "m00014",
+            "style": "normal",
+            "children": [
+              {
+                "_type": "span",
+                "_key": "m00013",
+                "text": "Gaga Engine owns reusable mechanics. The consumer application owns composition, content, and expression.",
+                "marks": []
+              }
+            ],
+            "markDefs": []
+          }
+        ],
+        "integration": {
+          "applicationId": "consumer.article.softcoded-systems",
+          "editorialSchema": "pakrpp.editorial/v1",
+          "canonicalBodyField": "content",
+          "legacyMetadata": {
+            "aiSummary": "A reference article about softcoded design systems.",
+            "author": "Editorial Team",
+            "authorRefs": [
+              "author.editorial-team"
+            ],
+            "breaking": false,
+            "contentClass": "article",
+            "contentId": "consumer.article.softcoded-systems",
+            "contentKind": "article",
+            "description": "Shows the signature configuration and token philosophy.",
+            "draft": false,
+            "editorialPriority": 80,
+            "editorialRole": "major",
+            "featured": true,
+            "kicker": "Publishing Systems",
+            "language": "id",
+            "live": false,
+            "noindex": false,
+            "publishedAt": "2026-10-10",
+            "readTime": "5 min",
+            "relatedRefs": [
+              "consumer.article.context-aware-reading"
+            ],
+            "section": "Systems",
+            "sectionRefs": [
+              "consumer.section.systems"
+            ],
+            "status": "published",
+            "storyFormat": "explainer",
+            "subtitle": "Configuration should express product decisions without duplicating mechanics.",
+            "tags": [
+              "architecture",
+              "tokens",
+              "configuration"
+            ],
+            "topicRefs": [
+              "consumer.topic.publishing"
+            ],
+            "topics": [
+              "Publishing Systems"
+            ],
+            "updatedAt": "2026-10-11",
+            "visibility": "public"
+          },
+          "migratedFrom": {
+            "pin": {
+              "collection": "posts",
+              "id": "01M5RYHYBT0NZBM5N0MTEJHBH7",
+              "liveRevisionId": "01M5S1YZCPHZ5HPA8Q9XQNMEB1",
+              "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+              "summaryField": "summary",
+              "titleField": "title",
+              "updatedAt": "2026-10-25T08:13:58.430Z"
+            },
+            "previousReviewedPin": {
+              "collection": "posts",
+              "id": "01M5RYHYBT0NZBM5N0MTEJHBH7",
+              "liveRevisionId": "01M5RYJ86S0M7277DW66A1D69T",
+              "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+              "summaryField": "summary",
+              "titleField": "title",
+              "updatedAt": "2026-10-25T07:14:25.719Z"
+            },
+            "markdownSha256": "e1c387075c660c20532e4c35ce74c0b3a4c412ff2f196d62b648ca6d7e4986c8",
+            "sourceSetSha256": "de2abab7a30e1ec7201054ba064b76cf3f031d7263bc436bf28987453ffb2275"
+          }
+        },
+        "editorial": {
+          "topics": [
+            "Publishing Systems"
+          ],
+          "tags": [
+            "architecture",
+            "tokens",
+            "configuration"
+          ],
+          "publicationDate": "2026-10-10T00:00:00.000Z",
+          "updatedDate": "2026-10-11T00:00:00.000Z",
+          "language": "id",
+          "seoTitle": "",
+          "seoDescription": "YWhy configuration, semantic tokens, and registries are preferable to repeated forks.",
+          "canonicalUrl": ""
+        }
+      },
+      "textEquivalent": true,
+      "references": {
+        "authors": [
+          "01M5RYDB6VGATHN3HWS5NX8FWF"
+        ]
+      }
+    }
+  ],
+  "writeBudget": 46,
+  "authorization": "Operator explicitly authorized current-production readmission and additive Rich Studio migration only after fresh qualification. No main promotion or publication Worker deployment.",
+  "productionContentCreates": 0,
+  "retries": 0
+}

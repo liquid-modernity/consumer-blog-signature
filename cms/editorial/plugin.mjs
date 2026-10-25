@@ -1,7 +1,10 @@
 import { definePlugin, ContentSaveRejectedError } from "emdash";
 import { fileURLToPath } from "node:url";
 import { blockRegistry, pluginId } from "../../editorial/registry.mjs";
-import { validatePortableText } from "../../editorial/portable-text.mjs";
+import {
+  validatePortableText,
+  plainText,
+} from "../../editorial/portable-text.mjs";
 export function studioPlugin() {
   return {
     id: pluginId,
@@ -20,7 +23,7 @@ export function studioPlugin() {
       {
         name: "integration",
         label: "Integration identity",
-        fieldTypes: ["json", "text"],
+        fieldTypes: ["json", "text", "string"],
       },
     ],
   };
@@ -29,20 +32,70 @@ export function createPlugin() {
   return definePlugin({
     id: pluginId,
     version: "1.0.0",
-    capabilities: ["content:write"],
+    capabilities: ["content:write", "schema:read"],
     hooks: {
-      "content:beforeSave": async (event) => {
+      "content:beforeSave": async (event, ctx) => {
         const data = { ...event.content };
         const owned =
           ["posts", "pages", "authors", "sections"].includes(
             event.collection,
           ) || data.integration?.editorialSchema === "pakrpp.editorial/v1";
+        if (
+          event.isNew &&
+          ["posts", "pages", "authors"].includes(event.collection) &&
+          !data.integration
+        )
+          data.integration = {
+            applicationId:
+              data.application_id || "editorial-" + crypto.randomUUID(),
+            editorialSchema: "pakrpp.editorial/v1",
+            canonicalBodyField: Object.hasOwn(data, "content")
+              ? "content"
+              : "body",
+          };
+        const canonicalField = data.integration?.canonicalBodyField ?? "body";
+        // Existing TEXT/NOT NULL constraints stay intact; new rich records receive a managed creation snapshot.
+        if (event.isNew && canonicalField === "content" && ctx?.schema) {
+          const model = await ctx.schema.getCollection(event.collection),
+            names = new Set(model?.fields.map((f) => f.slug));
+          if (names.has("application_id"))
+            data.application_id ||= data.integration.applicationId;
+          if (names.has("metadata"))
+            data.metadata ??= { contentId: data.integration.applicationId };
+          if (names.has("body") && data.body == null) {
+            data.body =
+              plainText(data.content ?? []) || String(data.title ?? "");
+            const markdownSha256 = Array.from(
+              new Uint8Array(
+                await crypto.subtle.digest(
+                  "SHA-256",
+                  new TextEncoder().encode(data.body),
+                ),
+              ),
+              (x) => x.toString(16).padStart(2, "0"),
+            ).join("");
+            data.integration.migratedFrom = {
+              sourceKind: "rich-creation-compatibility-snapshot",
+              markdownSha256,
+            };
+          }
+        }
+
         if (owned) {
           try {
-            if (event.collection === "authors" && data.body === null)
+            if (
+              event.collection === "authors" &&
+              canonicalField === "body" &&
+              data.body === null
+            )
               data.body = [];
+            if (event.collection === "authors" && data.content === null)
+              data.content = [];
             if (data.content !== undefined) validatePortableText(data.content);
-            if (data.body !== undefined) {
+            if (
+              data.body !== undefined &&
+              !(canonicalField === "content" && data.body === null)
+            ) {
               if (
                 typeof data.body === "string" &&
                 Array.isArray(data.content)
@@ -87,16 +140,6 @@ export function createPlugin() {
             )
               throw new ContentSaveRejectedError("Invalid editorial labels");
         }
-        if (
-          event.isNew &&
-          ["posts", "pages", "authors"].includes(event.collection) &&
-          !data.integration
-        )
-          data.integration = {
-            applicationId: "editorial-" + crypto.randomUUID(),
-            editorialSchema: "pakrpp.editorial/v1",
-            canonicalBodyField: "body",
-          };
         return data;
       },
     },

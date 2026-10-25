@@ -5,15 +5,15 @@ import {resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {root,hash,migrationSeed} from './migration.mjs';
 export function productionPlan(){
- const {seed,mapping}=migrationSeed(),admitted=JSON.parse(readFileSync(resolve(root,'content/emdash/published.json')));
+ const {seed,mapping}=migrationSeed(),admitted=JSON.parse(readFileSync(resolve(root,'cms/migration/production-receipt.json')));
  assert.deepEqual(JSON.parse(readFileSync(resolve(root,'cms/migration/seed.json'))),seed);
  assert.deepEqual(JSON.parse(readFileSync(resolve(root,'cms/migration/source-map.json'))),mapping);
  assert.equal(mapping.length,8);assert.equal(seed.content.posts.length,7);assert.equal(seed.content.authors.length,1);
  const records=['authors','posts'].flatMap(collection=>seed.content[collection].map(item=>{
   const m=mapping.find(x=>x.applicationId===item.id);assert.ok(m&&m.collection===collection);assert.equal(hash(item.data.body),m.bodySha256);
-  const local=admitted.documents.find(x=>x.applicationId===item.id);assert.ok(local);assert.deepEqual(local.item.data,item.data);
+  const local=admitted.records.find(x=>x.applicationId===item.id);assert.ok(local);assert.equal(local.bodySha256,hash(item.data.body));
   // The author has no original editorial date; retain its admitted publication timestamp.
-  const date=item.data.metadata.publishedAt??local.item.publishedAt;assert.ok(date,'Admitted publication date required');
+  const date=item.data.metadata.publishedAt??local.publishedAt;assert.ok(date,'Admitted publication date required');
   return {applicationId:item.id,collection,originalPath:m.originalPath,sourceSha256:m.sourceSha256,bodySha256:m.bodySha256,create:{slug:item.slug,status:'draft',locale:item.locale,data:item.data},publish:{publishedAt:new Date(date).toISOString()},publicationDateSource:item.data.metadata.publishedAt?'editorial-metadata':'admitted-local-export',expectedStatus:'published'};
  }));
  return {schema:'consumer.production-import-plan/v1',origin:JSON.parse(readFileSync(resolve(root,'cms/production.json'))).origin,records,operations:'Create each draft through REST, then publish using its fresh revision token and preserved publication date. Stop on partial/ambiguous failure; no automatic retries, deletes or overwrites.',requiredScopes:['content:read','content:write'],sourceAuthority:'Admitted preserved editorial records; EmDash becomes the sole writable content authority.',providerIdentity:'Generate fresh native content and revision IDs; application identity remains in data.application_id.'};
