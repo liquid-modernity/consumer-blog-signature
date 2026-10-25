@@ -83,57 +83,6 @@
       "bodySha256": "8df26cb6e5158871539fa874bcfe507af7a624659658f421adf01d5ef7a1d9d0"
     },
     {
-      "applicationId": "author.editorial-team",
-      "path": "src/content/docs/authors/editorial-team.md",
-      "pin": {
-        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
-        "collection": "authors",
-        "id": "01M5RYDB6VGATHN3HWS5NX8FWF",
-        "liveRevisionId": "01M5RYDN6NXX24ARJCXMMP2ZQH",
-        "updatedAt": "2026-10-25T07:11:55.189Z",
-        "titleField": "title",
-        "summaryField": "summary"
-      },
-      "item": {
-        "id": "01M5RYDB6VGATHN3HWS5NX8FWF",
-        "type": "authors",
-        "slug": "editorial-team",
-        "status": "published",
-        "updatedAt": "2026-10-25T07:11:55.189Z",
-        "publishedAt": "2026-10-24T20:36:13.182Z",
-        "liveRevisionId": "01M5RYDN6NXX24ARJCXMMP2ZQH",
-        "draftRevisionId": null,
-        "data": {
-          "title": "Editorial Team",
-          "summary": "Replace this profile with your own authors or contributors.",
-          "body": "# Editorial Team\n\nA replaceable example author profile for the consumer signature.\n",
-          "application_id": "author.editorial-team",
-          "metadata": {
-            "contentKind": "author",
-            "contentId": "author.editorial-team",
-            "description": "Default example author identity.",
-            "topics": [
-              "Publishing",
-              "Design"
-            ],
-            "tags": [
-              "example"
-            ],
-            "status": "published",
-            "visibility": "public",
-            "draft": false,
-            "noindex": false,
-            "language": "id",
-            "author": "Editorial Team",
-            "authorRefs": [
-              "author.editorial-team"
-            ]
-          }
-        }
-      },
-      "bodySha256": "b7736a6e134f0d2b4adecc12c6d063bf9b6ef687d73e22249f37f2bcd8a52fdd"
-    },
-    {
       "applicationId": "consumer.article.context-aware-reading",
       "path": "src/content/docs/designing-context-aware-reading-surface.md",
       "pin": {
@@ -595,6 +544,57 @@
         }
       },
       "bodySha256": "e1c387075c660c20532e4c35ce74c0b3a4c412ff2f196d62b648ca6d7e4986c8"
+    },
+    {
+      "applicationId": "author.editorial-team",
+      "path": "src/content/docs/authors/editorial-team.md",
+      "pin": {
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "collection": "authors",
+        "id": "01M5RYDB6VGATHN3HWS5NX8FWF",
+        "liveRevisionId": "01M5RYDN6NXX24ARJCXMMP2ZQH",
+        "updatedAt": "2026-10-25T07:11:55.189Z",
+        "titleField": "title",
+        "summaryField": "summary"
+      },
+      "item": {
+        "id": "01M5RYDB6VGATHN3HWS5NX8FWF",
+        "type": "authors",
+        "slug": "editorial-team",
+        "status": "published",
+        "updatedAt": "2026-10-25T07:11:55.189Z",
+        "publishedAt": "2026-10-24T20:36:13.182Z",
+        "liveRevisionId": "01M5RYDN6NXX24ARJCXMMP2ZQH",
+        "draftRevisionId": null,
+        "data": {
+          "title": "Editorial Team",
+          "summary": "Replace this profile with your own authors or contributors.",
+          "body": "# Editorial Team\n\nA replaceable example author profile for the consumer signature.\n",
+          "application_id": "author.editorial-team",
+          "metadata": {
+            "contentKind": "author",
+            "contentId": "author.editorial-team",
+            "description": "Default example author identity.",
+            "topics": [
+              "Publishing",
+              "Design"
+            ],
+            "tags": [
+              "example"
+            ],
+            "status": "published",
+            "visibility": "public",
+            "draft": false,
+            "noindex": false,
+            "language": "id",
+            "author": "Editorial Team",
+            "authorRefs": [
+              "author.editorial-team"
+            ]
+          }
+        }
+      },
+      "bodySha256": "b7736a6e134f0d2b4adecc12c6d063bf9b6ef687d73e22249f37f2bcd8a52fdd"
     }
   ],
   "provenance": {

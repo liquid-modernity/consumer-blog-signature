@@ -2,7 +2,7 @@
   "status": "PASS",
   "classification": "REAL_EMDASH_API_EXPORT",
   "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
-  "exportSha256": "0b8bac85c2ec458a7cb63a6efb98d66de7aa0e32c066d14f071ec27041160e53",
+  "exportSha256": "db07bfc96a80570b13004c5b78f10b4f5657b9e221bde491596d1c17cc79cc1f",
   "realProviderReads": 18,
   "records": [
     {
@@ -17,19 +17,6 @@
         "summaryField": "summary"
       },
       "bodySha256": "8df26cb6e5158871539fa874bcfe507af7a624659658f421adf01d5ef7a1d9d0"
-    },
-    {
-      "applicationId": "author.editorial-team",
-      "pin": {
-        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
-        "collection": "authors",
-        "id": "01M5RYDB6VGATHN3HWS5NX8FWF",
-        "liveRevisionId": "01M5RYDN6NXX24ARJCXMMP2ZQH",
-        "updatedAt": "2026-10-25T07:11:55.189Z",
-        "titleField": "title",
-        "summaryField": "summary"
-      },
-      "bodySha256": "b7736a6e134f0d2b4adecc12c6d063bf9b6ef687d73e22249f37f2bcd8a52fdd"
     },
     {
       "applicationId": "consumer.article.context-aware-reading",
@@ -108,6 +95,19 @@
         "summaryField": "summary"
       },
       "bodySha256": "e1c387075c660c20532e4c35ce74c0b3a4c412ff2f196d62b648ca6d7e4986c8"
+    },
+    {
+      "applicationId": "author.editorial-team",
+      "pin": {
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "collection": "authors",
+        "id": "01M5RYDB6VGATHN3HWS5NX8FWF",
+        "liveRevisionId": "01M5RYDN6NXX24ARJCXMMP2ZQH",
+        "updatedAt": "2026-10-25T07:11:55.189Z",
+        "titleField": "title",
+        "summaryField": "summary"
+      },
+      "bodySha256": "b7736a6e134f0d2b4adecc12c6d063bf9b6ef687d73e22249f37f2bcd8a52fdd"
     }
   ],
   "credentialsIncluded": false,
