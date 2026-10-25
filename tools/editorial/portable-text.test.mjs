@@ -281,3 +281,13 @@ test("reusable section text is included in Search and analysis, with unresolved 
     ),
   );
 });
+
+test("structured citation and cross-reference targets receive advisory mismatch warnings", () => {
+  const blocks = [
+    { _type: "citation", _key: "cite", referenceId: "missing" },
+    { _type: "crossReference", _key: "cross", target: "absent" },
+  ];
+  const warnings = analyzeEditorial(blocks).warnings;
+  assert.ok(warnings.includes("Broken reference: #ref-missing"));
+  assert.ok(warnings.includes("Broken reference: #figure-absent"));
+});

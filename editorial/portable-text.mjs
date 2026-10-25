@@ -268,7 +268,9 @@ export function analyzeEditorial(blocks, metadata = {}, context = {}) {
       images++;
       if (!image.alt?.trim()) warnings.push("Missing alt text: " + b._key);
     }
-    for (const d of b.markDefs ?? []) {
+    for (const d of b._type === "table"
+      ? b.rows.flatMap((r) => r.cells.flatMap((c) => c.markDefs ?? []))
+      : (b.markDefs ?? [])) {
       if (d.href.startsWith("https://")) externalLinks++;
       if (d.href.startsWith("#")) {
         const prefix = ["ref-", "fn-", "math-", "figure-"].find((p) =>
@@ -279,6 +281,18 @@ export function analyzeEditorial(blocks, metadata = {}, context = {}) {
       }
       if (d.href === "#") warnings.push("Empty link");
     }
+    if (
+      b._type === "citation" &&
+      !references.some((r) => r.id === b.referenceId)
+    )
+      warnings.push("Broken reference: #ref-" + b.referenceId);
+    if (
+      b._type === "crossReference" &&
+      !blocks.some(
+        (r) => ["figure", "image"].includes(r._type) && r.id === b.target,
+      )
+    )
+      warnings.push("Broken reference: #figure-" + b.target);
     if (b._type === "reference" && !b.title?.trim())
       warnings.push("Reference has no title: " + b.id);
   }

@@ -2,9 +2,7 @@ import { test, expect, type Page } from "@playwright/test";
 import { mkdirSync, writeFileSync, readFileSync } from "node:fs";
 import { richFixture } from "../fixture.mjs";
 import { markdownToPortableText } from "../../../editorial/markdown.mjs";
-import {
-  validatePortableText,
-} from "../../../editorial/portable-text.mjs";
+import { validatePortableText } from "../../../editorial/portable-text.mjs";
 async function api(page: Page, path: string, method = "GET", body?: unknown) {
   const r = await page.request.fetch(
     "http://localhost:4322/_emdash/api/" + path,
@@ -27,7 +25,10 @@ test("real local EmDash studio: rich edits, blocks, revision/publishing and PAKR
 }) => {
   mkdirSync(".gaga/editorial", { recursive: true });
   const errors: string[] = [];
-  page.on("pageerror", (error) => errors.push(error.message));
+  page.on("pageerror", (error) => {
+    errors.push(error.message);
+    console.log("LOCAL_PAGE_ERROR", error.message.slice(0, 1000));
+  });
   page.on("requestfailed", (request) => {
     const url = new URL(request.url());
     if (url.hostname === "localhost")
@@ -38,7 +39,7 @@ test("real local EmDash studio: rich edits, blocks, revision/publishing and PAKR
       );
   });
   page.on("console", (message) => {
-    if (message.type() === "error")
+    if (["error", "warning"].includes(message.type()))
       console.log(
         "LOCAL_BROWSER_ERROR",
         message
@@ -82,6 +83,10 @@ test("real local EmDash studio: rich edits, blocks, revision/publishing and PAKR
   expect(newPage.item.data.integration.applicationId).toMatch(/^editorial-/);
   const manifest = await api(page, "manifest");
   expect(manifest.collections.pages).toBeTruthy();
+  expect(manifest.collections.posts.fields.body.widget).toBe(
+    "pakrpp-studio:body",
+  );
+  expect(manifest.plugins["pakrpp-studio"].enabled).toBe(true);
   const posts = await api(page, "content/posts?status=published&limit=100"),
     authors = await api(page, "content/authors?status=published&limit=100");
   expect(
@@ -147,9 +152,35 @@ test("real local EmDash studio: rich edits, blocks, revision/publishing and PAKR
   });
   const id = created.item.id;
   await page.goto("/_emdash/admin/content/posts/" + id);
-  await expect(
-    page.getByRole("region", { name: "PAKRPP Editorial Studio" }),
-  ).toBeVisible();
+  const editorStarted = Date.now();
+  try {
+    await expect(
+      page.getByRole("region", { name: "PAKRPP Editorial Studio" }),
+    ).toBeVisible({ timeout: 30000 });
+  } catch (error) {
+    await page.screenshot({
+      path: ".gaga/editorial/editor-failed.png",
+      fullPage: true,
+    });
+    writeFileSync(
+      ".gaga/editorial/editor-failure.json",
+      JSON.stringify(
+        {
+          errors,
+          manifestBody: manifest.collections.posts.fields.body,
+          plugin: manifest.plugins["pakrpp-studio"],
+          localPageText: (await page.locator("body").innerText()).slice(
+            0,
+            16000,
+          ),
+        },
+        null,
+        2,
+      ) + "\n",
+    );
+    throw error;
+  }
+  console.log("EDITOR_READY_MS", Date.now() - editorStarted);
   expect(
     await page.locator("section.pakrpp-studio").getAttribute("aria-label"),
   ).toBe("PAKRPP Editorial Studio");
