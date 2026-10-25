@@ -19,8 +19,9 @@ mkdir -p .data/uploads .data/sessions
 case "${1:-dev}" in
   install) exec npm ci "${cms_cpu_args[@]}" --ignore-scripts --no-audit --no-fund ;;
   dev) exec npm run dev ;;
+  studio) exec npm run studio ;;
   seed) exec npm run seed ;;
   verify) cd "$cms_project_root"; exec node --env-file-if-exists=.env.cms.local tools/cms/verify-local.mjs ;;
   refresh) cd "$cms_project_root"; exec node --env-file-if-exists=.env.cms.local tools/cms/refresh.mjs ;;
-  *) echo 'Usage: npm run cms:install | cms:dev | cms:seed | cms:verify | cms:refresh' >&2; exit 1 ;;
+  *) echo 'Usage: npm run cms:install | cms:dev | cms:seed | cms:verify | cms:refresh | editorial:studio' >&2; exit 1 ;;
 esac

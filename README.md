@@ -64,8 +64,17 @@ The one-time import and admin setup are already complete on this laptop. Edit
 editorial content in EmDash, never in the preserved migration Markdown files.
 Refresh the admitted export explicitly before rebuilding. See [CMS operation and
 production prerequisites](docs/EMDASH-ACTIVATION.md) and [local commands](cms/README.md).
-Production CMS provisioning and website promotion remain pending. Tank and Vehicle
-are outside this application.
+The production CMS and publication are verified at the preserved main baseline;
+Studio changes below are isolated review work. Tank and Vehicle are outside this application.
+
+## Rich Editorial Studio (local review)
+
+Run `npm run editorial:prepare` then `npm run editorial:studio` for the separate
+local EmDash Studio on port 4322. Run the application on port 3000 for actual
+PAKRPP preview. The Studio supports structured Portable Text, citations, footnotes,
+media, technical blocks and native revisions. See [usage and tested scope](docs/RICH-EDITORIAL-STUDIO.md)
+and the [separate production migration proposal](docs/RICH-EDITORIAL-MIGRATION.md).
+These commands do not modify production content or deploy either Worker.
 
 ## Runtime and deployment
 

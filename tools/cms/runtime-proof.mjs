@@ -7,7 +7,9 @@ const root=resolve(import.meta.dirname,'../..'),out=process.env.GAGA_EVIDENCE_DI
 assert.ok(out&&!resolve(out).startsWith(root+'/'),'External evidence directory required');mkdirSync(out,{recursive:true});
 const env={...process.env,CI:'true',WRANGLER_SEND_METRICS:'false'};
 for(const key of Object.keys(env))if(key.startsWith('CLOUDFLARE_')||key.startsWith('CMS_'))delete env[key];
-const args=[resolve(root,'cms/node_modules/wrangler/bin/wrangler.js'),'dev','--local','--config',resolve(root,'cms/dist-cloudflare/server/wrangler.json'),'--ip','127.0.0.1','--port','8796','--persist-to',resolve(dirname(dirname(out)),'cms-runtime-state'),'--experimental-provision=false','--experimental-auto-create=false'];
+const config=resolve(root,process.env.GAGA_CMS_RUNTIME_CONFIG??'cms/dist-cloudflare/server/wrangler.json');
+assert.ok(['cms/dist-cloudflare/server/wrangler.json','cms/dist-editorial-cloudflare/server/wrangler.json'].some(path=>config===resolve(root,path)),'Only approved local runtime configs');
+const args=[resolve(root,'cms/node_modules/wrangler/bin/wrangler.js'),'dev','--local','--config',config,'--ip','127.0.0.1','--port','8796','--persist-to',resolve(dirname(dirname(out)),'cms-runtime-state'),'--experimental-provision=false','--experimental-auto-create=false'];
 const child=spawn(process.execPath,args,{cwd:resolve(root,'cms'),env,stdio:['ignore','pipe','pipe']});
 let log='';for(const stream of [child.stdout,child.stderr])stream.on('data',bytes=>{if(log.length<4*1024*1024)log+=bytes.toString();});
 const receipt={status:'RUNNING',mode:'local-native-workerd',providerCredentials:false,providerMutations:0};

@@ -1,0 +1,97 @@
+name: Rich Editorial Studio
+on:
+  push:
+    branches: [review/rich-editorial-studio-v1]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: editorial-studio-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    defaults:
+      run:
+        shell: bash
+    env:
+      ASTRO_TELEMETRY_DISABLED: "1"
+      ASTRO_DEV_BACKGROUND: "1"
+      WRANGLER_SEND_METRICS: "false"
+      PUBLIC_GIT_SHA: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.22.2
+      - name: Clean locked public dependencies; external evidence only
+        run: |
+          mkdir -p "$RUNNER_TEMP/editorial-evidence"
+          printf 'GAGA_EVIDENCE_DIRECTORY=%s/editorial-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm ci --prefix cms --ignore-scripts --no-audit --no-fund
+      - name: Official EmDash bytes and public extension boundary
+        run: python3 tools/editorial/upstream-integrity.py | tee "$GAGA_EVIDENCE_DIRECTORY/upstream.log"
+      - name: Rich model, boundary, CMS, GAGA and signature regressions
+        run: |
+          npm run test:editorial | tee "$GAGA_EVIDENCE_DIRECTORY/editorial-tests.log"
+          npm run test:gaga | tee "$GAGA_EVIDENCE_DIRECTORY/gaga-tests.log"
+          npm run test:cms | tee "$GAGA_EVIDENCE_DIRECTORY/cms-tests.log"
+          npm test | tee "$GAGA_EVIDENCE_DIRECTORY/signature-tests.log"
+          node tools/gaga/preservation.mjs
+          node tools/gaga/boundaries.mjs
+      - name: Deterministic conversion and native seed admission
+        run: |
+          npm run editorial:prepare
+          cd cms
+          node node_modules/emdash/dist/cli/index.mjs seed ../.gaga/editorial/seed.json --validate
+      - name: Strict application and CMS TypeScript
+        run: |
+          npx tsc --noEmit -p cms/tsconfig.json
+          npm run check | tee "$GAGA_EVIDENCE_DIRECTORY/types.log"
+      - name: Publication build and public-package Search/Starlight/workerd proof
+        run: |
+          npm run build | tee "$GAGA_EVIDENCE_DIRECTORY/build.log"
+          npm run test:consumer | tee "$GAGA_EVIDENCE_DIRECTORY/consumer.log"
+      - name: Native editor, persistence, media, revisions and real PAKRPP preview
+        run: |
+          npx playwright install --with-deps chromium
+          npm run test:editorial:ui | tee "$GAGA_EVIDENCE_DIRECTORY/studio-browser.log"
+          npm run test:ui | tee "$GAGA_EVIDENCE_DIRECTORY/blog-browser.log"
+      - name: Compile CMS studio with Cloudflare adapter, no credentials or deployment
+        working-directory: cms
+        run: npx astro build --root ./studio --config ../astro.studio.cloudflare.config.mjs > "$GAGA_EVIDENCE_DIRECTORY/cms-cloudflare-build.log" 2>&1
+      - name: Compiled CMS first request under local native workerd only
+        env:
+          GAGA_CMS_RUNTIME_CONFIG: cms/dist-editorial-cloudflare/server/wrangler.json
+        run: node tools/cms/runtime-proof.mjs
+      - name: Zero-vulnerability dependency audit
+        run: |
+          npm audit --audit-level=low --json > "$GAGA_EVIDENCE_DIRECTORY/audit.json"
+          npm audit --prefix cms --audit-level=low --json > "$GAGA_EVIDENCE_DIRECTORY/cms-audit.json"
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+      - name: Workflow lint and no generated tracked changes
+        run: |
+          go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.7 -shellcheck= .github/workflows/editorial-studio.yml
+          git diff --exit-code
+      - name: Preserve sanitized reports and screenshots; no databases or sessions
+        if: always()
+        run: |
+          node --input-type=module <<'JS'
+          import{existsSync,readdirSync,copyFileSync}from'node:fs';
+          const out=process.env.GAGA_EVIDENCE_DIRECTORY;if(!out)process.exit(0);
+          if(existsSync('.gaga/editorial'))for(const name of readdirSync('.gaga/editorial'))if(/\.(json|png)$/.test(name)&&name!=='seed.json')copyFileSync('.gaga/editorial/'+name,out+'/'+name);
+          if(existsSync('.gaga/browser-results.json'))copyFileSync('.gaga/browser-results.json',out+'/blog-browser-results.json');
+          JS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rich-editorial-studio-evidence
+          path: ${{ runner.temp }}/editorial-evidence
+          if-no-files-found: error

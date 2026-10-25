@@ -11,7 +11,8 @@
     "build": "astro build",
     "start": "node dist/server/entry.mjs",
     "seed": "emdash seed --database .data/cms.db --on-conflict error",
-    "build:cloudflare": "astro build --config astro.cloudflare.config.mjs"
+    "build:cloudflare": "astro build --config astro.cloudflare.config.mjs",
+    "studio": "astro dev --root ./studio --config ../astro.studio.config.mjs"
   },
   "dependencies": {
     "emdash": "1.3.1",
@@ -21,7 +22,8 @@
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "@emdash-cms/cloudflare": "1.3.1",
-    "@astrojs/cloudflare": "14.3.4"
+    "@astrojs/cloudflare": "14.3.4",
+    "@emdash-cms/admin": "1.3.1"
   },
   "overrides": {
     "rolldown": "1.2.12",

@@ -1,0 +1,19 @@
+---
+import GagaSiteLayout from '../components/gaga/GagaSiteLayout.astro';
+export const prerender=true;
+if(!import.meta.env.DEV)return Astro.redirect('/404');
+const entryData={title:'Editorial preview',summary:'Local draft preview · not published',contentKind:'article',contentId:'editorial.preview',author:'Preview',language:'id',draft:true,noindex:true};
+---
+<GagaSiteLayout entryData={entryData} routeContext={Astro.locals.gagaRoute}>
+ <div id="editorial-preview-body" aria-label="Rich article preview" aria-live="polite"></div>
+</GagaSiteLayout>
+<script>
+ import {replacePortablePreview} from '../../editorial/preview-dom.mjs';
+ const studio='http://localhost:4322';
+ window.addEventListener('message',(event:MessageEvent)=>{
+  if(event.origin!==studio||event.source!==window.parent||event.data?.type!=='pakrpp.editorial-preview/v1')return;
+  const target=document.getElementById('editorial-preview-body');if(!target)return;
+  try{replacePortablePreview(target,event.data.body,event.data.sections,studio);}catch{target.textContent='Preview unavailable: review unsupported blocks or missing references.';}
+ });
+ window.parent.postMessage({type:'pakrpp.preview-ready'},studio);
+</script>

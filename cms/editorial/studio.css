@@ -1,0 +1,121 @@
+.pakrpp-studio {
+  --studio-line: color-mix(in srgb, currentColor 18%, transparent);
+  border-block: 1px solid var(--studio-line);
+  padding: 1rem 0;
+}
+.pakrpp-studio header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+.studio-kicker {
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+}
+.pakrpp-studio h2 {
+  font-size: 1.3rem;
+  margin: 0.25rem 0;
+}
+.studio-tools {
+  display: flex;
+  gap: 0.6rem;
+  align-items: end;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+.studio-tools label {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+}
+.studio-tools input,
+.studio-tools select,
+.pakrpp-studio button {
+  border: 1px solid var(--studio-line);
+  border-radius: 0.3rem;
+  padding: 0.35rem 0.5rem;
+  background: transparent;
+  color: inherit;
+}
+.pakrpp-studio button {
+  cursor: pointer;
+}
+.pakrpp-studio button:focus-visible,
+.pakrpp-studio input:focus-visible,
+.pakrpp-studio select:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+.pakrpp-studio button[aria-pressed="true"] {
+  font-weight: 700;
+  text-decoration: underline;
+}
+.studio-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 260px);
+  gap: 1.25rem;
+}
+.studio-canvas {
+  min-height: 35rem;
+  min-width: 0;
+}
+.studio-workspace aside {
+  border-inline-start: 1px solid var(--studio-line);
+  padding-inline-start: 1rem;
+  font-size: 0.85rem;
+}
+.studio-workspace aside nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-bottom: 1rem;
+}
+.studio-workspace aside p {
+  margin-block: 0.6rem;
+}
+.studio-workspace aside ol {
+  padding-inline-start: 1rem;
+}
+.studio-workspace iframe {
+  width: 100%;
+  height: 65vh;
+  border: 1px solid var(--studio-line);
+}
+.studio-integration,
+.pakrpp-studio-saved details {
+  border-top: 1px solid var(--studio-line);
+  padding-block: 0.5rem;
+}
+.studio-integration pre {
+  white-space: pre-wrap;
+  font-size: 0.75rem;
+}
+@media (max-width: 900px) {
+  .studio-workspace {
+    grid-template-columns: 1fr;
+  }
+  .studio-workspace aside {
+    border-inline-start: 0;
+    border-top: 1px solid var(--studio-line);
+    padding-block-start: 1rem;
+  }
+}
+.studio-metadata details {
+  padding: 0.7rem;
+  border-block-end: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+}
+.studio-metadata label {
+  display: grid;
+  gap: 0.3rem;
+  margin-block: 0.7rem;
+}
+.studio-metadata input,
+.studio-metadata select {
+  border: 1px solid currentColor;
+  border-radius: 0.3rem;
+  padding: 0.4rem;
+  background: transparent;
+  color: inherit;
+}

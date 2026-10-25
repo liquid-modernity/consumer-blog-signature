@@ -1,0 +1,8 @@
+{
+  "name": "pakrpp-editorial-studio-local",
+  "private": true,
+  "type": "module",
+  "emdash": {
+    "seed": "../../.gaga/editorial/seed.json"
+  }
+}

@@ -4,11 +4,13 @@ import {resolve,relative} from 'node:path';
 import {createHash} from 'node:crypto';
 import {parse} from 'yaml';
 import {readEmDashPublished} from '@gaga/corps-emdash';
+import {editorialBody} from '../../editorial/portable-text.mjs';
+import {withEditorialText} from '../../editorial/search.mjs';
 export const root=resolve(import.meta.dirname,'../..');
 export const sha256=bytes=>createHash('sha256').update(bytes).digest('hex');
 export function frontmatter(text){const m=text.match(/^---\s*\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/);assert.ok(m,'Frontmatter required');return parse(m[1],{uniqueKeys:true});}
 export function readSnapshot(){return JSON.parse(readFileSync(resolve(root,'content/emdash/published.json'),'utf8'));}
-export function cmsFrontmatter(document){const {title,summary,metadata}=document.item.data;return {...metadata,title,summary};}
+export function cmsFrontmatter(document){const {title,summary,metadata,integration,editorial,body,content,application_id,...fields}=document.item.data;return {...(metadata??integration?.legacyMetadata),...fields,...(editorial?{topics:editorial.topics,tags:editorial.tags,publishedAt:editorial.publicationDate,updatedAt:editorial.updatedDate,language:editorial.language,seoTitle:editorial.seoTitle,metaDescription:editorial.seoDescription,canonical:editorial.canonicalUrl,image:editorial.featuredImage?.url,imageAlt:editorial.featuredImage?.alt}:{}),title,summary,contentId:metadata?.contentId??integration?.applicationId};}
 export async function verifySnapshot(snapshot=readSnapshot()){
  assert.equal(snapshot.schema,'consumer.emdash-export/v1');assert.equal(snapshot.mode,'published-emdash-export');
  const receipt=JSON.parse(readFileSync(resolve(root,'content/emdash/published-receipt.json')));
@@ -21,10 +23,10 @@ export async function verifySnapshot(snapshot=readSnapshot()){
   const mapping=migration.find(x=>x.applicationId===document.applicationId);assert.ok(mapping&&!seen.has(document.path));seen.add(document.path);assert.equal(document.path,mapping.originalPath);
   assert.equal(sha256(readFileSync(resolve(root,document.path))),mapping.sourceSha256,'Migration source is read-only; edit EmDash instead');
   assert.equal(document.item.data.application_id,document.applicationId);assert.equal(document.item.data.metadata.contentId,document.applicationId);
-  assert.equal(sha256(document.item.data.body),document.bodySha256,'CMS export body changed');
+  assert.equal(sha256(typeof editorialBody(document.item.data)==='string'?editorialBody(document.item.data):JSON.stringify(editorialBody(document.item.data))),document.bodySha256,'CMS export body changed');
   assert.equal(document.pin.origin,snapshot.origin);assert.ok(!document.pin.id.startsWith('seed-')&&!document.pin.liveRevisionId.startsWith('migration-'));
   const projection=await readEmDashPublished(document.pin,{origin:snapshot.origin,authorizeRead:async resource=>({decision:'ALLOW',resource}),readRaw:async()=>structuredClone(document.item)});
-  assert.equal(projection.status,'projected','Recorded CMS export rejected: '+projection.code);artifacts.push(projection.artifact);
+  assert.equal(projection.status,'projected','Recorded CMS export rejected: '+projection.code);artifacts.push(Array.isArray(editorialBody(document.item.data))?withEditorialText(projection,editorialBody(document.item.data)):projection.artifact);
  }
  // Original editorial files are immutable migration evidence, never a second writable authority.
  function visit(dir){for(const f of readdirSync(dir,{withFileTypes:true})){const path=resolve(dir,f.name);if(f.isDirectory())visit(path);else if(f.name.endsWith('.md')){const d=frontmatter(readFileSync(path,'utf8'));if(['article','author'].includes(d.contentKind)&&d.status==='published'&&d.visibility==='public'&&!d.draft&&!d.noindex)assert.ok(seen.has(relative(root,path)),'Editorial content must enter through EmDash');}}}
