@@ -1,0 +1,133 @@
+name: Exact Rich Editorial final release
+on:
+  push:
+    branches: [verification/rich-editorial-final-release]
+  workflow_dispatch:
+    inputs:
+      operation:
+        type: choice
+        required: true
+        options: [qualify, release]
+        default: qualify
+      controller_qualification_run:
+        type: string
+        description: Successful qualification of this exact controller commit
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: publication-production
+  cancel-in-progress: false
+jobs:
+  release:
+    if: github.ref == 'refs/heads/verification/rich-editorial-final-release'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      GAGA_APPLICATION_DIRECTORY: ${{ github.workspace }}/candidate
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_STAGE: ${{ inputs.operation == 'release' && 'after' || 'before' }}
+      WRANGLER_SEND_METRICS: "false"
+    steps:
+      - name: Pinned controller; actual workflow context stays intact
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: controller
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Immutable qualified application; never checkout controller over it
+        uses: actions/checkout@v4
+        with:
+          ref: 2f6fd0f6ec6af4302c34628da2c43a0c99266474
+          path: candidate
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.22.2
+      - name: Pinned tooling only; no application build
+        working-directory: candidate
+        run: |
+          mkdir -p "$RUNNER_TEMP/rich-final-release"
+          printf 'GAGA_EVIDENCE_DIRECTORY=%s/rich-final-release\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+          npm ci --ignore-scripts --no-audit --no-fund
+      - name: Exact tuple and zero-mutation regressions; legacy guard unchanged
+        working-directory: controller
+        run: |
+          node --test tools/release/rich-editorial-v1/control.test.mjs tools/gaga/production-deploy.test.mjs tools/gaga/production-readback.test.mjs tools/gaga/source-identity.test.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/regressions.log"
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+      - name: Maintained controller workflow lint
+        working-directory: controller
+        run: go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.7 -shellcheck= .github/workflows/rich-editorial-final-release.yml
+      - name: Exact approved successful run and ZIP admission
+        run: node controller/tools/release/rich-editorial-v1/control.mjs admit
+      - name: Install public browser tooling before any upload
+        if: inputs.operation == 'release'
+        working-directory: candidate
+        run: npx playwright install --with-deps chromium
+      - name: Fresh source/main/content/provider admission and dry run
+        id: preflight
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CMS_READ_TOKEN: ${{ secrets.CMS_READ_TOKEN }}
+        run: node controller/tools/release/rich-editorial-v1/control.mjs preflight
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rich-final-release-preflight
+          path: |
+            ${{ runner.temp }}/rich-final-release/admit.json
+            ${{ runner.temp }}/rich-final-release/preflight.json
+            ${{ runner.temp }}/rich-final-release/dry-run.log
+          if-no-files-found: error
+      - name: One exact publication upload; no CMS upload or rebuild
+        id: deploy
+        if: inputs.operation == 'release'
+        env:
+          CONTROLLER_QUALIFICATION_RUN: ${{ inputs.controller_qualification_run }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CMS_READ_TOKEN: ${{ secrets.CMS_READ_TOKEN }}
+        run: node controller/tools/release/rich-editorial-v1/control.mjs deploy
+      - name: Anonymous exact-byte readback and fresh CMS consistency
+        if: inputs.operation == 'release'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CMS_READ_TOKEN: ${{ secrets.CMS_READ_TOKEN }}
+        run: node controller/tools/release/rich-editorial-v1/control.mjs readback
+      - name: Existing desktop and mobile production browser cases
+        if: inputs.operation == 'release'
+        working-directory: candidate
+        env:
+          GAGA_PRODUCTION_BROWSER_URL: https://consumer-blog-signature.ratriatra.workers.dev
+        run: |
+          npm run test:ui | tee "$GAGA_EVIDENCE_DIRECTORY/production-browser.log"
+          node --input-type=module <<'JS'
+          import assert from'node:assert/strict';import{readFileSync,writeFileSync}from'node:fs';
+          const s=JSON.parse(readFileSync('.gaga/browser-results.json')).stats;assert.equal(s.expected,4);assert.equal(s.unexpected,0);assert.equal(s.skipped,0);assert.equal(s.flaky,0);writeFileSync(process.env.GAGA_EVIDENCE_DIRECTORY+'/production-browser.json',JSON.stringify(s,null,2)+'\n');
+          JS
+      - name: Roll back publication only if this run owns the failed deployment
+        if: failure() && steps.preflight.outcome == 'success' && inputs.operation == 'release'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: node controller/tools/release/rich-editorial-v1/control.mjs rollback
+      - name: Preserve public browser evidence only
+        if: always()
+        run: |
+          node --input-type=module <<'JS'
+          import{existsSync,readdirSync,copyFileSync,mkdirSync}from'node:fs';const out=process.env.GAGA_EVIDENCE_DIRECTORY;mkdirSync(out,{recursive:true});if(existsSync('candidate/.gaga'))for(const n of readdirSync('candidate/.gaga'))if(n.endsWith('.png'))copyFileSync('candidate/.gaga/'+n,out+'/'+n);
+          JS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rich-final-release-evidence
+          path: |
+            ${{ runner.temp }}/rich-final-release/*.json
+            ${{ runner.temp }}/rich-final-release/*.log
+            ${{ runner.temp }}/rich-final-release/*.png
+          if-no-files-found: error
