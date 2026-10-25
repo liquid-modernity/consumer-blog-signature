@@ -29,7 +29,13 @@ try{
  const expected=[...readFileSync(resolve(root,'cms/node_modules/emdash/src/database/migrations/runner.ts'),'utf8').matchAll(/"(\d{3}_[^"]+)": m\d+/g)].map(x=>x[1]).sort();assert.equal(expected.length,90);
  receipt.migrations={applied,pending:expected.filter(x=>!applied.includes(x)),unknown:applied.filter(x=>!expected.includes(x))};
  receipt.collections=receipt.tables.includes('_emdash_collections')?await query('SELECT slug FROM _emdash_collections ORDER BY slug'):[];
- receipt.counts={};for(const table of ['ec_posts','ec_authors','revisions','users','credentials','_emdash_api_tokens'])receipt.counts[table]=receipt.tables.includes(table)?(await query(`SELECT COUNT(*) AS count FROM ${table}`))[0].count:null;
+ receipt.collectionMetadata=await query('SELECT slug, label, supports, routable FROM _emdash_collections ORDER BY slug');
+ receipt.collectionFields=await query('SELECT c.slug AS collection, f.slug, f.type, f.required FROM _emdash_fields AS f JOIN _emdash_collections AS c ON c.id = f.collection_id ORDER BY c.slug, f.slug');
+ const seed=JSON.parse(readFileSync(resolve(root,'cms/migration/seed.json')));
+ receipt.collectionStructureMatchesSeed=seed.collections.every(c=>{const actual=receipt.collectionMetadata.find(x=>x.slug===c.slug);return actual?.label===c.label&&Boolean(actual.routable)===Boolean(c.routable)&&JSON.stringify(JSON.parse(actual.supports).sort())===JSON.stringify([...(c.supports??[])].sort())&&JSON.stringify(receipt.collectionFields.filter(x=>x.collection===c.slug).map(({slug,type,required})=>({slug,type,required:Boolean(required)})))===JSON.stringify(c.fields.map(({slug,type,required})=>({slug,type,required:Boolean(required)})).sort((a,b)=>a.slug.localeCompare(b.slug)));});
+ receipt.setupComplete=(await query("SELECT COUNT(*) AS count FROM options WHERE name = 'emdash:setup_complete' AND value = 'true'"))[0].count===1;
+ receipt.administratorCount=(await query('SELECT COUNT(*) AS count FROM users WHERE role >= 50'))[0].count;
+ receipt.counts={};for(const table of ['ec_posts','ec_authors','revisions','media','users','credentials','_emdash_api_tokens'])receipt.counts[table]=receipt.tables.includes(table)?(await query(`SELECT COUNT(*) AS count FROM ${table}`))[0].count:null;
  receipt.collectionSeedComplete=receipt.tables.includes('options')?(await query("SELECT COUNT(*) AS count FROM options WHERE name = 'emdash:seed_complete' AND value = 'true'"))[0].count===1:false;
  receipt.status='PASS';
 }catch(error){receipt.status='FAIL';receipt.failure=String(error.message).replaceAll(token,'[REDACTED]').replaceAll(account,'[ACCOUNT]');throw Error(receipt.failure);}
