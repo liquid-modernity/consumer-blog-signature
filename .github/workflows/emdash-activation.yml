@@ -179,8 +179,6 @@ jobs:
       contents: read
       actions: read
     env:
-      GAGA_EVIDENCE_DIRECTORY: ${{ runner.temp }}/cms-repair
-      CMS_REPAIR_ADMISSION: ${{ runner.temp }}/cms-repair/artifact-admission.json
       CMS_REPAIR_SOURCE: df3c022368726f07545f1736184ea77fe24ce5cf
       CMS_REPAIR_ARTIFACT_SHA256: e063e7ff2dec9c8212ff883e1d1e164ce4df5ca8e4b8fab7fb1d48bb57c2b518
       CMS_REPAIR_EXPECTED_VERSION: 3b493d27-84ee-47b9-a2f3-2ebd4794dadb
@@ -192,6 +190,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22.22.2
+      - name: Define evidence paths outside source
+        run: |
+          printf 'GAGA_EVIDENCE_DIRECTORY=%s/cms-repair\nCMS_REPAIR_ADMISSION=%s/cms-repair/artifact-admission.json\n' "$RUNNER_TEMP" "$RUNNER_TEMP" >> "$GITHUB_ENV"
       - name: Repair guard regressions and unchanged qualified CMS source
         run: |
           node --test tools/cms/deploy.test.mjs
