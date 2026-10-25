@@ -11,7 +11,9 @@ export default defineConfig({
   root: new URL("./studio/", import.meta.url),
   site: "http://localhost:4322",
   output: "server",
-  outDir: new URL("./dist-editorial-cloudflare/", import.meta.url),
+  outDir: fileURLToPath(
+    new URL("./dist-editorial-cloudflare/", import.meta.url),
+  ),
   adapter: cloudflare({
     configPath: fileURLToPath(
       new URL("./studio/wrangler.jsonc", import.meta.url),

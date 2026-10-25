@@ -115,6 +115,15 @@ test("real local EmDash studio: rich edits, blocks, revision/publishing and PAKR
   expect(authors.items.length).toBe(1);
   for (const item of [...posts.items, ...authors.items])
     validatePortableText(item.data.body);
+  const emptyAuthor = await api(page, "content/authors", "POST", {
+    slug: "empty-author-" + Date.now(),
+    data: { title: "Local empty profile proof" },
+  });
+  await page.goto("/_emdash/admin/content/authors/" + emptyAuthor.item.id);
+  await expect(
+    page.getByRole("region", { name: "PAKRPP Editorial Studio" }),
+  ).toBeVisible({ timeout: 30000 });
+  await expect(page.locator(".studio-canvas .tiptap")).toBeVisible();
   const sections = await api(
     page,
     "content/sections?status=published&limit=100",

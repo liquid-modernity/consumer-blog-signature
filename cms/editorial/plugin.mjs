@@ -20,7 +20,7 @@ export function studioPlugin() {
       {
         name: "integration",
         label: "Integration identity",
-        fieldTypes: ["json"],
+        fieldTypes: ["json", "text"],
       },
     ],
   };

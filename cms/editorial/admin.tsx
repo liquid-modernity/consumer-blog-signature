@@ -24,6 +24,7 @@ type Props = {
   id: string;
 };
 function StudioBody({ value = [], onChange, label, id }: Props) {
+  value ??= [];
   const [editor, setEditor] = useState<Editor | null>(null),
     [panel, setPanel] = useState("outline"),
     [reference, setReference] = useState(""),
