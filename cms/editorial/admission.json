@@ -1,4 +1,5 @@
 {
+  "status": "PASS",
   "schema": "consumer.production-editorial-admission/v1",
   "phase": "markdown",
   "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
