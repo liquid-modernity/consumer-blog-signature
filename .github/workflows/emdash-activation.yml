@@ -2,13 +2,13 @@ name: EmDash local activation and production preflight
 on:
   push:
     branches: [review/emdash-local-activation]
-    paths-ignore: [tools/cms/deploy.mjs, tools/cms/deploy.test.mjs, tools/cms/repair-artifact*, tools/cms/repair-state.mjs, .github/workflows/emdash-activation.yml]
+    paths-ignore: [tools/cms/deploy.mjs, tools/cms/deploy.test.mjs, tools/cms/repair-artifact*, tools/cms/repair-state.mjs, tools/cms/live-read-preflight*, tools/cms/production-plan*, .github/workflows/emdash-activation.yml]
   workflow_dispatch:
     inputs:
       operation:
         type: choice
         default: validate
-        options: [validate, provider-preflight, credential-preflight, provision, deploy-cms, repair-cms, inspect-cms]
+        options: [validate, provider-preflight, credential-preflight, provision, deploy-cms, repair-cms, inspect-cms, live-preflight]
         description: Validation has no provider access; credential and provider preflights are read-only
       diagnostic_public_key:
         type: string
@@ -266,4 +266,41 @@ jobs:
         with:
           name: cms-post-repair-state
           path: ${{ runner.temp }}/cms-state
+          if-no-files-found: warn
+
+  live:
+    if: github.event_name == 'workflow_dispatch' && inputs.operation == 'live-preflight'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.22.2
+      - run: npm ci --ignore-scripts --no-audit --no-fund && npm --prefix cms ci --ignore-scripts --no-audit --no-fund
+      - name: Validate the exact admitted eight-record import plan without writes
+        env:
+          GAGA_EVIDENCE_DIRECTORY: ${{ runner.temp }}/live-preflight
+        run: |
+          node --test tools/cms/production-plan.test.mjs tools/cms/live-read-preflight.test.mjs
+          node tools/cms/production-plan.mjs
+      - name: Existing account, Worker, D1 model and aggregate counts, read-only
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          GAGA_EVIDENCE_DIRECTORY: ${{ runner.temp }}/live-preflight
+        run: node tools/cms/repair-state.mjs
+      - name: Production read PAT, published access and anonymous negative controls
+        env:
+          CMS_ORIGIN: ${{ vars.CMS_ORIGIN }}
+          CMS_READ_TOKEN: ${{ secrets.CMS_READ_TOKEN }}
+          GAGA_EVIDENCE_DIRECTORY: ${{ runner.temp }}/live-preflight
+        run: node tools/cms/live-read-preflight.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: live-cms-preflight
+          path: ${{ runner.temp }}/live-preflight
           if-no-files-found: warn
