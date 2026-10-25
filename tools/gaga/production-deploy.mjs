@@ -14,7 +14,13 @@ const save=()=>writeFileSync(resolve(out,phase==='preflight'?'pre-deployment.jso
 async function api(path,body){
  if(body)assert.ok(phase==='rollback'&&path===base+'/deployments','Unapproved API mutation');
  const r=await fetch('https://api.cloudflare.com/client/v4'+path,{method:body?'POST':'GET',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{}),redirect:'error',signal:AbortSignal.timeout(25000)});
- const b=await r.json();assert.ok(r.ok&&b.success,`Provider ${body?'rollback':'read'} failed HTTP ${r.status}; codes ${(b.errors??[]).map(x=>x.code)}`);assert.ok((b.result_info?.total_pages??1)<=1);return b.result;
+ const b=await r.json();assert.ok(r.ok&&b.success,`Provider ${body?'rollback':'read'} failed HTTP ${r.status}; codes ${(b.errors??[]).map(x=>x.code)}`);
+ // Cloudflare defines deployments[0] on page one as active; older history need not be fetched.
+ if(!body&&path===base+'/deployments'){
+  receipt.activeDeploymentReadback={page:b.result_info?.page??1,totalPages:b.result_info?.total_pages??1};
+  assert.equal(receipt.activeDeploymentReadback.page,1,'Active deployment must come from page one');
+ }else assert.ok((b.result_info?.total_pages??1)<=1,`Partial provider inventory rejected: ${redact(path)}`);
+ return b.result;
 }
 function active(state){const d=state.deployments?.[0];assert.ok(d?.id);assert.equal(d.versions?.length,1);assert.equal(d.versions[0].percentage,100);return {deployment:d.id,version:d.versions[0].version_id};}
 const fingerprint=rows=>rows.filter(x=>x.id!==name).map(({id,etag,modified_on})=>({id,etag:etag??null,modified_on:modified_on??null})).sort((a,b)=>a.id.localeCompare(b.id));
