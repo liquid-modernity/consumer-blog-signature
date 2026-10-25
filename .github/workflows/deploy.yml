@@ -1,62 +1,196 @@
-name: Deploy Cloudflare Worker
-
+name: Qualified production publication
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
-
+    inputs:
+      operation:
+        type: choice
+        required: true
+        options: [qualify, deploy]
+      qualification_run:
+        type: string
+        description: Successful exact-source qualification run, required for deployment
+permissions:
+  contents: read
+  actions: read
 concurrency:
-  group: deploy-cloudflare-${{ github.ref }}
-  cancel-in-progress: true
-
+  group: publication-production
+  cancel-in-progress: false
 jobs:
-  deploy:
-    name: Deploy to Cloudflare Workers
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
+  qualify:
+    if: inputs.operation == 'qualify'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    env:
+      ASTRO_TELEMETRY_DISABLED: '1'
+      ASTRO_DEV_BACKGROUND: '1'
+      WRANGLER_SEND_METRICS: 'false'
+      PUBLIC_GIT_SHA: ${{ github.sha }}
+      PUBLIC_SITE_URL: https://consumer-blog-signature.ratriatra.workers.dev
+      GAGA_PRODUCTION_QUALIFICATION: '1'
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js 22
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
         with:
-          node-version: 22
-          cache: ${{ hashFiles('package-lock.json') != '' && 'npm' || '' }}
-
-      - name: Install dependencies
-        run: npm install --no-audit
-
-      - name: Validate signature & contracts
-        run: npm run validate:signature
-
-      - name: Typecheck Astro & components
-        run: npm run check
-
-      - name: Build static output for Workers
-        run: npm run build
-        env:
-          PUBLIC_SITE_URL: ${{ vars.PUBLIC_SITE_URL || 'https://consumer-blog-signature.workers.dev' }}
-          PUBLIC_GIT_SHA: ${{ github.sha }}
-          PUBLIC_BUILD_TIME: ${{ github.event.head_commit.timestamp }}
-
-      - name: Verify Cloudflare credentials
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.22.2
+      - name: External evidence and clean locked public dependencies
         run: |
-          if [ -z "${{ secrets.CLOUDFLARE_API_TOKEN }}" ]; then
-            echo "::error::CLOUDFLARE_API_TOKEN secret is not set in GitHub repository settings!"
-            echo "Please go to: Repository Settings -> Secrets and variables -> Actions -> New repository secret"
-            echo "Name: CLOUDFLARE_API_TOKEN"
-            echo "Value: <Your Cloudflare API Token with Workers:Edit permission>"
-            exit 1
-          fi
-
-      - name: Deploy to Cloudflare Workers
-        uses: cloudflare/wrangler-action@v3
+          mkdir -p "$RUNNER_TEMP/publication-qualification"
+          printf 'GAGA_EVIDENCE_DIRECTORY=%s/publication-qualification\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+          npm ci --ignore-scripts --no-audit --no-fund
+      - name: Verify committed export against live admitted production revisions
+        env:
+          CMS_ORIGIN: ${{ vars.CMS_ORIGIN }}
+          CMS_READ_TOKEN: ${{ secrets.CMS_READ_TOKEN }}
+        run: node tools/cms/refresh.mjs --check | tee "$GAGA_EVIDENCE_DIRECTORY/live-cms.log"
+      - name: Package boundaries and UI/style/routing preservation
+        run: node tools/gaga/boundaries.mjs && node tools/gaga/preservation.mjs
+      - name: GAGA, CMS, signature and release-guard regressions
+        run: |
+          npm run test:gaga | tee "$GAGA_EVIDENCE_DIRECTORY/gaga-tests.log"
+          npm run test:cms | tee "$GAGA_EVIDENCE_DIRECTORY/cms-tests.log"
+          npm test | tee "$GAGA_EVIDENCE_DIRECTORY/signature-tests.log"
+      - name: Strict TypeScript and Astro
+        run: npm run check | tee "$GAGA_EVIDENCE_DIRECTORY/types.log"
+      - name: Build publication and exact bundled Worker once
+        run: |
+          export PUBLIC_BUILD_TIME="$(git show -s --format=%cI HEAD)"
+          npm run build | tee "$GAGA_EVIDENCE_DIRECTORY/build.log"
+      - name: Public registry, Starlight, actual Engine Search and native workerd
+        run: npm run test:consumer | tee "$GAGA_EVIDENCE_DIRECTORY/consumer.log"
+      - run: npx playwright install --with-deps chromium
+      - name: All existing desktop and mobile browser cases
+        run: npm run test:ui | tee "$GAGA_EVIDENCE_DIRECTORY/browser.log"
+      - name: Zero-vulnerability audit
+        run: npm audit --audit-level=low --json > "$GAGA_EVIDENCE_DIRECTORY/audit.json"
+      - name: Exact Worker dry run without rebuild or provider access
+        run: npx wrangler deploy --dry-run --experimental-provision=false --experimental-auto-create=false --outdir "$GAGA_EVIDENCE_DIRECTORY/dry-run" > "$GAGA_EVIDENCE_DIRECTORY/wrangler.log" 2>&1
+      - uses: actions/setup-go@v5
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: deploy
+          go-version: '1.24'
+      - name: Workflow lint
+        run: go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.7 -shellcheck= .github/workflows/deploy.yml .github/workflows/emdash-activation.yml
+      - name: Source/content/plan identity and qualified artifact manifest
+        run: |
+          git log -1 --format=%B | grep -F 'Signed-off-by:'
+          node tools/gaga/deployment-manifest.mjs
+          cp .gaga/deployment-manifest.json "$GAGA_EVIDENCE_DIRECTORY/deployment-manifest.json"
+      - name: Preserve diagnostic/browser evidence
+        if: always()
+        run: |
+          node --input-type=module <<'JS'
+          import{existsSync,mkdirSync,readdirSync,copyFileSync,cpSync}from'node:fs';
+          const out=process.env.GAGA_EVIDENCE_DIRECTORY;if(!out)process.exit(0);mkdirSync(out,{recursive:true});
+          if(existsSync('.gaga'))for(const name of readdirSync('.gaga'))if(/\.(json|png)$/.test(name))copyFileSync('.gaga/'+name,out+'/'+name);
+          if(existsSync('test-results'))cpSync('test-results',out+'/browser-details',{recursive:true});
+          JS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: production-publication-qualification
+          path: ${{ runner.temp }}/publication-qualification
+      - uses: actions/upload-artifact@v4
+        with:
+          name: production-publication-candidate
+          include-hidden-files: true
+          if-no-files-found: error
+          path: |
+            dist
+            worker/bundle.mjs
+            wrangler.jsonc
+            .gaga/deployment-manifest.json
+  deploy:
+    if: inputs.operation == 'deploy' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.22.2
+      - name: External evidence and pinned tooling only, no rebuild
+        run: |
+          mkdir -p "$RUNNER_TEMP/publication-deployment"
+          printf 'GAGA_EVIDENCE_DIRECTORY=%s/publication-deployment\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+          npm ci --ignore-scripts --no-audit --no-fund
+      - name: Revalidate live content before production mutation
+        env:
+          CMS_ORIGIN: ${{ vars.CMS_ORIGIN }}
+          CMS_READ_TOKEN: ${{ secrets.CMS_READ_TOKEN }}
+        run: node tools/cms/refresh.mjs --check
+      - name: Admit exact successful candidate ZIP and current canonical main
+        env:
+          GH_TOKEN: ${{ github.token }}
+          QUALIFICATION_RUN: ${{ inputs.qualification_run }}
+        run: python3 tools/gaga/admit-production.py
+      - name: Prepare production browser tooling before deployment
+        run: npx playwright install --with-deps chromium
+      - name: Read-only provider admission and rollback reference
+        id: preflight
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          PUBLICATION_PHASE: preflight
+        run: node tools/gaga/production-deploy.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: publication-pre-deployment
+          path: |
+            ${{ runner.temp }}/publication-deployment/artifact-admission.json
+            ${{ runner.temp }}/publication-deployment/pre-deployment.json
+            ${{ runner.temp }}/publication-deployment/dry-run.log
+          if-no-files-found: error
+      - name: Update existing production Worker once with exact artifact
+        id: deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          PUBLICATION_PHASE: deploy
+        run: node tools/gaga/production-deploy.mjs
+      - name: Anonymous production pages, discovery and real Search
+        run: node tools/gaga/production-readback.mjs
+      - name: Existing desktop and mobile cases against production
+        env:
+          GAGA_PRODUCTION_BROWSER_URL: https://consumer-blog-signature.ratriatra.workers.dev
+        run: |
+          npm run test:ui | tee "$GAGA_EVIDENCE_DIRECTORY/production-browser.log"
+          node --input-type=module <<'JS'
+          import assert from'node:assert/strict';import{readFileSync,writeFileSync}from'node:fs';
+          const stats=JSON.parse(readFileSync('.gaga/browser-results.json')).stats;assert.equal(stats.expected,4);assert.equal(stats.unexpected,0);assert.equal(stats.skipped,0);assert.equal(stats.flaky,0);
+          writeFileSync(process.env.GAGA_EVIDENCE_DIRECTORY+'/production-browser.json',JSON.stringify(stats,null,2)+'\n');
+          JS
+      - name: Restore the pinned previous version after failed production verification
+        if: failure() && steps.preflight.outcome == 'success'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          PUBLICATION_PHASE: rollback
+        run: node tools/gaga/production-deploy.mjs
+      - name: Preserve deployment and production browser evidence
+        if: always()
+        run: |
+          node --input-type=module <<'JS'
+          import{existsSync,readdirSync,copyFileSync,cpSync}from'node:fs';const out=process.env.GAGA_EVIDENCE_DIRECTORY;if(!out)process.exit(0);
+          if(existsSync('.gaga'))for(const name of readdirSync('.gaga'))if(/\.(json|png)$/.test(name))copyFileSync('.gaga/'+name,out+'/'+name);
+          if(existsSync('test-results'))cpSync('test-results',out+'/browser-details',{recursive:true});
+          JS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: production-publication-deployment
+          path: |
+            ${{ runner.temp }}/publication-deployment/*.json
+            ${{ runner.temp }}/publication-deployment/*.log
+            ${{ runner.temp }}/publication-deployment/*.png
+            ${{ runner.temp }}/publication-deployment/browser-details

@@ -5,7 +5,7 @@ import {root,hash} from './migration.mjs';
 export function writePublishedExport(records,{origin,realProviderReads,check=false}){
  const documents=records.map(r=>{
   const item=Object.fromEntries(['id','type','slug','status','updatedAt','publishedAt','liveRevisionId','draftRevisionId','data'].map(k=>[k,r.item[k]]));
-  assert.equal(item.data.application_id,r.applicationId);assert.equal(item.draftRevisionId,null);
+  assert.ok(item.status==='published'&&item.draftRevisionId===null,'Only clean published records may be exported');assert.equal(item.data.application_id,r.applicationId);
   return {applicationId:r.applicationId,path:r.originalPath,pin:r.pin,item,bodySha256:hash(item.data.body)};
  });
  const output={schema:'consumer.emdash-export/v1',mode:'published-emdash-export',origin,documents,provenance:{emdashVersion:'1.3.1',liveEmDashExportVerified:true,realProviderReads}};

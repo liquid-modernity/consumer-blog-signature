@@ -113,3 +113,21 @@ introduce another writable editorial source or claim production CMS proof early.
 - [R2 creation permission](https://developers.cloudflare.com/api/resources/r2/subresources/buckets/methods/create/)
 - [KV creation permission](https://developers.cloudflare.com/api/resources/kv/subresources/namespaces/methods/create/)
 - [Update an existing Cloudflare token](https://developers.cloudflare.com/api/resources/user/subresources/tokens/methods/update/)
+
+## First live production activation
+
+Production EmDash is healthy at the dedicated CMS origin above. The eight admitted
+records were imported through supported same-origin REST using the operator's
+existing session, with no new credential. Production-native pins and body/date
+hashes are in `cms/migration/production-receipt.json`; published-only reads with
+`CMS_READ_TOKEN` generate `content/emdash/published.json`. No token is bundled.
+Token scopes and the owner's draft permissions differ: request published records
+explicitly and retain Corps draft/stale guards.
+
+The publication release workflow is `.github/workflows/deploy.yml`: qualify the
+exact commit with the production revision export, promote that qualified source
+to main, then deploy the same artifact with its qualification run. Deployment
+never rebuilds. Provider preflight records the existing Worker version; failed
+mandatory readback/browser verification restores that pinned version once.
+The CMS Worker/stores are not redeployed by publication releases. No Rich Editorial
+Studio, Tank, editor redesign or upstream package change is included.

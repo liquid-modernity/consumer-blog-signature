@@ -10,6 +10,7 @@ Read docs/EMDASH-ACTIVATION.md before CMS or provider work. The separate CMS und
 cms/ owns its own build; keep it outside the parent TypeScript project.
 Run npm run verify on supported Node 22.22.2+/Ubuntu and npm run test:ui.
 Do not publish upstream packages or deploy the production publication website from a
-review branch. The explicitly authorized dedicated CMS deployment is limited to
-`consumer-blog-signature-cms`, the stores in cms/provisioning.json and passing
-CMS validation; stop for operator admin/PAT setup afterward.
+review branch. Publication deployment is limited to qualified canonical main through
+.github/workflows/deploy.yml using the exact successful-run artifact; never rebuild
+on upload. EmDash owns editorial state; Git owns source/build state. CMS resources
+remain separate and pinned; do not rerun completed first-deploy/repair operations.

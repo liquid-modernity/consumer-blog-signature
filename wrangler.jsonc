@@ -15,5 +15,6 @@
     "run_worker_first": [
       "/api/search"
     ]
-  }
+  },
+  "no_bundle": true
 }
