@@ -2,13 +2,13 @@ name: EmDash local activation and production preflight
 on:
   push:
     branches: [review/emdash-local-activation]
-    paths-ignore: [tools/cms/deploy.mjs, tools/cms/deploy.test.mjs, tools/cms/repair-artifact*, tools/cms/repair-state.mjs, tools/cms/live-read-preflight*, tools/cms/production-plan*, .github/workflows/emdash-activation.yml]
+    paths-ignore: [tools/cms/deploy.mjs, tools/cms/deploy.test.mjs, tools/cms/repair-artifact*, tools/cms/repair-state.mjs, tools/cms/live-read-preflight*, tools/cms/production-plan*, tools/cms/browser-import*, tools/cms/export*, tools/cms/refresh.mjs, cms/migration/production-receipt.json, .github/workflows/emdash-activation.yml]
   workflow_dispatch:
     inputs:
       operation:
         type: choice
         default: validate
-        options: [validate, provider-preflight, credential-preflight, provision, deploy-cms, repair-cms, inspect-cms, live-preflight]
+        options: [validate, provider-preflight, credential-preflight, provision, deploy-cms, repair-cms, inspect-cms, live-preflight, live-export]
         description: Validation has no provider access; credential and provider preflights are read-only
       diagnostic_public_key:
         type: string
@@ -304,3 +304,33 @@ jobs:
           name: live-cms-preflight
           path: ${{ runner.temp }}/live-preflight
           if-no-files-found: warn
+
+  export:
+    if: github.event_name == 'workflow_dispatch' && inputs.operation == 'live-export'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.22.2
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Read only the admitted published production revisions through Corps
+        env:
+          CMS_ORIGIN: ${{ vars.CMS_ORIGIN }}
+          CMS_READ_TOKEN: ${{ secrets.CMS_READ_TOKEN }}
+        run: node tools/cms/refresh.mjs
+      - name: Only the explicit public export may change
+        run: |
+          git diff --name-only | while read -r path; do
+            case "$path" in content/emdash/published.json|content/emdash/published-receipt.json) ;; *) exit 1 ;; esac
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: live-production-published-export
+          path: |
+            content/emdash/published.json
+            content/emdash/published-receipt.json
+          if-no-files-found: error

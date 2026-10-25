@@ -1,0 +1,148 @@
+{
+  "schema": "consumer.production-import-receipt/v1",
+  "status": "PASS",
+  "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+  "planSha256": "65d337dda16d146ae1caa0d2780ab7564ef38bb55e893ae7c7cc779502aef27d",
+  "cmsWorkerVersion": "0bf4b66d-23bb-435f-8b14-0b2d7e64fd13",
+  "successfulContentOperations": 16,
+  "firstRejectedRequest": "HTTP403 CSRF_REJECTED before handler; empty collections reverified before supported-header correction",
+  "credentialAccess": false,
+  "records": [
+    {
+      "applicationId": "author.editorial-team",
+      "originalPath": "src/content/docs/authors/editorial-team.md",
+      "pin": {
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "collection": "authors",
+        "id": "01M5RYDB6VGATHN3HWS5NX8FWF",
+        "liveRevisionId": "01M5RYDN6NXX24ARJCXMMP2ZQH",
+        "updatedAt": "2026-10-25T07:11:55.189Z",
+        "titleField": "title",
+        "summaryField": "summary"
+      },
+      "bodySha256": "b7736a6e134f0d2b4adecc12c6d063bf9b6ef687d73e22249f37f2bcd8a52fdd",
+      "dataSha256": "4188b5fbfac60a7dc039807cd3f51f48c7c9877ed497192fb9ebaa09d8e444e9",
+      "slug": "editorial-team",
+      "publishedAt": "2026-10-24T20:36:13.182Z"
+    },
+    {
+      "applicationId": "pub_002",
+      "originalPath": "src/content/docs/akal-imitasi-sebagai-pekerja-tanpa-dignity.md",
+      "pin": {
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "collection": "posts",
+        "id": "01M5RYE04XBXXG8A1999AVVZW9",
+        "liveRevisionId": "01M5RYEA38WH60QXYDXJJ5MWCG",
+        "updatedAt": "2026-10-25T07:12:16.580Z",
+        "titleField": "title",
+        "summaryField": "summary"
+      },
+      "bodySha256": "8df26cb6e5158871539fa874bcfe507af7a624659658f421adf01d5ef7a1d9d0",
+      "dataSha256": "98abff1d4212df94258919b905c9372aeff9387fda472ca2a10067c519bf5923",
+      "slug": "akal-imitasi-sebagai-pekerja-tanpa-dignity",
+      "publishedAt": "2026-06-17T00:00:00.000Z"
+    },
+    {
+      "applicationId": "consumer.article.context-aware-reading",
+      "originalPath": "src/content/docs/designing-context-aware-reading-surface.md",
+      "pin": {
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "collection": "posts",
+        "id": "01M5RYEND738V6RF6QM0MK973Q",
+        "liveRevisionId": "01M5RYEZCTJZNNA9Z1ABVG2BR7",
+        "updatedAt": "2026-10-25T07:12:38.388Z",
+        "titleField": "title",
+        "summaryField": "summary"
+      },
+      "bodySha256": "e04b5f1f1d1d85f03d079758b8b9db3f77f121b409c9889be7c6dde1e14ec3ec",
+      "dataSha256": "df8b1d36b58de8255d293bdf300188e038db49715cdcd6e5ff88f64a090df2b5",
+      "slug": "designing-context-aware-reading-surface",
+      "publishedAt": "2026-10-11T00:00:00.000Z"
+    },
+    {
+      "applicationId": "pub_003",
+      "originalPath": "src/content/docs/dialog-imajiner-pakrpp-lizzie-monopoly-akal-imitasi.md",
+      "pin": {
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "collection": "posts",
+        "id": "01M5RYFA4GWC7Q3GSXAKRWEM5R",
+        "liveRevisionId": "01M5RYFMBM063RB7W1NMP1SS9C",
+        "updatedAt": "2026-10-25T07:12:59.859Z",
+        "titleField": "title",
+        "summaryField": "summary"
+      },
+      "bodySha256": "6e092ada7a61f84f87cc5da03a879e6cc5d4c81766c17f7988e2022025fb3b76",
+      "dataSha256": "668d3ac7fa01be0de17db987885bf012e26bf608ece04c9e4cbfb3437c21a69c",
+      "slug": "dialog-imajiner-pakrpp-lizzie-monopoly-akal-imitasi",
+      "publishedAt": "2025-11-16T00:00:00.000Z"
+    },
+    {
+      "applicationId": "pub_004",
+      "originalPath": "src/content/docs/esg-etika-pasar-atau-tambalan-reputasi.md",
+      "pin": {
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "collection": "posts",
+        "id": "01M5RYFZ456BXQ8B03WKK42K3H",
+        "liveRevisionId": "01M5RYG9HRXRDEM53RJZBG3BKN",
+        "updatedAt": "2026-10-25T07:13:21.562Z",
+        "titleField": "title",
+        "summaryField": "summary"
+      },
+      "bodySha256": "62b960620e7f69fcf375ad4489981b481bdaba67bb71dc5026085505c1e61419",
+      "dataSha256": "251a7a1150142b17cef9ec084dc105c67efbab4b4d617ca0a53d49fffbd4b8ff",
+      "slug": "esg-etika-pasar-atau-tambalan-reputasi",
+      "publishedAt": "2025-06-15T00:00:00.000Z"
+    },
+    {
+      "applicationId": "pub_005",
+      "originalPath": "src/content/docs/karsa-karya-kesejahteraan-antitesis-monopoly-dari-level-rw.md",
+      "pin": {
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "collection": "posts",
+        "id": "01M5RYGM5ENY3WY3F38B6QPF8B",
+        "liveRevisionId": "01M5RYGY30G4QKTZZKR1G05PG9",
+        "updatedAt": "2026-10-25T07:13:42.584Z",
+        "titleField": "title",
+        "summaryField": "summary"
+      },
+      "bodySha256": "c0c87f0670b2c0fcc37b6b5f4e3338e6061acb7f63e8f814744492a0cf9c9300",
+      "dataSha256": "a0fce4fccc05bbb06320fa6e0b92a941f519c4b44ab471af1339f77709f75b6d",
+      "slug": "karsa-karya-kesejahteraan-antitesis-monopoly-dari-level-rw",
+      "publishedAt": "2024-09-14T00:00:00.000Z"
+    },
+    {
+      "applicationId": "pub_001",
+      "originalPath": "src/content/docs/mengapa-ai-bukan-bukti.md",
+      "pin": {
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "collection": "posts",
+        "id": "01M5RYH99AW0EQMQEGGGH5JTRX",
+        "liveRevisionId": "01M5RYHKJB2TYWBTNKJ436S6R3",
+        "updatedAt": "2026-10-25T07:14:04.243Z",
+        "titleField": "title",
+        "summaryField": "summary"
+      },
+      "bodySha256": "179191c6534a421abb6408a5f60678afc95ff6ec887c0c956e339d05c5aa4d9d",
+      "dataSha256": "4f8d016e6dc930f6c26ad5d4622d92453c266c6e93c755b61a969ac11a048a32",
+      "slug": "mengapa-ai-bukan-bukti",
+      "publishedAt": "2026-10-19T00:00:00.000Z"
+    },
+    {
+      "applicationId": "consumer.article.softcoded-systems",
+      "originalPath": "src/content/docs/softcoded-systems-scale-better-than-theme-forks.md",
+      "pin": {
+        "origin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+        "collection": "posts",
+        "id": "01M5RYHYBT0NZBM5N0MTEJHBH7",
+        "liveRevisionId": "01M5RYJ86S0M7277DW66A1D69T",
+        "updatedAt": "2026-10-25T07:14:25.719Z",
+        "titleField": "title",
+        "summaryField": "summary"
+      },
+      "bodySha256": "ec86daf5314f3446f93a3e006d23abc740034fade2d19dde15b095eb21e5065f",
+      "dataSha256": "1996eea7b1e9ce4743cf439b9749c90fddda4dcff91c7f62a297b378bb04cb50",
+      "slug": "softcoded-systems-scale-better-than-theme-forks",
+      "publishedAt": "2026-10-10T00:00:00.000Z"
+    }
+  ]
+}
