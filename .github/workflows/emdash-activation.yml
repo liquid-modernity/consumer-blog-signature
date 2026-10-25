@@ -2,12 +2,13 @@ name: EmDash local activation and production preflight
 on:
   push:
     branches: [review/emdash-local-activation]
+    paths-ignore: [tools/cms/deploy.mjs, tools/cms/deploy.test.mjs, tools/cms/repair-artifact*, .github/workflows/emdash-activation.yml]
   workflow_dispatch:
     inputs:
       operation:
         type: choice
         default: validate
-        options: [validate, provider-preflight, credential-preflight, provision, deploy-cms]
+        options: [validate, provider-preflight, credential-preflight, provision, deploy-cms, repair-cms]
         description: Validation has no provider access; credential and provider preflights are read-only
       diagnostic_public_key:
         type: string
@@ -169,3 +170,74 @@ jobs:
         with:
           name: emdash-credential-diagnostic-encrypted
           path: ${{ runner.temp }}/credential-evidence
+
+  repair:
+    if: github.event_name == 'workflow_dispatch' && inputs.operation == 'repair-cms'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      actions: read
+    env:
+      GAGA_EVIDENCE_DIRECTORY: ${{ runner.temp }}/cms-repair
+      CMS_REPAIR_ADMISSION: ${{ runner.temp }}/cms-repair/artifact-admission.json
+      CMS_REPAIR_SOURCE: df3c022368726f07545f1736184ea77fe24ce5cf
+      CMS_REPAIR_ARTIFACT_SHA256: e063e7ff2dec9c8212ff883e1d1e164ce4df5ca8e4b8fab7fb1d48bb57c2b518
+      CMS_REPAIR_EXPECTED_VERSION: 3b493d27-84ee-47b9-a2f3-2ebd4794dadb
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.22.2
+      - name: Repair guard regressions and unchanged qualified CMS source
+        run: |
+          node --test tools/cms/deploy.test.mjs
+          python3 tools/cms/repair-artifact.test.py
+          git diff --exit-code "$CMS_REPAIR_SOURCE" HEAD -- cms package.json package-lock.json
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+      - name: Workflow lint
+        run: go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.7 -shellcheck= .github/workflows/emdash-activation.yml
+      - name: Admit exact successful-run artifact without rebuilding
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 tools/cms/repair-artifact.py
+      - name: Install pinned deployment tooling only, no build scripts
+        run: npm --prefix cms ci --ignore-scripts --no-audit --no-fund
+      - name: Read-only production version, bindings and fresh D1 admission
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CMS_REPAIR_PHASE: preflight
+        run: node tools/cms/deploy.mjs
+      - name: Preserve rollback and pre-deployment receipt before mutation
+        uses: actions/upload-artifact@v4
+        with:
+          name: cms-repair-predeployment
+          path: |
+            ${{ runner.temp }}/cms-repair/artifact-admission.json
+            ${{ runner.temp }}/cms-repair/pre-deployment.json
+            ${{ runner.temp }}/cms-repair/dry-run.log
+          if-no-files-found: error
+      - name: Recheck admission, update once, initialize and verify only CMS
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CMS_REPAIR_PHASE: update
+        run: node tools/cms/deploy.mjs
+      - name: Preserve sanitized repair receipt and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cms-repair-evidence
+          path: |
+            ${{ runner.temp }}/cms-repair/artifact-admission.json
+            ${{ runner.temp }}/cms-repair/pre-deployment.json
+            ${{ runner.temp }}/cms-repair/deployment.json
+            ${{ runner.temp }}/cms-repair/dry-run.log
+            ${{ runner.temp }}/cms-repair/deploy.log
+          if-no-files-found: warn
