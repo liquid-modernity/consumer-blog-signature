@@ -57,7 +57,7 @@ jobs:
       - name: Record exact Node, npm, runner image and both native workerd versions
         run: node tools/content/qualification-runtime.mjs
       - name: Existing source-bound consent, concurrency and public-boundary regressions
-        run: node --test tools/content/*.test.mjs tools/editorial/plugin.test.mjs tools/editorial/boundaries.test.mjs
+        run: node --test tools/content/approval.test.mjs tools/content/content.test.mjs tools/editorial/plugin.test.mjs tools/editorial/boundaries.test.mjs
       - name: Pinned native account, routing and lifecycle contract, isolated database only
         run: node tools/content/native-authorization-contract.mjs
       - name: Official EmDash integrity and strict CMS typing
