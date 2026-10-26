@@ -233,3 +233,59 @@ test("future due-time intent is denied even with signed host approval and editor
   );
   assert.equal(f.writes(), 0);
 });
+
+test("baseline service denies anonymous requests without exposing private state", async () => {
+  const f = fixture();
+  f.ctx.input = {};
+  assert.equal(
+    (await contentApprovalRoutes()["content-baseline"].handler(f.ctx)).status,
+    "DENIED",
+  );
+  assert.equal(f.writes(), 0);
+});
+
+test("verified baseline advancement uses CAS and an old Live callback cannot rewind it", async () => {
+  const f = fixture(),
+    p = payload(),
+    bootstrap = "sha256:" + "d".repeat(64),
+    source = "a".repeat(40),
+    old = f.ctx.settings.get;
+  f.ctx.settings.get = async (k) =>
+    k === "contentReleaseBootstrapDigest"
+      ? bootstrap
+      : k === "contentReleaseSource"
+        ? source
+        : old(k);
+  await f.ctx.kv.compareAndSet("content-intent:" + p.nonce, null, {
+    request,
+    actorId: "editor",
+    state: "CMS_PUBLISHED_SITE_PENDING",
+  });
+  const nextBaseline = {
+    schema: "gaga.release/v1",
+    release: { class: "content" },
+    source: { commit: source },
+    target: { origin: "https://consumer-blog-signature.ratriatra.workers.dev" },
+    content: {
+      origin: "https://consumer-blog-signature-cms.ratriatra.workers.dev",
+    },
+  };
+  const message = await signedContentMessage(
+    {
+      ...p,
+      purpose: "record-release-result",
+      status: "PUBLISHED",
+      releaseSealDigest: policy,
+      previousBaselineDigest: bootstrap,
+      nextBaseline,
+    },
+    secret,
+  );
+  const route = contentApprovalRoutes()["content-result"];
+  f.ctx.input = message;
+  assert.equal((await route.handler(f.ctx)).status, "RECORDED");
+  const saved = await f.ctx.kv.get("content-current-release");
+  assert.equal((await route.handler(f.ctx)).status, "DENIED");
+  assert.deepEqual(await f.ctx.kv.get("content-current-release"), saved);
+  assert.equal(f.writes(), 0);
+});

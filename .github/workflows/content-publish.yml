@@ -1,0 +1,88 @@
+name: Trusted editorial content release
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        type: choice
+        options: [publish, resume]
+        required: true
+      intent:
+        type: string
+        default: '{}'
+      ticket:
+        type: string
+        default: '{}'
+permissions:
+  contents: read
+  actions: write
+concurrency:
+  group: publication-production
+  cancel-in-progress: false
+jobs:
+  release:
+    if: github.ref == 'refs/heads/main'
+    environment: content-release
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Protected activation precondition
+        env:
+          ENABLED: ${{ vars.GAGA_CONTENT_RELEASE_ENABLED }}
+        run: test "$ENABLED" = true
+      - uses: actions/checkout@v4
+        with:
+          repository: liquid-modernity/gaga-garrison
+          ref: 12984a00f1f8cb07f6f30c9a7e8762bfab83e909
+          token: ${{ secrets.GAGA_CONTROLLER_READ_TOKEN }}
+          path: controller
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          path: application
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.22.2
+      - run: npm ci --prefix controller --ignore-scripts --no-audit --no-fund
+      - run: npm ci --prefix application --ignore-scripts --no-audit --no-fund
+      - name: Exact protected inputs outside checkouts
+        env:
+          BASELINE: ${{ vars.GAGA_CONTENT_BASELINE_MANIFEST_JSON }}
+          POLICY: ${{ vars.GAGA_CONTENT_POLICY_JSON }}
+        run: |
+          node --input-type=module - <<'JS'
+          import {mkdirSync,writeFileSync,readFileSync} from 'node:fs';
+          const root=process.env.RUNNER_TEMP+'/content-host';mkdirSync(root,{recursive:true});
+          const event=JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH));
+          const message=JSON.parse(event.inputs.intent);
+          for(const [name,value]of Object.entries({baseline:process.env.BASELINE,policy:process.env.POLICY,message:event.inputs.intent,intent:JSON.stringify(message.payload?.request??{}),ticket:event.inputs.ticket})){
+            JSON.parse(value);writeFileSync(root+'/'+name+'.json',value,{mode:0o600});
+          }
+          JS
+      - name: Guarded native transition, completed materialization, universal release and readback
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CMS_READ_TOKEN: ${{ secrets.CMS_READ_TOKEN }}
+          CMS_CONTENT_APPLY_KEY: ${{ secrets.CMS_CONTENT_APPLY_KEY }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          GAGA_CONTENT_RELEASE_ENABLED: ${{ vars.GAGA_CONTENT_RELEASE_ENABLED }}
+          GAGA_ACCEPTED_CONTENT_POLICY_SHA256: ${{ vars.GAGA_ACCEPTED_CONTENT_POLICY_SHA256 }}
+          OPERATION: ${{ inputs.operation }}
+        run: |
+          if [ "$OPERATION" = publish ]; then
+            node controller/release/control.mjs content-execute "$RUNNER_TEMP/content-host/baseline.json" --source "$GITHUB_WORKSPACE/application" --application "$GITHUB_WORKSPACE/application/tools/content/adapter.mjs" --policy "$RUNNER_TEMP/content-host/policy.json" --intent "$RUNNER_TEMP/content-host/intent.json" --message "$RUNNER_TEMP/content-host/message.json" --cache "$RUNNER_TEMP/content-cache" --receipt "$RUNNER_TEMP/content-host/receipt.json"
+          else
+            node controller/release/control.mjs content-resume "$RUNNER_TEMP/content-host/baseline.json" --source "$GITHUB_WORKSPACE/application" --application "$GITHUB_WORKSPACE/application/tools/content/adapter.mjs" --policy "$RUNNER_TEMP/content-host/policy.json" --ticket "$RUNNER_TEMP/content-host/ticket.json" --cache "$RUNNER_TEMP/content-cache" --receipt "$RUNNER_TEMP/content-host/receipt.json"
+          fi
+      - name: One canonical release receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: content-release-receipt
+          path: ${{ runner.temp }}/content-host/receipt.json
+          if-no-files-found: error
+          retention-days: 90

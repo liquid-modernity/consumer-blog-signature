@@ -1,4 +1,4 @@
-name: Content release zero-mutation qualification
+name: Trusted content host zero-mutation qualification
 on:
   push:
     branches: [review/content-release-pipeline-v1]
@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: liquid-modernity/gaga-garrison
-          ref: 2a4822fe90f3cd5c18a0429719c438fee174d113
+          ref: 12984a00f1f8cb07f6f30c9a7e8762bfab83e909
           token: ${{ secrets.GAGA_CONTROLLER_READ_TOKEN }}
           path: controller
           fetch-depth: 0
@@ -61,13 +61,21 @@ jobs:
       - name: Strict CMS typing
         working-directory: application
         run: node node_modules/typescript/bin/tsc --project cms/tsconfig.json --noEmit
+      - name: Official EmDash integrity and compiled native CMS startup
+        working-directory: application
+        env:
+          GAGA_EVIDENCE_DIRECTORY: ${{ runner.temp }}/host-native/evidence
+        run: |
+          python3 tools/editorial/upstream-integrity.py
+          npm run build:cloudflare --prefix cms > "$RUNNER_TEMP/host-cms-build.log" 2>&1
+          node tools/cms/runtime-proof.mjs
       - name: Dependency audits
         run: |
           npm audit --prefix controller --omit=dev --audit-level=low
           npm audit --prefix application --audit-level=low
           npm audit --prefix application/cms --audit-level=low
       - name: Workflow lint
-        run: go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.7 -shellcheck= controller/.github/workflows/universal-release.yml application/.github/workflows/content-release.yml
+        run: go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.7 -shellcheck= controller/.github/workflows/universal-release.yml application/.github/workflows/content-release.yml application/.github/workflows/content-publish.yml application/.github/workflows/content-materialize.yml
       - name: Exact live draft, private preview/build and published production verification
         env:
           GH_TOKEN: ${{ github.token }}
@@ -76,7 +84,7 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           GAGA_CONTENT_BUILD_PROOF: "1"
         run: |
-          node controller/release/control.mjs content-qualify controller/release/manifests/consumer-blog-signature.json \
+          node controller/release/control.mjs content-host-qualify controller/release/manifests/consumer-blog-signature.json \
             --source "$GITHUB_WORKSPACE/candidate" \
             --intent controller/release/manifests/consumer-blog-signature-content.json \
             --application "$GITHUB_WORKSPACE/application/tools/content/adapter.mjs" \
@@ -88,6 +96,17 @@ jobs:
           import {readFileSync} from 'node:fs';import assert from 'node:assert/strict';
           const r=JSON.parse(readFileSync(process.env.RUNNER_TEMP+'/content-release/receipt.json'));
           assert.equal(r.status,'VERIFIED');
+          assert.equal(r.pipeline.trustedHost.status,'SIMULATED');
+          assert.equal(r.pipeline.trustedHost.materialization,'passed');
+          assert.equal(r.pipeline.trustedHost.exactRevisionResume,'ALREADY_RELEASED_VERIFIED');
+          assert.equal(r.pipeline.trustedHost.activation,'DISABLED');
+          const native=JSON.parse(readFileSync(process.env.RUNNER_TEMP+'/host-native/evidence/runtime.json'));
+          const integrity=JSON.parse(readFileSync(process.env.RUNNER_TEMP+'/host-native/evidence/emdash-core-integrity.json'));
+          assert.equal(native.status,'PASS');assert.equal(integrity.status,'PASS');
+          r.pipeline.trustedHost.nativeCmsStartup={status:native.status,httpStatus:native.httpStatus,setupHttpStatus:native.setupHttpStatus,providerMutations:native.providerMutations};
+          r.pipeline.trustedHost.emdashIntegrity=integrity;
+          const {writeFileSync}=await import('node:fs');
+          writeFileSync(process.env.RUNNER_TEMP+'/content-release/receipt.json',JSON.stringify(r,null,2)+'\n');
           for(const k of ['attempts','uploads','resourceCreates','contentWrites','schemaWrites','contentMutationAttempts'])assert.equal(r.deployment[k],0);
           assert.equal(r.deployment.transport.mutatingRequests,0);
           assert.equal(r.pipeline.transition.status,'not-applied');

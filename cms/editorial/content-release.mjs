@@ -7,6 +7,14 @@ import {
   qualifyEditorial,
   previewDocument,
 } from "../../editorial/content-release.mjs";
+const canonicalRequest = (x) =>
+  JSON.stringify(x, (_k, v) =>
+    v && typeof v === "object" && !Array.isArray(v)
+      ? Object.fromEntries(
+          Object.entries(v).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)),
+        )
+      : v,
+  );
 const check = (x, message) => {
   if (!x) throw Error(message);
 };
@@ -15,11 +23,13 @@ async function configuredDispatcher(ctx) {
     policyDigest = await ctx.settings?.get("contentReleasePolicyDigest"),
     token = await ctx.settings?.get("contentReleaseDispatchToken"),
     workflow = await ctx.settings?.get("contentReleaseWorkflowId"),
-    ref = await ctx.settings?.get("contentReleaseSource");
+    ref = await ctx.settings?.get("contentReleaseSource"),
+    bootstrap = await ctx.settings?.get("contentReleaseBootstrapDigest");
   if (
     !key ||
     key.length < 32 ||
     !/^sha256:[a-f0-9]{64}$/.test(policyDigest ?? "") ||
+    !/^sha256:[a-f0-9]{64}$/.test(bootstrap ?? "") ||
     !token ||
     !/^\d+$/.test(workflow ?? "") ||
     !/^[a-f0-9]{40}$/.test(ref ?? "") ||
@@ -31,9 +41,21 @@ async function configuredDispatcher(ctx) {
       {
         schema: "gaga.content-message/v1",
         purpose: "editorial-intent",
+        requestDigest:
+          "sha256:" +
+          Array.from(
+            new Uint8Array(
+              await crypto.subtle.digest(
+                "SHA-256",
+                new TextEncoder().encode(canonicalRequest(intent.request)),
+              ),
+            ),
+            (x) => x.toString(16).padStart(2, "0"),
+          ).join(""),
         ...intent,
         actorId: intent.actor.id,
         policyDigest,
+        applicationCommit: ref,
         expiresAt: Date.now() + 300000,
       },
       key,
@@ -50,9 +72,11 @@ async function configuredDispatcher(ctx) {
           Authorization: "Bearer " + token,
           "Content-Type": "application/json",
           Accept: "application/vnd.github+json",
+          "User-Agent": "GAGA-Content-Host/1",
+          "X-GitHub-Api-Version": "2022-11-28",
         },
         body: JSON.stringify({
-          ref,
+          ref: "main",
           inputs: { operation: "publish", intent: JSON.stringify(signed) },
         }),
       },
@@ -153,7 +177,9 @@ export function contentReleaseRoutes({ dispatch = null } = {}) {
                 ? "Your article is no longer public. Its history is preserved."
                 : status === "PUBLISH FAILED"
                   ? "The article changed or could not be released. Your revision history is preserved. Review the saved version before trying again."
-                  : "Your website update is pending. Your revision history is preserved.",
+                  : value.state === "CMS_PUBLISHED_SITE_PENDING"
+                    ? "Your article was published but is not live yet. Do not publish again. Ask your site administrator to check."
+                    : "Your article is being checked. Your draft is preserved.",
         };
       },
     },
@@ -196,10 +222,12 @@ export function contentReleaseRoutes({ dispatch = null } = {}) {
                 "Publishing is not enabled yet. Your draft is preserved.",
             };
           const nonce = crypto.randomUUID(),
+            actorBinding = crypto.randomUUID(),
             expiresAt = Date.now() + 300000,
             record = {
               request: s.request,
               actorId: ctx.user.id,
+              actorBinding,
               expiresAt,
               state: "PUBLISH PENDING",
             };
@@ -212,7 +240,7 @@ export function contentReleaseRoutes({ dispatch = null } = {}) {
           check(stored.applied, "Publication is already pending.");
           await send({
             request: s.request,
-            actor: { id: ctx.user.id },
+            actor: { id: actorBinding },
             revision: s.revision.id,
             nonce,
           });

@@ -90,6 +90,14 @@ export function createContentApplication({
   return {
     profile,
     identity,
+    materialize: async (options) => {
+      const { materializePublished } = await import("./materialize.mjs");
+      return materializePublished({
+        source: resolve(import.meta.dirname, "../.."),
+        context,
+        ...options,
+      });
+    },
     changedFiles: [],
     changeSet: (selected) => ({
       before: {

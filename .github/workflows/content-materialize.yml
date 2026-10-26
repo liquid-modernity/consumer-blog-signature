@@ -1,0 +1,70 @@
+name: Qualified content materialization
+run-name: ${{ inputs.correlation }}
+on:
+  workflow_dispatch:
+    inputs:
+      correlation:
+        type: string
+        required: true
+      ticket:
+        type: string
+        required: true
+      baseline:
+        type: string
+        required: true
+permissions:
+  contents: read
+  actions: read
+jobs:
+  materialize:
+    if: github.ref == 'refs/heads/main'
+    environment: content-release
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: liquid-modernity/gaga-garrison
+          ref: 12984a00f1f8cb07f6f30c9a7e8762bfab83e909
+          token: ${{ secrets.GAGA_CONTROLLER_READ_TOKEN }}
+          path: controller
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: application
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.22.2
+      - run: npm ci --prefix controller --ignore-scripts --no-audit --no-fund
+      - run: npm ci --prefix application --ignore-scripts --no-audit --no-fund
+      - name: Protected exact materialization inputs
+        env:
+          POLICY: ${{ vars.GAGA_CONTENT_POLICY_JSON }}
+        run: |
+          node --input-type=module - <<'JS'
+          import {mkdirSync,writeFileSync,readFileSync} from 'node:fs';
+          const root=process.env.RUNNER_TEMP+'/materialization';mkdirSync(root,{recursive:true});
+          const event=JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH));
+          for(const [name,value]of Object.entries({baseline:event.inputs.baseline,ticket:event.inputs.ticket,policy:process.env.POLICY})){
+            JSON.parse(value);writeFileSync(root+'/'+name+'.json',value,{mode:0o600});
+          }
+          JS
+      - name: Exact published read, canonical projection, qualified renderer and sealed artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CMS_READ_TOKEN: ${{ secrets.CMS_READ_TOKEN }}
+          CMS_CONTENT_APPLY_KEY: ${{ secrets.CMS_CONTENT_APPLY_KEY }}
+          GAGA_ACCEPTED_CONTENT_POLICY_SHA256: ${{ vars.GAGA_ACCEPTED_CONTENT_POLICY_SHA256 }}
+        run: |
+          node controller/release/control.mjs content-materialize "$RUNNER_TEMP/materialization/baseline.json" --source "$GITHUB_WORKSPACE/application" --application "$GITHUB_WORKSPACE/application/tools/content/adapter.mjs" --policy "$RUNNER_TEMP/materialization/policy.json" --ticket "$RUNNER_TEMP/materialization/ticket.json" --output "$RUNNER_TEMP/materialization-payload" --cache "$RUNNER_TEMP/materialization-cache" --receipt "$RUNNER_TEMP/materialization/receipt.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: qualified-content-artifact
+          path: ${{ runner.temp }}/materialization-payload
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 90

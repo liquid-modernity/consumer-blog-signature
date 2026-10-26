@@ -1,3 +1,4 @@
+import profile from "../../content-release.json" with { type: "json" };
 const canonical = (x) =>
   JSON.stringify(x, (_k, v) =>
     v && typeof v === "object" && !Array.isArray(v)
@@ -88,6 +89,24 @@ export async function nativePublishGate(event, ctx) {
 }
 export function contentApprovalRoutes() {
   return {
+    "content-baseline": {
+      public: true,
+      methods: ["POST"],
+      request: { body: "json", maxBytes: 2048 },
+      handler: async (ctx) => {
+        try {
+          await verifiedContentMessage(
+            ctx.input,
+            await ctx.settings.get("contentReleaseKey"),
+            await ctx.settings.get("contentReleasePolicyDigest"),
+            "read-release-baseline",
+          );
+          return { release: await ctx.kv.get("content-current-release") };
+        } catch {
+          return { status: "DENIED" };
+        }
+      },
+    },
     "content-apply": {
       public: true,
       methods: ["POST"],
@@ -116,7 +135,7 @@ export function contentApprovalRoutes() {
             !pending ||
             canonical(pending.value.request) !== canonical(p.request) ||
             pending.value.expiresAt < Date.now() ||
-            pending.value.actorId !== p.actorId
+            (pending.value.actorBinding ?? pending.value.actorId) !== p.actorId
           )
             throw Error("Denied");
           if (
@@ -187,7 +206,8 @@ export function contentApprovalRoutes() {
           const terminal = ["PUBLISHED", "UNPUBLISHED"].includes(p.status);
           if (
             !pending ||
-            pending.value.actorId !== p.actorId ||
+            (pending.value.actorBinding ?? pending.value.actorId) !==
+              p.actorId ||
             ![
               "PUBLISHED",
               "UNPUBLISHED",
@@ -201,6 +221,42 @@ export function contentApprovalRoutes() {
               pending.value.state === "CMS_PUBLISHED_SITE_PENDING")
           )
             throw Error("Denied");
+          if (terminal && p.nextBaseline) {
+            if (
+              p.nextBaseline.schema !== "gaga.release/v1" ||
+              p.nextBaseline.release?.class !== "content" ||
+              p.nextBaseline.source?.commit !==
+                (await ctx.settings.get("contentReleaseSource"))
+            )
+              throw Error("Denied");
+            if (
+              p.nextBaseline.target?.origin !== profile.publicationOrigin ||
+              p.nextBaseline.content?.origin !== profile.cmsOrigin
+            )
+              throw Error("Denied");
+            const previous = await ctx.kv.getVersioned(
+              "content-current-release",
+            );
+            const expected = previous
+              ? "sha256:" +
+                Array.from(
+                  new Uint8Array(
+                    await crypto.subtle.digest(
+                      "SHA-256",
+                      bytes(previous.value.payload.nextBaseline),
+                    ),
+                  ),
+                  (x) => x.toString(16).padStart(2, "0"),
+                ).join("")
+              : await ctx.settings.get("contentReleaseBootstrapDigest");
+            if (p.previousBaselineDigest !== expected) throw Error("Conflict");
+            const stored = await ctx.kv.compareAndSet(
+              "content-current-release",
+              previous?.revision ?? null,
+              ctx.input,
+            );
+            if (!stored.applied) throw Error("Conflict");
+          }
           await ctx.kv.compareAndSet(
             "content-intent:" + p.nonce,
             pending.revision,

@@ -151,6 +151,7 @@ test("publish intent is sent only after exact selection, and conflicting selecti
   const routes = contentReleaseRoutes({
       dispatch: async (x) => {
         calls++;
+        assert.notEqual(x.actor.id, "editor");
         assert.equal(x.request.selectedRevision, "exact-draft");
       },
     }),
@@ -180,4 +181,61 @@ test("private preview uses the exact draft instead of the provider published ove
   assert.equal(out.provenance.prospective, true);
   assert.equal(out.mode, "prospective-content-preview");
   assert.notEqual(s.published.liveData.summary, record.item.data.summary);
+});
+
+test("configured server dispatch authenticates the exact request without exposing account IDs or credentials", async () => {
+  const c = ctx(),
+    secret = "isolated-dispatch-key-01234567890123456789",
+    policy = "sha256:" + "a".repeat(64),
+    token = "isolated-dispatch-fixture";
+  const values = {
+    contentReleaseKey: secret,
+    contentReleasePolicyDigest: policy,
+    contentReleaseDispatchToken: token,
+    contentReleaseWorkflowId: "123",
+    contentReleaseSource: "b".repeat(40),
+    contentReleaseBootstrapDigest: policy,
+  };
+  c.settings = { get: async (k) => values[k] };
+  let sent = 0;
+  c.http = {
+    fetch: async (url, o) => {
+      sent++;
+      assert.equal(
+        url,
+        "https://api.github.com/repos/liquid-modernity/consumer-blog-signature/actions/workflows/123/dispatches",
+      );
+      assert.equal(o.headers.Authorization, "Bearer " + token);
+      const body = JSON.parse(o.body);
+      assert.equal(body.ref, "main");
+      const signed = JSON.parse(body.inputs.intent);
+      const { verifiedContentMessage } =
+        await import("../../cms/editorial/content-approval.mjs");
+      const p = await verifiedContentMessage(
+        signed,
+        secret,
+        policy,
+        "editorial-intent",
+      );
+      assert.deepEqual(p.request, request);
+      assert.match(p.requestDigest, /^sha256:[a-f0-9]{64}$/);
+      assert.notEqual(p.actorId, c.user.id);
+      assert.equal(p.applicationCommit, values.contentReleaseSource);
+      return new Response(null, { status: 204 });
+    },
+  };
+  const routes = contentReleaseRoutes(),
+    r = await routes["content-publish"].handler(c);
+  assert.equal(r.status, "PUBLISH PENDING");
+  assert.equal(sent, 1);
+  assert.ok(
+    !JSON.stringify(r).includes(secret) && !JSON.stringify(r).includes(token),
+  );
+  c.input = { nonce: r.nonce };
+  assert.equal(
+    (await routes["content-status"].handler(c)).status,
+    "PUBLISH PENDING",
+  );
+  c.user = { id: "other-user" };
+  assert.equal((await routes["content-status"].handler(c)).status, "DENIED");
 });

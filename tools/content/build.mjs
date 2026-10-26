@@ -5,6 +5,8 @@ import {
   writeFileSync,
   readdirSync,
   rmSync,
+  cpSync,
+  mkdirSync,
 } from "node:fs";
 import { join, resolve } from "node:path";
 import { createHash } from "node:crypto";
@@ -41,14 +43,17 @@ export function changedSurfaces(before, after) {
       "Exact artifact byte diff across all static output; full static build required, unchanged output is excluded from readback.",
   };
 }
-export async function proveContentBuild({
+export async function buildContent({
   source,
   projection,
   baseline,
   cache,
   origin,
+  preview = true,
+  retain = false,
 }) {
   const root = mkdtempSync(join(cache, "private-content-build-"));
+  let complete = false;
   try {
     const archive = execFileSync("git", ["archive", "HEAD"], {
       cwd: source,
@@ -61,7 +66,9 @@ export async function proveContentBuild({
       resolve(root, "content/emdash/published-receipt.json"),
       JSON.stringify({
         status: "PASS",
-        classification: "PROSPECTIVE_CONTENT_PREVIEW",
+        classification: preview
+          ? "PROSPECTIVE_CONTENT_PREVIEW"
+          : "REAL_EMDASH_API_EXPORT",
         exportSha256: digest(bytes),
       }),
     );
@@ -69,7 +76,7 @@ export async function proveContentBuild({
       PATH: process.env.PATH,
       HOME: process.env.HOME,
       CI: "true",
-      GAGA_CONTENT_PREVIEW_QUALIFICATION: "1",
+      ...(preview ? { GAGA_CONTENT_PREVIEW_QUALIFICATION: "1" } : {}),
       PUBLIC_SITE_URL: origin,
       PUBLIC_BUILD_TIME: execFileSync(
         "git",
@@ -109,8 +116,25 @@ export async function proveContentBuild({
     const result = changedSurfaces(inventory(baseline), inventory(root));
     if (!result.current.length && !result.proposed.length)
       throw Error("Selected change produced no qualified public surface.");
-    return result;
+    if (!retain) return result;
+    const payload = join(root, "payload");
+    mkdirSync(payload);
+    mkdirSync(join(payload, "worker"));
+    mkdirSync(join(payload, "content/emdash"), { recursive: true });
+    cpSync(join(root, "dist"), join(payload, "dist"), { recursive: true });
+    cpSync(join(root, "worker/bundle.mjs"), join(payload, "worker/bundle.mjs"));
+    cpSync(join(root, "wrangler.jsonc"), join(payload, "wrangler.jsonc"));
+    cpSync(
+      join(root, "content/emdash/published.json"),
+      join(payload, "content/emdash/published.json"),
+    );
+    complete = true;
+    return { root, payload, affected: result };
   } finally {
-    rmSync(root, { recursive: true, force: true });
+    if (!retain || !complete) rmSync(root, { recursive: true, force: true });
   }
+}
+
+export async function proveContentBuild(options) {
+  return buildContent(options);
 }

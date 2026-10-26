@@ -58,6 +58,10 @@ export function createPlugin() {
           type: "string",
           label: "Content service locator",
         },
+        contentReleaseBootstrapDigest: {
+          type: "string",
+          label: "Initial verified application state",
+        },
         contentReleaseSource: {
           type: "string",
           label: "Qualified application source",
