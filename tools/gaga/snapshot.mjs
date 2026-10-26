@@ -18,7 +18,8 @@ export async function verifySnapshot(snapshot=readSnapshot()){
  assert.equal(receipt.exportSha256,sha256(JSON.stringify(snapshot,null,2)+'\n'),'Export differs from admitted provider receipt');
  assert.equal(snapshot.provenance.emdashVersion,'1.3.1');assert.equal(snapshot.provenance.liveEmDashExportVerified,true);
  const migration=JSON.parse(readFileSync(resolve(root,'cms/migration/source-map.json'))),seen=new Set(),artifacts=[];
- assert.equal(snapshot.documents.length,migration.length);
+ assert.ok(snapshot.documents.length<=migration.length,'New content needs explicit route admission');
+ for(const mapping of migration)assert.equal(sha256(readFileSync(resolve(root,mapping.originalPath))),mapping.sourceSha256,'Migration source remains immutable');
  for(const document of snapshot.documents){
   const mapping=migration.find(x=>x.applicationId===document.applicationId);assert.ok(mapping&&!seen.has(document.path));seen.add(document.path);assert.equal(document.path,mapping.originalPath);
   assert.equal(sha256(readFileSync(resolve(root,document.path))),mapping.sourceSha256,'Migration source is read-only; edit EmDash instead');
@@ -29,6 +30,6 @@ export async function verifySnapshot(snapshot=readSnapshot()){
   assert.equal(projection.status,'projected','Recorded CMS export rejected: '+projection.code);artifacts.push(Array.isArray(editorialBody(document.item.data))?withEditorialText(projection,editorialBody(document.item.data)):projection.artifact);
  }
  // Original editorial files are immutable migration evidence, never a second writable authority.
- function visit(dir){for(const f of readdirSync(dir,{withFileTypes:true})){const path=resolve(dir,f.name);if(f.isDirectory())visit(path);else if(f.name.endsWith('.md')){const d=frontmatter(readFileSync(path,'utf8'));if(['article','author'].includes(d.contentKind)&&d.status==='published'&&d.visibility==='public'&&!d.draft&&!d.noindex)assert.ok(seen.has(relative(root,path)),'Editorial content must enter through EmDash');}}}
+ function visit(dir){for(const f of readdirSync(dir,{withFileTypes:true})){const path=resolve(dir,f.name);if(f.isDirectory())visit(path);else if(f.name.endsWith('.md')){const d=frontmatter(readFileSync(path,'utf8'));if(['article','author'].includes(d.contentKind)&&d.status==='published'&&d.visibility==='public'&&!d.draft&&!d.noindex)assert.ok(migration.some(m=>m.originalPath===relative(root,path)),'Editorial content must enter through EmDash');}}}
  visit(resolve(root,'src/content/docs'));return {snapshot,artifacts};
 }

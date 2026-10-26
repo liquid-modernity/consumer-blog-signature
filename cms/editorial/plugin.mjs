@@ -5,6 +5,7 @@ import {
   validatePortableText,
   plainText,
 } from "../../editorial/portable-text.mjs";
+import { contentReleaseRoutes } from "./content-release.mjs";
 export function studioPlugin() {
   return {
     id: pluginId,
@@ -32,7 +33,8 @@ export function createPlugin() {
   return definePlugin({
     id: pluginId,
     version: "1.0.0",
-    capabilities: ["content:write", "schema:read"],
+    capabilities: ["content:write", "content:read", "schema:read"],
+    routes: contentReleaseRoutes(),
     hooks: {
       "content:beforeSave": async (event, ctx) => {
         const data = { ...event.content };

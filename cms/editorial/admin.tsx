@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
   PortableTextEditor,
+  apiFetch,
   MediaPickerModal,
   fetchContentList,
   type PortableTextEditorProps,
@@ -578,12 +579,82 @@ function SavedReadiness({ entry }: ContentEditorPanelContext) {
     </div>
   );
 }
+function ContentPublishing({ collection, entry }: ContentEditorPanelContext) {
+  const [message, setMessage] = useState("Save your draft before previewing."),
+    [html, setHtml] = useState(""),
+    [busy, setBusy] = useState(false);
+  const act = async (kind: "content-preview" | "content-publish") => {
+    setBusy(true);
+    try {
+      const response = await apiFetch(
+        "/_emdash/api/plugins/pakrpp-studio/" + kind,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            schema: "gaga.content-request/v1",
+            action: "publish",
+            resource: collection + "/" + entry.id,
+            selectedRevision: entry.draftRevisionId,
+            expectedPublishedRevision: entry.liveRevisionId,
+          }),
+        },
+      );
+      if (!response.ok) throw Error("Request denied");
+      const envelope = await response.json(),
+        result = envelope.data ?? envelope;
+      setMessage(result.message ?? "Your article needs review.");
+      if (kind === "content-preview" && result.status === "PREVIEW READY")
+        setHtml(result.html);
+    } catch {
+      setMessage(
+        "Unable to continue. Your draft is preserved. Contact your site administrator.",
+      );
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <section aria-label="Publication">
+      <p role="status">{message}</p>
+      <button
+        type="button"
+        disabled={busy || !entry.draftRevisionId}
+        onClick={() => act("content-preview")}
+      >
+        Preview saved draft
+      </button>
+      <button
+        type="button"
+        disabled={busy || !entry.draftRevisionId}
+        onClick={() => act("content-publish")}
+      >
+        Publish saved draft
+      </button>
+      {html && (
+        <iframe
+          title="Private article preview"
+          sandbox=""
+          srcDoc={html}
+          style={{ width: "100%", minHeight: "24rem" }}
+        />
+      )}
+    </section>
+  );
+}
 export const fields = {
   body: StudioBody,
   metadata: Metadata,
   integration: Integration,
 };
 export const contentEditorPanels = [
+  {
+    id: "content-publication",
+    title: "Preview and publish",
+    collections: ["posts", "authors"],
+    component: ContentPublishing,
+    order: 5,
+  },
   {
     id: "editorial-readiness",
     title: "Publishing · saved revision",
