@@ -46,6 +46,7 @@ export async function proveContentBuild({
   projection,
   baseline,
   cache,
+  origin,
 }) {
   const root = mkdtempSync(join(cache, "private-content-build-"));
   try {
@@ -68,6 +69,7 @@ export async function proveContentBuild({
       PATH: process.env.PATH,
       HOME: process.env.HOME,
       CI: "true",
+      PUBLIC_SITE_URL: origin,
       PUBLIC_BUILD_TIME: execFileSync(
         "git",
         ["show", "-s", "--format=%cI", "HEAD"],

@@ -187,6 +187,7 @@ export function createContentApplication({
           projection,
           baseline: context.artifactRoot,
           cache: context.cache,
+          origin: profile.publicationOrigin,
         });
       }
       return {
