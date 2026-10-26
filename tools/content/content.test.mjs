@@ -189,6 +189,7 @@ test("configured server dispatch authenticates the exact request without exposin
     policy = "sha256:" + "a".repeat(64),
     token = "isolated-dispatch-fixture";
   const values = {
+    contentReleaseEnabled: true,
     contentReleaseKey: secret,
     contentReleasePolicyDigest: policy,
     contentReleaseDispatchToken: token,
@@ -224,6 +225,13 @@ test("configured server dispatch authenticates the exact request without exposin
       return new Response(null, { status: 204 });
     },
   };
+  values.contentReleaseEnabled = false;
+  assert.equal(
+    (await contentReleaseRoutes()["content-publish"].handler(c)).status,
+    "PUBLISHING UNAVAILABLE",
+  );
+  assert.equal(sent, 0);
+  values.contentReleaseEnabled = true;
   const routes = contentReleaseRoutes(),
     r = await routes["content-publish"].handler(c);
   assert.equal(r.status, "PUBLISH PENDING");

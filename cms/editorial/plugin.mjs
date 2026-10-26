@@ -45,6 +45,10 @@ export function createPlugin() {
     allowedHosts: ["api.github.com"],
     admin: {
       settingsSchema: {
+        contentReleaseEnabled: {
+          type: "boolean",
+          label: "Enable verified content publishing",
+        },
         contentReleaseKey: { type: "secret", label: "Content service key" },
         contentReleasePolicyDigest: {
           type: "string",

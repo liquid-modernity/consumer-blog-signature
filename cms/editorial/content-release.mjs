@@ -19,6 +19,8 @@ const check = (x, message) => {
   if (!x) throw Error(message);
 };
 async function configuredDispatcher(ctx) {
+  const enabled = await ctx.settings?.get("contentReleaseEnabled");
+  if (enabled !== true) return null;
   const key = await ctx.settings?.get("contentReleaseKey"),
     policyDigest = await ctx.settings?.get("contentReleasePolicyDigest"),
     token = await ctx.settings?.get("contentReleaseDispatchToken"),
