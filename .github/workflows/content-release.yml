@@ -3,6 +3,19 @@ on:
   push:
     branches: [review/content-release-pipeline-v1]
   workflow_dispatch:
+    inputs:
+      operation:
+        type: choice
+        default: qualify
+        options: [qualify, baseline-check, seal-baseline, verify-baseline]
+      baseline:
+        type: string
+        default: '{}'
+        description: Exact previous published manifest for sealing, or completed qualified manifest for verification
+      expected_state:
+        type: string
+        default: '{}'
+        description: Exact current CMS/publication Worker versions for read-only disabled-state inspection
 permissions:
   contents: read
   actions: read
@@ -11,6 +24,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   qualify:
+    if: github.event_name == 'push' || inputs.operation == 'qualify'
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
@@ -126,3 +140,108 @@ jobs:
           path: ${{ runner.temp }}/content-release/receipt.json
           if-no-files-found: error
           retention-days: 90
+
+  baseline:
+    if: inputs.operation != 'qualify' && github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Qualified Garrison controller
+        uses: actions/checkout@v4
+        with:
+          repository: liquid-modernity/gaga-garrison
+          ref: fab157dd91880c37ac75651fe24eae665edac6a1
+          token: ${{ secrets.GAGA_CONTROLLER_READ_TOKEN }}
+          path: controller
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Application-owned adapter under review
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: application
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.22.2
+      - run: npm ci --prefix controller --ignore-scripts --no-audit --no-fund
+      - name: Focused evidence-reuse tests and workflow lint
+        run: |
+          cd application
+          node --test tools/content/baseline.test.mjs
+          go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.7 -shellcheck= .github/workflows/content-release.yml
+      - name: Exact manifest input outside all checkouts
+        if: inputs.operation != 'baseline-check'
+        env:
+          BASELINE_INPUT: ${{ inputs.baseline }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/baseline"
+          node --input-type=module - <<'JS'
+          import{writeFileSync}from'node:fs';
+          const m=JSON.parse(process.env.BASELINE_INPUT);
+          writeFileSync(process.env.RUNNER_TEMP+'/baseline/input.json',JSON.stringify(m,null,2)+'\n');
+          JS
+      - run: npm ci --prefix application/cms --ignore-scripts --no-audit --no-fund
+        if: inputs.operation == 'seal-baseline'
+      - name: Read-only current bindings, content/schema counts and disabled switches
+        if: inputs.operation == 'seal-baseline'
+        working-directory: application
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          GAGA_CONTENT_RELEASE_ENABLED: ${{ vars.GAGA_CONTENT_RELEASE_ENABLED }}
+          GAGA_EXPECTED_PRODUCTION_STATE: ${{ inputs.expected_state }}
+          GAGA_EVIDENCE_DIRECTORY: ${{ runner.temp }}/baseline/inspection
+        run: node tools/editorial/production-control.mjs inspect
+      - name: Reuse exact public bytes with explicit original-build provenance; no rebuild
+        if: inputs.operation == 'seal-baseline'
+        working-directory: application
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GAGA_CONTROLLER_ROOT: ${{ github.workspace }}/controller
+          GAGA_FOUNDATION_INSPECTION: ${{ runner.temp }}/baseline/inspection/production-inspect.json
+        run: node tools/content/baseline.mjs "$RUNNER_TEMP/baseline/input.json" "$RUNNER_TEMP/baseline/sealed"
+      - uses: actions/upload-artifact@v4
+        id: sealed
+        if: inputs.operation == 'seal-baseline'
+        with:
+          name: qualified-baseline-publication-payload
+          path: ${{ runner.temp }}/baseline/sealed/payload
+          include-hidden-files: true
+          if-no-files-found: error
+      - name: Bind the new qualification envelope to its immutable artifact
+        if: inputs.operation == 'seal-baseline'
+        env:
+          ARTIFACT_ID: ${{ steps.sealed.outputs.artifact-id }}
+          ARTIFACT_DIGEST: ${{ steps.sealed.outputs.artifact-digest }}
+        run: |
+          node --input-type=module - <<'JS'
+          import{readFileSync,writeFileSync}from'node:fs';
+          const root=process.env.RUNNER_TEMP+'/baseline',m=JSON.parse(readFileSync(root+'/sealed/manifest-template.json'));
+          m.artifact.reference='https://api.github.com/repos/'+process.env.GITHUB_REPOSITORY+'/actions/artifacts/'+process.env.ARTIFACT_ID;
+          m.artifact.digest='sha256:'+process.env.ARTIFACT_DIGEST.replace(/^sha256:/,'');
+          writeFileSync(root+'/manifest.json',JSON.stringify(m,null,2)+'\n');
+          JS
+      - name: Existing Universal Release Controller admits the completed qualification and live state
+        if: inputs.operation == 'verify-baseline'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CMS_READ_TOKEN: ${{ secrets.CMS_READ_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          ENABLED: ${{ vars.GAGA_CONTENT_RELEASE_ENABLED }}
+        run: |
+          test "$ENABLED" = false
+          node controller/release/control.mjs verify "$RUNNER_TEMP/baseline/input.json" --source "$GITHUB_WORKSPACE/application" --cache "$RUNNER_TEMP/baseline/verification-cache" --receipt "$RUNNER_TEMP/baseline/receipt.json"
+      - uses: actions/upload-artifact@v4
+        if: always() && inputs.operation != 'baseline-check'
+        with:
+          name: foundation-baseline-admission
+          path: |
+            ${{ runner.temp }}/baseline/manifest.json
+            ${{ runner.temp }}/baseline/input.json
+            ${{ runner.temp }}/baseline/receipt.json
+            ${{ runner.temp }}/baseline/sealed/reuse-proof.json
+            ${{ runner.temp }}/baseline/inspection/production-inspect.json
+          if-no-files-found: error
