@@ -6,7 +6,7 @@ import {
   previewDocument,
 } from "../../editorial/content-release.mjs";
 import { contentReleaseRoutes } from "../../cms/editorial/content-release.mjs";
-import { projectPublished } from "./adapter.mjs";
+import { projectPublished, projectPreview } from "./adapter.mjs";
 import { changedSurfaces } from "./build.mjs";
 const profile = JSON.parse(readFileSync("content-release.json")),
   snapshot = JSON.parse(readFileSync("content/emdash/published.json")),
@@ -28,12 +28,32 @@ const request = {
   expectedPublishedRevision: d.item.liveRevisionId,
 };
 function ctx() {
+  const values = new Map();
+  let version = 0;
+  const kv = {
+    get: async (key) => values.get(key)?.value ?? null,
+    getVersioned: async (key) => values.get(key) ?? null,
+    compareAndSet: async (key, revision, value) => {
+      if ((values.get(key)?.revision ?? null) !== revision)
+        return { applied: false };
+      const next = { value, revision: String(++version) };
+      values.set(key, next);
+      return { applied: true, revision: next.revision };
+    },
+    compareAndDelete: async (key, revision) => {
+      if (values.get(key)?.revision !== revision) return { applied: false };
+      values.delete(key);
+      return { applied: true };
+    },
+  };
+
   const item = {
     ...structuredClone(selected.published),
     draftRevisionId: "exact-draft",
   };
   return {
     user: { id: "editor" },
+    kv,
     input: request,
     content: {
       getVersioned: async () => ({ item, _rev: "opaque-native-cas" }),
@@ -146,4 +166,18 @@ test("publish intent is sent only after exact selection, and conflicting selecti
     "PUBLISH FAILED",
   );
   assert.equal(calls, 1);
+});
+
+test("private preview uses the exact draft instead of the provider published overlay", () => {
+  const s = structuredClone(selected);
+  s.published.liveData = structuredClone(s.published.data);
+  s.revision.data.summary = "Private prospective summary";
+  const out = projectPreview(snapshot, request, s, d.item.slug);
+  const record = out.documents.find((x) => x.item.id === d.item.id);
+  assert.equal(record.item.data.summary, "Private prospective summary");
+  assert.equal(record.item.liveRevisionId, "exact-draft");
+  assert.equal(out.provenance.liveEmDashExportVerified, false);
+  assert.equal(out.provenance.prospective, true);
+  assert.equal(out.mode, "prospective-content-preview");
+  assert.notEqual(s.published.liveData.summary, record.item.data.summary);
 });

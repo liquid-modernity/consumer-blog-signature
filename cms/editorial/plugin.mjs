@@ -5,6 +5,7 @@ import {
   validatePortableText,
   plainText,
 } from "../../editorial/portable-text.mjs";
+import { nativePublishGate } from "./content-approval.mjs";
 import { contentReleaseRoutes } from "./content-release.mjs";
 export function studioPlugin() {
   return {
@@ -33,9 +34,48 @@ export function createPlugin() {
   return definePlugin({
     id: pluginId,
     version: "1.0.0",
-    capabilities: ["content:write", "content:read", "schema:read"],
+    capabilities: [
+      "content:write",
+      "content:read",
+      "content:publish",
+      "hooks.content-policy:register",
+      "network:request",
+      "schema:read",
+    ],
+    allowedHosts: ["api.github.com"],
+    admin: {
+      settingsSchema: {
+        contentReleaseKey: { type: "secret", label: "Content service key" },
+        contentReleasePolicyDigest: {
+          type: "string",
+          label: "Accepted content policy",
+        },
+        contentReleaseDispatchToken: {
+          type: "secret",
+          label: "Content dispatch credential",
+        },
+        contentReleaseWorkflowId: {
+          type: "string",
+          label: "Content service locator",
+        },
+        contentReleaseSource: {
+          type: "string",
+          label: "Qualified application source",
+        },
+      },
+    },
     routes: contentReleaseRoutes(),
     hooks: {
+      "content:beforePublish": nativePublishGate,
+      "content:beforeSchedule": async (event) =>
+        ["posts", "authors"].includes(event.collection)
+          ? {
+              cancel: true,
+              reason:
+                "Scheduled publishing is not enabled yet. Your draft is preserved.",
+            }
+          : undefined,
+      "content:beforeUnpublish": nativePublishGate,
       "content:beforeSave": async (event, ctx) => {
         const data = { ...event.content };
         const owned =

@@ -63,5 +63,10 @@
   ],
   "publicationOrigin": "https://consumer-blog-signature.ratriatra.workers.dev",
   "cmsOrigin": "https://consumer-blog-signature-cms.ratriatra.workers.dev",
-  "fixedSlugs": true
+  "fixedSlugs": true,
+  "repository": "liquid-modernity/consumer-blog-signature",
+  "transition": {
+    "provider": "emdash-plugin/v1",
+    "pluginId": "pakrpp-studio"
+  }
 }

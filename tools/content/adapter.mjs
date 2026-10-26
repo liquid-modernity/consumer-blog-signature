@@ -60,6 +60,27 @@ export function projectPublished(snapshot, request, item) {
   ).slice(7);
   return next;
 }
+// A private projection must use the selected revision, never the provider's published overlay.
+export function projectPreview(snapshot, request, selected, slug) {
+  const data = { ...selected.revision.data };
+  const next = projectPublished(snapshot, request, {
+    ...selected.published,
+    data,
+    liveData: data,
+    slug,
+    status: "published",
+    liveRevisionId: request.selectedRevision,
+    draftRevisionId: null,
+  });
+  next.mode = "prospective-content-preview";
+  next.provenance = {
+    ...next.provenance,
+    liveEmDashExportVerified: false,
+    prospective: true,
+    realProviderReads: 0,
+  };
+  return next;
+}
 export function createContentApplication({
   source,
   identity,
@@ -98,16 +119,12 @@ export function createContentApplication({
         normalized = normalizeApplication(declaration);
       if (!normalized.ok) throw Error("Application declaration is invalid.");
       const result = qualifyEditorial({ request, selected, profile, snapshot });
-      // A prospective projection exists only in this private process; it is never a published export.
-      const item = {
-        ...selected.published,
-        data: { ...selected.revision.data },
-        slug: result.slug,
-        status: "published",
-        liveRevisionId: request.selectedRevision,
-        draftRevisionId: null,
-      };
-      const projection = projectPublished(snapshot, request, item);
+      const projection = projectPreview(
+        snapshot,
+        request,
+        selected,
+        result.slug,
+      );
       const document = projection.documents.find(
         (d) => d.item.type + "/" + d.item.id === request.resource,
       );
@@ -183,7 +200,7 @@ export function createContentApplication({
       if (process.env.GAGA_CONTENT_BUILD_PROOF === "1") {
         const { proveContentBuild } = await import("./build.mjs");
         result.affected = await proveContentBuild({
-          source,
+          source: resolve(import.meta.dirname, "../.."),
           projection,
           baseline: context.artifactRoot,
           cache: context.cache,
@@ -201,7 +218,7 @@ export function createContentApplication({
             "references",
             "route-conflicts",
             "canonical-renderer",
-            "public-corps-projection",
+            "corps-prospective-projection",
             "search-text",
             "private-preview",
           ],

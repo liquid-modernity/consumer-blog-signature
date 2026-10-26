@@ -582,8 +582,48 @@ function SavedReadiness({ entry }: ContentEditorPanelContext) {
 function ContentPublishing({ collection, entry }: ContentEditorPanelContext) {
   const [message, setMessage] = useState("Save your draft before previewing."),
     [html, setHtml] = useState(""),
-    [busy, setBusy] = useState(false);
-  const act = async (kind: "content-preview" | "content-publish") => {
+    [busy, setBusy] = useState(false),
+    [pending, setPending] = useState("");
+  useEffect(() => {
+    if (!pending) return;
+    let active = true,
+      timer: ReturnType<typeof setTimeout>,
+      tries = 0;
+    const poll = async () => {
+      try {
+        const response = await apiFetch(
+          "/_emdash/api/plugins/pakrpp-studio/content-status",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ nonce: pending }),
+          },
+        );
+        const b = await response.json(),
+          r = b.data ?? b;
+        if (!active) return;
+        if (r.message) setMessage(r.message);
+        if (["PUBLISHED", "UNPUBLISHED", "PUBLISH FAILED"].includes(r.status)) {
+          setPending("");
+          return;
+        }
+      } catch {}
+      if (active && ++tries < 120) timer = setTimeout(poll, 5000);
+      else if (active)
+        setMessage(
+          "Your website update is still pending. Ask your site administrator for help; do not publish again.",
+        );
+    };
+    void poll();
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [pending]);
+  const act = async (
+    kind: "content-preview" | "content-publish",
+    action: "publish" | "unpublish" = "publish",
+  ) => {
     setBusy(true);
     try {
       const response = await apiFetch(
@@ -593,9 +633,10 @@ function ContentPublishing({ collection, entry }: ContentEditorPanelContext) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             schema: "gaga.content-request/v1",
-            action: "publish",
+            action,
             resource: collection + "/" + entry.id,
-            selectedRevision: entry.draftRevisionId,
+            selectedRevision:
+              action === "publish" ? entry.draftRevisionId : null,
             expectedPublishedRevision: entry.liveRevisionId,
           }),
         },
@@ -604,6 +645,8 @@ function ContentPublishing({ collection, entry }: ContentEditorPanelContext) {
       const envelope = await response.json(),
         result = envelope.data ?? envelope;
       setMessage(result.message ?? "Your article needs review.");
+      if (result.status === "PUBLISH PENDING" && result.nonce)
+        setPending(result.nonce);
       if (kind === "content-preview" && result.status === "PREVIEW READY")
         setHtml(result.html);
     } catch {
@@ -619,18 +662,27 @@ function ContentPublishing({ collection, entry }: ContentEditorPanelContext) {
       <p role="status">{message}</p>
       <button
         type="button"
-        disabled={busy || !entry.draftRevisionId}
+        disabled={busy || !!pending || !entry.draftRevisionId}
         onClick={() => act("content-preview")}
       >
         Preview saved draft
       </button>
       <button
         type="button"
-        disabled={busy || !entry.draftRevisionId}
+        disabled={busy || !!pending || !entry.draftRevisionId}
         onClick={() => act("content-publish")}
       >
         Publish saved draft
       </button>
+      {entry.status === "published" && (
+        <button
+          type="button"
+          disabled={busy || !!pending}
+          onClick={() => act("content-publish", "unpublish")}
+        >
+          Unpublish
+        </button>
+      )}
       {html && (
         <iframe
           title="Private article preview"

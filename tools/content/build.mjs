@@ -61,7 +61,7 @@ export async function proveContentBuild({
       resolve(root, "content/emdash/published-receipt.json"),
       JSON.stringify({
         status: "PASS",
-        classification: "REAL_EMDASH_API_EXPORT",
+        classification: "PROSPECTIVE_CONTENT_PREVIEW",
         exportSha256: digest(bytes),
       }),
     );
@@ -69,6 +69,7 @@ export async function proveContentBuild({
       PATH: process.env.PATH,
       HOME: process.env.HOME,
       CI: "true",
+      GAGA_CONTENT_PREVIEW_QUALIFICATION: "1",
       PUBLIC_SITE_URL: origin,
       PUBLIC_BUILD_TIME: execFileSync(
         "git",

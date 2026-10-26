@@ -70,7 +70,8 @@ writeFileSync(
       planSha256: sha256(stableStringify(result.value)),
       cmsMode: snapshot.mode,
       editorialDocuments: snapshot.documents.length,
-      recordedProviderExportVerified: snapshot.provenance.liveEmDashExportVerified,
+      recordedProviderExportVerified:
+        snapshot.provenance.liveEmDashExportVerified,
       liveProviderReadDuringBuild: false,
     },
     null,
@@ -78,6 +79,6 @@ writeFileSync(
   ) + "\n",
 );
 console.log(
-  "Application admitted; deterministic plan persisted; recorded EmDash published export verified:",
+  "Application admitted; deterministic plan persisted; admitted content input verified:",
   snapshot.documents.length,
 );
