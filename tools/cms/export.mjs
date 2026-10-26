@@ -3,6 +3,17 @@ import {readFileSync,writeFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {root,hash} from './migration.mjs';
 import {editorialBody} from '../../editorial/portable-text.mjs';
+const canonical=x=>JSON.stringify(x,(_k,v)=>v&&typeof v==='object'&&!Array.isArray(v)?Object.fromEntries(Object.entries(v).sort(([a],[b])=>a.localeCompare(b))):v);
+// Admit effective published bytes before removing a non-public editorial draft pointer.
+export function admitPublishedItem(item,expected){
+ assert.ok(expected?.dataSha256,'Published data admission is required');
+ assert.equal(item.status,'published');assert.equal(item.liveRevisionId,expected.pin.liveRevisionId);
+ const draft=item.draftRevisionId;
+ assert.ok(draft===null||(typeof draft==='string'&&draft.length>0&&draft!==item.liveRevisionId),'Ambiguous draft/published identity');
+ const data=Object.hasOwn(item,'liveData')?item.liveData:item.data;
+ assert.equal(hash(canonical(data)),expected.dataSha256,'Effective published data differs from admission');
+ return {...item,data,draftRevisionId:null};
+}
 export function writePublishedExport(records,{origin,realProviderReads,check=false}){
  const documents=records.map(r=>{
   const item=Object.fromEntries(['id','type','slug','status','updatedAt','publishedAt','liveRevisionId','draftRevisionId','data'].map(k=>[k,r.item[k]]));

@@ -131,3 +131,14 @@ never rebuilds. Provider preflight records the existing Worker version; failed
 mandatory readback/browser verification restores that pinned version once.
 The CMS Worker/stores are not redeployed by publication releases. No Rich Editorial
 Studio, Tank, editor redesign or upstream package change is included.
+
+## Forward foundation admission
+
+A saved non-public draft is not published-state drift. Deployment refresh verifies
+admitted published data/revisions and denied anonymous CMS access before projecting
+published-only records. Commit sign-off text is not release identity; source/tree,
+qualification, exact artifact bytes and canonical main are independently admitted.
+CMS deployment accepts an explicit expected current Worker state and rechecks it
+before the single upload. Historical migration rollback pins remain historical.
+An existing CMS ZIP may be reused only when its exact run/source/digest match and
+all CMS build inputs are unchanged. Foundation installation does not activate publishing.

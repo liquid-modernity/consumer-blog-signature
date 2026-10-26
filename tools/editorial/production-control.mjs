@@ -25,6 +25,9 @@ const plan = load("cms/editorial/migration-plan.json"),
   publication = base + "/workers/scripts/consumer-blog-signature";
 assert.equal(spec.serviceName, "consumer-blog-signature-cms");
 assert.equal(plan.origin, spec.origin);
+const expectedState=process.env.GAGA_EXPECTED_PRODUCTION_STATE?JSON.parse(process.env.GAGA_EXPECTED_PRODUCTION_STATE):{cms:plan.rollback.cmsWorker,publication:plan.rollback.publicationWorker};
+assert.deepEqual(Object.keys(expectedState).sort(),['cms','publication']);
+for(const version of Object.values(expectedState))assert.match(version,/^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/,'Exact expected Worker version required');
 assert.equal(cfg.d1_databases[0].database_id, plan.rollback.d1);
 assert.equal(cfg.r2_buckets[0].bucket_name, plan.rollback.r2);
 assert.equal(cfg.kv_namespaces[0].id, plan.rollback.kv);
@@ -34,6 +37,7 @@ const receipt = {
   source: process.env.GITHUB_SHA,
   planSha256: hash(readFileSync("cms/editorial/migration-plan.json")),
   sourceSetSha256: plan.sourceSetSha256,
+  expectedState,
   uploads: 0,
   resourceCreates: 0,
   contentWrites: 0,
@@ -125,7 +129,7 @@ const inventory = () => {
     }
   }
   walk("cms/dist-cloudflare");
-  return list.sort((a, b) => a.path.localeCompare(b.path));
+  return list.sort((a,b)=>a.path<b.path?-1:a.path>b.path?1:0);
 };
 try {
   assert.equal((await get("/user/tokens/verify")).status, "active");
@@ -147,13 +151,13 @@ try {
   receipt.publication = active(await get(publication + "/deployments"));
   assert.equal(
     receipt.cms.version,
-    plan.rollback.cmsWorker,
-    "CMS changed since plan",
+    expectedState.cms,
+    "CMS differs from expected current production state",
   );
   assert.equal(
     receipt.publication.version,
-    plan.rollback.publicationWorker,
-    "Publication changed since plan",
+    expectedState.publication,
+    "Publication differs from expected current production state",
   );
   receipt.bindings = bindings((await get(cms + "/settings")).bindings);
   receipt.schema = await query(
@@ -230,9 +234,12 @@ try {
     };
   }
   if (mode === "deploy-cms") {
+    if(process.env.GAGA_EXPECTED_PRODUCTION_STATE)assert.equal(process.env.GITHUB_REF,'refs/heads/main','Forward production deployment requires canonical main');
     const admission = load(process.env.GAGA_CMS_ARTIFACT_ADMISSION);
     assert.equal(admission.status, "PASS");
-    assert.equal(admission.planSha256, receipt.planSha256);
+    admission.files.sort((a,b)=>a.path<b.path?-1:a.path>b.path?1:0);
+    if(admission.expectedState)assert.deepEqual(admission.expectedState,expectedState,'Artifact admission and provider expectation differ');
+    else assert.equal(admission.planSha256, receipt.planSha256);
     assert.equal(
       hash(readFileSync(admission.archive)),
       admission.artifactSha256,
@@ -280,6 +287,15 @@ try {
     receipt.qualificationRun = admission.qualificationRun;
     receipt.rollback = { cms: receipt.cms, publication: receipt.publication };
     receipt.beforeFiles = admission.files;
+    const preservedState=async()=>({
+      schema:hash(JSON.stringify(await query("SELECT name,type,sql FROM sqlite_schema WHERE name NOT LIKE 'sqlite_%' ORDER BY name"))),
+      collections:hash(JSON.stringify(await query("SELECT * FROM _emdash_collections ORDER BY slug"))),
+      fields:hash(JSON.stringify(await query("SELECT * FROM _emdash_fields ORDER BY id"))),
+      posts:hash(JSON.stringify(await query("SELECT * FROM ec_posts ORDER BY id"))),
+      authors:hash(JSON.stringify(await query("SELECT * FROM ec_authors ORDER BY id"))),
+      revisions:hash(JSON.stringify(await query("SELECT * FROM revisions ORDER BY id")))
+    });
+    receipt.preservedBefore=await preservedState();
     save();
     const args = [
       resolve("cms/node_modules/wrangler/bin/wrangler.js"),
@@ -294,11 +310,11 @@ try {
       if (!dry) {
         assert.equal(
           active(await get(cms + "/deployments")).version,
-          plan.rollback.cmsWorker,
+          expectedState.cms,
         );
         assert.equal(
           active(await get(publication + "/deployments")).version,
-          plan.rollback.publicationWorker,
+          expectedState.publication,
         );
         receipt.uploads++;
         receipt.pendingOperation =
@@ -348,7 +364,7 @@ try {
       if (receipt.active.version === receipt.newVersion) break;
       assert.equal(
         receipt.active.version,
-        plan.rollback.cmsWorker,
+        expectedState.cms,
         "Competing CMS deployment",
       );
       if (i < 5) await new Promise((r) => setTimeout(r, 2000));
@@ -358,7 +374,7 @@ try {
     bindings((await get(cms + "/settings")).bindings);
     assert.equal(
       active(await get(publication + "/deployments")).version,
-      plan.rollback.publicationWorker,
+      expectedState.publication,
       "Publication Worker changed",
     );
     const origin = plan.origin,
@@ -390,6 +406,8 @@ try {
       );
       receipt.adminRedirect = target.pathname;
     }
+    receipt.preservedAfter=await preservedState();
+    assert.deepEqual(receipt.preservedAfter,receipt.preservedBefore,'Schema/editorial state changed during Worker-only deployment');
     receipt.adminHttpStatus = admin.status;
     receipt.setupHttpStatus = health.status;
     delete receipt.pendingOperation;

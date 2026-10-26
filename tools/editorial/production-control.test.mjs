@@ -1,3 +1,4 @@
+import {createHash} from 'node:crypto';
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
@@ -38,19 +39,34 @@ function simulate(scenario) {
     join(project, "cms/node_modules/emdash/src/database/migrations/runner.ts"),
     runner,
   );
+  const isDeploy=['forward-deploy','state-change','upload-fails'].includes(scenario);
+  if(isDeploy){
+    mkdirSync(join(project,'cms/dist-cloudflare/server'),{recursive:true});mkdirSync(join(project,'cms/node_modules/wrangler/bin'),{recursive:true});
+    const cfg=JSON.parse(readFileSync('cms/wrangler.jsonc'));
+    writeFileSync(join(project,'cms/dist-cloudflare/server/wrangler.json'),JSON.stringify(cfg));
+    writeFileSync(join(project,'cms/dist-cloudflare/server/entry.mjs'),'export default {}');
+    writeFileSync(join(project,'cms/node_modules/wrangler/bin/wrangler.js'),`const fs=require('node:fs');if(!process.argv.includes('--dry-run')){fs.appendFileSync(process.env.TRACE,JSON.stringify({phase:'upload'})+'\\n');fs.writeFileSync(process.env.DEPLOYED,'yes');if(process.env.SCENARIO==='upload-fails')process.exit(1);console.log('Current Version ID: 11111111-1111-4111-8111-111111111111');}`);
+    const hash=x=>createHash('sha256').update(x).digest('hex');
+    const files=['entry.mjs','wrangler.json'].map(n=>({path:'cms/dist-cloudflare/server/'+n,sha256:hash(readFileSync(join(project,'cms/dist-cloudflare/server',n)))}));
+    writeFileSync(join(out,'archive.zip'),'qualified');
+    writeFileSync(join(out,'admission.json'),JSON.stringify({status:'PASS',archive:join(out,'archive.zip'),artifactSha256:hash('qualified'),qualificationRun:123,expectedState:{cms:'e69a0e28-0788-4b8b-80af-77ae17296896',publication:'51f60924-2ec7-4cc0-831f-e36aff523b62'},files}));
+  }
   const preload = join(dir, "provider.mjs");
   writeFileSync(
     preload,
     `
- import {readFileSync,appendFileSync} from 'node:fs';
- const p=JSON.parse(readFileSync('cms/editorial/migration-plan.json')),s=JSON.parse(readFileSync('cms/production.json')),scenario=process.env.SCENARIO;
+ import {readFileSync,appendFileSync,existsSync} from 'node:fs';
+ const p=JSON.parse(readFileSync('cms/editorial/migration-plan.json')),s=JSON.parse(readFileSync('cms/production.json')),scenario=process.env.SCENARIO;const expected=process.env.GAGA_EXPECTED_PRODUCTION_STATE?JSON.parse(process.env.GAGA_EXPECTED_PRODUCTION_STATE):{cms:p.rollback.cmsWorker,publication:p.rollback.publicationWorker};
  const migrations=[...readFileSync('cms/node_modules/emdash/src/database/migrations/runner.ts','utf8').matchAll(/"(\\d{3}_[^"]+)": m\\d+/g)].map(x=>({name:x[1]})).sort((a,b)=>a.name.localeCompare(b.name));
  globalThis.fetch=async(url,o={})=>{
  const path=new URL(url).pathname;appendFileSync(process.env.TRACE,JSON.stringify({path,method:o.method??'GET'})+'\\n');let result;
+ if(path==='/_emdash/api/setup/status')return Response.json({success:true,data:{needsSetup:false}});
+ if(path==='/_emdash/admin')return new Response('Login',{status:200});
  if(o.method==='POST'){
   assertRead();const sql=JSON.parse(o.body).sql;if(!/^SELECT [^;]+$/i.test(sql))throw Error('Forbidden mutation');let rows=[];
   if(sql.includes('_emdash_migrations'))rows=migrations;
-  else if(sql.includes('FROM _emdash_collections'))rows=[{slug:'authors'},{slug:'posts'}];
+  else if(sql.includes('FROM _emdash_collections'))rows=(['forward-deploy','state-change','upload-fails'].includes(scenario)?['authors','pages','posts','references','sections']:['authors','posts']).map(slug=>({slug}));
+  else if(scenario==='state-change'&&existsSync(process.env.DEPLOYED)&&sql.includes('SELECT * FROM ec_posts'))rows=[{changed:true}];
   else if(sql.includes('COUNT(*)'))rows=[{count:sql.includes('ec_posts')?7:sql.includes('ec_authors')||sql.includes('users')?1:0}];
   result=[{success:true,meta:{changes:0},results:rows}];
  }else{
@@ -60,7 +76,7 @@ function simulate(scenario) {
   else if(path.includes('/d1/database/'))result={name:s.databaseName};
   else if(path.includes('/r2/buckets/'))result={name:s.mediaBucket};
   else if(path.endsWith('/storage/kv/namespaces'))result=[{id:p.rollback.kv,title:s.sessionNamespace}];
-  else if(path.endsWith('/deployments'))result={deployments:[{id:'current',versions:[{percentage:100,version_id:scenario==='wrong-version'?'changed':path.includes(s.serviceName)?p.rollback.cmsWorker:p.rollback.publicationWorker}]}]};
+  else if(path.endsWith('/deployments'))result={deployments:[{id:'current',versions:[{percentage:100,version_id:['wrong-version','forward-drift'].includes(scenario)?'changed':path.includes(s.serviceName)?existsSync(process.env.DEPLOYED)?'11111111-1111-4111-8111-111111111111':expected.cms:expected.publication}]}]};
   else if(path.endsWith('/settings'))result={bindings:[{name:'DB',type:'d1',id:scenario==='wrong-binding'?'wrong':p.rollback.d1},{name:'MEDIA',type:'r2_bucket',bucket_name:p.rollback.r2},{name:'SESSION',type:'kv_namespace',namespace_id:p.rollback.kv}]};
   else throw Error('Unexpected provider path');
  }
@@ -73,7 +89,7 @@ function simulate(scenario) {
     mode =
       scenario === "backup"
         ? "backup"
-        : scenario === "missing-artifact"
+        : (scenario === "missing-artifact" || isDeploy)
           ? "deploy-cms"
           : "inspect";
   const r = spawnSync(
@@ -90,11 +106,14 @@ function simulate(scenario) {
         PATH: process.env.PATH,
         SCENARIO: scenario,
         TRACE: trace,
+        DEPLOYED:join(dir,'deployed'),
+        GITHUB_REF:'refs/heads/main',
+        ...(['forward','forward-drift','malformed-expectation','forward-deploy','state-change','upload-fails'].includes(scenario)?{GAGA_EXPECTED_PRODUCTION_STATE:JSON.stringify(scenario==='malformed-expectation'?{cms:'latest',publication:'unknown'}:{cms:'e69a0e28-0788-4b8b-80af-77ae17296896',publication:'51f60924-2ec7-4cc0-831f-e36aff523b62'})}:{}),
         CLOUDFLARE_API_TOKEN: "mock-secret",
         CLOUDFLARE_ACCOUNT_ID: "mock-account",
         GAGA_EVIDENCE_DIRECTORY: out,
         GAGA_EDITORIAL_FREEZE_CONFIRMED: "true",
-        GAGA_CMS_ARTIFACT_ADMISSION: join(out, "missing.json"),
+        GAGA_CMS_ARTIFACT_ADMISSION: join(out,isDeploy?"admission.json":"missing.json"),
       },
       encoding: "utf8",
     },
@@ -145,3 +164,17 @@ for (const scenario of ["inspect", "backup"])
       assert.ok(!JSON.stringify(r.receipt).includes("mock-secret"));
     },
   );
+
+test('forward production state is admitted without rewriting historical migration rollback pins',()=>{
+ const r=simulate('forward');assert.equal(r.code,0,r.error);assert.equal(r.receipt.cms.version,'e69a0e28-0788-4b8b-80af-77ae17296896');assert.equal(r.receipt.uploads,0);
+});
+test('explicit forward expectation still rejects production drift before upload',()=>{
+ const r=simulate('forward-drift');assert.notEqual(r.code,0);assert.equal(r.receipt.uploads,0);assert.equal(r.receipt.schemaWrites,0);assert.equal(r.receipt.contentWrites,0);
+});
+
+test('admitted forward CMS deployment uploads once and proves schema/editorial state unchanged',()=>{
+ const r=simulate('forward-deploy');assert.equal(r.code,0,r.error);assert.equal(r.receipt.uploads,1);assert.equal(r.receipt.newVersion,'11111111-1111-4111-8111-111111111111');assert.deepEqual(r.receipt.preservedAfter,r.receipt.preservedBefore);assert.equal(r.receipt.contentWrites,0);assert.equal(r.receipt.schemaWrites,0);
+});
+for(const scenario of ['state-change','upload-fails'])test(scenario+' stops after one upload and preserves failure evidence',()=>{
+ const r=simulate(scenario);assert.notEqual(r.code,0);assert.equal(r.receipt.uploads,1);assert.equal(r.requests.filter(x=>x.phase==='upload').length,1);assert.equal(r.receipt.status,'FAIL');
+});

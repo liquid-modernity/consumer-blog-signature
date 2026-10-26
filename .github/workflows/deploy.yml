@@ -77,7 +77,6 @@ jobs:
         run: go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.7 -shellcheck= .github/workflows/deploy.yml .github/workflows/emdash-activation.yml
       - name: Source/content/plan identity and qualified artifact manifest
         run: |
-          git log -1 --format=%B | grep -F 'Signed-off-by:'
           node tools/gaga/deployment-manifest.mjs
           cp .gaga/deployment-manifest.json "$GAGA_EVIDENCE_DIRECTORY/deployment-manifest.json"
       - name: Preserve diagnostic/browser evidence

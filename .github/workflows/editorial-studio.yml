@@ -7,10 +7,22 @@ on:
       operation:
         type: choice
         default: qualify
-        options: [qualify, production-preflight, production-backup, deploy-cms]
+        options: [qualify, admission-check, production-preflight, production-backup, deploy-cms]
       qualification_run:
         type: string
         description: Exact successful qualification run for CMS upload
+      artifact_id:
+        type: string
+        description: Optional immutable prequalified CMS artifact ID
+      artifact_sha256:
+        type: string
+        description: Exact prequalified ZIP digest, required with artifact_id
+      artifact_source:
+        type: string
+        description: Immutable CMS source commit, required with artifact_id
+      expected_state:
+        type: string
+        description: Exact expected current CMS and publication versions as JSON
       freeze_confirmed:
         type: boolean
         default: false
@@ -21,6 +33,24 @@ concurrency:
   group: editorial-studio-${{ github.ref }}
   cancel-in-progress: false
 jobs:
+  admission:
+    if: inputs.operation == 'admission-check'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.22.2
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm ci --prefix cms --ignore-scripts --no-audit --no-fund
+      - name: Only changed admission paths and existing zero-side-effect deployment guards
+        run: node --test tools/cms/export.test.mjs tools/editorial/production-control.test.mjs tools/editorial/admission.test.mjs tools/gaga/production-deploy.test.mjs
+      - name: Maintained deployment workflow lint
+        run: go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.7 -shellcheck= .github/workflows/deploy.yml .github/workflows/editorial-studio.yml
   verify:
     if: github.event_name == 'push' || inputs.operation == 'qualify'
     runs-on: ubuntu-24.04
@@ -151,7 +181,7 @@ jobs:
           if-no-files-found: error
 
   production:
-    if: github.event_name == 'workflow_dispatch' && inputs.operation != 'qualify'
+    if: github.event_name == 'workflow_dispatch' && contains(fromJSON('["production-preflight","production-backup","deploy-cms"]'), inputs.operation)
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions:
@@ -175,10 +205,14 @@ jobs:
           npm ci --ignore-scripts --no-audit --no-fund
           npm ci --prefix cms --ignore-scripts --no-audit --no-fund
       - name: Admit the exact qualified artifact without rebuilding
-        if: inputs.operation == 'deploy-cms'
+        if: inputs.operation == 'deploy-cms' || inputs.artifact_id != ''
         env:
           GH_TOKEN: ${{ github.token }}
           QUALIFICATION_RUN: ${{ inputs.qualification_run }}
+          CMS_ARTIFACT_ID: ${{ inputs.artifact_id }}
+          CMS_ARTIFACT_SHA256: ${{ inputs.artifact_sha256 }}
+          CMS_ARTIFACT_SOURCE: ${{ inputs.artifact_source }}
+          GAGA_EXPECTED_PRODUCTION_STATE: ${{ inputs.expected_state }}
         run: python3 tools/editorial/admit-cms-artifact.py
       - name: Recheck admitted production content with the unchanged read-only PAT
         env:
@@ -190,6 +224,7 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           OPERATION: ${{ inputs.operation }}
+          GAGA_EXPECTED_PRODUCTION_STATE: ${{ inputs.expected_state }}
           GAGA_EDITORIAL_FREEZE_CONFIRMED: ${{ inputs.freeze_confirmed }}
           GAGA_CMS_ARTIFACT_ADMISSION: ${{ runner.temp }}/rich-production/artifact-admission.json
         run: |
