@@ -7,6 +7,7 @@ import {
   qualifyEditorial,
   previewDocument,
 } from "../../editorial/content-release.mjs";
+import { editorialBody } from "../../editorial/portable-text.mjs";
 import { readEmDashPublished } from "@gaga/corps-emdash";
 import { stableStringify, normalizeApplication } from "@gaga/arsenal";
 import {
@@ -53,10 +54,9 @@ export function projectPublished(snapshot, request, item) {
     liveRevisionId: item.liveRevisionId,
     updatedAt: item.updatedAt,
   };
+  const body = editorialBody(data);
   d.bodySha256 = hash(
-    typeof data.content === "string"
-      ? data.content
-      : JSON.stringify(data.content),
+    typeof body === "string" ? body : JSON.stringify(body),
   ).slice(7);
   return next;
 }
