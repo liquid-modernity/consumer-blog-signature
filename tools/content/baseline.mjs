@@ -11,6 +11,7 @@ export function admitPublicReuse(paths){
   /^tools\/.+\.test\.mjs$/.test(path)||path==='tools/content/baseline.mjs',
   'Public build input changed; fresh application qualification is required: '+path);
 }
+export const qualificationContent=records=>records.map(({id,resource,revision,updatedAt,bodyDigest})=>({id,resource,revision,updatedAt,bodyDigest}));
 export async function sealBaseline({previous,root,controller,cache,output,env=process.env}){
  const module=p=>import(pathToFileURL(resolve(controller,'release',p)));
  const [{sourceIdentity,safePath},{fingerprint,bytesDigest,admitManifest},{githubEvidence},{transport}]=await Promise.all([
@@ -37,7 +38,7 @@ export async function sealBaseline({previous,root,controller,cache,output,env=pr
  const index={schema:'gaga.qualification/v1',source,buildSource:previous.source,
   foundation:{controller:controllerIdentity,pipeline:source,publishing:inspection.publishing,expectedState:{publication:inspection.publication.version,cms:inspection.cms.version},bindings:inspection.bindings},
   reuse:{qualification:evidence.evidence,artifact:previous.artifact,scope:'Unchanged public build inputs; CMS/admin, tests and workflow changes only',privateChanges:changes},
-  files:evidence.inventory,checks:evidence.checks.map(id=>({id,status:'passed'})),content:previous.content.records};
+  files:evidence.inventory,checks:evidence.checks.map(id=>({id,status:'passed'})),content:qualificationContent(previous.content.records)};
  const indexPath='.gaga/baseline-qualification.json';mkdirSync(dirname(resolve(payload,indexPath)),{recursive:true});
  writeFileSync(resolve(payload,indexPath),JSON.stringify(index,null,2)+'\n');
  const next=structuredClone(previous);next.release.id=previous.release.id+'/preview-baseline';

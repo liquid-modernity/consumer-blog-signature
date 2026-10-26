@@ -167,6 +167,8 @@ jobs:
           node-version: 22.22.2
       - run: npm ci --prefix controller --ignore-scripts --no-audit --no-fund
       - name: Focused evidence-reuse tests and workflow lint
+        env:
+          GAGA_CONTROLLER_ROOT: ${{ github.workspace }}/controller
         run: |
           cd application
           node --test tools/content/baseline.test.mjs
