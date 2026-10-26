@@ -1,0 +1,109 @@
+name: Content release zero-mutation qualification
+on:
+  push:
+    branches: [review/content-release-pipeline-v1]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: content-release-zero-mutation
+  cancel-in-progress: false
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Qualified Garrison controller
+        uses: actions/checkout@v4
+        with:
+          repository: liquid-modernity/gaga-garrison
+          ref: 669deecf9d1f2e63c02c2c7b24426b1660693e72
+          token: ${{ secrets.GAGA_CONTROLLER_READ_TOKEN }}
+          path: controller
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Application-owned adapter under review
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: application
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.22.2
+      - run: npm ci --prefix controller --ignore-scripts --no-audit --no-fund
+      - run: npm ci --prefix application --ignore-scripts --no-audit --no-fund
+      - run: npm ci --prefix application/cms --ignore-scripts --no-audit --no-fund
+      - name: Resolve immutable deployed application source
+        id: source
+        run: |
+          node controller/release/control.mjs describe controller/release/manifests/consumer-blog-signature.json > "$RUNNER_TEMP/content-source.json"
+          node --input-type=module - <<'JS'
+          import {readFileSync,appendFileSync} from 'node:fs';
+          const x=JSON.parse(readFileSync(process.env.RUNNER_TEMP+'/content-source.json'));
+          appendFileSync(process.env.GITHUB_OUTPUT,`repository=${x.repository}\ncommit=${x.commit}\n`);
+          JS
+      - name: Immutable released source
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ steps.source.outputs.repository }}
+          ref: ${{ steps.source.outputs.commit }}
+          path: candidate
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Universal and content regressions
+        run: npm test --prefix controller
+      - name: Application, public boundaries, Studio and content regressions
+        working-directory: application
+        run: node --test tools/content/content.test.mjs tools/editorial/plugin.test.mjs tools/editorial/boundaries.test.mjs tools/gaga/application.test.mjs
+      - name: Strict CMS typing
+        working-directory: application
+        run: node node_modules/typescript/bin/tsc --project cms/tsconfig.json --noEmit
+      - name: Dependency audits
+        run: |
+          npm audit --prefix controller --omit=dev --audit-level=low
+          npm audit --prefix application --audit-level=low
+          npm audit --prefix application/cms --audit-level=low
+      - name: Workflow lint
+        run: go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.7 -shellcheck= controller/.github/workflows/universal-release.yml application/.github/workflows/content-release.yml
+      - name: Exact live draft, private preview/build and published production verification
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CMS_READ_TOKEN: ${{ secrets.CMS_READ_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          GAGA_CONTENT_BUILD_PROOF: '1'
+        run: |
+          node controller/release/control.mjs content-qualify controller/release/manifests/consumer-blog-signature.json \
+            --source "$GITHUB_WORKSPACE/candidate" \
+            --intent controller/release/manifests/consumer-blog-signature-content.json \
+            --application "$GITHUB_WORKSPACE/application/tools/content/adapter.mjs" \
+            --cache "$RUNNER_TEMP/content-release-cache" \
+            --receipt "$RUNNER_TEMP/content-release/receipt.json"
+      - name: Assert preserved draft and zero production mutation
+        run: |
+          node --input-type=module - <<'JS'
+          import {readFileSync} from 'node:fs';import assert from 'node:assert/strict';
+          const r=JSON.parse(readFileSync(process.env.RUNNER_TEMP+'/content-release/receipt.json'));
+          assert.equal(r.status,'VERIFIED');
+          for(const k of ['attempts','uploads','resourceCreates','contentWrites','schemaWrites','contentMutationAttempts'])assert.equal(r.deployment[k],0);
+          assert.equal(r.deployment.transport.mutatingRequests,0);
+          assert.equal(r.pipeline.transition.status,'not-applied');
+          assert.equal(r.pipeline.classification.type,'CONTENT');
+          assert.equal(r.pipeline.preview.authorizedStatus,200);
+          assert.equal(r.pipeline.preview.anonymousStatus,401);
+          assert.equal(r.pipeline.preview.selectedRevision,r.pipeline.selection.revision);
+          assert.deepEqual(r.actualState,r.expectedState);
+          assert.ok(r.editorial.records.some(x=>x.draftRevision===r.pipeline.selection.revision));
+          console.log(JSON.stringify({status:r.status,publishedRecords:r.content.records.length,preview:'PRIVATE',affectedPublicFiles:r.readback.publicFiles.length,productionMutations:0}));
+          JS
+      - name: Preserve the one canonical content receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: content-release-receipt
+          path: ${{ runner.temp }}/content-release/receipt.json
+          if-no-files-found: error
+          retention-days: 90
