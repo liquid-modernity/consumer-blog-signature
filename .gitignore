@@ -41,5 +41,7 @@ cms/emdash-env.d.ts
 # Generated isolated editorial studio types and native migration manifest
 cms/studio/.emdash/
 cms/studio/emdash-env.d.ts
+cms/authorization-proof/.emdash/
+cms/authorization-proof/emdash-env.d.ts
 
 cms/dist-editorial-cloudflare/
