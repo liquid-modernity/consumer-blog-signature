@@ -5,7 +5,7 @@ import {resolve,dirname,relative,isAbsolute}from'node:path';
 import {pathToFileURL}from'node:url';
 import {execFileSync}from'node:child_process';
 export function admitPublicReuse(paths){
- assert.ok(paths.length>0,'No source correction to admit');
+ // Metadata-only readmission may keep the exact same application source.
  for(const path of paths)assert.ok(
   path.startsWith('cms/editorial/')||path.startsWith('.github/workflows/')||
   /^tools\/.+\.test\.mjs$/.test(path)||['tools/content/baseline.mjs','tools/editorial/production-control.mjs','tools/editorial/provider-bindings.mjs','tools/editorial/admit-cms-artifact.py'].includes(path),

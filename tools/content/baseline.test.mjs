@@ -27,3 +27,5 @@ test('application secret metadata follows the actual Garrison manifest contract'
  d.bindings=inspectCmsBindings([{name:'DB',type:'d1',id:resources.d1},{name:'MEDIA',type:'r2_bucket',bucket_name:resources.r2},{name:'SESSION',type:'kv_namespace',namespace_id:resources.kv},{name:secret.name,type:'secret_text'}],{worker:d.id,resources,secrets:[secret]});
  assert.doesNotThrow(()=>admitManifest(m));assert.deepEqual(d.bindings.find(b=>b.kind==='secret'),secret);
 });
+
+test('metadata-only readmission can reuse unchanged application source without permitting new build inputs',()=>{assert.doesNotThrow(()=>admitPublicReuse([]));assert.throws(()=>admitPublicReuse(['wrangler.jsonc']),/fresh application qualification/);});
