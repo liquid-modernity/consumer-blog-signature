@@ -7,6 +7,8 @@ import {execFileSync,spawnSync}from'node:child_process';
 function simulate(scenario){
  const temp=mkdtempSync(join(tmpdir(),'cms-admission-')),root=join(temp,'app'),out=join(temp,'evidence');
  mkdirSync(join(root,'tools/editorial'),{recursive:true});mkdirSync(join(root,'tools/gaga'));mkdirSync(join(root,'cms'));mkdirSync(out);
+ copyFileSync('tools/editorial/provider-bindings.mjs',join(root,'tools/editorial/provider-bindings.mjs'));
+ copyFileSync('cms/production.json',join(root,'cms/production.json'));
  copyFileSync('tools/editorial/admit-cms-artifact.py',join(root,'tools/editorial/admit-cms-artifact.py'));
  copyFileSync('tools/gaga/source-identity.mjs',join(root,'tools/gaga/source-identity.mjs'));
  writeFileSync(join(root,'cms/input'),'qualified source');
@@ -37,10 +39,13 @@ urllib.request.build_opener=lambda *a:Mock()
 runpy.run_path('tools/editorial/admit-cms-artifact.py',run_name='__main__')
 `);
  try{
- const r=spawnSync('python3',[mock],{cwd:root,env:{...process.env,SCENARIO:scenario,GH_TOKEN:'fake-token',QUALIFICATION_RUN:'123',CMS_ARTIFACT_ID:'456',CMS_ARTIFACT_SOURCE:source,GITHUB_SHA:controller,GITHUB_REF:'refs/heads/main',GAGA_EVIDENCE_DIRECTORY:out,GAGA_EXPECTED_PRODUCTION_STATE:JSON.stringify({cms:'e69a0e28-0788-4b8b-80af-77ae17296896',publication:'51f60924-2ec7-4cc0-831f-e36aff523b62'})},encoding:'utf8'});
+ const r=spawnSync('python3',[mock],{cwd:root,env:{...process.env,SCENARIO:scenario,GH_TOKEN:'fake-token',QUALIFICATION_RUN:'123',CMS_ARTIFACT_ID:'456',CMS_ARTIFACT_SOURCE:source,GITHUB_SHA:controller,GITHUB_REF:'refs/heads/main',GAGA_EVIDENCE_DIRECTORY:out,GAGA_EXPECTED_PRODUCTION_STATE:JSON.stringify({...(['secret-valid','secret-wrong-worker','secret-value'].includes(scenario)?{cmsSecretBindings:[{name:'EMDASH_ENCRYPTION_KEY',kind:'secret',identity:scenario==='secret-wrong-worker'?'another/EMDASH_ENCRYPTION_KEY':'consumer-blog-signature-cms/EMDASH_ENCRYPTION_KEY',present:true,...(scenario==='secret-value'?{value:'do-not-record'}:{})}]}:{}),cms:'e69a0e28-0788-4b8b-80af-77ae17296896',publication:'51f60924-2ec7-4cc0-831f-e36aff523b62'})},encoding:'utf8'});
  return{code:r.status,error:r.stderr,receipt:existsSync(join(out,'artifact-admission.json'))?JSON.parse(readFileSync(join(out,'artifact-admission.json'))):null,extracted:existsSync(join(root,'cms/dist-cloudflare/server/wrangler.json'))};
  }finally{rmSync(temp,{recursive:true,force:true});}
 }
 test('unchanged qualified CMS bytes are admitted with a distinct immutable controller source',()=>{const r=simulate('ok');assert.equal(r.code,0,r.error);assert.equal(r.receipt.rebuilds,0);assert.notEqual(r.receipt.qualifiedSource,r.receipt.controllerSource);assert.equal(r.extracted,true);});
 for(const scenario of ['wrong-digest','wrong-source','wrong-run','failed-run','expired','changed-cms'])test(scenario+' rejects existing artifact before extraction',()=>{const r=simulate(scenario);assert.notEqual(r.code,0);assert.equal(r.extracted,false);assert.equal(r.receipt,null);});
 test('legacy signoff was replaced by immutable source and artifact admission, not a history rewrite',()=>{const w=readFileSync('.github/workflows/deploy.yml','utf8');assert.ok(!w.includes("grep -F 'Signed-off-by:'"));assert.ok(w.includes('node tools/gaga/deployment-manifest.mjs'));assert.ok(w.includes('python3 tools/gaga/admit-production.py'));assert.ok(readFileSync('tools/gaga/deployment-manifest.mjs','utf8').includes('sourceIdentity()'));});
+
+test('artifact admission carries an explicit validated secret expectation without installing it',()=>{const r=simulate('secret-valid');assert.equal(r.code,0,r.error);assert.equal(r.receipt.expectedState.cmsSecretBindings[0].present,true);assert.equal(r.receipt.rebuilds,0);});
+for(const scenario of ['secret-wrong-worker','secret-value'])test('artifact admission rejects '+scenario,()=>{const r=simulate(scenario);assert.notEqual(r.code,0);assert.equal(r.receipt,null);assert.ok(!r.error.includes('do-not-record'));});

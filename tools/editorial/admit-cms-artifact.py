@@ -49,8 +49,7 @@ with zipfile.ZipFile(archive) as z:
   if path.parts[:2]==('cms','dist-cloudflare'):files.append({'path':str(path),'sha256':hashlib.sha256(z.read(f)).hexdigest()})
 if explicit:
  assert any(f['path']=='cms/dist-cloudflare/server/wrangler.json' for f in files),'Worker configuration missing'
- state=json.loads(os.environ['GAGA_EXPECTED_PRODUCTION_STATE']);assert set(state)=={'cms','publication'}
- assert all(re.fullmatch('[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}',x) for x in state.values())
+ state=json.loads(subprocess.check_output(['node','--input-type=module','-e',"import{readFileSync}from'node:fs';import{admitExpectedState}from'./tools/editorial/provider-bindings.mjs';const worker=JSON.parse(readFileSync('cms/production.json')).serviceName;console.log(JSON.stringify(admitExpectedState(JSON.parse(process.env.GAGA_EXPECTED_PRODUCTION_STATE),worker)));"],text=True))
  receipt={'status':'PASS','qualificationRun':run_id,'qualifiedSource':source,'controllerSource':os.environ['GITHUB_SHA'],'artifactId':artifact['id'],'artifactSha256':digest,'archive':str(archive),'expectedState':state,'files':sorted(files,key=lambda f:f['path']),'rebuilds':0}
 else:
  manifest=json.loads((root/'.gaga/cms-qualified.json').read_text());assert manifest['sourceCommit']==run['head_sha'] and str(manifest['qualificationRun'])==run_id

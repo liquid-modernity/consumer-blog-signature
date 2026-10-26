@@ -26,6 +26,7 @@ function simulate(scenario) {
   mkdirSync(out);
   for (const p of [
     "tools/editorial/production-control.mjs",
+    "tools/editorial/provider-bindings.mjs",
     "cms/editorial/migration-plan.json",
     "cms/production.json",
     "cms/wrangler.jsonc",
@@ -78,7 +79,7 @@ function simulate(scenario) {
   else if(path.includes('/r2/buckets/'))result={name:s.mediaBucket};
   else if(path.endsWith('/storage/kv/namespaces'))result=[{id:p.rollback.kv,title:s.sessionNamespace}];
   else if(path.endsWith('/deployments'))result={deployments:[{id:'current',versions:[{percentage:100,version_id:['wrong-version','forward-drift'].includes(scenario)?'changed':path.includes(s.serviceName)?existsSync(process.env.DEPLOYED)?'11111111-1111-4111-8111-111111111111':expected.cms:expected.publication}]}]};
-  else if(path.endsWith('/settings'))result={bindings:[{name:'DB',type:'d1',id:scenario==='wrong-binding'?'wrong':p.rollback.d1},{name:'MEDIA',type:'r2_bucket',bucket_name:p.rollback.r2},{name:'SESSION',type:'kv_namespace',namespace_id:p.rollback.kv}]};
+  else if(path.endsWith('/settings'))result={bindings:[{name:'DB',type:'d1',id:scenario==='wrong-binding'?'wrong':p.rollback.d1},{name:'MEDIA',type:'r2_bucket',bucket_name:p.rollback.r2},{name:'SESSION',type:'kv_namespace',namespace_id:p.rollback.kv},...(['secret-declared','secret-unexpected','secret-wrong-type'].includes(scenario)?[{name:'EMDASH_ENCRYPTION_KEY',type:scenario==='secret-wrong-type'?'plain_text':'secret_text',text:'synthetic-value-must-never-be-recorded'}]:[])]};
   else throw Error('Unexpected provider path');
  }
  return Response.json({success:true,result});
@@ -111,6 +112,7 @@ function simulate(scenario) {
         GAGA_CONTENT_RELEASE_ENABLED:'false',
         GITHUB_REF:'refs/heads/main',
         ...(['forward','forward-drift','malformed-expectation','forward-deploy','state-change','upload-fails','native-enabled'].includes(scenario)?{GAGA_EXPECTED_PRODUCTION_STATE:JSON.stringify(scenario==='malformed-expectation'?{cms:'latest',publication:'unknown'}:{cms:'e69a0e28-0788-4b8b-80af-77ae17296896',publication:'51f60924-2ec7-4cc0-831f-e36aff523b62'})}:{}),
+        ...(['secret-declared','secret-missing','secret-wrong-type'].includes(scenario)?{GAGA_EXPECTED_PRODUCTION_STATE:JSON.stringify({cms:'e69a0e28-0788-4b8b-80af-77ae17296896',publication:'51f60924-2ec7-4cc0-831f-e36aff523b62',cmsSecretBindings:[{name:'EMDASH_ENCRYPTION_KEY',kind:'secret',identity:'consumer-blog-signature-cms/EMDASH_ENCRYPTION_KEY',present:true}]})}:{}),
         CLOUDFLARE_API_TOKEN: "mock-secret",
         CLOUDFLARE_ACCOUNT_ID: "mock-account",
         GAGA_EVIDENCE_DIRECTORY: out,
@@ -182,3 +184,20 @@ for(const scenario of ['state-change','upload-fails'])test(scenario+' stops afte
 });
 
 test('native publishing enabled blocks foundation admission without upload or content/schema writes',()=>{const r=simulate('native-enabled');assert.notEqual(r.code,0);assert.equal(r.receipt.uploads,0);assert.equal(r.receipt.contentWrites,0);assert.equal(r.receipt.schemaWrites,0);});
+
+test('declared production secret metadata is inspected without value disclosure',()=>{
+ const r=simulate('secret-declared');assert.equal(r.code,0,r.error);assert.equal(r.receipt.status,'PASS');assert.equal(r.receipt.uploads,0);assert.equal(r.receipt.contentWrites,0);assert.equal(r.receipt.schemaWrites,0);
+ assert.deepEqual(r.receipt.bindings.find(b=>b.kind==='secret'),{name:'EMDASH_ENCRYPTION_KEY',kind:'secret',identity:'consumer-blog-signature-cms/EMDASH_ENCRYPTION_KEY',present:true});
+ assert.ok(!JSON.stringify(r).includes('synthetic-value-must-never-be-recorded'));
+});
+for(const scenario of ['secret-unexpected','secret-missing','secret-wrong-type'])test(scenario+' fails with zero provider mutations',()=>{
+ const r=simulate(scenario);assert.notEqual(r.code,0);assert.equal(r.receipt.uploads,0);assert.equal(r.receipt.contentWrites,0);assert.equal(r.receipt.schemaWrites,0);assert.ok(!JSON.stringify(r).includes('synthetic-value-must-never-be-recorded'));assert.ok(r.requests.every(x=>x.method==='GET'||x.path.endsWith('/query')));
+});
+test('pure metadata inspection never accesses secret values and rejects wrong Worker declarations',async()=>{
+ const {inspectCmsBindings,admitExpectedState}=await import('./provider-bindings.mjs');const worker='consumer-blog-signature-cms',resources={d1:'database',r2:'bucket',kv:'namespace'},secret={name:'EMDASH_ENCRYPTION_KEY',kind:'secret',identity:worker+'/EMDASH_ENCRYPTION_KEY',present:true};
+ const row={name:secret.name,type:'secret_text'};for(const k of ['value','text'])Object.defineProperty(row,k,{enumerable:true,get(){throw Error('Secret value was read');}});
+ const actual=[{name:'DB',type:'d1',id:resources.d1},{name:'MEDIA',type:'r2_bucket',bucket_name:resources.r2},{name:'SESSION',type:'kv_namespace',namespace_id:resources.kv},row];
+ const result=inspectCmsBindings(actual,{worker,resources,secrets:[secret]});assert.deepEqual(result.find(x=>x.kind==='secret'),secret);assert.ok(!JSON.stringify(result).includes('"text"'));
+ for(const change of [{identity:'another-worker/EMDASH_ENCRYPTION_KEY'},{kind:'plain_text'},{present:false},{value:'do-not-record'},{name:undefined}])assert.throws(()=>admitExpectedState({cms:'11111111-1111-4111-8111-111111111111',publication:'22222222-2222-4222-8222-222222222222',cmsSecretBindings:[{...secret,...change}]},worker));
+ assert.throws(()=>inspectCmsBindings([...actual,row],{worker,resources,secrets:[secret]}));assert.throws(()=>inspectCmsBindings([...actual,{name:'OTHER',type:'assets'}],{worker,resources,secrets:[secret]}));
+});

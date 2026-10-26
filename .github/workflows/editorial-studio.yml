@@ -22,7 +22,7 @@ on:
         description: Immutable CMS source commit, required with artifact_id
       expected_state:
         type: string
-        description: Exact expected current CMS and publication versions as JSON
+        description: Exact CMS/publication versions and optional cmsSecretBindings metadata as JSON
       freeze_confirmed:
         type: boolean
         default: false

@@ -8,7 +8,7 @@ export function admitPublicReuse(paths){
  assert.ok(paths.length>0,'No source correction to admit');
  for(const path of paths)assert.ok(
   path.startsWith('cms/editorial/')||path.startsWith('.github/workflows/')||
-  /^tools\/.+\.test\.mjs$/.test(path)||path==='tools/content/baseline.mjs',
+  /^tools\/.+\.test\.mjs$/.test(path)||['tools/content/baseline.mjs','tools/editorial/production-control.mjs','tools/editorial/provider-bindings.mjs','tools/editorial/admit-cms-artifact.py'].includes(path),
   'Public build input changed; fresh application qualification is required: '+path);
 }
 export const qualificationContent=records=>records.map(({id,resource,revision,updatedAt,bodyDigest})=>({id,resource,revision,updatedAt,bodyDigest}));
@@ -42,7 +42,7 @@ export async function sealBaseline({previous,root,controller,cache,output,env=pr
  const indexPath='.gaga/baseline-qualification.json';mkdirSync(dirname(resolve(payload,indexPath)),{recursive:true});
  writeFileSync(resolve(payload,indexPath),JSON.stringify(index,null,2)+'\n');
  const next=structuredClone(previous);next.release.id=previous.release.id+'/preview-baseline';
- next.source={...previous.source,...source};next.expectedState.dependencies.find(d=>d.id==='consumer-blog-signature-cms').revision=inspection.cms.version;next.rollback.revision=inspection.publication.version;next.qualification.reference=`https://api.github.com/repos/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}`;
+ next.source={...previous.source,...source};const cms=next.expectedState.dependencies.find(d=>d.id==='consumer-blog-signature-cms');cms.revision=inspection.cms.version;cms.bindings=inspection.bindings;next.rollback.revision=inspection.publication.version;next.qualification.reference=`https://api.github.com/repos/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}`;
  next.artifact.index={path:indexPath,format:'gaga.qualification/v1',digest:bytesDigest(readFileSync(resolve(payload,indexPath)))};
  next.artifact.inventoryDigest=fingerprint(evidence.inventory);
  writeFileSync(resolve(output,'manifest-template.json'),JSON.stringify(next,null,2)+'\n');

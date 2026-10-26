@@ -1,5 +1,6 @@
 // Existing application CMS only. Inspect/recovery are read-only; deploy accepts one checksum-pinned qualified artifact.
 import assert from "node:assert/strict";
+import {admitExpectedState,inspectCmsBindings} from "./provider-bindings.mjs";
 import { readFileSync, writeFileSync, mkdirSync, readdirSync } from "node:fs";
 import { resolve, relative } from "node:path";
 import { createHash } from "node:crypto";
@@ -25,9 +26,7 @@ const plan = load("cms/editorial/migration-plan.json"),
   publication = base + "/workers/scripts/consumer-blog-signature";
 assert.equal(spec.serviceName, "consumer-blog-signature-cms");
 assert.equal(plan.origin, spec.origin);
-const expectedState=process.env.GAGA_EXPECTED_PRODUCTION_STATE?JSON.parse(process.env.GAGA_EXPECTED_PRODUCTION_STATE):{cms:plan.rollback.cmsWorker,publication:plan.rollback.publicationWorker};
-assert.deepEqual(Object.keys(expectedState).sort(),['cms','publication']);
-for(const version of Object.values(expectedState))assert.match(version,/^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/,'Exact expected Worker version required');
+const expectedState=admitExpectedState(process.env.GAGA_EXPECTED_PRODUCTION_STATE?JSON.parse(process.env.GAGA_EXPECTED_PRODUCTION_STATE):{cms:plan.rollback.cmsWorker,publication:plan.rollback.publicationWorker},spec.serviceName);
 assert.equal(cfg.d1_databases[0].database_id, plan.rollback.d1);
 assert.equal(cfg.r2_buckets[0].bucket_name, plan.rollback.r2);
 assert.equal(cfg.kv_namespaces[0].id, plan.rollback.kv);
@@ -97,21 +96,7 @@ function active(result) {
   return { id: d.id, version: d.versions[0].version_id };
 }
 function bindings(actual) {
-  for (const [name, type, key, value] of [
-    ["DB", "d1", "id", plan.rollback.d1],
-    ["MEDIA", "r2_bucket", "bucket_name", plan.rollback.r2],
-    ["SESSION", "kv_namespace", "namespace_id", plan.rollback.kv],
-  ]) {
-    const rows = actual.filter((x) => x.name === name);
-    assert.equal(rows.length, 1);
-    assert.equal(rows[0].type, type);
-    assert.equal(rows[0][key], value);
-  }
-  assert.ok(
-    actual.every((x) => ["DB", "MEDIA", "SESSION", "ASSETS"].includes(x.name)),
-    "Unexpected binding",
-  );
-  return actual.filter((x) => x.name !== "ASSETS");
+  return inspectCmsBindings(actual,{worker:spec.serviceName,resources:plan.rollback,secrets:expectedState.cmsSecretBindings??[]});
 }
 const inventory = () => {
   const list = [];

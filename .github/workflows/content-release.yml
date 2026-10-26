@@ -15,7 +15,7 @@ on:
       expected_state:
         type: string
         default: '{}'
-        description: Exact current CMS/publication Worker versions for read-only disabled-state inspection
+        description: Exact CMS/publication Worker versions; optional cmsSecretBindings metadata, read-only disabled inspection
 permissions:
   contents: read
   actions: read
@@ -32,7 +32,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: liquid-modernity/gaga-garrison
-          ref: bc91cbe5155e2fe35c7976f8b63e094151c5d7a9
+          ref: ed93b5b9611ce97f33d138e945bdd7bb563750c2
           token: ${{ secrets.GAGA_CONTROLLER_READ_TOKEN }}
           path: controller
           fetch-depth: 0
@@ -150,7 +150,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: liquid-modernity/gaga-garrison
-          ref: bc91cbe5155e2fe35c7976f8b63e094151c5d7a9
+          ref: ed93b5b9611ce97f33d138e945bdd7bb563750c2
           token: ${{ secrets.GAGA_CONTROLLER_READ_TOKEN }}
           path: controller
           fetch-depth: 0
@@ -186,6 +186,10 @@ jobs:
           JS
       - run: npm ci --prefix application/cms --ignore-scripts --no-audit --no-fund
         if: inputs.operation == 'seal-baseline'
+      - name: Focused provider and exact CMS artifact admission regressions
+        if: inputs.operation == 'seal-baseline'
+        working-directory: application
+        run: node --test tools/editorial/production-control.test.mjs tools/editorial/admission.test.mjs
       - name: Read-only current bindings, content/schema counts and disabled switches
         if: inputs.operation == 'seal-baseline'
         working-directory: application
