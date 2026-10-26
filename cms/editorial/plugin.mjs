@@ -37,6 +37,7 @@ export function createPlugin() {
     capabilities: [
       "content:write",
       "content:read",
+      "content:revisions:read",
       "content:publish",
       "hooks.content-policy:register",
       "network:request",

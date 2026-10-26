@@ -93,3 +93,14 @@ test("managed legacy constraints support new rich authoring through public schem
     createHash("sha256").update(r.body).digest("hex"),
   );
 });
+
+test('native preview declares the public EmDash capability that installs exact revision reads',async()=>{
+ const {createRequire}=await import('node:module');
+ const require=createRequire(new URL('../../cms/package.json',import.meta.url));
+ const {createContentAccess}=await import(require.resolve('emdash'));
+ const capabilities=createPlugin().capabilities;
+ assert.ok(capabilities.includes('content:revisions:read'));
+ const native=createContentAccess({}, {revisions:capabilities.includes('content:revisions:read')});
+ assert.equal(typeof native.getRevision,'function');
+ assert.equal(typeof createContentAccess({}, {revisions:false}).getRevision,'undefined');
+});

@@ -136,13 +136,15 @@ export function contentReleaseRoutes({ dispatch = null } = {}) {
       x.action === "publish" ? x.selectedRevision : x.expectedPublishedRevision,
     );
     check(
-      revision && revision.collection === collection && revision.entryId === id,
+      revision &&
+        revision.id === (x.action === "publish" ? x.selectedRevision : x.expectedPublishedRevision) &&
+        revision.collection === collection && revision.entryId === id,
       "That saved revision is unavailable.",
     );
     const documents = [];
     for (const c of profile.collections) {
       const list = await ctx.content.list(c, {
-        status: "published",
+        where: { status: "published" },
         limit: 100,
       });
       check(!list.hasMore, "The content catalog needs application review.");

@@ -58,12 +58,14 @@ function ctx() {
     content: {
       getVersioned: async () => ({ item, _rev: "opaque-native-cas" }),
       getRevision: async () => selected.revision,
-      list: async (collection) => ({
+      list: async (collection,options) => {
+        assert.deepEqual(options,{where:{status:'published'},limit:100});
+        return ({
         items: snapshot.documents
           .filter((d) => d.item.type === collection)
           .map((d) => d.item),
         hasMore: false,
-      }),
+      });},
     },
   };
 }
@@ -246,4 +248,11 @@ test("configured server dispatch authenticates the exact request without exposin
   );
   c.user = { id: "other-user" };
   assert.equal((await routes["content-status"].handler(c)).status, "DENIED");
+});
+
+test('preview rejects a revision response with the wrong exact identity or record owner',async()=>{
+ for(const changed of [{id:'another-revision'},{entryId:'another-entry'},{collection:'authors'}]){
+  const c=ctx();c.content.getRevision=async()=>({...selected.revision,...changed});
+  assert.equal((await contentReleaseRoutes()['content-preview'].handler(c)).status,'PREVIEW UNAVAILABLE');
+ }
 });

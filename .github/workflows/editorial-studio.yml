@@ -7,7 +7,7 @@ on:
       operation:
         type: choice
         default: qualify
-        options: [qualify, admission-check, production-preflight, production-backup, deploy-cms]
+        options: [qualify, admission-check, preview-check, production-preflight, production-backup, deploy-cms]
       qualification_run:
         type: string
         description: Exact successful qualification run for CMS upload
@@ -51,6 +51,48 @@ jobs:
         run: node --test tools/cms/export.test.mjs tools/editorial/production-control.test.mjs tools/editorial/admission.test.mjs tools/gaga/production-deploy.test.mjs
       - name: Maintained deployment workflow lint
         run: go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.7 -shellcheck= .github/workflows/deploy.yml .github/workflows/editorial-studio.yml
+  preview:
+    if: inputs.operation == 'preview-check'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.22.2
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm ci --prefix cms --ignore-scripts --no-audit --no-fund
+      - name: Exact native revision capability, canonical preview and unchanged security boundaries
+        run: node --test tools/content/content.test.mjs tools/editorial/plugin.test.mjs tools/editorial/boundaries.test.mjs
+      - name: Strict CMS types
+        run: node node_modules/typescript/bin/tsc --project cms/tsconfig.json --noEmit
+      - name: Build the changed CMS once and prove compiled native startup without provider credentials
+        env:
+          GAGA_EVIDENCE_DIRECTORY: ${{ runner.temp }}/preview-qualification/evidence
+        run: |
+          mkdir -p "$RUNNER_TEMP/preview-qualification/evidence"
+          npm run build:cloudflare --prefix cms > "$RUNNER_TEMP/preview-qualification/cms-build.log" 2>&1
+          node tools/cms/runtime-proof.mjs
+      - name: Maintained workflow lint
+        run: go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.7 -shellcheck= .github/workflows/editorial-studio.yml
+      - name: Source unchanged
+        run: |
+          git diff --exit-code
+          test -z "$(git ls-files --others --exclude-standard)"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cms-worker-candidate
+          path: cms/dist-cloudflare
+          include-hidden-files: true
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: preview-qualification-evidence
+          path: ${{ runner.temp }}/preview-qualification
   verify:
     if: github.event_name == 'push' || inputs.operation == 'qualify'
     runs-on: ubuntu-24.04
