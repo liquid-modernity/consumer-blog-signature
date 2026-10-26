@@ -7,7 +7,7 @@ on:
       operation:
         type: choice
         default: qualify
-        options: [qualify, admission-check, preview-check, production-preflight, production-backup, deploy-cms]
+        options: [qualify, authorization-check, admission-check, preview-check, production-preflight, production-backup, deploy-cms]
       qualification_run:
         type: string
         description: Exact successful qualification run for CMS upload
@@ -33,6 +33,50 @@ concurrency:
   group: editorial-studio-${{ github.ref }}
   cancel-in-progress: false
 jobs:
+  authorization:
+    if: inputs.operation == 'authorization-check'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      ASTRO_TELEMETRY_DISABLED: "1"
+      WRANGLER_SEND_METRICS: "false"
+      GAGA_EVIDENCE_DIRECTORY: ${{ runner.temp }}/native-authorization/evidence
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.23.4
+      - name: Clean locked dependencies, no production credentials
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm ci --prefix cms --ignore-scripts --no-audit --no-fund
+      - name: Record exact Node, npm, runner image and both native workerd versions
+        run: node tools/content/qualification-runtime.mjs
+      - name: Existing source-bound consent, concurrency and public-boundary regressions
+        run: node --test tools/content/*.test.mjs tools/editorial/plugin.test.mjs tools/editorial/boundaries.test.mjs
+      - name: Pinned native account, routing and lifecycle contract, isolated database only
+        run: node tools/content/native-authorization-contract.mjs
+      - name: Official EmDash integrity and strict CMS typing
+        run: |
+          python3 tools/editorial/upstream-integrity.py
+          node node_modules/typescript/bin/tsc --project cms/tsconfig.json --noEmit
+      - name: Unchanged production CMS build and native local workerd startup, no upload
+        run: |
+          npm run build:cloudflare --prefix cms > "$GAGA_EVIDENCE_DIRECTORY/cms-build.log" 2>&1
+          node tools/cms/runtime-proof.mjs
+      - name: Workflow lint and unchanged tracked sources
+        run: |
+          go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.7 -shellcheck= .github/workflows/editorial-studio.yml
+          git diff --exit-code
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-authorization-contract-evidence
+          path: ${{ runner.temp }}/native-authorization/evidence
+          if-no-files-found: error
   admission:
     if: inputs.operation == 'admission-check'
     runs-on: ubuntu-24.04
@@ -44,7 +88,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
-          node-version: 22.22.2
+          node-version: 22.23.4
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: npm ci --prefix cms --ignore-scripts --no-audit --no-fund
       - name: Only changed admission paths and existing zero-side-effect deployment guards
@@ -62,7 +106,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
-          node-version: 22.22.2
+          node-version: 22.23.4
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: npm ci --prefix cms --ignore-scripts --no-audit --no-fund
       - name: Exact native revision capability, canonical preview and unchanged security boundaries
@@ -112,7 +156,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
-          node-version: 22.22.2
+          node-version: 22.23.4
       - name: Clean locked public dependencies; external evidence only
         run: |
           mkdir -p "$RUNNER_TEMP/editorial-evidence"
@@ -239,7 +283,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
-          node-version: 22.22.2
+          node-version: 22.23.4
       - name: Locked public tools and external evidence
         run: |
           printf 'GAGA_EVIDENCE_DIRECTORY=%s/rich-production\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
