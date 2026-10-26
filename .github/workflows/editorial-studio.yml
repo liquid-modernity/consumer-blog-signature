@@ -225,6 +225,7 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           OPERATION: ${{ inputs.operation }}
           GAGA_EXPECTED_PRODUCTION_STATE: ${{ inputs.expected_state }}
+          GAGA_CONTENT_RELEASE_ENABLED: ${{ vars.GAGA_CONTENT_RELEASE_ENABLED }}
           GAGA_EDITORIAL_FREEZE_CONFIRMED: ${{ inputs.freeze_confirmed }}
           GAGA_CMS_ARTIFACT_ADMISSION: ${{ runner.temp }}/rich-production/artifact-admission.json
         run: |

@@ -160,6 +160,14 @@ try {
     "Publication differs from expected current production state",
   );
   receipt.bindings = bindings((await get(cms + "/settings")).bindings);
+  async function publishingDisabled(){
+    assert.equal(process.env.GAGA_CONTENT_RELEASE_ENABLED,'false','Foundation publishing must remain disabled');
+    const rows=await query("SELECT value FROM options WHERE name = 'plugin:pakrpp-studio:settings:contentReleaseEnabled'");
+    assert.ok(rows.length<=1,'Ambiguous native publish switch');
+    if(rows.length)assert.equal(JSON.parse(rows[0].value),false,'Native content publishing must remain disabled');
+    return {github:false,nativeEffective:false,nativeStored:rows.length?false:null};
+  }
+  if(process.env.GAGA_EXPECTED_PRODUCTION_STATE)receipt.publishing=await publishingDisabled();
   receipt.schema = await query(
     "SELECT name,type,sql FROM sqlite_schema WHERE name NOT LIKE 'sqlite_%' ORDER BY name",
   );
@@ -406,6 +414,7 @@ try {
       );
       receipt.adminRedirect = target.pathname;
     }
+    if(process.env.GAGA_EXPECTED_PRODUCTION_STATE)receipt.publishingAfter=await publishingDisabled();
     receipt.preservedAfter=await preservedState();
     assert.deepEqual(receipt.preservedAfter,receipt.preservedBefore,'Schema/editorial state changed during Worker-only deployment');
     receipt.adminHttpStatus = admin.status;

@@ -65,6 +65,7 @@ function simulate(scenario) {
  if(o.method==='POST'){
   assertRead();const sql=JSON.parse(o.body).sql;if(!/^SELECT [^;]+$/i.test(sql))throw Error('Forbidden mutation');let rows=[];
   if(sql.includes('_emdash_migrations'))rows=migrations;
+  else if(scenario==='native-enabled'&&sql.includes('FROM options'))rows=[{value:'true'}];
   else if(sql.includes('FROM _emdash_collections'))rows=(['forward-deploy','state-change','upload-fails'].includes(scenario)?['authors','pages','posts','references','sections']:['authors','posts']).map(slug=>({slug}));
   else if(scenario==='state-change'&&existsSync(process.env.DEPLOYED)&&sql.includes('SELECT * FROM ec_posts'))rows=[{changed:true}];
   else if(sql.includes('COUNT(*)'))rows=[{count:sql.includes('ec_posts')?7:sql.includes('ec_authors')||sql.includes('users')?1:0}];
@@ -107,8 +108,9 @@ function simulate(scenario) {
         SCENARIO: scenario,
         TRACE: trace,
         DEPLOYED:join(dir,'deployed'),
+        GAGA_CONTENT_RELEASE_ENABLED:'false',
         GITHUB_REF:'refs/heads/main',
-        ...(['forward','forward-drift','malformed-expectation','forward-deploy','state-change','upload-fails'].includes(scenario)?{GAGA_EXPECTED_PRODUCTION_STATE:JSON.stringify(scenario==='malformed-expectation'?{cms:'latest',publication:'unknown'}:{cms:'e69a0e28-0788-4b8b-80af-77ae17296896',publication:'51f60924-2ec7-4cc0-831f-e36aff523b62'})}:{}),
+        ...(['forward','forward-drift','malformed-expectation','forward-deploy','state-change','upload-fails','native-enabled'].includes(scenario)?{GAGA_EXPECTED_PRODUCTION_STATE:JSON.stringify(scenario==='malformed-expectation'?{cms:'latest',publication:'unknown'}:{cms:'e69a0e28-0788-4b8b-80af-77ae17296896',publication:'51f60924-2ec7-4cc0-831f-e36aff523b62'})}:{}),
         CLOUDFLARE_API_TOKEN: "mock-secret",
         CLOUDFLARE_ACCOUNT_ID: "mock-account",
         GAGA_EVIDENCE_DIRECTORY: out,
@@ -178,3 +180,5 @@ test('admitted forward CMS deployment uploads once and proves schema/editorial s
 for(const scenario of ['state-change','upload-fails'])test(scenario+' stops after one upload and preserves failure evidence',()=>{
  const r=simulate(scenario);assert.notEqual(r.code,0);assert.equal(r.receipt.uploads,1);assert.equal(r.requests.filter(x=>x.phase==='upload').length,1);assert.equal(r.receipt.status,'FAIL');
 });
+
+test('native publishing enabled blocks foundation admission without upload or content/schema writes',()=>{const r=simulate('native-enabled');assert.notEqual(r.code,0);assert.equal(r.receipt.uploads,0);assert.equal(r.receipt.contentWrites,0);assert.equal(r.receipt.schemaWrites,0);});
