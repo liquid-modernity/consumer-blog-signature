@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: liquid-modernity/gaga-garrison
-          ref: 7da650951c3c7cd091c2bd24bcfe10b7d2e876fd
+          ref: 2a4822fe90f3cd5c18a0429719c438fee174d113
           token: ${{ secrets.GAGA_CONTROLLER_READ_TOKEN }}
           path: controller
           fetch-depth: 0
