@@ -12,7 +12,8 @@ export function admitPublishedItem(item,expected){
  assert.ok(draft===null||(typeof draft==='string'&&draft.length>0&&draft!==item.liveRevisionId),'Ambiguous draft/published identity');
  const data=Object.hasOwn(item,'liveData')?item.liveData:item.data;
  assert.equal(hash(canonical(data)),expected.dataSha256,'Effective published data differs from admission');
- return {...item,data,draftRevisionId:null};
+ const {liveData,...published}=item;
+ return {...published,data,draftRevisionId:null};
 }
 export function writePublishedExport(records,{origin,realProviderReads,check=false}){
  const documents=records.map(r=>{
