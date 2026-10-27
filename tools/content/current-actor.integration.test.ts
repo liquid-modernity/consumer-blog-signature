@@ -75,7 +75,7 @@ describe("GAGA original actor revalidation through native EmDash routing and lif
 		const schema = new SchemaRegistry(runtime.db);
 		for (const collection of ["posts", "authors"]) {
 			await schema.createCollection({ slug: collection, label: collection });
-			for (const [slug, type] of [["title", "string"], ["summary", "string"], ["content", "portableText"]] as const) await schema.createField(collection, { slug, label: slug, type });
+			for (const [slug, type] of [["title", "string"], ["summary", "string"], ["content", "portableText"], ["integration", "json"]] as const) await schema.createField(collection, { slug, label: slug, type });
 		}
 		const users = new UserRepository(runtime.db);
 		actorId = (await users.create({ email: "original@example.test", role: "author" })).id;
@@ -83,6 +83,7 @@ describe("GAGA original actor revalidation through native EmDash routing and lif
 		repo = new ContentRepository(runtime.db);
 		const item = await repo.create({ type: "posts", slug: "isolated-authorization", authorId: actorId, data: {
 			title: "Isolated authorization", summary: "Exact saved native revision",
+			integration: { canonicalBodyField: "content" },
 			content: [{ _type: "block", _key: "p", style: "normal", markDefs: [], children: [{ _type: "span", _key: "s", text: "Current native authorization", marks: [] }] }],
 		} });
 		itemId = item.id;

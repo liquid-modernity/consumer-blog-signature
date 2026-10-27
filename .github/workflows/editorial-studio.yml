@@ -75,6 +75,9 @@ jobs:
       - name: Exact upstream source and patch input, no production credentials
         run: |
           mkdir -p "$RUNNER_TEMP/current-actor-evidence"
+          native_host="$RUNNER_TEMP/emdash-native-host"
+          cp -a native-host "$native_host"
+          echo "NATIVE_HOST=$native_host" >> "$GITHUB_ENV"
           echo "GAGA_EVIDENCE_DIRECTORY=$RUNNER_TEMP/current-actor-evidence" >> "$GITHUB_ENV"
           echo "GAGA_AUTH_APPLICATION=$GITHUB_WORKSPACE" >> "$GITHUB_ENV"
           echo "GAGA_AUTH_EVIDENCE=$RUNNER_TEMP/current-actor-evidence/delayed-apply.jsonl" >> "$GITHUB_ENV"
@@ -89,9 +92,9 @@ jobs:
           assert.equal(createHash('sha256').update(packed).digest('hex'),pin.compressedPatchSha256);
           assert.equal(createHash('sha256').update(gunzipSync(packed)).digest('hex'),pin.patchSha256);
           JS
-          test "$(git -C native-host rev-parse HEAD)" = 0409cd220949d7f8ea4856b2f49b75e99c2b4119
-          gzip -dc tools/content/current-actor-proof/upstream.patch.gz | git -C native-host apply --check
-          gzip -dc tools/content/current-actor-proof/upstream.patch.gz | git -C native-host apply
+          test "$(git -C "$native_host" rev-parse HEAD)" = 0409cd220949d7f8ea4856b2f49b75e99c2b4119
+          gzip -dc tools/content/current-actor-proof/upstream.patch.gz | git -C "$native_host" apply --check
+          gzip -dc tools/content/current-actor-proof/upstream.patch.gz | git -C "$native_host" apply
           cp tools/content/current-actor-proof/upstream.json "$RUNNER_TEMP/current-actor-evidence/"
       - name: Clean locked installation and exact runtime record
         run: |
@@ -99,63 +102,63 @@ jobs:
           [[ "$(npm --version)" == 10.* ]]
           { echo "ImageOS=$ImageOS"; echo "ImageVersion=$ImageVersion"; uname -a; node --version; npm --version; pnpm --version; } > "$GAGA_EVIDENCE_DIRECTORY/runtime.txt"
           npm ci --ignore-scripts --no-audit --no-fund
-          cd native-host
+          cd "$NATIVE_HOST"
           pnpm install --frozen-lockfile > "$GAGA_EVIDENCE_DIRECTORY/install.log" 2>&1
           find node_modules/.pnpm -path '*/workerd/bin/workerd' -type f -exec {} --version \; >> "$GAGA_EVIDENCE_DIRECTORY/runtime.txt"
       - name: Required upstream formatting
-        working-directory: native-host
+        working-directory: ${{ env.NATIVE_HOST }}
         run: pnpm format > "$GAGA_EVIDENCE_DIRECTORY/format.log" 2>&1
       - name: Required upstream workspace build
         id: native-build
-        working-directory: native-host
+        working-directory: ${{ env.NATIVE_HOST }}
         run: pnpm build > "$GAGA_EVIDENCE_DIRECTORY/build.log" 2>&1
       - name: Upstream package and component declarations
         if: always() && steps.native-build.outcome == 'success'
-        working-directory: native-host
+        working-directory: ${{ env.NATIVE_HOST }}
         run: pnpm typecheck > "$GAGA_EVIDENCE_DIRECTORY/typecheck.log" 2>&1
       - name: Upstream quick lint
         if: always() && steps.native-build.outcome == 'success'
-        working-directory: native-host
+        working-directory: ${{ env.NATIVE_HOST }}
         run: pnpm lint:quick > "$GAGA_EVIDENCE_DIRECTORY/lint-quick.json" 2>&1
       - name: Upstream type-aware lint
         if: always() && steps.native-build.outcome == 'success'
-        working-directory: native-host
+        working-directory: ${{ env.NATIVE_HOST }}
         run: pnpm --silent lint:json > "$GAGA_EVIDENCE_DIRECTORY/lint.json" 2>&1
       - name: Public capability and consent regressions
         if: always() && steps.native-build.outcome == 'success'
-        working-directory: native-host
+        working-directory: ${{ env.NATIVE_HOST }}
         run: pnpm --filter @emdash-cms/plugin-types test > "$GAGA_EVIDENCE_DIRECTORY/plugin-types.log" 2>&1
       - name: Native RBAC regressions
         if: always() && steps.native-build.outcome == 'success'
-        working-directory: native-host
+        working-directory: ${{ env.NATIVE_HOST }}
         run: pnpm --filter @emdash-cms/auth exec vitest run > "$GAGA_EVIDENCE_DIRECTORY/auth.log" 2>&1
       - name: Current authorization and native route policy regressions
         if: always() && steps.native-build.outcome == 'success'
-        working-directory: native-host
+        working-directory: ${{ env.NATIVE_HOST }}
         run: pnpm --filter emdash exec vitest run tests/unit/plugins/authorization.test.ts tests/unit/plugins/capability-normalization.test.ts tests/unit/plugins/routes.test.ts tests/unit/plugins/content-policy.test.ts tests/unit/plugins/unpublish-hooks.test.ts > "$GAGA_EVIDENCE_DIRECTORY/native-authorization.log" 2>&1
       - name: Cloudflare provider and bridge regressions
         if: always() && steps.native-build.outcome == 'success'
-        working-directory: native-host
+        working-directory: ${{ env.NATIVE_HOST }}
         run: pnpm --filter @emdash-cms/cloudflare test > "$GAGA_EVIDENCE_DIRECTORY/cloudflare.log" 2>&1
       - name: Workerd bridge regressions
         if: always() && steps.native-build.outcome == 'success'
-        working-directory: native-host
+        working-directory: ${{ env.NATIVE_HOST }}
         run: pnpm --filter @emdash-cms/sandbox-workerd test > "$GAGA_EVIDENCE_DIRECTORY/workerd-bridge.log" 2>&1
       - name: Plugin CLI contract regressions
         if: always() && steps.native-build.outcome == 'success'
-        working-directory: native-host
+        working-directory: ${{ env.NATIVE_HOST }}
         run: pnpm --filter @emdash-cms/plugin-cli test > "$GAGA_EVIDENCE_DIRECTORY/plugin-cli.log" 2>&1
       - name: Exhaustive plugin contract fixture
         if: always() && steps.native-build.outcome == 'success'
-        working-directory: native-host
+        working-directory: ${{ env.NATIVE_HOST }}
         run: pnpm --filter @emdash-cms/plugin-test test > "$GAGA_EVIDENCE_DIRECTORY/plugin-test.log" 2>&1
       - name: Real local D1 and sandbox RPC parity
         if: always() && steps.native-build.outcome == 'success'
-        working-directory: native-host
+        working-directory: ${{ env.NATIVE_HOST }}
         run: pnpm --filter emdash exec vitest run --config vitest.workerd.config.ts tests/workerd/plugin-authorization.test.ts > "$GAGA_EVIDENCE_DIRECTORY/workerd-rpc.log" 2>&1
       - name: Public documentation build
         if: always() && steps.native-build.outcome == 'success'
-        working-directory: native-host
+        working-directory: ${{ env.NATIVE_HOST }}
         run: pnpm --dir docs build > "$GAGA_EVIDENCE_DIRECTORY/docs.log" 2>&1
       - name: Read-only documentation dependency diagnosis
         if: always() && steps.native-build.outcome == 'success'
@@ -165,9 +168,9 @@ jobs:
           import {readFileSync,writeFileSync,existsSync,readdirSync} from 'node:fs';
           import {resolve,dirname,join} from 'node:path';
           import {pathToFileURL} from 'node:url';
-          const chunks=resolve('native-host/docs/dist/server/.prerender/chunks');
+          const chunks=resolve(process.env.NATIVE_HOST,'docs/dist/server/.prerender/chunks');
           const report=[];
-          for(const origin of [resolve('native-host/docs/package.json'), ...(existsSync(chunks)?readdirSync(chunks).filter(n=>n.startsWith('TabItem_')).map(n=>join(chunks,n)):[])]) {
+          for(const origin of [resolve(process.env.NATIVE_HOST,'docs/package.json'), ...(existsSync(chunks)?readdirSync(chunks).filter(n=>n.startsWith('TabItem_')).map(n=>join(chunks,n)):[])]) {
             const entry={origin};
             try {
               const file=createRequire(origin).resolve('satteri'); entry.resolved=file;
@@ -186,8 +189,8 @@ jobs:
       - name: Actual application intent to native apply and revocation matrix
         if: always() && steps.native-build.outcome == 'success'
         run: |
-          cp tools/content/current-actor.integration.test.ts native-host/packages/core/tests/integration/runtime/gaga-delayed-apply.test.ts
-          cd native-host
+          cp tools/content/current-actor.integration.test.ts "$NATIVE_HOST/packages/core/tests/integration/runtime/gaga-delayed-apply.test.ts"
+          cd "$NATIVE_HOST"
           pnpm --filter emdash exec vitest run tests/integration/runtime/gaga-delayed-apply.test.ts > "$GAGA_EVIDENCE_DIRECTORY/gaga-delayed-apply.log" 2>&1
       - name: Workflow lint
         if: always()
@@ -195,12 +198,12 @@ jobs:
       - name: Preserve exact qualified upstream diff and unchanged application locks
         if: always()
         run: |
-          rm -f native-host/packages/core/tests/integration/runtime/gaga-delayed-apply.test.ts
-          git -C native-host add -N .
-          git -C native-host diff --binary > "$GAGA_EVIDENCE_DIRECTORY/qualified-upstream.patch"
-          git -C native-host status --short > "$GAGA_EVIDENCE_DIRECTORY/upstream-status.txt"
-          git -C native-host add -A
-          git -C native-host write-tree > "$GAGA_EVIDENCE_DIRECTORY/upstream-tree.txt"
+          rm -f "$NATIVE_HOST/packages/core/tests/integration/runtime/gaga-delayed-apply.test.ts"
+          git -C "$NATIVE_HOST" add -N .
+          git -C "$NATIVE_HOST" diff --binary > "$GAGA_EVIDENCE_DIRECTORY/qualified-upstream.patch"
+          git -C "$NATIVE_HOST" status --short > "$GAGA_EVIDENCE_DIRECTORY/upstream-status.txt"
+          git -C "$NATIVE_HOST" add -A
+          git -C "$NATIVE_HOST" write-tree > "$GAGA_EVIDENCE_DIRECTORY/upstream-tree.txt"
           sha256sum package-lock.json cms/package-lock.json tools/content/current-actor-proof/upstream.patch.gz > "$GAGA_EVIDENCE_DIRECTORY/identities.txt"
           git diff --exit-code -- package-lock.json cms/package-lock.json
       - uses: actions/upload-artifact@v4
