@@ -4,7 +4,7 @@ import { blockRegistry, pluginId } from "../../editorial/registry.mjs";
 import {
   validatePortableText,
   plainText,
-} from "../../editorial/portable-text.mjs";
+} from "../../editorial/content-semantics.mjs";
 import { nativePublishGate } from "./content-approval.mjs";
 import { contentReleaseRoutes } from "./content-release.mjs";
 export function studioPlugin() {

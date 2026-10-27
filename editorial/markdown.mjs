@@ -2,7 +2,7 @@ import { unified } from "unified";
 import remarkParse from "remark-parse";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
-import { validatePortableText, plainText } from "./portable-text.mjs";
+import { validatePortableText, plainText } from "./content-semantics.mjs";
 // Stable position keys make repeated imports byte-identical; no content execution or HTML fallback.
 export function markdownToPortableText(markdown) {
   const tree = unified()

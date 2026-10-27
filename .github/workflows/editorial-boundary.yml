@@ -1,0 +1,100 @@
+name: Portable editorial semantics boundary
+on:
+  push:
+    branches: [review/editorial-semantics-boundary-v1]
+permissions:
+  contents: read
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: bash
+    env:
+      ASTRO_TELEMETRY_DISABLED: '1'
+      ASTRO_DEV_BACKGROUND: '1'
+      WRANGLER_SEND_METRICS: 'false'
+      PUBLIC_GIT_SHA: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.23.4'
+      - name: Exact runtime and external evidence
+        run: |
+          npm install --global npm@10.9.3 --ignore-scripts --no-audit --no-fund
+          mkdir -p "$RUNNER_TEMP/editorial-boundary"
+          echo "GAGA_EVIDENCE_DIRECTORY=$RUNNER_TEMP/editorial-boundary" >> "$GITHUB_ENV"
+          node --version
+          npm --version
+          uname -a
+          node --input-type=module <<'JS'
+          import {writeFileSync} from 'node:fs';
+          import {execFileSync} from 'node:child_process';
+          writeFileSync(process.env.RUNNER_TEMP+'/editorial-boundary/runtime.json',JSON.stringify({node:process.version,npm:execFileSync('npm',['--version'],{encoding:'utf8'}).trim(),runner:process.env.RUNNER_OS,image:process.env.ImageOS,imageVersion:process.env.ImageVersion,source:process.env.GITHUB_SHA}));
+          JS
+      - name: Unchanged locked dependencies
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm ci --prefix cms --ignore-scripts --no-audit --no-fund
+      - name: Directly affected equivalence, plugin, preview and Search checks
+        run: |
+          node --test tools/editorial/portable-text.test.mjs tools/editorial/semantics-boundary.test.mjs tools/editorial/plugin.test.mjs tools/editorial/boundaries.test.mjs tools/content/content.test.mjs tools/gaga/application.test.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/tests.log"
+          node tools/gaga/preservation.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/preservation.log"
+          node tools/gaga/boundaries.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/boundaries.log"
+      - name: Strict application and CMS typing; actual publication build
+        run: |
+          node node_modules/typescript/bin/tsc --project cms/tsconfig.json --noEmit
+          npm run check | tee "$GAGA_EVIDENCE_DIRECTORY/types.log"
+          PUBLIC_BUILD_TIME="$(git show -s --format=%cI HEAD)" npm run build | tee "$GAGA_EVIDENCE_DIRECTORY/build.log"
+      - name: Compiled native Search boundary; no external provider access
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import {readFileSync,writeFileSync} from 'node:fs';
+          import {startNative} from './tools/gaga/native.mjs';
+          const index=JSON.parse(readFileSync('dist/search-index.json'));
+          assert.equal(index.searchProof.status,'succeeded');
+          const runtime=await startNative();
+          try {
+            const r=await fetch(runtime.url+'/api/search?q=Akal%20Imitasi');
+            assert.equal(r.status,200);const result=await r.json();
+            assert.equal(result.status,'succeeded');assert.ok(result.output.results.some(r=>r.title.includes('Dignity')));
+            assert.equal((await fetch(runtime.url+'/api/search?q=')).status,400);
+            assert.equal((await fetch(runtime.url+'/api/search?q=Akal',{method:'POST'})).status,405);
+            writeFileSync(process.env.GAGA_EVIDENCE_DIRECTORY+'/native-search.json',JSON.stringify({status:'PASS',workerd:'1.20261022.1',matchedArtifactIds:result.output.matchedArtifactIds,productionWrites:0}));
+          } finally {await runtime.stop();}
+          JS
+      - name: Workflow lint and unchanged protected application data
+        run: |
+          go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.7 -shellcheck= .github/workflows/editorial-boundary.yml
+          git diff --exit-code
+          test -z "$(git ls-files --others --exclude-standard)"
+      - name: Canonical qualification receipt
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import {readFileSync,writeFileSync} from 'node:fs';
+          import {createHash} from 'node:crypto';
+          import {execFileSync} from 'node:child_process';
+          const dir=process.env.GAGA_EVIDENCE_DIRECTORY;
+          const read=name=>JSON.parse(readFileSync(dir+'/'+name));
+          const runtime=read('runtime.json'),equivalence=read('semantics-equivalence.json'),native=read('native-search.json');
+          const tests=readFileSync(dir+'/tests.log','utf8');
+          assert.equal(runtime.node,'v22.23.4');assert.equal(runtime.npm,'10.9.3');
+          assert.match(tests,/# fail 0\b/);assert.match(tests,/# skipped 0\b/);
+          assert.equal(equivalence.status,'PASS');assert.equal(equivalence.records.length,8);assert.equal(native.status,'PASS');
+          const git=args=>execFileSync('git',args,{encoding:'utf8'}).trim();
+          const receipt={schema:'gaga.editorial-semantics-boundary-qualification/v1',status:'QUALIFIED',source:{commit:git(['rev-parse','HEAD']),tree:git(['rev-parse','HEAD^{tree}'])},baseline:equivalence.baseline,runtime,checks:{tests:Number(tests.match(/# pass (\d+)/)[1]),failed:0,skipped:0,canonicalRecords:8,independentDetachedConsumer:true,strictApplicationTypes:'PASS',strictCmsTypes:'PASS',astroBuild:'PASS',nativeSearch:'PASS',workflowLint:'PASS'},coreSha256:createHash('sha256').update(readFileSync('editorial/portable-content.mjs')).digest('hex'),exportSha256:equivalence.exportSha256,production:{contentWrites:0,schemaWrites:0,providerMutations:0,deployments:0,credentialChanges:0,publishUnpublishOperations:0,packagePublications:0,mainPromotions:0},run:process.env.GITHUB_RUN_ID};
+          writeFileSync(dir+'/qualification-receipt.json',JSON.stringify(receipt,null,2)+'\n');
+          JS
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: editorial-semantics-boundary-evidence
+          path: ${{ runner.temp }}/editorial-boundary
+          if-no-files-found: error
