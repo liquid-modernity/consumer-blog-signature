@@ -17,6 +17,8 @@ const application = process.env.GAGA_AUTH_APPLICATION;
 if (!application) throw Error("Explicit isolated application fixture required");
 const { contentReleaseRoutes } = await import(pathToFileURL(application + "/cms/editorial/content-release.mjs").href);
 const { nativePublishGate, signedContentMessage } = await import(pathToFileURL(application + "/cms/editorial/content-approval.mjs").href);
+const { qualifyEditorial } = await import(pathToFileURL(application + "/editorial/content-release.mjs").href);
+const { default: profile } = await import(pathToFileURL(application + "/content-release.json").href, { with: { type: "json" } });
 const policy = "sha256:" + "a".repeat(64);
 const secret = "isolated-native-proof-only-01234567890123456789";
 
@@ -95,6 +97,22 @@ describe("GAGA original actor revalidation through native EmDash routing and lif
 	});
 	afterEach(async () => { await runtime?.stopCron(); await runtime?.db.destroy(); });
 
+	it("native intent prerequisites expose the exact qualified saved revision", async () => {
+		const selected = await request();
+		expect(await fixtureContext.authorization?.check({ actor: { type: "user", id: actorId }, permission: "content:publish_own", resource: { type: "content", collection: "posts", id: itemId } })).toEqual({ allowed: true });
+		const current = await fixtureContext.content!.getVersioned!("posts", itemId);
+		expect(current?.item).toMatchObject({ id: itemId, draftRevisionId: selected.selectedRevision, liveRevisionId: null });
+		const revision = await fixtureContext.content!.getRevision!("posts", itemId, selected.selectedRevision!);
+		expect(revision).toMatchObject({ id: selected.selectedRevision, collection: "posts", entryId: itemId });
+		const documents = [];
+		for (const collection of profile.collections) {
+			const result = await fixtureContext.content!.list(collection, { where: { status: "published" }, limit: 100 });
+			expect(result.hasMore).toBe(false);
+			for (const item of result.items) documents.push({ item });
+		}
+		expect(qualifyEditorial({ request: selected, selected: { published: current!.item, revision }, profile, snapshot: { documents } }).title).toBe("Isolated authorization");
+		expect(await fixtureContext.kv.compareAndSet("isolated-prerequisite", null, { allowed: true })).toMatchObject({ applied: true });
+	});
 	it("A: keeps original actor correlation and allows exact native publication when still authorized", async () => {
 		const selected = await intent();
 		const result = await apply(selected);
