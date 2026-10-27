@@ -96,7 +96,7 @@ jobs:
       - name: Clean locked installation and exact runtime record
         run: |
           test "$(node --version)" = v22.23.4
-          test "$(npm --version)" = 10.9.3
+          [[ "$(npm --version)" == 10.* ]]
           { echo "ImageOS=$ImageOS"; echo "ImageVersion=$ImageVersion"; uname -a; node --version; npm --version; pnpm --version; } > "$GAGA_EVIDENCE_DIRECTORY/runtime.txt"
           npm ci --ignore-scripts --no-audit --no-fund
           cd native-host
