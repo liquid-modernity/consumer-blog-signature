@@ -1,25 +1,79 @@
-name: Check
+# Verification-only ref. Never promote this harness; test the one-file repair below.
+name: Canonical Check history compatibility proof
 on:
-  pull_request:
   push:
-    branches: [main, develop]
-
+    branches: [verification/arsenal-020-check-history-v1]
+permissions:
+  contents: read
 jobs:
   verify:
-    name: Verify Signature & Build
-    runs-on: ubuntu-latest
+    name: Verify exact repaired canonical Check
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: bash
+    env:
+      CHECK_SOURCE: c346617df851916a69167b62924bbc5b419c5c56
+      GAGA_CONTENT_RELEASE_ENABLED: 'false'
+      WRANGLER_SEND_METRICS: 'false'
     steps:
-      - name: Checkout repository
+      - name: Checkout exact repair using full history
         uses: actions/checkout@v4
         with:
-          # Provenance regressions read immutable historical baselines.
+          ref: c346617df851916a69167b62924bbc5b419c5c56
           fetch-depth: 0
-      - name: Setup Node.js 22
+          persist-credentials: false
+      - name: Setup Node.js 22 as in canonical Check
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: ${{ hashFiles('package-lock.json') != '' && 'npm' || '' }}
-      - name: Install dependencies
+      - name: Record tested source and required historical baseline
+        run: |
+          mkdir -p "$RUNNER_TEMP/check-history-proof"
+          echo "GAGA_EVIDENCE_DIRECTORY=$RUNNER_TEMP/check-history-proof" >> "$GITHUB_ENV"
+          test "$(git rev-parse HEAD)" = "$CHECK_SOURCE"
+          test "$(git rev-parse --is-shallow-repository)" = false
+          git cat-file -e e4e8149f3ce03969e71575dd7a719ad3b6882358:package-lock.json
+          git rev-parse e4e8149f3ce03969e71575dd7a719ad3b6882358:package-lock.json > "$RUNNER_TEMP/check-history-proof/baseline-blob.txt"
+          node --version
+          npm --version
+      - name: Install dependencies exactly as canonical Check
         run: npm install --no-audit
-      - name: Run verification suite
-        run: npm run verify
+      - name: Run unchanged canonical verification suite
+        run: GITHUB_SHA="$CHECK_SOURCE" npm run verify | tee "$GAGA_EVIDENCE_DIRECTORY/check.log"
+      - name: Lint repaired workflow and seal source-preservation receipt
+        run: |
+          go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.7 -shellcheck= .github/workflows/check.yml
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import {readFileSync,writeFileSync} from 'node:fs';
+          import {execFileSync} from 'node:child_process';
+          import {createHash} from 'node:crypto';
+          import {parse} from 'yaml';
+          import {sourceIdentity} from './tools/gaga/source-identity.mjs';
+          const base='c6f27198ce4324ee7f26e6f588de0a961efe4e30',source=sourceIdentity();
+          assert.equal(source.commit,process.env.CHECK_SOURCE);
+          const git=(...args)=>execFileSync('git',args,{encoding:'utf8'}).trim();
+          assert.equal(git('diff','--name-only',base,source.commit),'.github/workflows/check.yml');
+          const expected=parse(execFileSync('git',['show',base+':.github/workflows/check.yml'],{encoding:'utf8'}));
+          expected.jobs.verify.steps[0].with={'fetch-depth':0};
+          assert.deepEqual(parse(readFileSync('.github/workflows/check.yml','utf8')),expected);
+          assert.equal(git('status','--porcelain'),'');
+          const digest=path=>createHash('sha256').update(readFileSync(path)).digest('hex'),dir=process.env.GAGA_EVIDENCE_DIRECTORY;
+          assert.equal(digest('package-lock.json'),'5eaf8946c85601681837807ac2bca5c8d4547bd784014dd7dab07d44e3e8b9ee');
+          assert.equal(digest('cms/package-lock.json'),'62b398d8c74d91f0fa4b5c1c40818737c225e574aecbe14637fd6f86c4c2eef5');
+          assert.equal(digest('dist/search-index.json'),'5b982d6827606ed194604511f83156cb0697c04115df253177581df24ce6a807');
+          assert.equal(digest('.gaga/composition-plan.json'),'9bcb42ad793a612b9322c81cac78d64a680ee51d779dbd65ab908c6375eda7c7');
+          const log=readFileSync(dir+'/check.log','utf8');assert.match(log,/# tests 38\b/);assert.match(log,/# pass 38\b/);assert.match(log,/# fail 0\b/);assert.match(log,/# skipped 0\b/);
+          const consumer=JSON.parse(readFileSync('.gaga/consumer-receipt.json'));assert.equal(consumer.status,'PASS');assert.equal(consumer.sourceCommit,source.commit);
+          const receipt={status:'QUALIFIED',source:{commit:source.commit,tree:source.tree,sha256:source.sha256},harness:{commit:process.env.GITHUB_SHA,ref:process.env.GITHUB_REF,verificationOnly:true},run:process.env.GITHUB_RUN_ID,baseline:base,historicalBaseline:{commit:'e4e8149f3ce03969e71575dd7a719ad3b6882358',available:true,shallow:false,lockBlob:git('rev-parse','e4e8149f3ce03969e71575dd7a719ad3b6882358:package-lock.json')},runtime:{node:process.version,npm:execFileSync('npm',['--version'],{encoding:'utf8'}).trim(),runner:process.env.RUNNER_OS,image:process.env.ImageOS,imageVersion:process.env.ImageVersion,workerd:execFileSync('node_modules/.bin/workerd',['--version'],{encoding:'utf8'}).trim()},checks:{canonicalWorkflowOnlyCheckoutChanged:true,canonicalCommandsUnchanged:true,provenanceRegressionIntact:true,tests:38,failed:0,skipped:0,signature:'PASS',strictApplicationTypes:'PASS',publicationBuild:'PASS',nativeSearch:'PASS',starlight:'PASS',workflowLint:'PASS',lockIdentities:'UNCHANGED',searchOutput:'UNCHANGED',compositionPlan:'UNCHANGED'},lockSha256:digest('package-lock.json'),cmsLockSha256:digest('cms/package-lock.json'),registry:consumer.registry,reusedQualification:{run:40521050926,scope:'Unchanged application/CMS/editorial/browser/security/package qualification'},production:{mainPromotions:0,deployments:0,providerMutations:0,contentWrites:0,schemaWrites:0,credentialChanges:0,packagePublications:0,publishingActivations:0,workflowDispatches:0}};
+          writeFileSync(dir+'/qualification-receipt.json',JSON.stringify(receipt,null,2)+'\n');
+          JS
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: arsenal-020-check-history-evidence
+          path: ${{ runner.temp }}/check-history-proof
+          if-no-files-found: error
