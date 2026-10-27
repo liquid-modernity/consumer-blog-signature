@@ -123,7 +123,13 @@ jobs:
       - name: Upstream type-aware lint
         if: always() && steps.native-build.outcome == 'success'
         working-directory: ${{ env.NATIVE_HOST }}
-        run: pnpm --silent lint:json > "$GAGA_EVIDENCE_DIRECTORY/lint.json" 2>&1
+        run: |
+          pnpm --silent lint:json > "$GAGA_EVIDENCE_DIRECTORY/lint.json" 2>&1
+          node --input-type=module - <<'JS'
+          import {readFileSync} from 'node:fs';
+          import assert from 'node:assert/strict';
+          assert.deepEqual(JSON.parse(readFileSync(process.env.GAGA_EVIDENCE_DIRECTORY+'/lint.json')).diagnostics, []);
+          JS
       - name: Public capability and consent regressions
         if: always() && steps.native-build.outcome == 'success'
         working-directory: ${{ env.NATIVE_HOST }}
