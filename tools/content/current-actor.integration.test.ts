@@ -76,7 +76,7 @@ describe("GAGA original actor revalidation through native EmDash routing and lif
 			plugins: [plugin], createDialect: () => new SqliteDialect({ database: sqlite }), createStorage: null, sandboxEnabled: false, sandboxedPluginEntries: [], createSandboxRunner: null });
 		const schema = new SchemaRegistry(runtime.db);
 		for (const collection of ["posts", "authors"]) {
-			await schema.createCollection({ slug: collection, label: collection });
+			await schema.createCollection({ slug: collection, label: collection, supports: ["revisions"] });
 			for (const [slug, type] of [["title", "string"], ["summary", "string"], ["content", "portableText"], ["integration", "json"]] as const) await schema.createField(collection, { slug, label: slug, type });
 		}
 		const users = new UserRepository(runtime.db);
@@ -89,6 +89,9 @@ describe("GAGA original actor revalidation through native EmDash routing and lif
 			content: [{ _type: "block", _key: "p", style: "normal", markDefs: [], children: [{ _type: "span", _key: "s", text: "Current native authorization", marks: [] }] }],
 		} });
 		itemId = item.id;
+		// A row alone has no selected revision: save through the native revision lifecycle.
+		expect(await runtime.handleContentUpdate("posts", itemId, { data: item.data, actor: { id: actorId, role: Role.AUTHOR, source: "api" } })).toMatchObject({ success: true });
+		expect((await repo.findById("posts", itemId))?.draftRevisionId).toEqual(expect.any(String));
 		// Test-host configuration only; no provider credentials or production switches are available.
 		fixtureContext = new PluginContextFactory(runtime["pipelineFactoryOptions"]).createContext(plugin);
 		await fixtureContext.settings.set("contentReleaseEnabled", true);
