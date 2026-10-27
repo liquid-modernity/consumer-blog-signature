@@ -1,0 +1,15 @@
+{
+  "schema": "gaga.arsenal-editorial-review/v1",
+  "name": "@gaga/arsenal",
+  "version": "0.2.0-editorial.0",
+  "file": "vendor/arsenal-editorial/gaga-arsenal-0.2.0-editorial.0.tgz",
+  "source": {
+    "repository": "liquid-modernity/gaga-arsenal",
+    "commit": "395982f3fe2e2ae27efb6bdabda3f822cef31c17",
+    "baseline": "edbd96ee781517bc7bac8cc7331f18557da09451"
+  },
+  "qualificationRun": "40481661000",
+  "sha256": "569210368d630def5b6e7e314c55c625578252406d0dc5ff83391217d37bfc99",
+  "sha512": "979a87e42393c442837ba18d0a78a8f6cfe3bf195e0624689248108fa7d8a8d74506ac048fb1927f0fe6cc2f39e7b88375b54fc1d37e16b9d2ac7e1533ce7394",
+  "distribution": "unpublished-review-tarball"
+}

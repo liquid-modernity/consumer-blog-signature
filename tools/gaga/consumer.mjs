@@ -9,6 +9,8 @@ import {
 import { startNative } from "./native.mjs";
 import { proveStarlight } from "./starlight-proof.mjs";
 import "./boundaries.mjs";
+import { verifyEditorialReview } from "./editorial-review.mjs";
+const editorialReview = process.env.GAGA_ARSENAL_EDITORIAL_REVIEW === "1" ? verifyEditorialReview({installed:true}) : null;
 const index = JSON.parse(readFileSync("dist/search-index.json"));
 assert.ok(index.artifacts.length >= 8);
 assert.equal(index.searchProof.status, "succeeded");
@@ -34,6 +36,10 @@ const lock = JSON.parse(readFileSync("package-lock.json")),
 for (const [name, p] of Object.entries(lock.packages))
   if (name.startsWith("node_modules/@gaga/")) {
     const packageName = name.slice("node_modules/".length);
+    if (editorialReview && packageName === editorialReview.name) {
+      registry.push({...editorialReview,integrity:p.integrity});
+      continue;
+    }
     const response = await fetch(
       "https://npm.cloudsmith.io/gaga/gaga/" +
         encodeURIComponent(packageName) +
@@ -113,7 +119,7 @@ const receipt = {
   host: process.platform,
   registry,
   workspaceLinks: false,
-  arsenal: JSON.parse(readFileSync("vendor/arsenal-consumer.json")),
+  arsenal: editorialReview ?? JSON.parse(readFileSync("vendor/arsenal-consumer.json")),
   applicationId: "consumer-blog-signature",
   cms: JSON.parse(readFileSync(".gaga/preparation.json")),
   astro: "7.3.3",

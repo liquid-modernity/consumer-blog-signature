@@ -1,12 +1,11 @@
 import test, { after } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, writeFileSync, mkdirSync, mkdtempSync, rmSync, copyFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync, mkdirSync, mkdtempSync, rmSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
-import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { createHash } from 'node:crypto';
-import { createPortableTextSemantics } from '../../editorial/portable-content.mjs';
+import { createPortableTextSemantics } from '@gaga/arsenal';
 import * as current from '../../editorial/portable-text.mjs';
 import * as semantic from '../../editorial/content-semantics.mjs';
 import { blockRegistry } from '../../editorial/registry.mjs';
@@ -17,12 +16,12 @@ import { richFixture } from './fixture.mjs';
 import { readEmDashPublished } from '@gaga/corps-emdash';
 import { defineQuery, executeSearchReference } from '@gaga/engine-capabilities/search';
 
-const baseline = '5b593c3ee0b42645941c648c0e2f01fb3028b8d3';
+const baseline = '25bf99cafbbfd1bd7a98e6589efa1edb39bac001';
 const sha = value => createHash('sha256').update(value).digest('hex');
 mkdirSync('.gaga', { recursive: true });
 const oracleDirectory = mkdtempSync(resolve('.gaga/editorial-baseline-'));
 const baselineFiles = {};
-for (const name of ['portable-text.mjs', 'registry.mjs', 'search.mjs', 'markdown.mjs', 'content-release.mjs']) {
+for (const name of ['portable-text.mjs', 'portable-content.mjs', 'content-semantics.mjs', 'registry.mjs', 'search.mjs', 'markdown.mjs', 'content-release.mjs']) {
   const bytes = execFileSync('git', ['show', `${baseline}:editorial/${name}`]);
   baselineFiles[`editorial/${name}`] = sha(bytes);
   writeFileSync(join(oracleDirectory, name), bytes);
@@ -106,25 +105,20 @@ test('native widget declarations must be adapted; the portable descriptor has no
   for (const config of [null, [{ type: 'block', stringFields: [] }], [{ type: 'note', stringFields: ['text', 'text'] }], [{ type: 'note' }], [{ type: 'note', stringFields: [] }, { type: 'note', stringFields: [] }]])
     assert.throws(() => createPortableTextSemantics(config), /Invalid Portable Text block definitions/);
 });
-test('detached differently configured consumer runs with only the portable module and Node built-ins', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'portable-editorial-'));
-  try {
-    copyFileSync('editorial/portable-content.mjs', join(dir, 'portable-content.mjs'));
-    const code = `import assert from 'node:assert/strict';
-      import {createPortableTextSemantics} from './portable-content.mjs';
-      const s=createPortableTextSemantics([{type:'researchNote',stringFields:['title','text']}]);
-      const b=[{_type:'researchNote',_key:'n',title:'Methods',text:'Independent project'}];
-      assert.equal(s.validatePortableText(b),b);
-      assert.equal(s.plainText(b),'Methods Independent project');
-      assert.throws(()=>s.validatePortableText([{_type:'callout',_key:'n',text:'Unselected'}]));
-      assert.throws(()=>s.validatePortableText([{_type:'researchNote',_key:'n',text:42}]));
-      console.log('PASS: detached vocabulary, no dependencies');`;
-    assert.match(execFileSync(process.execPath, ['--input-type=module', '-e', code], { cwd: dir, encoding: 'utf8', env: {} }), /PASS: detached vocabulary/);
-  } finally { rmSync(dir, { recursive: true, force: true }); }
+test('actual package root supports independent extension configuration', () => {
+  const semantics = createPortableTextSemantics([{ type: 'researchNote', stringFields: ['title', 'text'] }]);
+  assert.deepEqual(Object.keys(semantics).sort(), ['plainText', 'resolveSections', 'validatePortableText']);
+  const body = [{ _type: 'researchNote', _key: 'n', title: 'Methods', text: 'Independent project' }];
+  assert.equal(semantics.validatePortableText(body), body);
+  assert.equal(semantics.plainText(body), 'Methods Independent project');
+  assert.throws(() => semantics.validatePortableText([{ _type: 'callout', _key: 'n', text: 'Unselected' }]));
+  assert.throws(() => semantics.validatePortableText([{ _type: 'researchNote', _key: 'n', text: 42 }]));
 });
-test('portable core has no imports, renderer, provider, framework, application routes or ambient services', () => {
-  const source = readFileSync('editorial/portable-content.mjs', 'utf8');
-  assert.doesNotMatch(source, /\bimport\s|\brequire\s*\(|\bexport\s+[^;]*\sfrom\s|emdash|astro|react|cloudflare|katex|pakrpp|\/authors\/|\b(?:fetch|process|window|document)\./i);
+test('application delegates through the public root and retains no semantic core', () => {
+  assert.equal(existsSync('editorial/portable-content.mjs'), false);
+  const adapter = readFileSync('editorial/content-semantics.mjs', 'utf8');
+  assert.match(adapter, /from "@gaga\/arsenal"/);
+  assert.doesNotMatch(adapter, /function\s+(?:validatePortableText|resolveSections|plainText)|@gaga\/arsenal\//);
   for (const file of ['editorial/search.mjs', 'editorial/markdown.mjs', 'cms/editorial/plugin.mjs'])
     assert.doesNotMatch(readFileSync(file, 'utf8'), /from\s*['"][^'"]*portable-text\.mjs/);
 });
@@ -169,7 +163,7 @@ test('all eight admitted records preserve conversion, canonical body, render byt
   }
 });
 test('section depth bound and URL contexts remain the baseline contract', () => {
-  for (const depth of [7, 9]) {
+  for (const depth of [7, 8, 9]) {
     const ref = i => ({ _type: 'sectionRef', _key: 'r' + i, id: 'part' + i });
     const sections = Object.fromEntries(Array.from({ length: depth }, (_, i) => ['part' + i, i === depth - 1 ? [paragraph('Leaf')] : [ref(i + 1)]]));
     const before = outcome(original.plainText, [ref(0)], { sections });
@@ -178,4 +172,22 @@ test('section depth bound and URL contexts remain the baseline contract', () => 
   }
   for (const value of [undefined, null, '', ' ', '#note', '#', '/image.png', '//host/file', '/\\host/file', 'https://example.org', 'mailto:editor@example.org', 'javascript:x()', 'https://user:pass@example.org'])
     for (const media of [false, true]) assert.equal(semantic.safeUrl(value, { media }), original.safeUrl(value, { media }));
+});
+
+test('section expansion preserves input order and unique section identities', () => {
+  const unique = text => ({...paragraph(text), _key:text, children:[{_type:'span', _key:text+'-span', text}]});
+  const body = [unique('Before'), {_type:'sectionRef',_key:'ref',id:'part'}, unique('After')];
+  const context = { sections: { part: [unique('Middle')] } };
+  for (const operation of ['validatePortableText','resolveSections','plainText'])
+    assert.deepEqual(outcome(semantic[operation],body,context),outcome(original[operation],body,context));
+  assert.equal(semantic.plainText(body,context),'Before\n\nMiddle\n\nAfter');
+});
+
+test('expanded section document remains bounded exactly as the qualified baseline',()=>{
+  const sections=Object.fromEntries(['one','two'].map(name=>[name,Array.from({length:2600},(_,i)=>({_type:'break',_key:name+i}))]));
+  const body=['one','two'].map(id=>({_type:'sectionRef',_key:id,id}));
+  for(const operation of ['resolveSections','plainText']){
+    const before=outcome(original[operation],body,{sections});assert.ok(before.error);
+    assert.deepEqual(outcome(semantic[operation],body,{sections}),before);
+  }
 });
