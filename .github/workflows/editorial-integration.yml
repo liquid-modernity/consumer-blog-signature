@@ -64,6 +64,10 @@ jobs:
           npx --no-install playwright install --with-deps chromium
           npx --no-install playwright test --config playwright.editorial.config.ts integration.spec.ts | tee "$GAGA_EVIDENCE_DIRECTORY/browser.log"
           cp .gaga/editorial/browser-results.json .gaga/editorial/packed-integration.json .gaga/editorial/packed-integration.png "$GAGA_EVIDENCE_DIRECTORY/"
+      - name: Existing desktop and mobile publication browser regressions
+        run: |
+          npm run test:ui | tee "$GAGA_EVIDENCE_DIRECTORY/publication-browser.log"
+          cp .gaga/browser-results.json "$GAGA_EVIDENCE_DIRECTORY/publication-browser-results.json"
       - name: Workflow lint, dependency audit and unchanged protected state
         run: |
           go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.7 -shellcheck= .github/workflows/editorial-integration.yml
@@ -84,8 +88,9 @@ jobs:
           const tests=readFileSync(dir+'/tests.log','utf8');assert.match(tests,/# fail 0\b/);assert.match(tests,/# skipped 0\b/);
           assert.equal(equivalence.records.length,8);assert.equal(consumer.status,'PASS');assert.equal(cms.status,'PASS');
           assert.equal(read('packed-integration.json').status,'PASS');assert.equal(read('browser-results.json').stats.unexpected,0);
+          const publicationBrowser=read('publication-browser-results.json');assert.equal(publicationBrowser.stats.expected,4);assert.equal(publicationBrowser.stats.unexpected,0);
           const digest=path=>createHash('sha256').update(readFileSync(path)).digest('hex');
-          const receipt={schema:'gaga.arsenal-editorial-consumer-qualification/v1',status:'QUALIFIED',source:sourceIdentity(),baseline:equivalence.baseline,package:read('package.json'),runner,workerd:execFileSync('node_modules/.bin/workerd',['--version'],{encoding:'utf8'}).trim(),lockSha256:digest('package-lock.json'),cmsLockSha256:digest('cms/package-lock.json'),exportSha256:equivalence.exportSha256,searchArtifactsSha256:digest('dist/search-index.json'),compositionPlanSha256:digest('.gaga/composition-plan.json'),checks:{tests:Number(tests.match(/# pass (\d+)/)[1]),failed:0,skipped:0,records:8,signature:'PASS',strictApplicationTypes:'PASS',strictCmsTypes:'PASS',publicationBuild:'PASS',cmsBuild:'PASS',nativeSearch:'PASS',cmsStartup:'PASS',starlight:'PASS',localEditorPreview:'PASS',workflowLint:'PASS',audit:'PASS'},production:{contentWrites:0,schemaWrites:0,providerMutations:0,deployments:0,credentialChanges:0,publishUnpublishOperations:0,packagePublications:0,mainPromotions:0},run:process.env.GITHUB_RUN_ID};
+          const receipt={schema:'gaga.arsenal-editorial-consumer-qualification/v1',status:'QUALIFIED',source:sourceIdentity(),baseline:equivalence.baseline,package:read('package.json'),runner,workerd:execFileSync('node_modules/.bin/workerd',['--version'],{encoding:'utf8'}).trim(),lockSha256:digest('package-lock.json'),cmsLockSha256:digest('cms/package-lock.json'),exportSha256:equivalence.exportSha256,searchArtifactsSha256:digest('dist/search-index.json'),compositionPlanSha256:digest('.gaga/composition-plan.json'),checks:{tests:Number(tests.match(/# pass (\d+)/)[1]),failed:0,skipped:0,records:8,signature:'PASS',strictApplicationTypes:'PASS',strictCmsTypes:'PASS',publicationBuild:'PASS',cmsBuild:'PASS',nativeSearch:'PASS',cmsStartup:'PASS',starlight:'PASS',localEditorPreview:'PASS',publicationBrowser:{passed:4,failed:0,desktop:true,mobile:true},workflowLint:'PASS',audit:'PASS'},production:{contentWrites:0,schemaWrites:0,providerMutations:0,deployments:0,credentialChanges:0,publishUnpublishOperations:0,packagePublications:0,mainPromotions:0},run:process.env.GITHUB_RUN_ID};
           writeFileSync(dir+'/qualification-receipt.json',JSON.stringify(receipt,null,2)+'\n');
           JS
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

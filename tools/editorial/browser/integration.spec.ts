@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 import {mkdirSync,writeFileSync} from 'node:fs';
 import {richFixture} from '../fixture.mjs';
-import {validatePortableText} from '../../../editorial/content-semantics.mjs';
+import {validatePortableText,plainText} from '../../../editorial/content-semantics.mjs';
 test('packed Arsenal in actual local editor: draft save/reload and canonical preview',async({page,context})=>{
   const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
   const api=async(path:string,method='GET',data?:unknown)=>{
@@ -14,19 +14,24 @@ test('packed Arsenal in actual local editor: draft save/reload and canonical pre
   if(me.isFirstLogin){await page.getByRole('button',{name:'Get Started',exact:true}).click();}
   const {body}=richFixture();
   // No external media or reusable-section dependency is needed to exercise the changed graph.
-  const content=body.filter((b:any)=>!['sectionRef','image','gallery','figure','video'].includes(b._type));
+  const content=[...body.filter((b:any)=>!['sectionRef','image','gallery','figure','video'].includes(b._type)),{
+    _type:'block',_key:'integration-writing',style:'normal',markDefs:[],
+    children:[{_type:'span',_key:'integration-span',text:'Integration writing line',marks:[]}],
+  }];
   const created=await api('content/posts','POST',{slug:'packed-integration-proof',data:{title:'Packed integration proof',summary:'Local qualification only',body:content}});
   const id=created.item.id;
   await page.goto('/_emdash/admin/content/posts/'+id);
   await expect(page.getByRole('region',{name:'PAKRPP Editorial Studio'})).toBeVisible({timeout:30000});
   const canvas=page.locator('.studio-canvas .tiptap');
-  const writing=canvas.locator('p').filter({hasText:'Strong'}).first();
+  const writing=canvas.locator('p').filter({hasText:'Integration writing line'}).first();
   await writing.click();await page.keyboard.press('End');
   const saved=page.waitForResponse(r=>r.request().method()==='PUT'&&r.url().includes('/_emdash/api/content/posts/'+id)&&r.status()===200);
   await page.keyboard.type(' Packed consumer persisted.');await saved;
   let current=await api('content/posts/'+id);validatePortableText(current.item.data.body);
+  expect(plainText(current.item.data.body)).toContain('Packed consumer persisted.');
   expect(current.item.status).toBe('draft');expect(current.item.liveRevisionId).toBeFalsy();
   await page.reload();await expect(canvas).toContainText('Packed consumer persisted.');
+  expect(plainText((await api('content/posts/'+id)).item.data.body)).toContain('Packed consumer persisted.');
   await page.locator('.studio-workspace aside nav button').filter({hasText:/^preview$/}).click();
   const preview=page.frameLocator('iframe[title="PAKRPP article preview"]');
   await expect(preview.locator('#editorial-preview-body')).toContainText('Packed consumer persisted.');

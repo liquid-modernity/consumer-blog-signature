@@ -31,7 +31,8 @@ GAGA_ARSENAL_EDITORIAL_REVIEW=1 node tools/gaga/editorial-review.mjs
 all eight record equivalence checks, strict types, actual publication/CMS builds,
 Starlight, native publication Search and local compiled CMS startup. One local
 browser case covers editor hydration, draft save/reload, canonical preview and
-anonymous denial. It performs no publish/unpublish action. All runtime stores
+anonymous denial; the four existing desktop/mobile publication cases also run.
+It performs no publish/unpublish action. All runtime stores
 remain local and outside uploaded evidence; no credentials are supplied.
 
 The explicit review flag only admits the pinned tarball in this qualification
