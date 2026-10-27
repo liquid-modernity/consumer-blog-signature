@@ -1,3 +1,6 @@
+> Historical tarball rehearsal. The current registry-backed successor is
+> [Arsenal 0.2.0 registry adoption](ARSENAL-020-REGISTRY-ADOPTION.md).
+
 # Packed editorial consumer rehearsal
 
 This review installs `@gaga/arsenal@0.2.0-editorial.0` from the exact unpublished

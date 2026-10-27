@@ -53,8 +53,8 @@
     "@gaga/corps-emdash": "0.1.0",
     "@gaga/corps-cloudflare": "0.1.0",
     "@astrojs/starlight": "0.41.10",
-    "@gaga/arsenal-contracts": "0.1.0",
-    "@gaga/arsenal": "file:vendor/arsenal-editorial/gaga-arsenal-0.2.0-editorial.0.tgz",
+    "@gaga/arsenal-contracts": "0.2.0",
+    "@gaga/arsenal": "0.2.0",
     "@astrojs/markdown-remark": "7.3.4",
     "github-slugger": "2.0.0",
     "katex": "0.19.1"

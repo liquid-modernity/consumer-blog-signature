@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import { readFileSync, writeFileSync, mkdirSync, cpSync } from "node:fs";
 import { resolve } from "node:path";
 import { createHash } from "node:crypto";
@@ -9,8 +10,6 @@ import {
 import { startNative } from "./native.mjs";
 import { proveStarlight } from "./starlight-proof.mjs";
 import "./boundaries.mjs";
-import { verifyEditorialReview } from "./editorial-review.mjs";
-const editorialReview = process.env.GAGA_ARSENAL_EDITORIAL_REVIEW === "1" ? verifyEditorialReview({installed:true}) : null;
 const index = JSON.parse(readFileSync("dist/search-index.json"));
 assert.ok(index.artifacts.length >= 8);
 assert.equal(index.searchProof.status, "succeeded");
@@ -36,10 +35,6 @@ const lock = JSON.parse(readFileSync("package-lock.json")),
 for (const [name, p] of Object.entries(lock.packages))
   if (name.startsWith("node_modules/@gaga/")) {
     const packageName = name.slice("node_modules/".length);
-    if (editorialReview && packageName === editorialReview.name) {
-      registry.push({...editorialReview,integrity:p.integrity});
-      continue;
-    }
     const response = await fetch(
       "https://npm.cloudsmith.io/gaga/gaga/" +
         encodeURIComponent(packageName) +
@@ -83,10 +78,19 @@ for (const [name, p] of Object.entries(lock.packages))
     if (admitted) {
       assert.equal(createHash("sha256").update(bytes).digest("hex"), admitted.sha256);
       assert.equal(createHash("sha512").update(bytes).digest("hex"), admitted.sha512);
+      assert.equal(metadata.dist.tarball, p.resolved);
+      for (const member of execFileSync("tar", ["-tzf", "-"], { input: bytes, encoding: "utf8" }).trim().split("\n")) {
+        assert.ok(member.startsWith("package/") && !member.split("/").includes(".."));
+        if (!member.endsWith("/")) assert.deepEqual(readFileSync(name + "/" + member.slice(8)), execFileSync("tar", ["-xOzf", "-", member], { input: bytes }), "Installed package differs: " + member);
+      }
     }
     registry.push({
       name: packageName,
       version: p.version,
+      resolved: p.resolved,
+      artifactUrl: metadata.dist.tarball,
+      verifiedAt: new Date().toISOString(),
+      installedBytesVerified: Boolean(admitted),
       integrity: p.integrity,
       sha256: createHash("sha256").update(bytes).digest("hex"),
       sha512: createHash("sha512").update(bytes).digest("hex"),
@@ -119,7 +123,7 @@ const receipt = {
   host: process.platform,
   registry,
   workspaceLinks: false,
-  arsenal: editorialReview ?? JSON.parse(readFileSync("vendor/arsenal-consumer.json")),
+  arsenal: JSON.parse(readFileSync("vendor/arsenal-consumer.json")),
   applicationId: "consumer-blog-signature",
   cms: JSON.parse(readFileSync(".gaga/preparation.json")),
   astro: "7.3.3",

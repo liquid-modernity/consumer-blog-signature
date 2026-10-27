@@ -1,13 +1,15 @@
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync, lstatSync } from "node:fs";
 import { createHash } from "node:crypto";
-import { verifyEditorialReview } from "./editorial-review.mjs";
-const editorialReview = process.env.GAGA_ARSENAL_EDITORIAL_REVIEW === "1" ? verifyEditorialReview({installed:true}) : null;
 const pkg = JSON.parse(readFileSync("package.json")),
   lock = JSON.parse(readFileSync("package-lock.json"));
+for (const [path, entry] of Object.entries(lock.packages))
+  if (path.startsWith("node_modules/")) {
+    assert.ok(!entry.link, "Workspace links are not production dependencies");
+    assert.match(entry.resolved ?? "", /^https:\/\//, "Local package resolutions are not production dependencies");
+  }
 for (const [name, version] of Object.entries(pkg.dependencies))
   if (name.startsWith("@gaga/")) {
-    if (editorialReview && name === editorialReview.name) continue;
     assert.match(version, /^\d+\.\d+\.\d+$/, "GAGA dependencies must use exact public versions");
     const p = lock.packages["node_modules/" + name];
     assert.ok(
@@ -33,7 +35,6 @@ const arsenalAdmission = JSON.parse(readFileSync("vendor/arsenal-consumer.json")
 assert.equal(arsenalAdmission.distribution, "public-registry");
 assert.equal(arsenalAdmission.registry, "https://npm.cloudsmith.io/gaga/gaga/");
 for (const a of arsenalAdmission.artifacts) {
-  if (editorialReview && a.name === editorialReview.name) continue;
   assert.equal(pkg.dependencies[a.name], a.version);
   const p = lock.packages["node_modules/" + a.name];
   assert.equal(p.version, a.version);
@@ -77,5 +78,5 @@ walk("editorial");
 walk("cms/editorial");
 walk("tools/gaga");
 console.log(
-  editorialReview ? "Exact review Arsenal tarball; public Engine/Corps/contracts; no workspace/private imports" : "Public Engine/Corps/Arsenal registry packages; stable artifact integrity; no workspace/private imports",
+  "Public Engine/Corps/Arsenal registry packages; stable artifact integrity; no workspace/private imports",
 );

@@ -1,7 +1,7 @@
-name: Packed Arsenal editorial consumer integration
+name: Registry Arsenal 0.2.0 consumer adoption
 on:
   push:
-    branches: [review/editorial-consumer-integration-v1]
+    branches: [review/arsenal-020-registry-adoption-v1]
 permissions:
   contents: read
 jobs:
@@ -15,7 +15,7 @@ jobs:
       ASTRO_TELEMETRY_DISABLED: '1'
       ASTRO_DEV_BACKGROUND: '1'
       WRANGLER_SEND_METRICS: 'false'
-      GAGA_ARSENAL_EDITORIAL_REVIEW: '1'
+      GAGA_CONTENT_RELEASE_ENABLED: 'false'
       PUBLIC_GIT_SHA: ${{ github.sha }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
@@ -28,29 +28,28 @@ jobs:
       - name: Exact runtime and external evidence
         run: |
           npm install --global npm@10.9.3 --ignore-scripts --no-audit --no-fund
-          mkdir -p "$RUNNER_TEMP/editorial-integration/evidence"
-          echo "GAGA_EVIDENCE_DIRECTORY=$RUNNER_TEMP/editorial-integration/evidence" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/registry-adoption/evidence"
+          echo "GAGA_EVIDENCE_DIRECTORY=$RUNNER_TEMP/registry-adoption/evidence" >> "$GITHUB_ENV"
           node --version
           npm --version
           node --input-type=module <<'JS'
           import {writeFileSync} from 'node:fs';
           import {execFileSync} from 'node:child_process';
-          writeFileSync(process.env.RUNNER_TEMP+'/editorial-integration/evidence/runner.json',JSON.stringify({node:process.version,npm:execFileSync('npm',['--version'],{encoding:'utf8'}).trim(),runner:process.env.RUNNER_OS,image:process.env.ImageOS,imageVersion:process.env.ImageVersion,source:process.env.GITHUB_SHA}));
+          writeFileSync(process.env.RUNNER_TEMP+'/registry-adoption/evidence/runner.json',JSON.stringify({node:process.version,npm:execFileSync('npm',['--version'],{encoding:'utf8'}).trim(),runner:process.env.RUNNER_OS,image:process.env.ImageOS,imageVersion:process.env.ImageVersion,source:process.env.GITHUB_SHA}));
           JS
-      - name: Clean committed-lock installs and actual packed-package admission
+      - name: Clean committed-lock installs and official registry admission
         run: |
           npm ci --ignore-scripts --no-audit --no-fund
           npm ci --prefix cms --ignore-scripts --no-audit --no-fund
-          node tools/gaga/editorial-review.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/package.json"
           node tools/gaga/boundaries.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/boundaries.log"
       - name: Directly affected equivalence, CMS, preview and Search regressions
         run: |
-          node --test tools/editorial/portable-text.test.mjs tools/editorial/semantics-boundary.test.mjs tools/editorial/plugin.test.mjs tools/editorial/boundaries.test.mjs tools/content/content.test.mjs tools/gaga/application.test.mjs tools/gaga/editorial-review.test.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/tests.log"
+          node --test tools/editorial/portable-text.test.mjs tools/editorial/semantics-boundary.test.mjs tools/editorial/plugin.test.mjs tools/editorial/boundaries.test.mjs tools/content/content.test.mjs tools/gaga/application.test.mjs tools/gaga/registry-adoption.test.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/tests.log"
           npm test | tee "$GAGA_EVIDENCE_DIRECTORY/signature.log"
           node tools/gaga/preservation.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/preservation.log"
       - name: Strict app and CMS typing; actual publication and CMS compilation
         run: |
-          node node_modules/typescript/bin/tsc --project cms/tsconfig.json --noEmit
+          node node_modules/typescript/bin/tsc --project cms/tsconfig.json --noEmit > "$GAGA_EVIDENCE_DIRECTORY/cms-types.log" 2>&1
           npm run check | tee "$GAGA_EVIDENCE_DIRECTORY/types.log"
           PUBLIC_BUILD_TIME="$(git show -s --format=%cI HEAD)" npm run build | tee "$GAGA_EVIDENCE_DIRECTORY/build.log"
           npm run build:cloudflare --prefix cms | tee "$GAGA_EVIDENCE_DIRECTORY/cms-build.log"
@@ -58,7 +57,7 @@ jobs:
         run: |
           node tools/gaga/consumer.mjs > "$GAGA_EVIDENCE_DIRECTORY/consumer.log" 2>&1
           node tools/cms/runtime-proof.mjs
-      - name: Local browser hydration, draft persistence and canonical preview
+      - name: Local registry-backed editor hydration, draft persistence and canonical preview
         run: |
           npm run editorial:prepare
           npx --no-install playwright install --with-deps chromium
@@ -72,6 +71,9 @@ jobs:
         run: |
           go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.7 -shellcheck= .github/workflows/editorial-integration.yml
           npm audit --audit-level=low --json > "$GAGA_EVIDENCE_DIRECTORY/audit.json"
+          npm audit --prefix cms --audit-level=low --json > "$GAGA_EVIDENCE_DIRECTORY/cms-audit.json"
+          cp package-lock.json "$GAGA_EVIDENCE_DIRECTORY/application-package-lock.json"
+          cp cms/package-lock.json "$GAGA_EVIDENCE_DIRECTORY/cms-package-lock.json"
           git diff --exit-code
           test -z "$(git ls-files --others --exclude-standard)"
       - name: Canonical qualification receipt
@@ -89,13 +91,20 @@ jobs:
           assert.equal(equivalence.records.length,8);assert.equal(consumer.status,'PASS');assert.equal(cms.status,'PASS');
           assert.equal(read('packed-integration.json').status,'PASS');assert.equal(read('browser-results.json').stats.unexpected,0);
           const publicationBrowser=read('publication-browser-results.json');assert.equal(publicationBrowser.stats.expected,4);assert.equal(publicationBrowser.stats.unexpected,0);
+          for(const browser of [read('browser-results.json'),publicationBrowser]){assert.equal(browser.stats.skipped,0);assert.equal(browser.stats.flaky,0);}
+          for(const audit of ['audit.json','cms-audit.json'])assert.equal(read(audit).metadata.vulnerabilities.total,0);
           const digest=path=>createHash('sha256').update(readFileSync(path)).digest('hex');
-          const receipt={schema:'gaga.arsenal-editorial-consumer-qualification/v1',status:'QUALIFIED',source:sourceIdentity(),baseline:equivalence.baseline,package:read('package.json'),runner,workerd:execFileSync('node_modules/.bin/workerd',['--version'],{encoding:'utf8'}).trim(),lockSha256:digest('package-lock.json'),cmsLockSha256:digest('cms/package-lock.json'),exportSha256:equivalence.exportSha256,searchArtifactsSha256:digest('dist/search-index.json'),compositionPlanSha256:digest('.gaga/composition-plan.json'),checks:{tests:Number(tests.match(/# pass (\d+)/)[1]),failed:0,skipped:0,records:8,signature:'PASS',strictApplicationTypes:'PASS',strictCmsTypes:'PASS',publicationBuild:'PASS',cmsBuild:'PASS',nativeSearch:'PASS',cmsStartup:'PASS',starlight:'PASS',localEditorPreview:'PASS',publicationBrowser:{passed:4,failed:0,desktop:true,mobile:true},workflowLint:'PASS',audit:'PASS'},production:{contentWrites:0,schemaWrites:0,providerMutations:0,deployments:0,credentialChanges:0,publishUnpublishOperations:0,packagePublications:0,mainPromotions:0},run:process.env.GITHUB_RUN_ID};
+          // Exact output identities from qualified integration run 40488444126.
+          assert.equal(digest('dist/search-index.json'),'5b982d6827606ed194604511f83156cb0697c04115df253177581df24ce6a807');
+          assert.equal(digest('.gaga/composition-plan.json'),'9bcb42ad793a612b9322c81cac78d64a680ee51d779dbd65ab908c6375eda7c7');
+          assert.equal(digest('cms/package-lock.json'),'62b398d8c74d91f0fa4b5c1c40818737c225e574aecbe14637fd6f86c4c2eef5');
+          assert.equal(process.env.GAGA_CONTENT_RELEASE_ENABLED,'false');
+          const receipt={schema:'gaga.arsenal-registry-adoption-qualification/v1',status:'QUALIFIED',source:sourceIdentity(),baseline:'e4e8149f3ce03969e71575dd7a719ad3b6882358',semanticOracle:equivalence.baseline,arsenal:consumer.arsenal,registry:consumer.registry,runner,workerd:execFileSync('node_modules/.bin/workerd',['--version'],{encoding:'utf8'}).trim(),lockSha256:digest('package-lock.json'),cmsLockSha256:digest('cms/package-lock.json'),exportSha256:equivalence.exportSha256,searchArtifactsSha256:digest('dist/search-index.json'),compositionPlanSha256:digest('.gaga/composition-plan.json'),checks:{tests:Number(tests.match(/# pass (\d+)/)[1]),failed:0,skipped:0,records:8,signature:'PASS',strictApplicationTypes:'PASS',strictCmsTypes:'PASS',publicationBuild:'PASS',cmsBuild:'PASS',nativeSearch:'PASS',cmsStartup:'PASS',starlight:'PASS',localEditorPreview:'PASS',publicationBrowser:{passed:4,failed:0,desktop:true,mobile:true},searchOutputIdentity:'UNCHANGED',compositionPlanIdentity:'UNCHANGED',reviewExceptionRemoved:true,productionGuard:'PASS',workflowLint:'PASS',audit:'PASS',cmsAudit:'PASS'},production:{contentWrites:0,schemaWrites:0,providerMutations:0,deployments:0,credentialChanges:0,publishUnpublishOperations:0,packagePublications:0,mainPromotions:0},run:process.env.GITHUB_RUN_ID};
           writeFileSync(dir+'/qualification-receipt.json',JSON.stringify(receipt,null,2)+'\n');
           JS
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
-          name: arsenal-editorial-consumer-integration-evidence
-          path: ${{ runner.temp }}/editorial-integration/evidence
+          name: arsenal-020-registry-adoption-evidence
+          path: ${{ runner.temp }}/registry-adoption/evidence
           if-no-files-found: error

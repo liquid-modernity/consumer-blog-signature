@@ -1,26 +1,36 @@
 {
   "distribution": "public-registry",
   "registry": "https://npm.cloudsmith.io/gaga/gaga/",
-  "sourceCommit": "17374947b8175a34c1f332005ca0927a4fd9d975",
-  "sourceSha256": "387762aecb615dec5d1a1a4cd6aaf8432503a8a18b903410a367c410b5fcd67f",
+  "sourceCommit": "4e53068363fd842ee8e672c316a9ee64af8a6f8f",
+  "sourceSha256": "3fc629ab825605094c7067b618ce2593897b16aae73bb957f396a91fc129fa22",
   "controllerCommit": "edf8680bf0974d0b632d409f4ade88bb1ce30460",
-  "qualificationRun": 40103637774,
-  "publicationRun": 40104685274,
+  "qualificationRun": 40499814407,
+  "publicationRun": 40506236943,
   "schemaStatus": "EXPERIMENTAL",
   "authoringApiStatus": "EXPERIMENTAL",
   "historicalDevelopmentAdmission": "vendor/arsenal-dev1.json",
   "artifacts": [
     {
       "name": "@gaga/arsenal-contracts",
-      "version": "0.1.0",
-      "sha256": "bceb6b9510495d35524accd777630a2d1b632d58427efe57280a05e81decb39f",
-      "sha512": "205c49138a917e7b0d13f5b8c135ad7c33e4e60c2e7eb5ef14d7478f0c2c4890d84f5c77353d5cb2e9ce63f2219c03d012bc23900835353cb21b696494f8f7e2"
+      "version": "0.2.0",
+      "sha256": "fd39d9ac310087c3484ad5ab1ad845ac6dda21935242e6fbf41d2dc8e42e7c63",
+      "sha512": "a51fb3c115efadc5d878ef822834f85afb4a712086f106035a38b0677ac5a2bd9955919db0daf5a61d96cd2ec273baf479df5ec14af3b7678027ae037aa3953f",
+      "integrity": "sha512-pR+zwRXvrcXYeO+CKDT4WvtKcSCG8QYDWjiwZ3rFor2ZVZGdsNr1ph2WzS7Cc7r0ed9ewUrzt2eAJ64DeqOVPw=="
     },
     {
       "name": "@gaga/arsenal",
-      "version": "0.1.0",
-      "sha256": "f3764d9811d268fcdda8393404b84138bdfafe6e7d7cd39a4c07648417f7b200",
-      "sha512": "0f3f9ef84059c1abe181ec6226aab09d259e99b6eadfd3eed341037ed32c176a53d5f790e8221764cab7924db47b4b071b3d270cbf32accbf8ab0b0942c6c1f0"
+      "version": "0.2.0",
+      "sha256": "d293129c3cf2a3614ae43c6eafd4a70378ea60452b4260d9b2e9c96a9a37875f",
+      "sha512": "32f104d73bfd0713e897e40fc7e54e3beb5e4bd70f6336bcab572d0b34b3eb87b9720dd3c42833b0edc9e3dd10a9233872fbeb0271375a1fc05bd00fd57bfdde",
+      "integrity": "sha512-MvEE1zv9BxPol+QPx+VOO+teS9cPYza8q1ctCzSz64e5cg3TxCgzsO3J490QqSM4cvvrAnE3Wh/AW9AP1Xv93g=="
     }
-  ]
+  ],
+  "sourceTree": "e6e2baa7b0d11019dcd46d95bcfde698940fa9cc",
+  "registryVerificationRun": 40518413061,
+  "registryProofCommit": "1946bba9b7e01cbecf3d678db8d24590aaa4f089",
+  "publicationRunNote": "Both exact uploads verified; its post-publication editorial harness failure was resolved by separate read-only registry proof 40518413061.",
+  "historicalStableAdmission": {
+    "applicationCommit": "e4e8149f3ce03969e71575dd7a719ad3b6882358",
+    "path": "vendor/arsenal-consumer.json"
+  }
 }
