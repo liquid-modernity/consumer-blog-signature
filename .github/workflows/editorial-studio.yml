@@ -81,14 +81,17 @@ jobs:
           node --input-type=module - <<'JS'
           import {readFileSync} from 'node:fs';
           import {createHash} from 'node:crypto';
+          import {gunzipSync} from 'node:zlib';
           import assert from 'node:assert/strict';
           const pin=JSON.parse(readFileSync('tools/content/current-actor-proof/upstream.json'));
           assert.equal(pin.baseline,'0409cd220949d7f8ea4856b2f49b75e99c2b4119');
-          assert.equal(createHash('sha256').update(readFileSync('tools/content/current-actor-proof/upstream.patch')).digest('hex'),pin.patchSha256);
+          const packed=readFileSync('tools/content/current-actor-proof/upstream.patch.gz');
+          assert.equal(createHash('sha256').update(packed).digest('hex'),pin.compressedPatchSha256);
+          assert.equal(createHash('sha256').update(gunzipSync(packed)).digest('hex'),pin.patchSha256);
           JS
           test "$(git -C native-host rev-parse HEAD)" = 0409cd220949d7f8ea4856b2f49b75e99c2b4119
-          git -C native-host apply --check ../tools/content/current-actor-proof/upstream.patch
-          git -C native-host apply ../tools/content/current-actor-proof/upstream.patch
+          gzip -dc tools/content/current-actor-proof/upstream.patch.gz | git -C native-host apply --check
+          gzip -dc tools/content/current-actor-proof/upstream.patch.gz | git -C native-host apply
           cp tools/content/current-actor-proof/upstream.json "$RUNNER_TEMP/current-actor-evidence/"
       - name: Clean locked installation and exact runtime record
         run: |
@@ -139,7 +142,7 @@ jobs:
           git -C native-host add -N .
           git -C native-host diff --binary > "$GAGA_EVIDENCE_DIRECTORY/qualified-upstream.patch"
           git -C native-host status --short > "$GAGA_EVIDENCE_DIRECTORY/upstream-status.txt"
-          sha256sum package-lock.json cms/package-lock.json tools/content/current-actor-proof/upstream.patch > "$GAGA_EVIDENCE_DIRECTORY/identities.txt"
+          sha256sum package-lock.json cms/package-lock.json tools/content/current-actor-proof/upstream.patch.gz > "$GAGA_EVIDENCE_DIRECTORY/identities.txt"
           git diff --exit-code -- package-lock.json cms/package-lock.json
       - uses: actions/upload-artifact@v4
         if: always()
