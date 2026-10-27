@@ -27,6 +27,7 @@ describe("GAGA original actor revalidation through native EmDash routing and lif
 	let otherId: string;
 	let itemId: string;
 	let dispatches: Array<Record<string, any>>;
+	let revokeAtNativeHook = false;
 	let plugin: ReturnType<typeof definePlugin>;
 	let fixtureContext: ReturnType<PluginContextFactory["createContext"]>;
 	const request = async (action = "publish") => {
@@ -57,10 +58,14 @@ describe("GAGA original actor revalidation through native EmDash routing and lif
 	};
 	beforeEach(async () => {
 		dispatches = [];
+		revokeAtNativeHook = false;
 		plugin = definePlugin({
 			id: "pakrpp-studio", version: "1.0.0", capabilities: ["content:read", "content:write", "content:publish", "content:revisions:read", "hooks.content-policy:register", "authorization:check"],
 			routes: contentReleaseRoutes({ dispatch: async (selected: Record<string, any>) => { dispatches.push(selected); } }),
-			hooks: { "content:beforePublish": nativePublishGate, "content:beforeUnpublish": nativePublishGate },
+			hooks: { "content:beforePublish": async (event, ctx) => {
+				if (revokeAtNativeHook) await new UserRepository(runtime.db).update(actorId, { role: "contributor" });
+				return nativePublishGate(event, ctx);
+			}, "content:beforeUnpublish": nativePublishGate },
 		});
 		const sqlite = new Sqlite(":memory:");
 		runtime = await EmDashRuntime.create({ config: { database: { entrypoint: "isolated-auth-" + randomUUID(), config: {}, type: "sqlite" } },
@@ -134,6 +139,14 @@ describe("GAGA original actor revalidation through native EmDash routing and lif
 		await apply(await intent());
 		expect(await apply(await intent("unpublish"))).toMatchObject({ data: { status: "CMS_PUBLISHED_SITE_PENDING" } });
 		expect((await repo.findById("posts", itemId))?.liveRevisionId).toBeNull();
+	});
+	it("rechecks a role revoked after the apply decision at the native lifecycle boundary", async () => {
+		const selected = await intent();
+		revokeAtNativeHook = true;
+		expect(await apply(selected)).toMatchObject({ data: { status: "DENIED" } });
+		expect((await repo.findById("posts", itemId))?.liveRevisionId).toBeNull();
+		expect(await fixtureContext.kv.get("content-authorization:" + selected.nonce + ":apply")).toMatchObject({ allowed: true });
+		expect(await fixtureContext.kv.get("content-authorization:" + selected.nonce + ":native-hook")).toMatchObject({ actorId, allowed: false });
 	});
 	it("current disable switch and a native lifecycle recheck deny late authority changes", async () => {
 		const selected = await intent();

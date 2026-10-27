@@ -101,7 +101,7 @@ jobs:
           npm ci --ignore-scripts --no-audit --no-fund
           cd native-host
           pnpm install --frozen-lockfile > "$GAGA_EVIDENCE_DIRECTORY/install.log" 2>&1
-          find node_modules/.pnpm -path '*/workerd/bin/workerd' -type f -exec node {} --version \; >> "$GAGA_EVIDENCE_DIRECTORY/runtime.txt"
+          find node_modules/.pnpm -path '*/workerd/bin/workerd' -type f -exec {} --version \; >> "$GAGA_EVIDENCE_DIRECTORY/runtime.txt"
       - name: Required upstream formatting, workspace build and declarations
         working-directory: native-host
         run: |
