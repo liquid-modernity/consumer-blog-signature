@@ -35,12 +35,14 @@ describe("GAGA original actor revalidation through native EmDash routing and lif
 		return { schema: "gaga.content-request/v1", action, resource: "posts/" + itemId,
 			selectedRevision: action === "publish" ? item?.draftRevisionId : null, expectedPublishedRevision: item?.liveRevisionId ?? null };
 	};
-	const route = async (name: string, data: unknown, user: { id: string; role: typeof Role.AUTHOR } | null = null) => runtime.handlePluginApiRoute(
-		"pakrpp-studio", "POST", "/" + name,
-		new Request("https://isolated.example/_emdash/api/plugins/pakrpp-studio/" + name, {
-			method: "POST", headers: { "Content-Type": "application/json", "X-EmDash-Request": "1" }, body: JSON.stringify(data),
-		}), user as never,
-	);
+	const route = async (name: string, data: unknown, user: { id: string; role: typeof Role.AUTHOR } | null = null) => {
+		const caller = user ? await new UserRepository(runtime.db).findById(user.id) : null;
+		return runtime.handlePluginApiRoute("pakrpp-studio", "POST", "/" + name,
+			new Request("https://isolated.example/_emdash/api/plugins/pakrpp-studio/" + name, {
+				method: "POST", headers: { "Content-Type": "application/json", "X-EmDash-Request": "1" }, body: JSON.stringify(data),
+			}), caller);
+	};
+
 	const intent = async (action = "publish") => {
 		const value = await route("content-publish", await request(action), { id: actorId, role: Role.AUTHOR });
 		expect(value).toMatchObject({ success: true, data: { status: "PUBLISH PENDING" } });

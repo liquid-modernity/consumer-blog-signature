@@ -157,6 +157,29 @@ jobs:
         if: always() && steps.native-build.outcome == 'success'
         working-directory: native-host
         run: pnpm --dir docs build > "$GAGA_EVIDENCE_DIRECTORY/docs.log" 2>&1
+      - name: Read-only documentation dependency diagnosis
+        if: always() && steps.native-build.outcome == 'success'
+        run: |
+          node --input-type=module - <<'JS'
+          import {createRequire} from 'node:module';
+          import {readFileSync,writeFileSync,existsSync,readdirSync} from 'node:fs';
+          import {resolve,dirname,join} from 'node:path';
+          import {pathToFileURL} from 'node:url';
+          const chunks=resolve('native-host/docs/dist/server/.prerender/chunks');
+          const report=[];
+          for(const origin of [resolve('native-host/docs/package.json'), ...(existsSync(chunks)?readdirSync(chunks).filter(n=>n.startsWith('TabItem_')).map(n=>join(chunks,n)):[])]) {
+            const entry={origin};
+            try {
+              const file=createRequire(origin).resolve('satteri'); entry.resolved=file;
+              let parent=dirname(file); while(!existsSync(join(parent,'package.json'))&&parent!==dirname(parent))parent=dirname(parent);
+              const meta=JSON.parse(readFileSync(join(parent,'package.json')));entry.package={name:meta.name,version:meta.version,main:meta.main,exports:meta.exports};
+              entry.htmlToHastSource=readFileSync(file,'utf8').includes('export function htmlToHast');
+              try { entry.exports=Object.keys(await import(pathToFileURL(file).href)); } catch(error) {entry.loadError=error.message;}
+            } catch(error) {entry.error=error.message;}
+            report.push(entry);
+          }
+          writeFileSync(process.env.GAGA_EVIDENCE_DIRECTORY+'/docs-export-inspection.json',JSON.stringify(report,null,2));
+          JS
       - name: Affected application regressions
         if: always() && steps.native-build.outcome == 'success'
         run: node --test tools/content/approval.test.mjs tools/content/content.test.mjs > "$GAGA_EVIDENCE_DIRECTORY/application-regressions.log" 2>&1
