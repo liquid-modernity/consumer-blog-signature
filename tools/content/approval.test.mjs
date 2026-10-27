@@ -42,10 +42,11 @@ function fixture() {
     },
   };
   const ctx = {
+    authorization: { check: async () => ({ allowed: true }) },
     kv,
     settings: {
       get: async (k) =>
-        k === "contentReleaseKey"
+        k === "contentReleaseEnabled" ? true : k === "contentReleaseKey"
           ? secret
           : k === "contentReleasePolicyDigest"
             ? policy
@@ -288,4 +289,22 @@ test("verified baseline advancement uses CAS and an old Live callback cannot rew
   assert.equal((await route.handler(f.ctx)).status, "DENIED");
   assert.deepEqual(await f.ctx.kv.get("content-current-release"), saved);
   assert.equal(f.writes(), 0);
+});
+
+test("unknown, unavailable or denied current host authority preserves the pending draft", async () => {
+  for (const authority of [undefined, { check: async () => ({ allowed: false }) }, { check: async () => ({}) }, { check: async () => { throw Error("unavailable"); } }]) {
+    const f = fixture(), p = payload({ actorId: "opaque-service-binding" });
+    f.ctx.authorization = authority;
+    await f.ctx.kv.compareAndSet("content-intent:" + p.nonce, null, {
+      request, actorId: "original-account", actorBinding: p.actorId,
+      expiresAt: p.expiresAt, state: "PUBLISH PENDING",
+    });
+    f.ctx.input = await signedContentMessage(p, secret);
+    assert.equal((await contentApprovalRoutes()["content-apply"].handler(f.ctx)).status, "DENIED");
+    assert.equal(f.writes(), 0);
+    assert.equal(f.item.draftRevisionId, "draft-exact");
+    const audit = await f.ctx.kv.get("content-authorization:" + p.nonce + ":apply");
+    assert.equal(audit.actorId, "original-account");
+    assert.equal(audit.allowed, false);
+  }
 });

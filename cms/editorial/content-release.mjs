@@ -1,6 +1,7 @@
 import {
   contentApprovalRoutes,
   signedContentMessage,
+  currentActorAuthorization,
 } from "./content-approval.mjs";
 import profile from "../../content-release.json" with { type: "json" };
 import {
@@ -119,6 +120,12 @@ export function contentReleaseRoutes({ dispatch = null } = {}) {
       profile.collections.includes(collection),
       "This content needs application review.",
     );
+    const decision = await ctx.authorization?.check({
+      actor: { type: "user", id: ctx.user.id },
+      permission: "content:publish_own",
+      resource: { type: "content", collection, id },
+    });
+    check(decision?.allowed === true, "You are not authorized to publish this article.");
     const current = await ctx.content.getVersioned(collection, id);
     check(
       current?.item &&
@@ -162,7 +169,7 @@ export function contentReleaseRoutes({ dispatch = null } = {}) {
     ...contentApprovalRoutes(),
     "content-status": {
       public: false,
-      permission: "content:publish_any",
+      permission: "content:publish_own",
       methods: ["POST"],
       request: { body: "json", maxBytes: 1024 },
       handler: async (ctx) => {
@@ -189,7 +196,7 @@ export function contentReleaseRoutes({ dispatch = null } = {}) {
     },
     "content-preview": {
       public: false,
-      permission: "content:publish_any",
+      permission: "content:publish_own",
       methods: ["POST"],
       request: { body: "json", maxBytes: 4096 },
       handler: async (ctx) => {
@@ -212,7 +219,7 @@ export function contentReleaseRoutes({ dispatch = null } = {}) {
     },
     "content-publish": {
       public: false,
-      permission: "content:publish_any",
+      permission: "content:publish_own",
       methods: ["POST"],
       request: { body: "json", maxBytes: 4096 },
       handler: async (ctx) => {
@@ -236,6 +243,7 @@ export function contentReleaseRoutes({ dispatch = null } = {}) {
               state: "PUBLISH PENDING",
             };
           check(ctx.kv?.compareAndSet, "Publication service is unavailable.");
+          await currentActorAuthorization(ctx, ctx.user.id, s.request, nonce, "intent");
           const stored = await ctx.kv.compareAndSet(
             "content-intent:" + nonce,
             null,

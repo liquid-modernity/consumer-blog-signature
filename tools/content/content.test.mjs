@@ -53,6 +53,7 @@ function ctx() {
   };
   return {
     user: { id: "editor" },
+    authorization: { check: async () => ({ allowed: true }) },
     kv,
     input: request,
     content: {
@@ -129,7 +130,7 @@ test("unpublish removes projection, not CMS data/history; export strips private 
 test("native preview denies unbound callers and selects only the exact saved revision", async () => {
   const routes = contentReleaseRoutes();
   assert.equal(routes["content-preview"].public, false);
-  assert.equal(routes["content-preview"].permission, "content:publish_any");
+  assert.equal(routes["content-preview"].permission, "content:publish_own");
   const c = ctx(),
     r = await routes["content-preview"].handler(c);
   assert.equal(r.status, "PREVIEW READY");

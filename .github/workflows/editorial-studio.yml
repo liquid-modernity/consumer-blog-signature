@@ -7,7 +7,7 @@ on:
       operation:
         type: choice
         default: qualify
-        options: [qualify, admission-check, preview-check, production-preflight, production-backup, deploy-cms]
+        options: [current-actor-check, qualify, admission-check, preview-check, production-preflight, production-backup, deploy-cms]
       qualification_run:
         type: string
         description: Exact successful qualification run for CMS upload
@@ -33,6 +33,121 @@ concurrency:
   group: editorial-studio-${{ github.ref }}
   cancel-in-progress: false
 jobs:
+  current-actor:
+    if: inputs.operation == 'current-actor-check'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: isolated-test-only
+          POSTGRES_USER: emdash_test
+          POSTGRES_DB: emdash_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready --health-interval 10s
+          --health-timeout 5s --health-retries 5
+    env:
+      ASTRO_TELEMETRY_DISABLED: "1"
+      WRANGLER_SEND_METRICS: "false"
+      GAGA_CONTENT_RELEASE_ENABLED: "false"
+      EMDASH_TEST_PG: postgres://emdash_test:isolated-test-only@localhost:5432/emdash_test
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: emdash-cms/emdash
+          ref: 0409cd220949d7f8ea4856b2f49b75e99c2b4119
+          path: native-host
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.23.4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.9.0
+          run_install: false
+      - name: Exact upstream source and patch input, no production credentials
+        run: |
+          mkdir -p "$RUNNER_TEMP/current-actor-evidence"
+          echo "GAGA_EVIDENCE_DIRECTORY=$RUNNER_TEMP/current-actor-evidence" >> "$GITHUB_ENV"
+          echo "GAGA_AUTH_APPLICATION=$GITHUB_WORKSPACE" >> "$GITHUB_ENV"
+          echo "GAGA_AUTH_EVIDENCE=$RUNNER_TEMP/current-actor-evidence/delayed-apply.jsonl" >> "$GITHUB_ENV"
+          node --input-type=module - <<'JS'
+          import {readFileSync} from 'node:fs';
+          import {createHash} from 'node:crypto';
+          import assert from 'node:assert/strict';
+          const pin=JSON.parse(readFileSync('tools/content/current-actor-proof/upstream.json'));
+          assert.equal(pin.baseline,'0409cd220949d7f8ea4856b2f49b75e99c2b4119');
+          assert.equal(createHash('sha256').update(readFileSync('tools/content/current-actor-proof/upstream.patch')).digest('hex'),pin.patchSha256);
+          JS
+          test "$(git -C native-host rev-parse HEAD)" = 0409cd220949d7f8ea4856b2f49b75e99c2b4119
+          git -C native-host apply --check ../tools/content/current-actor-proof/upstream.patch
+          git -C native-host apply ../tools/content/current-actor-proof/upstream.patch
+          cp tools/content/current-actor-proof/upstream.json "$RUNNER_TEMP/current-actor-evidence/"
+      - name: Clean locked installation and exact runtime record
+        run: |
+          test "$(node --version)" = v22.23.4
+          test "$(npm --version)" = 10.9.3
+          { echo "ImageOS=$ImageOS"; echo "ImageVersion=$ImageVersion"; uname -a; node --version; npm --version; pnpm --version; } > "$GAGA_EVIDENCE_DIRECTORY/runtime.txt"
+          npm ci --ignore-scripts --no-audit --no-fund
+          cd native-host
+          pnpm install --frozen-lockfile > "$GAGA_EVIDENCE_DIRECTORY/install.log" 2>&1
+          find node_modules/.pnpm -path '*/workerd/bin/workerd' -type f -exec node {} --version \; >> "$GAGA_EVIDENCE_DIRECTORY/runtime.txt"
+      - name: Required upstream formatting, workspace build and declarations
+        working-directory: native-host
+        run: |
+          pnpm format > "$GAGA_EVIDENCE_DIRECTORY/format.log" 2>&1
+          pnpm build > "$GAGA_EVIDENCE_DIRECTORY/build.log" 2>&1
+          pnpm typecheck > "$GAGA_EVIDENCE_DIRECTORY/typecheck.log" 2>&1
+          pnpm lint:quick > "$GAGA_EVIDENCE_DIRECTORY/lint-quick.json"
+          pnpm --silent lint:json > "$GAGA_EVIDENCE_DIRECTORY/lint.json"
+          test "$(jq '.diagnostics | length' "$GAGA_EVIDENCE_DIRECTORY/lint.json")" = 0
+      - name: Public capability, native RBAC, bridge and CLI regressions
+        working-directory: native-host
+        run: |
+          pnpm --filter @emdash-cms/plugin-types test > "$GAGA_EVIDENCE_DIRECTORY/plugin-types.log" 2>&1
+          pnpm --filter @emdash-cms/auth exec vitest run > "$GAGA_EVIDENCE_DIRECTORY/auth.log" 2>&1
+          pnpm --filter emdash exec vitest run tests/unit/plugins/authorization.test.ts tests/unit/plugins/capability-normalization.test.ts tests/unit/plugins/routes.test.ts tests/unit/plugins/content-policy.test.ts tests/unit/plugins/unpublish-hooks.test.ts > "$GAGA_EVIDENCE_DIRECTORY/native-authorization.log" 2>&1
+          pnpm --filter @emdash-cms/cloudflare test > "$GAGA_EVIDENCE_DIRECTORY/cloudflare.log" 2>&1
+          pnpm --filter @emdash-cms/sandbox-workerd test > "$GAGA_EVIDENCE_DIRECTORY/workerd-bridge.log" 2>&1
+          pnpm --filter @emdash-cms/plugin-cli test > "$GAGA_EVIDENCE_DIRECTORY/plugin-cli.log" 2>&1
+          pnpm --filter @emdash-cms/plugin-test test > "$GAGA_EVIDENCE_DIRECTORY/plugin-test.log" 2>&1
+      - name: Real local D1 and sandbox RPC parity
+        working-directory: native-host
+        run: pnpm --filter emdash exec vitest run --config vitest.workerd.config.ts tests/workerd/plugin-authorization.test.ts > "$GAGA_EVIDENCE_DIRECTORY/workerd-rpc.log" 2>&1
+      - name: Documentation build and affected application regressions
+        run: |
+          pnpm --dir native-host/docs build > "$GAGA_EVIDENCE_DIRECTORY/docs.log" 2>&1
+          node --test tools/content/approval.test.mjs tools/content/content.test.mjs > "$GAGA_EVIDENCE_DIRECTORY/application-regressions.log" 2>&1
+      - name: Actual application intent to native apply and revocation matrix
+        run: |
+          cp tools/content/current-actor.integration.test.ts native-host/packages/core/tests/integration/runtime/gaga-delayed-apply.test.ts
+          cd native-host
+          pnpm --filter emdash exec vitest run tests/integration/runtime/gaga-delayed-apply.test.ts > "$GAGA_EVIDENCE_DIRECTORY/gaga-delayed-apply.log" 2>&1
+      - name: Workflow lint
+        run: go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.7 -shellcheck= .github/workflows/editorial-studio.yml
+      - name: Preserve exact qualified upstream diff and unchanged application locks
+        if: always()
+        run: |
+          rm -f native-host/packages/core/tests/integration/runtime/gaga-delayed-apply.test.ts
+          git -C native-host add -N .
+          git -C native-host diff --binary > "$GAGA_EVIDENCE_DIRECTORY/qualified-upstream.patch"
+          git -C native-host status --short > "$GAGA_EVIDENCE_DIRECTORY/upstream-status.txt"
+          sha256sum package-lock.json cms/package-lock.json tools/content/current-actor-proof/upstream.patch > "$GAGA_EVIDENCE_DIRECTORY/identities.txt"
+          git diff --exit-code -- package-lock.json cms/package-lock.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: current-actor-authorization-evidence
+          path: ${{ runner.temp }}/current-actor-evidence
+          if-no-files-found: error
+
   admission:
     if: inputs.operation == 'admission-check'
     runs-on: ubuntu-24.04

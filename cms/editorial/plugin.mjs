@@ -39,6 +39,7 @@ export function createPlugin() {
       "content:read",
       "content:revisions:read",
       "content:publish",
+      "authorization:check",
       "hooks.content-policy:register",
       "network:request",
       "schema:read",

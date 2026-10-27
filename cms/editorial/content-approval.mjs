@@ -66,6 +66,25 @@ export async function verifiedContentMessage(
     throw Error("Denied");
   return p;
 }
+export async function currentActorAuthorization(ctx, actorId, request, nonce, phase) {
+  const [collection, id] = request.resource.split("/");
+  let allowed = false;
+  try {
+    const decision = await ctx.authorization?.check({
+      actor: { type: "user", id: actorId },
+      permission: "content:publish_own",
+      resource: { type: "content", collection, id },
+    });
+    allowed = decision?.allowed === true;
+  } catch {
+    allowed = false;
+  }
+  const audit = { actorId, intent: nonce, action: request.action, resource: request.resource,
+    phase, allowed, result: allowed ? "AUTHORIZED" : "DENIED", checkedAt: new Date().toISOString() };
+  const stored = await ctx.kv.compareAndSet("content-authorization:" + nonce + ":" + phase, null, audit);
+  if (!stored.applied || !allowed) throw Error("Denied");
+  return audit;
+}
 export async function nativePublishGate(event, ctx) {
   if (!["posts", "authors"].includes(event.collection)) return;
   const item = event.content,
@@ -86,6 +105,12 @@ export async function nativePublishGate(event, ctx) {
       reason:
         "Use Preview and publish to release a saved revision. Your draft is preserved.",
     };
+  try {
+    if ((await ctx.settings.get("contentReleaseEnabled")) !== true) throw Error("Denied");
+    await currentActorAuthorization(ctx, approval.originalActorId, approval.request, approval.nonce, "native-hook");
+  } catch {
+    return { cancel: true, reason: "Publishing authority changed. Your draft is preserved." };
+  }
 }
 export function contentApprovalRoutes() {
   return {
@@ -114,6 +139,7 @@ export function contentApprovalRoutes() {
       handler: async (ctx) => {
         let lock;
         try {
+          if ((await ctx.settings.get("contentReleaseEnabled")) !== true) throw Error("Denied");
           const policy = await ctx.settings.get("contentReleasePolicyDigest"),
             secret = await ctx.settings.get("contentReleaseKey"),
             p = await verifiedContentMessage(
@@ -133,6 +159,8 @@ export function contentApprovalRoutes() {
           );
           if (
             !pending ||
+            pending.value.state !== "PUBLISH PENDING" ||
+            !pending.value.actorId ||
             canonical(pending.value.request) !== canonical(p.request) ||
             pending.value.expiresAt < Date.now() ||
             (pending.value.actorBinding ?? pending.value.actorId) !== p.actorId
@@ -156,8 +184,9 @@ export function contentApprovalRoutes() {
           )
             throw Error("Conflict");
           const inflight = "content-inflight:" + p.request.resource;
-          lock = await ctx.kv.compareAndSet(inflight, null, p);
+          lock = await ctx.kv.compareAndSet(inflight, null, { ...p, originalActorId: pending.value.actorId });
           if (!lock.applied) throw Error("Busy");
+          const authorization = await currentActorAuthorization(ctx, pending.value.actorId, p.request, p.nonce, "apply");
           // Native EmDash still owns the actual revision transition and optimistic concurrency.
           const result = await ctx.content[p.request.action](collection, id, {
             _rev: current._rev,
@@ -168,6 +197,7 @@ export function contentApprovalRoutes() {
             {
               ...pending.value,
               state: "CMS_PUBLISHED_SITE_PENDING",
+              authorization,
               liveRevision: result.item.liveRevisionId,
             },
           );
