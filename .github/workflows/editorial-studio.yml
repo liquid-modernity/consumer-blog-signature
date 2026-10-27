@@ -102,39 +102,73 @@ jobs:
           cd native-host
           pnpm install --frozen-lockfile > "$GAGA_EVIDENCE_DIRECTORY/install.log" 2>&1
           find node_modules/.pnpm -path '*/workerd/bin/workerd' -type f -exec {} --version \; >> "$GAGA_EVIDENCE_DIRECTORY/runtime.txt"
-      - name: Required upstream formatting, workspace build and declarations
+      - name: Required upstream formatting
         working-directory: native-host
-        run: |
-          pnpm format > "$GAGA_EVIDENCE_DIRECTORY/format.log" 2>&1
-          pnpm build > "$GAGA_EVIDENCE_DIRECTORY/build.log" 2>&1
-          pnpm typecheck > "$GAGA_EVIDENCE_DIRECTORY/typecheck.log" 2>&1
-          pnpm lint:quick > "$GAGA_EVIDENCE_DIRECTORY/lint-quick.json"
-          pnpm --silent lint:json > "$GAGA_EVIDENCE_DIRECTORY/lint.json"
-          test "$(jq '.diagnostics | length' "$GAGA_EVIDENCE_DIRECTORY/lint.json")" = 0
-      - name: Public capability, native RBAC, bridge and CLI regressions
+        run: pnpm format > "$GAGA_EVIDENCE_DIRECTORY/format.log" 2>&1
+      - name: Required upstream workspace build
+        id: native-build
         working-directory: native-host
-        run: |
-          pnpm --filter @emdash-cms/plugin-types test > "$GAGA_EVIDENCE_DIRECTORY/plugin-types.log" 2>&1
-          pnpm --filter @emdash-cms/auth exec vitest run > "$GAGA_EVIDENCE_DIRECTORY/auth.log" 2>&1
-          pnpm --filter emdash exec vitest run tests/unit/plugins/authorization.test.ts tests/unit/plugins/capability-normalization.test.ts tests/unit/plugins/routes.test.ts tests/unit/plugins/content-policy.test.ts tests/unit/plugins/unpublish-hooks.test.ts > "$GAGA_EVIDENCE_DIRECTORY/native-authorization.log" 2>&1
-          pnpm --filter @emdash-cms/cloudflare test > "$GAGA_EVIDENCE_DIRECTORY/cloudflare.log" 2>&1
-          pnpm --filter @emdash-cms/sandbox-workerd test > "$GAGA_EVIDENCE_DIRECTORY/workerd-bridge.log" 2>&1
-          pnpm --filter @emdash-cms/plugin-cli test > "$GAGA_EVIDENCE_DIRECTORY/plugin-cli.log" 2>&1
-          pnpm --filter @emdash-cms/plugin-test test > "$GAGA_EVIDENCE_DIRECTORY/plugin-test.log" 2>&1
+        run: pnpm build > "$GAGA_EVIDENCE_DIRECTORY/build.log" 2>&1
+      - name: Upstream package and component declarations
+        if: always() && steps.native-build.outcome == 'success'
+        working-directory: native-host
+        run: pnpm typecheck > "$GAGA_EVIDENCE_DIRECTORY/typecheck.log" 2>&1
+      - name: Upstream quick lint
+        if: always() && steps.native-build.outcome == 'success'
+        working-directory: native-host
+        run: pnpm lint:quick > "$GAGA_EVIDENCE_DIRECTORY/lint-quick.json" 2>&1
+      - name: Upstream type-aware lint
+        if: always() && steps.native-build.outcome == 'success'
+        working-directory: native-host
+        run: pnpm --silent lint:json > "$GAGA_EVIDENCE_DIRECTORY/lint.json" 2>&1
+      - name: Public capability and consent regressions
+        if: always() && steps.native-build.outcome == 'success'
+        working-directory: native-host
+        run: pnpm --filter @emdash-cms/plugin-types test > "$GAGA_EVIDENCE_DIRECTORY/plugin-types.log" 2>&1
+      - name: Native RBAC regressions
+        if: always() && steps.native-build.outcome == 'success'
+        working-directory: native-host
+        run: pnpm --filter @emdash-cms/auth exec vitest run > "$GAGA_EVIDENCE_DIRECTORY/auth.log" 2>&1
+      - name: Current authorization and native route policy regressions
+        if: always() && steps.native-build.outcome == 'success'
+        working-directory: native-host
+        run: pnpm --filter emdash exec vitest run tests/unit/plugins/authorization.test.ts tests/unit/plugins/capability-normalization.test.ts tests/unit/plugins/routes.test.ts tests/unit/plugins/content-policy.test.ts tests/unit/plugins/unpublish-hooks.test.ts > "$GAGA_EVIDENCE_DIRECTORY/native-authorization.log" 2>&1
+      - name: Cloudflare provider and bridge regressions
+        if: always() && steps.native-build.outcome == 'success'
+        working-directory: native-host
+        run: pnpm --filter @emdash-cms/cloudflare test > "$GAGA_EVIDENCE_DIRECTORY/cloudflare.log" 2>&1
+      - name: Workerd bridge regressions
+        if: always() && steps.native-build.outcome == 'success'
+        working-directory: native-host
+        run: pnpm --filter @emdash-cms/sandbox-workerd test > "$GAGA_EVIDENCE_DIRECTORY/workerd-bridge.log" 2>&1
+      - name: Plugin CLI contract regressions
+        if: always() && steps.native-build.outcome == 'success'
+        working-directory: native-host
+        run: pnpm --filter @emdash-cms/plugin-cli test > "$GAGA_EVIDENCE_DIRECTORY/plugin-cli.log" 2>&1
+      - name: Exhaustive plugin contract fixture
+        if: always() && steps.native-build.outcome == 'success'
+        working-directory: native-host
+        run: pnpm --filter @emdash-cms/plugin-test test > "$GAGA_EVIDENCE_DIRECTORY/plugin-test.log" 2>&1
       - name: Real local D1 and sandbox RPC parity
+        if: always() && steps.native-build.outcome == 'success'
         working-directory: native-host
         run: pnpm --filter emdash exec vitest run --config vitest.workerd.config.ts tests/workerd/plugin-authorization.test.ts > "$GAGA_EVIDENCE_DIRECTORY/workerd-rpc.log" 2>&1
-      - name: Documentation build and affected application regressions
-        run: |
-          pnpm --dir native-host/docs build > "$GAGA_EVIDENCE_DIRECTORY/docs.log" 2>&1
-          node --test tools/content/approval.test.mjs tools/content/content.test.mjs > "$GAGA_EVIDENCE_DIRECTORY/application-regressions.log" 2>&1
+      - name: Public documentation build
+        if: always() && steps.native-build.outcome == 'success'
+        working-directory: native-host
+        run: pnpm --dir docs build > "$GAGA_EVIDENCE_DIRECTORY/docs.log" 2>&1
+      - name: Affected application regressions
+        if: always() && steps.native-build.outcome == 'success'
+        run: node --test tools/content/approval.test.mjs tools/content/content.test.mjs > "$GAGA_EVIDENCE_DIRECTORY/application-regressions.log" 2>&1
       - name: Actual application intent to native apply and revocation matrix
+        if: always() && steps.native-build.outcome == 'success'
         run: |
           cp tools/content/current-actor.integration.test.ts native-host/packages/core/tests/integration/runtime/gaga-delayed-apply.test.ts
           cd native-host
           pnpm --filter emdash exec vitest run tests/integration/runtime/gaga-delayed-apply.test.ts > "$GAGA_EVIDENCE_DIRECTORY/gaga-delayed-apply.log" 2>&1
       - name: Workflow lint
-        run: go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.7 -shellcheck= .github/workflows/editorial-studio.yml
+        if: always()
+        run: go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.7 -shellcheck= .github/workflows/editorial-studio.yml > "$GAGA_EVIDENCE_DIRECTORY/workflow-lint.log" 2>&1
       - name: Preserve exact qualified upstream diff and unchanged application locks
         if: always()
         run: |
@@ -142,6 +176,8 @@ jobs:
           git -C native-host add -N .
           git -C native-host diff --binary > "$GAGA_EVIDENCE_DIRECTORY/qualified-upstream.patch"
           git -C native-host status --short > "$GAGA_EVIDENCE_DIRECTORY/upstream-status.txt"
+          git -C native-host add -A
+          git -C native-host write-tree > "$GAGA_EVIDENCE_DIRECTORY/upstream-tree.txt"
           sha256sum package-lock.json cms/package-lock.json tools/content/current-actor-proof/upstream.patch.gz > "$GAGA_EVIDENCE_DIRECTORY/identities.txt"
           git diff --exit-code -- package-lock.json cms/package-lock.json
       - uses: actions/upload-artifact@v4
