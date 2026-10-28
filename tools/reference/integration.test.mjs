@@ -43,7 +43,9 @@ test('Editorial: the actual public root validates, resolves and projects all adm
 test('Editorial: independent public extension vocabulary works without application widgets',()=>{
  const semantics=createPortableTextSemantics([{type:'fieldObservation',stringFields:['label','notes']}]);
  const body=[{_type:'fieldObservation',_key:'o',label:'Moss Atlas',notes:'Independent field notes'}];
- assert.equal(semantics.validatePortableText(body),body);assert.equal(semantics.plainText(body),'Moss Atlas Independent field notes');
+ assert.equal(semantics.validatePortableText(body),body);assert.equal(semantics.plainText(body),'','Extension stringFields validate fields; they are not text selectors');
+ const textSemantics=createPortableTextSemantics([{type:'fieldObservation',stringFields:['title','text']}]);
+ assert.equal(textSemantics.plainText([{_type:'fieldObservation',_key:'o',title:'Moss Atlas',text:'Independent field notes'}]),'Moss Atlas Independent field notes');
  assert.throws(()=>semantics.validatePortableText([{_type:'callout',_key:'c',text:'Not selected'}]));
 });
 test('Core/Site: independent application identity and source names compose without a new package or schema',()=>{

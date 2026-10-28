@@ -40,6 +40,11 @@ selectors, storage policy, rendering and presentation. Garrison remains release
 and qualification authority; Escutcheon remains portable security/evidence
 semantics. No runtime imports from their private/source internals are added.
 
+The [repository authority map](REPOSITORY-AUTHORITY-V1.md) distinguishes canonical
+origin/source from historical clones, linked worktrees and release evidence. Core,
+Editorial, Experience and Site are architectural boundaries, not justification for
+additional packages or prototype repositories.
+
 ## Reproduce the integration
 
 Use Ubuntu 24.04, Node **22.23.4**, npm **10.9.3**:
@@ -86,14 +91,14 @@ Both publishing paths remain disabled; no switch is written during qualification
 
 ## Remaining prototype-suite work
 
-Applications 2–4 are not identified in the supplied suite checkpoint. These are
+Applications 2–4 are explicitly **UNASSIGNED**, per operator direction. These are
 concrete implementation slots, not invented application/product requirements:
 
 | Slot | Next implementation and acceptance task |
 |---|---|
-| 2 | Bind the designated application's existing declaration/readers to public Arsenal Core and the actual provider ports. Run its clean-lock/native host proof; use its own IDs/origin/routes. This becomes the second real consumer requirement before extracting Site composition. |
-| 3 | Wire the designated application's real reader/interaction surface to existing public Engine ports with explicit selectors, storage/cleanup and locale. Prove an actual interaction/reload round-trip before proposing Arsenal Experience extraction. |
-| 4 | Implement its selected content vocabulary and provider adapter through the public Editorial root; qualify real content, reference resolution, preview/authorization boundaries and affected discovery. Structural/new-block needs remain separate application work. |
+| 2 — UNASSIGNED | Bind the designated application's existing declaration/readers to public Arsenal Core and the actual provider ports. Run its clean-lock/native host proof; use its own IDs/origin/routes. This becomes the second real consumer requirement before extracting Site composition. |
+| 3 — UNASSIGNED | Wire the designated application's real reader/interaction surface to existing public Engine ports with explicit selectors, storage/cleanup and locale. Prove an actual interaction/reload round-trip before proposing Arsenal Experience extraction. |
+| 4 — UNASSIGNED | Implement its selected content vocabulary and provider adapter through the public Editorial root; qualify real content, reference resolution, preview/authorization boundaries and affected discovery. Structural/new-block needs remain separate application work. |
 
 Each application needs its own repository identity, content/privacy model and
 runtime acceptance test. This fixture does not pretend those unknown products
