@@ -126,22 +126,18 @@ function StudioBody({ value = [], onChange, label, id }: Props) {
       })
       .run();
   }
-  function jump(title: string, level: number) {
+  function jump(key: string) {
     if (!editor) return;
-    let found = false;
+    // Expanded reusable-section headings are not editable nodes in this document.
+    const target = value
+      .filter((block) => block._type === "block" && /^h[1-6]$/.test(String(block.style)))
+      .findIndex((block) => block._key === key);
+    if (target < 0) return;
+    let heading = 0,
+      found = false;
     editor.state.doc.descendants((node, pos) => {
-      if (
-        !found &&
-        node.type.name === "heading" &&
-        node.attrs.level === level &&
-        node.textContent === title
-      ) {
-        editor
-          .chain()
-          .focus()
-          .setTextSelection(pos + 1)
-          .scrollIntoView()
-          .run();
+      if (!found && node.type.name === "heading" && heading++ === target) {
+        editor.chain().focus().setTextSelection(pos + 1).scrollIntoView().run();
         found = true;
       }
       return !found;
@@ -232,7 +228,7 @@ function StudioBody({ value = [], onChange, label, id }: Props) {
                   >
                     <button
                       type="button"
-                      onClick={() => jump(h.title, h.level)}
+                      onClick={() => jump(h.key)}
                     >
                       {h.title}
                     </button>
