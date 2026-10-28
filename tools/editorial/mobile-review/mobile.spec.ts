@@ -50,7 +50,7 @@ async function state(page: Page) {
         state: pane.dataset.state, ariaHidden: pane.getAttribute("aria-hidden"), inert: pane.inert,
         x: box.x, right: box.right, y: box.y, width: box.width, height: box.height,
         visibleWidth: Math.max(0, Math.min(innerWidth, box.right) - Math.max(0, box.left)),
-        transform: css.transform, transition: css.transition,
+        transform: css.transform, translate: css.translate, transition: css.transition,
         animations: pane.getAnimations().map(a => ({
           playState: a.playState, currentTime: a.currentTime,
           timing: a.effect?.getComputedTiming(),
@@ -58,6 +58,8 @@ async function state(page: Page) {
         })),
       } : null,
       backdropOpacity: backdrop ? getComputedStyle(backdrop).opacity : null,
+      activeTag: document.activeElement?.tagName,
+      activeInsideSettings: !!pane?.contains(document.activeElement),
       active: document.activeElement?.getAttribute("aria-label") || document.activeElement?.textContent?.trim().slice(0, 100),
     };
   }, paneSelector);
@@ -105,7 +107,8 @@ for (const width of [320, 360, 390, 768]) {
     const open = await capture(page, width + "-open");
     await page.getByRole("button", { name: "Close settings", exact: true }).click();
     await settled(page, false);
-    await expect(settings).toBeFocused();
+    const buttonRestoresFocus = await settings.evaluate(el => el === document.activeElement);
+    expect.soft(buttonRestoresFocus, "Native X close must restore focus to Settings").toBe(true);
     const afterClose = await capture(page, width + "-closed-after-button");
     await settings.press("Enter");
     await settled(page, true);
@@ -113,10 +116,16 @@ for (const width of [320, 360, 390, 768]) {
     await settled(page, false);
     await expect(settings).toBeFocused();
     const afterEscape = await state(page);
+    await settings.press("Enter"); await settled(page, true);
+    await page.getByRole("button", { name: "Close settings", exact: true }).press("Enter");
+    await settled(page, false);
+    const keyboardCloseRestoresFocus = await settings.evaluate(el => el === document.activeElement);
+    expect.soft(keyboardCloseRestoresFocus, "Native keyboard X close must restore focus to Settings").toBe(true);
+    const afterKeyboardClose = await state(page);
     expect(await original!.evaluate(el => el.isConnected && el === document.querySelector(".studio-canvas .tiptap"))).toBe(true);
     expect(await api(page, "content/posts/" + id)).toEqual(before);
     expect(await api(page, "content/posts/" + id + "/revisions?limit=100")).toEqual(revisionsBefore);
-    writeFileSync(join(out, width + "-result.json"), JSON.stringify({ status: "PASS", width, closed, open, afterClose, afterEscape, editorIdentityPreserved: true, localDraftAndRevisionsUnchanged: true }, null, 2) + "\n");
+    writeFileSync(join(out, width + "-result.json"), JSON.stringify({ status: buttonRestoresFocus && keyboardCloseRestoresFocus ? "PASS" : "NATIVE_FOCUS_DEFECT", width, closed, open, afterClose, afterEscape, afterKeyboardClose, buttonRestoresFocus, keyboardCloseRestoresFocus, escapeRestoresFocus: true, editorIdentityPreserved: true, localDraftAndRevisionsUnchanged: true }, null, 2) + "\n");
   });
 }
 

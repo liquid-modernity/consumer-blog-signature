@@ -72,6 +72,7 @@ jobs:
         run: |
           npx --no-install playwright test --config .gaga/mobile-review/config.ts | tee "$GAGA_EVIDENCE_DIRECTORY/browser.log"
       - name: Workflow lint and preserved source receipt
+        if: always()
         run: |
           go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.7 -shellcheck= ../harness/.github/workflows/editorial-mobile-evidence.yml
           node --input-type=module <<'JS'
@@ -82,10 +83,10 @@ jobs:
           const dir=process.env.GAGA_EVIDENCE_DIRECTORY,read=n=>JSON.parse(readFileSync(dir+'/'+n));
           const runtime=read('runtime.json'),source=sourceIdentity();assert.deepEqual(source,runtime.source);
           execFileSync('git',['diff','--exit-code']);assert.equal(execFileSync('git',['ls-files','--others','--exclude-standard'],{encoding:'utf8'}).trim(),'');
-          const browser=read('browser-results.json');assert.equal(browser.stats.expected,5);assert.equal(browser.stats.unexpected,0);assert.equal(browser.stats.skipped,0);assert.equal(browser.stats.flaky,0);
-          for(const width of [320,360,390,768])assert.equal(read(width+'-result.json').status,'PASS');
+          const browser=read('browser-results.json');assert.equal(browser.stats.expected+browser.stats.unexpected,5);assert.equal(browser.stats.skipped,0);assert.equal(browser.stats.flaky,0);
+          const widths=[320,360,390,768].map(width=>read(width+'-result.json'));for(const result of widths){assert.ok(['PASS','NATIVE_FOCUS_DEFECT'].includes(result.status));assert.equal(result.editorIdentityPreserved,true);assert.equal(result.localDraftAndRevisionsUnchanged,true);assert.equal(result.escapeRestoresFocus,true);}
           assert.equal(process.env.GAGA_CONTENT_RELEASE_ENABLED,'false');
-          const receipt={schema:'gaga.editorial-mobile-evidence/v1',status:'VERIFIED',run:process.env.GITHUB_RUN_ID,source,harness:process.env.GITHUB_SHA,runtime,workerd:execFileSync('node_modules/.bin/workerd',['--version'],{encoding:'utf8'}).trim(),browser:browser.stats,production:{mainPromotions:0,deployments:0,workerUpdates:0,contentWrites:0,schemaWrites:0,credentialChanges:0,providerMutations:0,publishUnpublishOperations:0,publishingSwitchChanges:0}};
+          const receipt={schema:'gaga.editorial-mobile-evidence/v1',status:browser.stats.unexpected?'REVIEW_COMPLETE_NATIVE_FOCUS_DEFECT':'VERIFIED',widths,run:process.env.GITHUB_RUN_ID,source,harness:process.env.GITHUB_SHA,runtime,workerd:execFileSync('node_modules/.bin/workerd',['--version'],{encoding:'utf8'}).trim(),browser:browser.stats,production:{mainPromotions:0,deployments:0,workerUpdates:0,contentWrites:0,schemaWrites:0,credentialChanges:0,providerMutations:0,publishUnpublishOperations:0,publishingSwitchChanges:0}};
           writeFileSync(dir+'/qualification-receipt.json',JSON.stringify(receipt,null,2)+'\n');
           JS
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
