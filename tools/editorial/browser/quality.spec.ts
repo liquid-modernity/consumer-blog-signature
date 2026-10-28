@@ -1,6 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { mkdirSync, writeFileSync, readFileSync } from "node:fs";
 import { richFixture } from "../fixture.mjs";
+import { plainText } from "../../../editorial/content-semantics.mjs";
 
 async function api(page: Page, path: string, method = "GET", data?: unknown) {
   const response = await page.request.fetch("http://localhost:4322/_emdash/api/" + path, {
@@ -236,12 +237,12 @@ test("responsive native canvas, inspector and app controls across desktop and mo
   await expect.poll(async () => Number(await resize.getAttribute("aria-valuenow"))).toBeGreaterThan(oldWidth);
   await resize.press("ArrowRight");
   await expect(resize).toHaveAttribute("aria-valuenow", String(oldWidth));
-  // Switch native theme through its existing HTML theme contract, not app styles.
-  await page.evaluate(() => document.documentElement.setAttribute("data-mode", "dark"));
-  await page.emulateMedia({ colorScheme: "dark" });
+  // Exercise the real native theme control, including its context and storage.
+  await page.getByRole("button", { name: "Switch to dark", exact: true }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-mode", "dark");
   await page.screenshot({ path: ".gaga/editorial/quality/1600-dark.png", fullPage: true });
-  await page.evaluate(() => document.documentElement.setAttribute("data-mode", "light"));
-  await page.emulateMedia({ colorScheme: "light" });
+  await page.getByRole("button", { name: "Switch to light", exact: true }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-mode", "light");
   await page.setViewportSize({ width: 390, height: 844 });
   const settings = page.getByRole("button", { name: "Settings", exact: true });
   await settings.click(); await expect(page.getByRole("button", { name: "Close settings", exact: true })).toBeVisible();
@@ -275,14 +276,19 @@ test("keyboard disclosures and public accessibility tree retain native limitatio
   let screenReaderSession = "NOT_RUN";
   if (process.env.GAGA_EDITORIAL_SCREEN_READER === "orca") {
     const log = process.env.GAGA_ORCA_LOG!;
+    let start = readFileSync(log, "utf8").length;
+    const newSpeech = () => readFileSync(log, "utf8").slice(start);
     await outline.focus();
-    await expect.poll(() => readFileSync(log, "utf8")).toMatch(/SPEECH OUTPUT:[^\n]*Outline/);
+    await expect.poll(newSpeech).toMatch(/SPEECH OUTPUT:[^\n]*Outline/);
+    start = readFileSync(log, "utf8").length;
     await page.keyboard.press("Tab");
     await expect(page.getByRole("button", { name: "References", exact: true })).toBeFocused();
-    await expect.poll(() => readFileSync(log, "utf8")).toMatch(/SPEECH OUTPUT:[^\n]*References/);
+    await expect.poll(newSpeech).toMatch(/SPEECH OUTPUT:[^\n]*References/);
+    start = readFileSync(log, "utf8").length;
     await page.keyboard.press("Space");
     await expect(page.getByRole("button", { name: "References", exact: true })).toHaveAttribute("aria-expanded", "true");
-    await expect.poll(() => readFileSync(log, "utf8")).toMatch(/SPEECH OUTPUT:[^\n]*expanded/);
+    await expect.poll(newSpeech).toMatch(/SPEECH OUTPUT:[^\n]*expanded/);
+    evidence("screen-reader", { status: "PASS", implementation: "Orca", focusedControlAnnouncements: ["Outline", "References"], expandedStateAnnouncement: true, logScope: "fresh lines after each interaction", audibleHumanReview: false });
     screenReaderSession = "ORCA_HEADFUL_SMOKE";
   }
   evidence("accessibility", { status: "APP_CONTROLS_PASS_NATIVE_ISSUES_RETAINED", nativeTextboxNames: textbox.map((node: any) => node.name?.value ?? ""), appControlNames: controlsAx.map((node: any) => node.name.value), disclosureKeyboard: true, focusVisible: true, screenReaderSession, nativeTextboxNameFixed: false, nativeReadOnlyBridgeFixed: false });
@@ -321,6 +327,9 @@ test("rich media, reusable sections and native picker remain on their existing p
   }
   const item = await article(page, "rich-media-quality-proof", body as any);
   const canvas = canvasOf(page);
+  const resolvedText = plainText(body, { sections: Object.fromEntries(sections.map((s: any) => [s.id, s.data.body])) });
+  const expectedWords = resolvedText.match(/\S+/gu)?.length ?? 0;
+  await expect(page.locator(".studio-stats")).toContainText(expectedWords + " words");
   await expect(canvas.locator("table")).toBeVisible();
   // Native cards summarize identity; reference details belong to the reference utility.
   await expect(canvas).toContainText("Reference");
