@@ -84,6 +84,7 @@ test('settled saved library layout, tab strip, touch targets and keyboard focus'
   await page.keyboard.press('ArrowLeft');
   const keyboardLeft=await tabs.first().evaluate(el=>el===document.activeElement);
   expect.soft(keyboardLeft,'ArrowLeft returns to saved tab').toBe(true);
+  await settle(page);
   const focus=await page.evaluate(()=>{const el=document.activeElement as HTMLElement,css=getComputedStyle(el);return {visible:el.matches(':focus-visible'),outline:css.outlineStyle,width:parseFloat(css.outlineWidth),shadow:css.boxShadow};});
   expect.soft(focus.visible).toBe(true);
   expect.soft((focus.outline!=='none'&&focus.width>=2)||focus.shadow!=='none','visible keyboard focus').toBe(true);

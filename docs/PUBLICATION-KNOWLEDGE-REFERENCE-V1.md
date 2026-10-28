@@ -72,13 +72,15 @@ The focused responsive/semantic continuation preserves the qualified functional
 slice at `1df87908a0c9dcda003275ff2ea60850942cd317` / run `40697899137`.
 `PageFrame` now uses the existing main wrapper from `AppFrameBase` instead of
 suppressing its semantics. The skip-link keeps its existing unique focusable
-`#gaga-main` target; landing/preview documents without that shell are inventoried
-separately. The whole built app-shell route set is checked statically and by
+`#gaga-main` target. The homepage's viewport-anchor handler leaves skip links to
+native browser navigation/focus instead of canceling their default action.
+Landing/preview documents without that shell are inventoried separately. The whole built app-shell route set is checked statically and by
 keyboard, so representative pages cannot conceal a route-specific broken target.
 
 Saved Library's own scoped styles bound the grid/header, retain a horizontally
 scrollable tab strip and provide 44px tab targets. Its existing handler now
-supports roving focus with arrows/Home/End; these changes do not alter save or
+supports roving focus with arrows/Home/End. Focus outlines change immediately,
+while existing color transitions remain. These changes do not alter save or
 retention logic. Settled rendering is measured at 320/360/390/768/1440px without
 disabling motion. The focused workflow reruns only affected build/native/browser
 checks and the preserved Save journey, rather than the full prior functional suite.

@@ -456,7 +456,8 @@ const socialSection = sectionById.get('social');
     // Smoothly scroll to the parent viewport stage when clicking root anchor links or Outline Peek links
     document.addEventListener('click', (event) => {
       const target = event.target instanceof Element ? event.target.closest<HTMLAnchorElement>('a[href*="#"]') : null;
-      if (!target) return;
+      // Skip navigation must keep the browser's native target focus behavior.
+      if (!target || target.classList.contains('gaga-skip-link')) return;
       const href = target.getAttribute('href') ?? '';
       if (!href.startsWith('#') && !href.startsWith('/#')) return;
       const id = href.replace(/^\/?#/, '');
