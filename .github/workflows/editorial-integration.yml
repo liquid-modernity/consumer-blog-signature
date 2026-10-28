@@ -78,7 +78,12 @@ jobs:
           gsettings set org.gnome.desktop.a11y.applications screen-reader-enabled true
           mkdir -p "$RUNNER_TEMP/orca-prefs"
           orca --version > "$GAGA_EVIDENCE_DIRECTORY/orca-version.txt"
-          orca --replace --enable=speech --disable=braille --debug --debug-file="$GAGA_ORCA_LOG" -u "$RUNNER_TEMP/orca-prefs" > "$GAGA_EVIDENCE_DIRECTORY/orca-process.log" 2>&1 &
+          # Native debug files are buffered; stream documented customizations to unbuffered stdout.
+          cat > "$RUNNER_TEMP/orca-prefs/orca-customizations.py" <<'PY'
+          import orca.debug
+          orca.debug.debugLevel = orca.debug.LEVEL_ALL
+          PY
+          PYTHONUNBUFFERED=1 orca --replace --enable=speech --disable=braille -u "$RUNNER_TEMP/orca-prefs" > "$GAGA_ORCA_LOG" 2>&1 &
           orca_pid=$!
           trap 'kill "$orca_pid" 2>/dev/null || true' EXIT
           npx --no-install playwright test --config playwright.editorial.config.ts quality.spec.ts --grep 'Orca announces' | tee "$GAGA_EVIDENCE_DIRECTORY/screen-reader.log"
