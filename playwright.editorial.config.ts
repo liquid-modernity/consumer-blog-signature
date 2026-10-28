@@ -8,17 +8,18 @@ export default defineConfig({
   workers: 1,
   use: {
     baseURL: "http://localhost:4322",
-    headless: true,
+    headless: process.env.GAGA_EDITORIAL_SCREEN_READER !== "orca",
     trace: "off",
     screenshot: "only-on-failure",
     viewport: { width: 1600, height: 1100 },
-    ...(process.env.GAGA_STUDIO_BROWSER_EXECUTABLE
-      ? {
-          launchOptions: {
-            executablePath: process.env.GAGA_STUDIO_BROWSER_EXECUTABLE,
-          },
-        }
-      : {}),
+    launchOptions: {
+      ...(process.env.GAGA_STUDIO_BROWSER_EXECUTABLE
+        ? { executablePath: process.env.GAGA_STUDIO_BROWSER_EXECUTABLE }
+        : {}),
+      ...(process.env.GAGA_EDITORIAL_SCREEN_READER === "orca"
+        ? { args: ["--force-renderer-accessibility"] }
+        : {}),
+    },
   },
   webServer: [
     {

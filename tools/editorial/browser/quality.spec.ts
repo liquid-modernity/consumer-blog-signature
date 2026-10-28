@@ -1,5 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, writeFileSync, readFileSync } from "node:fs";
 import { richFixture } from "../fixture.mjs";
 
 async function api(page: Page, path: string, method = "GET", data?: unknown) {
@@ -175,7 +175,7 @@ test("private saved preview keeps exact pins, canonical renderer, denial and dis
   const anonymous = await context.browser()!.newContext();
   expect([401, 403]).toContain((await anonymous.request.post(privateUrl, { data: payload, headers: { "X-EmDash-Request": "1" } })).status());
   await anonymous.close();
-  const denied = await page.request.post(privateUrl, { data: payload, headers: { "Origin": "https://untrusted.example", "X-EmDash-Request": "1" } });
+  const denied = await page.request.post(privateUrl, { data: payload, headers: { "Origin": "https://untrusted.example" } });
   expect(denied.status()).toBe(403);
   // Stale selected/live identities are rejected by the actual private route.
   for (const stale of [{ ...payload, selectedRevision: "not-the-selected-revision" }, { ...payload, expectedPublishedRevision: "not-the-live-revision" }]) {
@@ -272,7 +272,20 @@ test("keyboard disclosures and public accessibility tree retain native limitatio
   const controlsAx = tree.nodes.filter((node: any) => node.role?.value === "button" && ["Outline", "References", "Readiness"].includes(node.name?.value));
   expect(controlsAx).toHaveLength(3);
   const textbox = tree.nodes.filter((node: any) => node.role?.value === "textbox");
-  evidence("accessibility", { status: "APP_CONTROLS_PASS_NATIVE_ISSUES_RETAINED", nativeTextboxNames: textbox.map((node: any) => node.name?.value ?? ""), appControlNames: controlsAx.map((node: any) => node.name.value), disclosureKeyboard: true, focusVisible: true, screenReaderSession: "NOT_RUN", nativeTextboxNameFixed: false, nativeReadOnlyBridgeFixed: false });
+  let screenReaderSession = "NOT_RUN";
+  if (process.env.GAGA_EDITORIAL_SCREEN_READER === "orca") {
+    const log = process.env.GAGA_ORCA_LOG!;
+    await outline.focus();
+    await expect.poll(() => readFileSync(log, "utf8")).toMatch(/SPEECH OUTPUT:[^\n]*Outline/);
+    await page.keyboard.press("Tab");
+    await expect(page.getByRole("button", { name: "References", exact: true })).toBeFocused();
+    await expect.poll(() => readFileSync(log, "utf8")).toMatch(/SPEECH OUTPUT:[^\n]*References/);
+    await page.keyboard.press("Space");
+    await expect(page.getByRole("button", { name: "References", exact: true })).toHaveAttribute("aria-expanded", "true");
+    await expect.poll(() => readFileSync(log, "utf8")).toMatch(/SPEECH OUTPUT:[^\n]*expanded/);
+    screenReaderSession = "ORCA_HEADFUL_SMOKE";
+  }
+  evidence("accessibility", { status: "APP_CONTROLS_PASS_NATIVE_ISSUES_RETAINED", nativeTextboxNames: textbox.map((node: any) => node.name?.value ?? ""), appControlNames: controlsAx.map((node: any) => node.name.value), disclosureKeyboard: true, focusVisible: true, screenReaderSession, nativeTextboxNameFixed: false, nativeReadOnlyBridgeFixed: false });
   await cdp.detach();
 });
 

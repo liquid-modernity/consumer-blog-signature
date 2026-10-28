@@ -61,7 +61,26 @@ jobs:
         run: |
           npm run editorial:prepare
           npx --no-install playwright install --with-deps chromium
+          # Ephemeral runner tools only; no application dependency or lock changes.
+          sudo apt-get update -qq
+          sudo apt-get install -y orca dbus-x11 pulseaudio speech-dispatcher-espeak-ng
+          cat > "$RUNNER_TEMP/editorial-screen-reader.sh" <<'SH'
+          set -euo pipefail
+          export NO_AT_BRIDGE=0
+          export GAGA_EDITORIAL_SCREEN_READER=orca
+          export GAGA_ORCA_LOG="$GAGA_EVIDENCE_DIRECTORY/orca-debug.log"
+          pulseaudio --start --exit-idle-time=-1
+          pactl load-module module-null-sink sink_name=editorial-proof > "$GAGA_EVIDENCE_DIRECTORY/audio-sink.txt"
+          speech-dispatcher -d
+          gsettings set org.gnome.desktop.a11y.applications screen-reader-enabled true
+          mkdir -p "$RUNNER_TEMP/orca-prefs"
+          orca --version > "$GAGA_EVIDENCE_DIRECTORY/orca-version.txt"
+          orca --replace --enable=speech --disable=braille --debug --debug-file="$GAGA_ORCA_LOG" -u "$RUNNER_TEMP/orca-prefs" > "$GAGA_EVIDENCE_DIRECTORY/orca-process.log" 2>&1 &
+          orca_pid=$!
+          trap 'kill "$orca_pid" 2>/dev/null || true' EXIT
           npx --no-install playwright test --config playwright.editorial.config.ts integration.spec.ts quality.spec.ts | tee "$GAGA_EVIDENCE_DIRECTORY/browser.log"
+          SH
+          dbus-run-session -- xvfb-run -a bash "$RUNNER_TEMP/editorial-screen-reader.sh"
           cp .gaga/editorial/browser-results.json .gaga/editorial/packed-integration.json .gaga/editorial/packed-integration.png "$GAGA_EVIDENCE_DIRECTORY/"
       - name: Preserve isolated editor screenshots and diagnostics
         if: always()
@@ -98,7 +117,7 @@ jobs:
           assert.equal(read('packed-integration.json').status,'PASS');assert.equal(read('browser-results.json').stats.unexpected,0);
           const editorBrowser=read('browser-results.json');assert.equal(editorBrowser.stats.expected,9);
           for(const file of ['editing','saved-preview','responsive','rich-media'])assert.equal(read('editorial/quality/'+file+'.json').status,'PASS');
-          const a11y=read('editorial/quality/accessibility.json');assert.equal(a11y.status,'APP_CONTROLS_PASS_NATIVE_ISSUES_RETAINED');
+          const a11y=read('editorial/quality/accessibility.json');assert.equal(a11y.status,'APP_CONTROLS_PASS_NATIVE_ISSUES_RETAINED');assert.equal(a11y.screenReaderSession,'ORCA_HEADFUL_SMOKE');
           const publicationBrowser=read('publication-browser-results.json');assert.equal(publicationBrowser.stats.expected,4);assert.equal(publicationBrowser.stats.unexpected,0);
           for(const browser of [read('browser-results.json'),publicationBrowser]){assert.equal(browser.stats.skipped,0);assert.equal(browser.stats.flaky,0);}
           for(const audit of ['audit.json','cms-audit.json'])assert.equal(read(audit).metadata.vulnerabilities.total,0);
