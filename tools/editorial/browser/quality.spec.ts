@@ -350,5 +350,20 @@ test("rich media, reusable sections and native picker remain on their existing p
   await page.screenshot({ path: ".gaga/editorial/quality/rich-media.png", fullPage: true });
   const persisted = (await api(page, "content/posts/" + item.id)).item.data.body;
   expect(persisted).toEqual(body);
-  evidence("rich-media", { status: "PASS", types: [...new Set(body.map(b => b._type))], nativeTable: true, actualMediaUpload: true, pickerOpenCancelFocus: true, sectionIdentity: sections[0].id, persistedBodyUnchanged: true, videoPlayback: "NOT_TESTED" });
+  // The moved insertion disclosure must preserve the native selection and marker command.
+  const writing = canvas.locator("p").filter({ hasText: "Strong" }).first();
+  await writing.click(); await page.keyboard.press("End");
+  const markers = canvas.locator('a[href="#ref-study"]');
+  const previousMarkers = await markers.count();
+  await page.getByText("Insert citation or cross-reference", { exact: true }).click();
+  const insertion = page.getByRole("group", { name: "Structured inline insertion" });
+  await insertion.getByLabel("Target ID", { exact: true }).fill("study");
+  const saved = saveOf(page, item.id);
+  await insertion.getByRole("button", { name: "Insert inline marker", exact: true }).click(); await saved;
+  await expect(markers).toHaveCount(previousMarkers + 1);
+  await expect(writing).toContainText("[study]");
+  const afterInsertion = (await api(page, "content/posts/" + item.id)).item.data.body;
+  expect(afterInsertion.map((b: any) => b._key)).toEqual(body.map(b => b._key));
+  expect(afterInsertion.find((b: any) => b._type === "sectionRef").id).toBe(sections[0].id);
+  evidence("rich-media", { status: "PASS", inlineMarkerAtSelection: true, types: [...new Set(body.map(b => b._type))], nativeTable: true, actualMediaUpload: true, pickerOpenCancelFocus: true, sectionIdentity: sections[0].id, persistedBodyUnchanged: true, videoPlayback: "NOT_TESTED" });
 });
