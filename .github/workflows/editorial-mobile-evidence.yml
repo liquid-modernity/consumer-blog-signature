@@ -1,0 +1,96 @@
+name: Editorial mobile evidence (verification only)
+on:
+  push:
+    branches: [verification/editorial-mobile-evidence-v1]
+permissions:
+  contents: read
+jobs:
+  mobile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    defaults:
+      run:
+        shell: bash
+        working-directory: application
+    env:
+      ASTRO_TELEMETRY_DISABLED: '1'
+      ASTRO_DEV_BACKGROUND: '1'
+      WRANGLER_SEND_METRICS: 'false'
+      GAGA_CONTENT_RELEASE_ENABLED: 'false'
+      PUBLIC_GIT_SHA: 952ab4ca4b75c6236456276c2439a8276b17883d
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: 952ab4ca4b75c6236456276c2439a8276b17883d
+          path: application
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          path: harness
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.23.4'
+      - name: Exact runtime and immutable application identity
+        run: |
+          npm install --global npm@10.9.3 --ignore-scripts --no-audit --no-fund
+          mkdir -p "$RUNNER_TEMP/editorial-mobile-evidence"
+          echo "GAGA_EVIDENCE_DIRECTORY=$RUNNER_TEMP/editorial-mobile-evidence" >> "$GITHUB_ENV"
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import {writeFileSync} from 'node:fs';
+          import {execFileSync} from 'node:child_process';
+          import {sourceIdentity} from './tools/gaga/source-identity.mjs';
+          const source=sourceIdentity();assert.equal(source.commit,'952ab4ca4b75c6236456276c2439a8276b17883d');
+          assert.equal(source.tree,'e6b5c842aca5cc645d283285fad369c049107452');
+          const runtime={node:process.version,npm:execFileSync('npm',['--version'],{encoding:'utf8'}).trim(),runner:process.env.RUNNER_OS,image:process.env.ImageOS,imageVersion:process.env.ImageVersion,harness:process.env.GITHUB_SHA,source};
+          assert.equal(runtime.node,'v22.23.4');assert.equal(runtime.npm,'10.9.3');
+          writeFileSync(process.env.RUNNER_TEMP+'/editorial-mobile-evidence/runtime.json',JSON.stringify(runtime,null,2)+'\n');
+          console.log(JSON.stringify({...runtime,source:{commit:source.commit,tree:source.tree,sha256:source.sha256}}));
+          JS
+      - name: Clean committed-lock installs and isolated local fixture
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm ci --prefix cms --ignore-scripts --no-audit --no-fund
+          npm run editorial:prepare
+          npx --no-install playwright install --with-deps chromium
+          mkdir -p .gaga/mobile-review
+          cp ../harness/tools/editorial/mobile-review/mobile.spec.ts .gaga/mobile-review/mobile.spec.ts
+          cat > .gaga/mobile-review/config.ts <<'TS'
+          import { defineConfig } from '@playwright/test';
+          import base from '../../playwright.editorial.config';
+          export default defineConfig(base, {
+            testDir: '.', testMatch: 'mobile.spec.ts',
+            outputDir: process.env.GAGA_EVIDENCE_DIRECTORY + '/test-results',
+            reporter: [['list'], ['json', {outputFile: process.env.GAGA_EVIDENCE_DIRECTORY + '/browser-results.json'}]],
+            use: {...base.use, trace: 'on'},
+          });
+          TS
+      - name: Real native mobile geometry, focus, draft preservation and screenshots
+        run: |
+          npx --no-install playwright test --config .gaga/mobile-review/config.ts | tee "$GAGA_EVIDENCE_DIRECTORY/browser.log"
+      - name: Workflow lint and preserved source receipt
+        run: |
+          go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.7 -shellcheck= ../harness/.github/workflows/editorial-mobile-evidence.yml
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import {readFileSync,writeFileSync} from 'node:fs';
+          import {execFileSync} from 'node:child_process';
+          import {sourceIdentity} from './tools/gaga/source-identity.mjs';
+          const dir=process.env.GAGA_EVIDENCE_DIRECTORY,read=n=>JSON.parse(readFileSync(dir+'/'+n));
+          const runtime=read('runtime.json'),source=sourceIdentity();assert.deepEqual(source,runtime.source);
+          execFileSync('git',['diff','--exit-code']);assert.equal(execFileSync('git',['ls-files','--others','--exclude-standard'],{encoding:'utf8'}).trim(),'');
+          const browser=read('browser-results.json');assert.equal(browser.stats.expected,5);assert.equal(browser.stats.unexpected,0);assert.equal(browser.stats.skipped,0);assert.equal(browser.stats.flaky,0);
+          for(const width of [320,360,390,768])assert.equal(read(width+'-result.json').status,'PASS');
+          assert.equal(process.env.GAGA_CONTENT_RELEASE_ENABLED,'false');
+          const receipt={schema:'gaga.editorial-mobile-evidence/v1',status:'VERIFIED',run:process.env.GITHUB_RUN_ID,source,harness:process.env.GITHUB_SHA,runtime,workerd:execFileSync('node_modules/.bin/workerd',['--version'],{encoding:'utf8'}).trim(),browser:browser.stats,production:{mainPromotions:0,deployments:0,workerUpdates:0,contentWrites:0,schemaWrites:0,credentialChanges:0,providerMutations:0,publishUnpublishOperations:0,publishingSwitchChanges:0}};
+          writeFileSync(dir+'/qualification-receipt.json',JSON.stringify(receipt,null,2)+'\n');
+          JS
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: editorial-mobile-evidence
+          path: ${{ runner.temp }}/editorial-mobile-evidence
+          if-no-files-found: error
