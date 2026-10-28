@@ -61,7 +61,7 @@ jobs:
         run: |
           npm run editorial:prepare
           npx --no-install playwright install --with-deps chromium
-          npx --no-install playwright test --config playwright.editorial.config.ts integration.spec.ts quality.spec.ts --grep-invert '^Orca announces' | tee "$GAGA_EVIDENCE_DIRECTORY/browser.log"
+          npx --no-install playwright test --config playwright.editorial.config.ts integration.spec.ts quality.spec.ts --grep-invert 'Orca announces' | tee "$GAGA_EVIDENCE_DIRECTORY/browser.log"
           cp .gaga/editorial/browser-results.json .gaga/editorial/packed-integration.json .gaga/editorial/packed-integration.png "$GAGA_EVIDENCE_DIRECTORY/"
           # One independent headed AT smoke; functional cases stay on the established headless path.
           # Ephemeral runner tools only; no application dependency or lock changes.
@@ -81,7 +81,7 @@ jobs:
           orca --replace --enable=speech --disable=braille --debug --debug-file="$GAGA_ORCA_LOG" -u "$RUNNER_TEMP/orca-prefs" > "$GAGA_EVIDENCE_DIRECTORY/orca-process.log" 2>&1 &
           orca_pid=$!
           trap 'kill "$orca_pid" 2>/dev/null || true' EXIT
-          npx --no-install playwright test --config playwright.editorial.config.ts quality.spec.ts --grep '^Orca announces' | tee "$GAGA_EVIDENCE_DIRECTORY/screen-reader.log"
+          npx --no-install playwright test --config playwright.editorial.config.ts quality.spec.ts --grep 'Orca announces' | tee "$GAGA_EVIDENCE_DIRECTORY/screen-reader.log"
           cp .gaga/editorial/browser-results.json "$GAGA_EVIDENCE_DIRECTORY/screen-reader-results.json"
           SH
           dbus-run-session -- xvfb-run -a -s '-screen 0 1920x1440x24' bash "$RUNNER_TEMP/editorial-screen-reader.sh"
