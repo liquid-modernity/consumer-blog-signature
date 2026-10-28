@@ -10,6 +10,7 @@ export default defineConfig({
     baseURL: "http://localhost:4322",
     headless: true,
     trace: "off",
+    screenshot: "only-on-failure",
     viewport: { width: 1600, height: 1100 },
     ...(process.env.GAGA_STUDIO_BROWSER_EXECUTABLE
       ? {

@@ -32,7 +32,7 @@ test('packed Arsenal in actual local editor: draft save/reload and canonical pre
   expect(current.item.status).toBe('draft');expect(current.item.liveRevisionId).toBeFalsy();
   await page.reload();await expect(canvas).toContainText('Packed consumer persisted.');
   expect(plainText((await api('content/posts/'+id)).item.data.body)).toContain('Packed consumer persisted.');
-  await page.locator('.studio-workspace aside nav button').filter({hasText:/^preview$/}).click();
+  await page.getByRole('button',{name:'Developer preview',exact:true}).click();
   const preview=page.frameLocator('iframe[title="PAKRPP article preview"]');
   await expect(preview.locator('#editorial-preview-body')).toContainText('Packed consumer persisted.');
   await expect(preview.locator('[role="doc-bibliography"]')).toContainText('Evidence and methods');

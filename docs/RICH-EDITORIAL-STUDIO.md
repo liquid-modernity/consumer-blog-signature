@@ -1,122 +1,116 @@
-# Rich Editorial Studio v1
+# Rich Editorial Studio
 
-This application-owned native EmDash plugin adds structured long-form authoring to
-PAKRPP. EmDash 1.3.1 owns accounts, permissions, content, revisions and publishing.
-Corps 0.1.0 admits published provider records; Arsenal 0.1.0 composes the application;
-Engine 0.4.0 supplies Search. None of those packages changes here.
+The application’s editorial plugin composes the public EmDash 1.3.1 editor. EmDash
+owns accounts, roles, ownership, revisions, saves and native publishing. Public
+Arsenal 0.2.0 supplies Portable Text validation, section resolution and plain-text
+projection; application widgets, HTML/KaTeX rendering and contextual URLs remain
+application-owned. No new design system or package is introduced.
 
-## Run locally
+## Qualification and local fixtures
 
-Use Node 22.22.2 in the Node 22 line, then:
+The authoritative qualification host is Ubuntu 24.04 with Node **22.23.4** and npm
+**10.9.3**, using committed application/CMS lockfiles. Catalina is not the runtime
+qualification authority. On a supported development host:
 
 ```sh
 npm ci --ignore-scripts
-npm run cms:install
+npm ci --prefix cms --ignore-scripts
 npm run editorial:prepare
 npm run editorial:studio
-# In another terminal:
+# Another terminal, for the optional developer preview:
 npm run dev -- --host 127.0.0.1
 ```
 
-Studio: <http://localhost:4322/_emdash/admin>. Complete local setup normally, or use
-EmDash's development-only bootstrap at
+Studio: <http://localhost:4322/_emdash/admin>. Complete local setup normally, or
+use the native development-only bootstrap at
 <http://localhost:4322/_emdash/api/setup/dev-bypass?content=1&redirect=/_emdash/admin>
-for disposable local testing. The browser proof uses this route, not a PAT or the
-operator's production session. It does not prove passkey enrollment.
+for disposable local testing. This does not establish production/passkey login.
 
-The Studio uses its own SQLite database `cms/.data/editorial-studio-v1.db`, uploads
-`cms/.data/editorial-uploads` and local sessions. It neither opens the older local
-CMS database on port 4321 nor connects to production. Keep all databases, sessions,
-media state and environment files out of Git. The generated seed and reports live
-under ignored `.gaga/editorial/`. Preparing the seed does not reset an existing CMS.
+The Studio uses its own SQLite database `cms/.data/editorial-studio-v1.db`, local
+uploads and sessions. It never opens the older CMS on 4321 or production stores.
+Preparing the seed does not reset an existing database. Browser tests must run
+only in this isolated environment; they create local drafts and media. Evidence
+and generated seed files stay under ignored `.gaga/editorial/` or outside Git.
 
-The local-only React SSR setting keeps `@astrojs/react` inside Vite so its virtual
-renderer options resolve correctly. No installed package is patched. Restart the local Studio after changing its Astro
-configuration; EmDash can retain a closed Vite runner across a config hot restart.
+## Writing
 
-## Authoring
+Title and Summary retain their native controls. Main Content uses the native
+rich editor at the available document width, without an application utility rail.
+Native document gutters, toolbar, menus, media controls and heading styles remain
+native. The writing surface retains one editor instance while utilities change.
 
-Articles expose Title, Slug, Dek/Summary, Main Content, Authors and grouped
-Metadata/SEO/Media settings. Dates are UTC; language choices are Indonesian and
-English. Topics and tags commit on blur. Featured/social images use the native
-media picker, with explicit alternative text. Application identity and migration
-bookkeeping remain managed integration metadata rather than editable JSON.
+Outline, References and Readiness are optional, mutually exclusive disclosures,
+closed initially. Select the active button again to close it. Escape from a
+utility returns focus to its invoking button. Duplicate headings navigate by their
+current document order, not by repeated text. Headings inside reusable sections
+are not editable nodes in the containing document.
 
-The writing canvas is the public EmDash `PortableTextEditor`, with native keyboard
-formatting, undo/redo, block handles and slash insertion. Outline, References,
-Readiness and Preview panels surround it. The saved-revision panel reports the
-native publication state; readiness advice does not grant publication authority.
+“Insert citation or cross-reference” reveals the existing stable-ID insertion
+controls. Reference, footnote, math and figure markers retain their existing
+commands and URL validation. Slash insertion, keyboard formatting, undo/redo and
+rich media remain native EmDash behavior. Word counts are quiet text rather than
+an announcement on every edit.
 
-Native blocks: paragraphs, headings, emphasis, underline, inline code, links,
-ordered/unordered lists, quotations, dividers, image, gallery, video, code and
-tables. Application blocks: citation, reference, footnote, cross reference, callout,
-figure, math, code listing with language/filename, disclosure, author note, related
-reading, publication note, CTA and reusable section reference.
+Editable application metadata stays in its original widget/onChange path under
+collapsed Editorial settings. Dates remain UTC; topics/tags commit on blur. The
+native inspector’s language, taxonomy, ownership/byline and SEO fields are not
+assumed interchangeable with application presentation metadata. No second
+save mechanism or schema migration is involved.
 
-Use `/` for native Text/Media commands and registered Knowledge/Technical/Reusable
-commands: `/citation`, `/reference`, `/footnote`, `/callout`, `/figure`, `/math`,
-`/code listing`, `/disclosure`, `/author note`, `/related reading`, `/publication
-note`, `/call to action`, `/reusable section`. Inline insertion links a stable ID to
-a reference, footnote, equation or figure. Bibliographies contain structured title,
-authors, publication/date, URL, DOI and access date. Footnotes render accessible
-markers and backlinks. Citation style belongs to this application.
+Managed integration/archive fields remain registered with their native constraints
+and values; their repeated explanatory widgets render no writer-facing content.
+The native field wrappers may still reserve spacing. Do not remove historical
+Markdown, revision history or constraints to change that spacing.
 
-Published reference-library entries are copied explicitly into an article's
-revision. Reusable sections resolve through an explicit published section map;
-missing/cyclic references fail rendering and Search admission. Local readiness
-warns about missing sections. Production section export is not enabled here.
+## Saved draft and preview
 
-Readiness is deterministic advice: words/read time, heading hierarchy, image/alt
-text, external links, references and missing title/summary. It does not certify
-factual accuracy, rights, accessibility or security. No AI service is required.
+For Posts and Authors, one contributed inspector section combines existing
+saved-revision readiness with Preview saved draft and the existing guarded
+publication handoff. Pages retain their saved-readiness section without gaining
+content-release actions. Body readiness describes the current editor buffer;
+saved readiness and preview describe the saved revision.
 
-## Preview and public rendering
+**Preview saved draft** uses the existing authenticated private route and exact
+selected draft / expected live revision. Unsaved edits are not included. The
+canonical renderer, iframe sandbox and denial/concurrency checks are unchanged.
+Preview never publishes content. Access still follows native endpoint permissions.
 
-The iframe uses the actual PAKRPP layout and the same structured renderer as the
-content loader. Only the two explicit loopback origins exchange structured data;
-HTML is never accepted from messages. `/editorial-preview` renders only in Astro
-development and redirects in a production build. This is local preview, not a
-production draft-preview capability.
+**Developer preview** is separate: it is offered only in development on the
+explicit localhost context, and sends the buffer only to the existing
+`http://localhost:3000` preview. It is not a production preview or authorization
+mechanism. Production builds do not expose this developer affordance. Origins,
+message validation and CSP are not broadened.
 
-All admitted blocks have application renderers. Math uses bounded, untrusted
-KaTeX MathML; code and text are escaped. Raw HTML, arbitrary iframes and executable
-embeds are rejected by the native save hook. Native EmDash may still show those
-upstream commands; they cannot be saved through this model. Video accepts media
-URLs, not arbitrary embed scripts. No CSP exception is added.
+Publishing remains disabled. Native lifecycle hooks and existing content-release
+policy remain the authority; button appearance does not grant permission or
+activate publishing. Request payloads, polling, revision pins and audit correlation
+are unchanged. This UI change is not content-release activation.
 
-Search extracts meaningful content after Corps published-record admission and uses
-public Engine Search. Bibliographic identifiers and presentation bookkeeping do
-not become body search text. Current production Markdown/export pins stay intact.
+## Responsive and accessibility scope
 
-## Pages
+The native Settings inspector remains resizable on desktop and a native sheet
+below 1024px. Application utilities stay inline; no second sidebar/modal or focus
+trap is introduced. Application controls use scoped native-aligned tokens and
+visible focus/expanded/disabled states; mobile controls target 44px height.
 
-EmDash's installed default seed already includes Pages. Our earlier application
-seed declared only `posts` (Articles) and `authors`; that is why Pages was absent.
-The isolated Studio declares Pages with the article editor, native drafts and
-revisions. It is `routable: false`: production routes remain application-owned.
-This is configuration, not an upstream feature gap or a Corps mapping defect.
-No production Page schema or record is created by this work.
+The existing native editable textbox accessible-name defect and trusted widget
+read-only/editor-bridge limitations are **not fixed here**. They need a supported
+native component/extension follow-up. Do not claim complete accessibility
+conformance, reconstruct permissions in the client, import private components or
+patch native ancestors to conceal those limits.
 
 ## Verification
 
-```sh
-npm run test:editorial
-npm run test:cms
-npm run test:gaga
-npm test
-npx tsc --noEmit -p cms/tsconfig.json
-npm run verify
-npm run test:editorial:ui
-npm run test:ui
-```
+The existing `.github/workflows/editorial-integration.yml` qualification is reused
+on the UI review branch, without secrets or deployment steps. `integration.spec.ts`
+keeps the established local save/reload/developer-renderer proof;
+`quality.spec.ts` exercises the native editor, private saved preview, disclosures,
+outline, responsive layouts, media and accessibility-tree observations. The older
+`studio.spec.ts` remains a historical local migration/publish rehearsal, with its
+changed preview selector kept compatible; it is not a production test command.
 
-The maintained `Rich Editorial Studio` Actions workflow performs clean locked
-installs, model/migration tests, official-package byte comparison, public import
-boundaries, strict typing, application build/Search/Starlight proof, real local CMS
-browser persistence, native workerd startup, audits and workflow lint. It has no
-provider secrets or deployment job. Screenshots/reports exclude database/session
-files. Synthetic local Dev Admin and test records are disposable test identities.
-
-[Production migration proposal](RICH-EDITORIAL-MIGRATION.md) is a separate approval
-boundary. No production content, CMS Worker, publication Worker or canonical main
-is changed during Studio implementation.
+Screenshots and measured geometry are generated from deterministic local fixtures.
+Record actual executed tests separately from reused evidence and unexecuted manual
+screen-reader/physical-IME checks. Unchanged public contracts, Search and rendering
+are checked against all eight admitted-record fixtures. Canonical promotion,
+deployment and production publishing require separate decisions.

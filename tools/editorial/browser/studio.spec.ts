@@ -288,8 +288,7 @@ test("real local EmDash studio: rich edits, blocks, revision/publishing and PAKR
     "A persisted editorial addition.",
   );
   await page
-    .locator(".studio-workspace aside nav button")
-    .filter({ hasText: /^preview$/ })
+    .getByRole("button", { name: "Developer preview", exact: true })
     .click();
   const preview = page.frameLocator('iframe[title="PAKRPP article preview"]');
   await expect(preview.locator("#editorial-preview-body")).toContainText(

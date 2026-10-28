@@ -27,7 +27,7 @@ type Props = {
 function StudioBody({ value = [], onChange, label, id }: Props) {
   value ??= [];
   const [editor, setEditor] = useState<Editor | null>(null),
-    [panel, setPanel] = useState("outline"),
+    [panel, setPanel] = useState<string | null>(null),
     [reference, setReference] = useState(""),
     [linkKind, setLinkKind] = useState("citation"),
     [sections, setSections] = useState<Record<string, Body>>({}),
@@ -35,6 +35,11 @@ function StudioBody({ value = [], onChange, label, id }: Props) {
       Array<{ id: string; data: Record<string, unknown> }>
     >([]),
     [error, setError] = useState("");
+  const developerPreview =
+    import.meta.env.DEV &&
+    typeof window !== "undefined" &&
+    window.location.hostname === "localhost";
+  const panelButton = useRef<HTMLButtonElement | null>(null);
   const previewWindow = useRef<Window | null>(null);
   const frame = useRef<HTMLIFrameElement>(null),
     draft = useRef(value);
@@ -45,6 +50,7 @@ function StudioBody({ value = [], onChange, label, id }: Props) {
   } catch {}
   const sendPreview = () => {
     if (
+      !developerPreview ||
       !frame.current?.contentWindow ||
       previewWindow.current !== frame.current.contentWindow
     )
@@ -55,6 +61,7 @@ function StudioBody({ value = [], onChange, label, id }: Props) {
     );
   };
   useEffect(() => {
+    if (!developerPreview) return;
     const ready = (event: MessageEvent) => {
       if (
         event.origin === "http://localhost:3000" &&
@@ -67,7 +74,7 @@ function StudioBody({ value = [], onChange, label, id }: Props) {
     };
     window.addEventListener("message", ready);
     return () => window.removeEventListener("message", ready);
-  }, [sections]);
+  }, [sections, developerPreview]);
   useEffect(() => {
     sendPreview();
   }, [value, sections, panel]);
@@ -130,7 +137,9 @@ function StudioBody({ value = [], onChange, label, id }: Props) {
     if (!editor) return;
     // Expanded reusable-section headings are not editable nodes in this document.
     const target = value
-      .filter((block) => block._type === "block" && /^h[1-6]$/.test(String(block.style)))
+      .filter(
+        (block) => block._type === "block" && /^h[1-6]$/.test(String(block.style)),
+      )
       .findIndex((block) => block._key === key);
     if (target < 0) return;
     let heading = 0,
@@ -145,78 +154,90 @@ function StudioBody({ value = [], onChange, label, id }: Props) {
   }
   return (
     <section className="pakrpp-studio" aria-label="PAKRPP Editorial Studio">
-      <header>
+      <header className="studio-heading">
         <div>
-          <span className="studio-kicker">PAKRPP · EDITORIAL STUDIO</span>
-          <h2 id={id + "-label"}>{label}</h2>
+          <h2 className="studio-title" id={id + "-label"}>{label}</h2>
         </div>
-        <output aria-live="polite">
+        <span className="studio-stats">
           {analysis?.words ?? 0} words · {analysis?.readingMinutes ?? 1} min
-        </output>
+        </span>
       </header>
-      <div
-        className="studio-tools"
-        role="group"
-        aria-label="Structured inline insertion"
-      >
-        <label>
-          Insert{" "}
-          <select
-            value={linkKind}
-            onChange={(e) => setLinkKind(e.target.value)}
-          >
-            <option value="citation">Citation</option>
-            <option value="footnote">Footnote</option>
-            <option value="math">Inline math</option>
-            <option value="figure">Cross reference</option>
-          </select>
-        </label>
-        <label>
-          Target ID{" "}
-          <input
-            value={reference}
-            onChange={(e) => setReference(e.target.value)}
-            placeholder="Stable reference ID"
-          />
-        </label>
-        <button
-          type="button"
-          onClick={insertMarker}
-          disabled={!editor || !reference}
+      <details className="studio-disclosure studio-insertion">
+        <summary>Insert citation or cross-reference</summary>
+        <div
+          className="studio-tools"
+          role="group"
+          aria-label="Structured inline insertion"
         >
-          Insert inline marker
-        </button>
-      </div>
-      {error && <p role="alert">{error}</p>}
-      <div className="studio-workspace">
-        <div className="studio-canvas">
-          <PortableTextEditor
-            value={value}
-            onChange={changed}
-            aria-labelledby={id + "-label"}
-            variant="document"
-            onEditorReady={setEditor}
-            pluginBlocks={
-              blockRegistry as NonNullable<
-                PortableTextEditorProps["pluginBlocks"]
-              >
-            }
-            placeholder="Write. Type / to insert a structured block."
-          />
+          <label>
+            Insert{" "}
+            <select
+              className="studio-input"
+              value={linkKind}
+              onChange={(e) => setLinkKind(e.target.value)}
+            >
+              <option value="citation">Citation</option>
+              <option value="footnote">Footnote</option>
+              <option value="math">Inline math</option>
+              <option value="figure">Cross reference</option>
+            </select>
+          </label>
+          <label>
+            Target ID{" "}
+            <input
+              className="studio-input"
+              value={reference}
+              onChange={(e) => setReference(e.target.value)}
+              placeholder="Stable reference ID"
+            />
+          </label>
+          <button
+            className="studio-control"
+            type="button"
+            onClick={insertMarker}
+            disabled={!editor || !reference}
+          >
+            Insert inline marker
+          </button>
         </div>
-        <aside aria-label="Editorial tools">
-          <nav aria-label="Editorial panels">
-            {["outline", "references", "readiness", "preview"].map((name) => (
-              <button
-                type="button"
-                key={name}
-                aria-pressed={panel === name}
-                onClick={() => setPanel(name)}
-              >
-                {name}
-              </button>
-            ))}
-          </nav>
+      </details>
+      {error && <p role="alert">{error}</p>}
+      <nav className="studio-utilities" aria-label="Editorial tools">
+        {[
+          "outline", "references", "readiness",
+          ...(developerPreview ? ["preview"] : []),
+        ].map((name) => (
+          <button
+            className="studio-control"
+            type="button"
+            key={name}
+            aria-expanded={panel === name}
+            aria-controls={id + "-utilities"}
+            onClick={(event) => {
+              panelButton.current = event.currentTarget;
+              setPanel(panel === name ? null : name);
+            }}
+          >
+            {name === "preview"
+              ? "Developer preview"
+              : name[0].toUpperCase() + name.slice(1)}
+          </button>
+        ))}
+      </nav>
+      <div className="studio-workspace">
+        <aside
+          className="studio-utility"
+          id={id + "-utilities"}
+          aria-label="Editorial utility"
+          hidden={!panel}
+          onKeyDown={(event) => {
+            if (event.key === "Escape") {
+              event.preventDefault();
+              setPanel(null);
+              panelButton.current?.focus();
+            }
+          }}
+        >
           {panel === "outline" && (
             <>
               <h3>Outline</h3>
@@ -227,6 +248,7 @@ function StudioBody({ value = [], onChange, label, id }: Props) {
                     style={{ marginInlineStart: (h.level - 1) * 8 }}
                   >
                     <button
+                      className="studio-control"
                       type="button"
                       onClick={() => jump(h.key)}
                     >
@@ -256,6 +278,7 @@ function StudioBody({ value = [], onChange, label, id }: Props) {
               <h4>Published reference library</h4>
               {library.map((r) => (
                 <button
+                  className="studio-control"
                   type="button"
                   key={r.id}
                   onClick={() => {
@@ -309,9 +332,9 @@ function StudioBody({ value = [], onChange, label, id }: Props) {
               </p>
             </>
           )}
-          {panel === "preview" && (
+          {developerPreview && panel === "preview" && (
             <>
-              <h3>Actual PAKRPP preview</h3>
+              <h3>Developer preview</h3>
               <p>
                 Start the application on localhost:3000. Draft data is sent only
                 to that loopback origin.
@@ -325,6 +348,21 @@ function StudioBody({ value = [], onChange, label, id }: Props) {
             </>
           )}
         </aside>
+        <div className="studio-canvas">
+          <PortableTextEditor
+            value={value}
+            onChange={changed}
+            aria-labelledby={id + "-label"}
+            variant="document"
+            onEditorReady={setEditor}
+            pluginBlocks={
+              blockRegistry as NonNullable<
+                PortableTextEditorProps["pluginBlocks"]
+              >
+            }
+            placeholder="Write. Type / to insert a structured block."
+          />
+        </div>
       </div>
     </section>
   );
@@ -357,12 +395,15 @@ function Metadata({
     onChange({ ...value, [key]: next });
   return (
     <section className="studio-metadata" aria-label="Editorial settings">
-      <details>
+      <details className="studio-disclosure">
+        <summary>Editorial settings</summary>
+      <details className="studio-disclosure">
         <summary>Metadata · dates, topics, tags and language</summary>
         {(["topics", "tags"] as const).map((key) => (
           <label key={key}>
             {key}
             <input
+              className="studio-input"
               defaultValue={(value[key] ?? []).join(", ")}
               onBlur={(e) =>
                 change(key, [
@@ -380,6 +421,7 @@ function Metadata({
         <label>
           Publication Date
           <input
+            className="studio-input"
             type="datetime-local"
             value={value.publicationDate?.slice(0, 16) ?? ""}
             onChange={(e) =>
@@ -395,6 +437,7 @@ function Metadata({
         <label>
           Updated Date
           <input
+            className="studio-input"
             type="datetime-local"
             value={value.updatedDate?.slice(0, 16) ?? ""}
             onChange={(e) =>
@@ -411,6 +454,7 @@ function Metadata({
         <label>
           Language
           <select
+            className="studio-input"
             value={value.language ?? "id"}
             onChange={(e) => change("language", e.target.value)}
           >
@@ -419,7 +463,7 @@ function Metadata({
           </select>
         </label>
       </details>
-      <details>
+      <details className="studio-disclosure">
         <summary>SEO · search and social metadata</summary>
         {(["seoTitle", "seoDescription", "canonicalUrl"] as const).map(
           (key) => (
@@ -432,6 +476,7 @@ function Metadata({
                 }[key]
               }
               <input
+                className="studio-input"
                 value={value[key] ?? ""}
                 onChange={(e) => change(key, e.target.value)}
               />
@@ -439,11 +484,11 @@ function Metadata({
           ),
         )}
       </details>
-      <details>
+      <details className="studio-disclosure">
         <summary>Media · featured and social image</summary>
         {(["featuredImage", "socialImage"] as const).map((key) => (
           <div key={key}>
-            <button type="button" onClick={() => setPicker(key)}>
+            <button className="studio-control" type="button" onClick={() => setPicker(key)}>
               Choose{" "}
               {key === "featuredImage" ? "Featured Image" : "Social Image"}
             </button>
@@ -451,6 +496,7 @@ function Metadata({
               <label>
                 Alternative text
                 <input
+                  className="studio-input"
                   value={value[key]?.alt ?? ""}
                   onChange={(e) =>
                     change(key, { ...value[key], alt: e.target.value })
@@ -460,6 +506,7 @@ function Metadata({
             )}
           </div>
         ))}
+      </details>
       </details>
       <MediaPickerModal
         open={picker !== null}
@@ -484,16 +531,8 @@ function Metadata({
 }
 
 function Integration() {
-  return (
-    <details className="studio-integration">
-      <summary>Integration identity · managed</summary>
-      <p>
-        Application identity and migration references remain on the EmDash
-        record. They are managed by the application and are not editorial
-        fields.
-      </p>
-    </details>
-  );
+  // Native fields and their historical values remain managed; writers have no action here.
+  return null;
 }
 function SavedReadiness({ entry }: ContentEditorPanelContext) {
   let analysis;
@@ -515,7 +554,7 @@ function SavedReadiness({ entry }: ContentEditorPanelContext) {
           <li key={i}>{w}</li>
         ))}
       </ul>
-      <details>
+      <details className="studio-disclosure">
         <summary>Metadata</summary>
         <p>
           {String(
@@ -539,7 +578,7 @@ function SavedReadiness({ entry }: ContentEditorPanelContext) {
           {((entry.data.editorial as EditorialMetadata)?.tags ?? []).join(", ")}
         </p>
       </details>
-      <details>
+      <details className="studio-disclosure">
         <summary>SEO</summary>
         <p>
           {String(
@@ -562,7 +601,7 @@ function SavedReadiness({ entry }: ContentEditorPanelContext) {
           )}
         </p>
       </details>
-      <details>
+      <details className="studio-disclosure">
         <summary>Media</summary>
         <p>
           {analysis.imageCount} body images. Featured media:{" "}
@@ -654,9 +693,12 @@ function ContentPublishing({ collection, entry }: ContentEditorPanelContext) {
     }
   };
   return (
-    <section aria-label="Publication">
+    <section className="studio-publication" aria-label="Saved draft publication">
+      <SavedReadiness collection={collection} entry={entry} />
+      <p>Preview uses the saved draft. Save your changes before previewing.</p>
       <p role="status">{message}</p>
       <button
+        className="studio-control"
         type="button"
         disabled={busy || !!pending || !entry.draftRevisionId}
         onClick={() => act("content-preview")}
@@ -664,6 +706,7 @@ function ContentPublishing({ collection, entry }: ContentEditorPanelContext) {
         Preview saved draft
       </button>
       <button
+        className="studio-control"
         type="button"
         disabled={busy || !!pending || !entry.draftRevisionId}
         onClick={() => act("content-publish")}
@@ -672,6 +715,7 @@ function ContentPublishing({ collection, entry }: ContentEditorPanelContext) {
       </button>
       {entry.status === "published" && (
         <button
+          className="studio-control"
           type="button"
           disabled={busy || !!pending}
           onClick={() => act("content-publish", "unpublish")}
@@ -698,15 +742,15 @@ export const fields = {
 export const contentEditorPanels = [
   {
     id: "content-publication",
-    title: "Preview and publish",
+    title: "Saved draft · preview and readiness",
     collections: ["posts", "authors"],
     component: ContentPublishing,
     order: 5,
   },
   {
     id: "editorial-readiness",
-    title: "Publishing · saved revision",
-    collections: ["posts", "pages", "authors"],
+    title: "Saved revision readiness",
+    collections: ["pages"],
     component: SavedReadiness,
     order: 10,
   },

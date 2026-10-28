@@ -1,13 +1,13 @@
-name: Registry Arsenal 0.2.0 consumer adoption
+name: Editorial consumer qualification
 on:
   push:
-    branches: [review/arsenal-020-registry-adoption-v1]
+    branches: [review/arsenal-020-registry-adoption-v1, review/editorial-studio-uiux-v1]
 permissions:
   contents: read
 jobs:
   qualify:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 40
     defaults:
       run:
         shell: bash
@@ -44,7 +44,7 @@ jobs:
           node tools/gaga/boundaries.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/boundaries.log"
       - name: Directly affected equivalence, CMS, preview and Search regressions
         run: |
-          node --test tools/editorial/portable-text.test.mjs tools/editorial/semantics-boundary.test.mjs tools/editorial/plugin.test.mjs tools/editorial/boundaries.test.mjs tools/content/content.test.mjs tools/gaga/application.test.mjs tools/gaga/registry-adoption.test.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/tests.log"
+          node --test tools/editorial/portable-text.test.mjs tools/editorial/semantics-boundary.test.mjs tools/editorial/plugin.test.mjs tools/editorial/boundaries.test.mjs tools/content/content.test.mjs tools/content/approval.test.mjs tools/gaga/application.test.mjs tools/gaga/registry-adoption.test.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/tests.log"
           npm test | tee "$GAGA_EVIDENCE_DIRECTORY/signature.log"
           node tools/gaga/preservation.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/preservation.log"
       - name: Strict app and CMS typing; actual publication and CMS compilation
@@ -57,12 +57,18 @@ jobs:
         run: |
           node tools/gaga/consumer.mjs > "$GAGA_EVIDENCE_DIRECTORY/consumer.log" 2>&1
           node tools/cms/runtime-proof.mjs
-      - name: Local registry-backed editor hydration, draft persistence and canonical preview
+      - name: Local native editor, presentation, private preview and responsive regressions
         run: |
           npm run editorial:prepare
           npx --no-install playwright install --with-deps chromium
-          npx --no-install playwright test --config playwright.editorial.config.ts integration.spec.ts | tee "$GAGA_EVIDENCE_DIRECTORY/browser.log"
+          npx --no-install playwright test --config playwright.editorial.config.ts integration.spec.ts quality.spec.ts | tee "$GAGA_EVIDENCE_DIRECTORY/browser.log"
           cp .gaga/editorial/browser-results.json .gaga/editorial/packed-integration.json .gaga/editorial/packed-integration.png "$GAGA_EVIDENCE_DIRECTORY/"
+      - name: Preserve isolated editor screenshots and diagnostics
+        if: always()
+        run: |
+          mkdir -p "$GAGA_EVIDENCE_DIRECTORY/editorial"
+          if [ -d .gaga/editorial ]; then cp -R .gaga/editorial/. "$GAGA_EVIDENCE_DIRECTORY/editorial/"; fi
+          if [ -d test-results ]; then cp -R test-results "$GAGA_EVIDENCE_DIRECTORY/editorial/"; fi
       - name: Existing desktop and mobile publication browser regressions
         run: |
           npm run test:ui | tee "$GAGA_EVIDENCE_DIRECTORY/publication-browser.log"
@@ -90,16 +96,25 @@ jobs:
           const tests=readFileSync(dir+'/tests.log','utf8');assert.match(tests,/# fail 0\b/);assert.match(tests,/# skipped 0\b/);
           assert.equal(equivalence.records.length,8);assert.equal(consumer.status,'PASS');assert.equal(cms.status,'PASS');
           assert.equal(read('packed-integration.json').status,'PASS');assert.equal(read('browser-results.json').stats.unexpected,0);
+          const editorBrowser=read('browser-results.json');assert.equal(editorBrowser.stats.expected,9);
+          for(const file of ['editing','saved-preview','responsive','rich-media'])assert.equal(read('editorial/quality/'+file+'.json').status,'PASS');
+          const a11y=read('editorial/quality/accessibility.json');assert.equal(a11y.status,'APP_CONTROLS_PASS_NATIVE_ISSUES_RETAINED');
           const publicationBrowser=read('publication-browser-results.json');assert.equal(publicationBrowser.stats.expected,4);assert.equal(publicationBrowser.stats.unexpected,0);
           for(const browser of [read('browser-results.json'),publicationBrowser]){assert.equal(browser.stats.skipped,0);assert.equal(browser.stats.flaky,0);}
           for(const audit of ['audit.json','cms-audit.json'])assert.equal(read(audit).metadata.vulnerabilities.total,0);
           const digest=path=>createHash('sha256').update(readFileSync(path)).digest('hex');
+          // Scope is presentation/tests/docs plus this existing qualification entrypoint.
+          const allowed=new Set(['cms/editorial/admin.tsx','cms/editorial/studio.css','docs/RICH-EDITORIAL-STUDIO.md','tools/editorial/browser/integration.spec.ts','tools/editorial/browser/quality.spec.ts','tools/editorial/browser/studio.spec.ts','playwright.editorial.config.ts','.github/workflows/editorial-integration.yml']);
+          const changed=execFileSync('git',['diff','--name-only','c346617df851916a69167b62924bbc5b419c5c56','HEAD'],{encoding:'utf8'}).trim().split('\n');assert.ok(changed.every(file=>allowed.has(file)));
+          const client=execFileSync('find',['cms/dist-cloudflare/client','-name','*.js'],{encoding:'utf8'}).trim().split('\n').filter(Boolean).map(file=>readFileSync(file,'utf8')).join('\n');
+          assert.ok(!client.includes('Start the application on localhost:3000'),'Production client must eliminate developer preview instructions');
+          assert.equal(digest('package-lock.json'),'5eaf8946c85601681837807ac2bca5c8d4547bd784014dd7dab07d44e3e8b9ee');
           // Exact output identities from qualified integration run 40488444126.
           assert.equal(digest('dist/search-index.json'),'5b982d6827606ed194604511f83156cb0697c04115df253177581df24ce6a807');
           assert.equal(digest('.gaga/composition-plan.json'),'9bcb42ad793a612b9322c81cac78d64a680ee51d779dbd65ab908c6375eda7c7');
           assert.equal(digest('cms/package-lock.json'),'62b398d8c74d91f0fa4b5c1c40818737c225e574aecbe14637fd6f86c4c2eef5');
           assert.equal(process.env.GAGA_CONTENT_RELEASE_ENABLED,'false');
-          const receipt={schema:'gaga.arsenal-registry-adoption-qualification/v1',status:'QUALIFIED',source:sourceIdentity(),baseline:'e4e8149f3ce03969e71575dd7a719ad3b6882358',semanticOracle:equivalence.baseline,arsenal:consumer.arsenal,registry:consumer.registry,runner,workerd:execFileSync('node_modules/.bin/workerd',['--version'],{encoding:'utf8'}).trim(),lockSha256:digest('package-lock.json'),cmsLockSha256:digest('cms/package-lock.json'),exportSha256:equivalence.exportSha256,searchArtifactsSha256:digest('dist/search-index.json'),compositionPlanSha256:digest('.gaga/composition-plan.json'),checks:{tests:Number(tests.match(/# pass (\d+)/)[1]),failed:0,skipped:0,records:8,signature:'PASS',strictApplicationTypes:'PASS',strictCmsTypes:'PASS',publicationBuild:'PASS',cmsBuild:'PASS',nativeSearch:'PASS',cmsStartup:'PASS',starlight:'PASS',localEditorPreview:'PASS',publicationBrowser:{passed:4,failed:0,desktop:true,mobile:true},searchOutputIdentity:'UNCHANGED',compositionPlanIdentity:'UNCHANGED',reviewExceptionRemoved:true,productionGuard:'PASS',workflowLint:'PASS',audit:'PASS',cmsAudit:'PASS'},production:{contentWrites:0,schemaWrites:0,providerMutations:0,deployments:0,credentialChanges:0,publishUnpublishOperations:0,packagePublications:0,mainPromotions:0},run:process.env.GITHUB_RUN_ID};
+          const receipt={schema:'gaga.editorial-uiux-qualification/v1',status:'QUALIFIED',source:sourceIdentity(),baseline:'c346617df851916a69167b62924bbc5b419c5c56',changedFiles:changed,editorBrowserCases:editorBrowser.stats.expected,accessibility:a11y,semanticOracle:equivalence.baseline,arsenal:consumer.arsenal,registry:consumer.registry,runner,workerd:execFileSync('node_modules/.bin/workerd',['--version'],{encoding:'utf8'}).trim(),lockSha256:digest('package-lock.json'),cmsLockSha256:digest('cms/package-lock.json'),exportSha256:equivalence.exportSha256,searchArtifactsSha256:digest('dist/search-index.json'),compositionPlanSha256:digest('.gaga/composition-plan.json'),checks:{tests:Number(tests.match(/# pass (\d+)/)[1]),failed:0,skipped:0,records:8,signature:'PASS',strictApplicationTypes:'PASS',strictCmsTypes:'PASS',publicationBuild:'PASS',cmsBuild:'PASS',nativeSearch:'PASS',cmsStartup:'PASS',starlight:'PASS',localEditorPreview:'PASS',publicationBrowser:{passed:4,failed:0,desktop:true,mobile:true},searchOutputIdentity:'UNCHANGED',compositionPlanIdentity:'UNCHANGED',reviewExceptionRemoved:true,productionGuard:'PASS',workflowLint:'PASS',audit:'PASS',cmsAudit:'PASS'},production:{contentWrites:0,schemaWrites:0,providerMutations:0,deployments:0,credentialChanges:0,publishUnpublishOperations:0,packagePublications:0,mainPromotions:0},run:process.env.GITHUB_RUN_ID};
           writeFileSync(dir+'/qualification-receipt.json',JSON.stringify(receipt,null,2)+'\n');
           JS
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
