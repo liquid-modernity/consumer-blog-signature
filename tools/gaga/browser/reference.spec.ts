@@ -8,15 +8,19 @@ test.beforeEach(async ({ context }) => {
   await context.route('**/*', route => ['localhost', '127.0.0.1'].includes(new URL(route.request().url()).hostname) ? route.continue() : route.abort());
 });
 
-test('reference Site surfaces and machine discovery retain the admitted public record set', async ({ page }) => {
+test('reference Site surfaces and machine discovery retain the admitted public record set', async ({ page }, info) => {
+  const surfaces = [];
   const indexResponse = await page.request.get('/search-index.json'); expect(indexResponse.status()).toBe(200);
   const index = await indexResponse.json();
   const admitted = JSON.parse(readFileSync('content/emdash/published.json', 'utf8'));
   for (const doc of admitted.documents) expect(index.artifacts.some((a: { id: string }) => a.id === admitted.origin + '/_emdash/api/content/' + doc.pin.collection + '/' + doc.pin.id)).toBe(true);
   for (const path of ['/publications', '/knowledge', '/knowledge/index', '/topics', '/tags', '/archive/2026']) {
     const response = await page.goto(path); expect(response?.status(), path).toBe(200);
-    await expect(page.locator('main').first()).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
+    surfaces.push({path, heading: await page.getByRole('heading', {level: 1}).first().innerText(), mainLandmarkCount: await page.locator('main, [role=main]').count()});
   }
+  mkdirSync('.gaga/reference', { recursive: true });
+  writeFileSync('.gaga/reference/' + info.project.name + '-site.json', JSON.stringify({status: 'PASS', surfaces, scope: 'Rendered route smoke, not accessibility conformance'}, null, 2) + '\n');
   for (const path of ['/machine.json', '/agent.json', '/sitemap.xml', '/sitemap-index.xml', '/rss.xml', '/robots.txt', '/llms.txt']) {
     const response = await page.request.get(path); expect(response.status(), path).toBe(200); expect((await response.body()).length).toBeGreaterThan(0);
   }

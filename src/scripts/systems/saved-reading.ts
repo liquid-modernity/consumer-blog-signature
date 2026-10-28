@@ -17,6 +17,7 @@ function currentItem(): SavedItem | null {
 export function initSavedReading() {
   createSavedReadingCapability({
     storageKey: storageKeys.saved,
+    buttonSelector: '[data-gaga-action="toggle-save"], [data-gaga-action="save-reading"]',
     getCurrentItem: currentItem,
     requestQuickActionsSync
   });

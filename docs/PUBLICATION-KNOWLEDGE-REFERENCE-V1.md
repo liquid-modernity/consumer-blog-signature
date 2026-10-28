@@ -68,6 +68,11 @@ connect the visible article action and existing canonical toggle command. It doe
 not change UI markup, keys, saved-item shape, lifecycle, retention or Engine APIs.
 The pre-correction hosted browser failure is preserved in external evidence.
 
+The Site smoke records each route heading and main-landmark count. Some existing
+standalone page shells lack a main landmark; fixing their semantics/skip-link
+targets is an application accessibility follow-up, not covered by this narrow
+reader binding correction. No complete accessibility-conformance claim is made.
+
 CMS typing/build/startup, revision-pinned preview and Studio functional tests are
 reused from 40676100962 only after byte comparisons establish unchanged CMS,
 plugin, lock, authorization, publishing and UI inputs. They are not described as
@@ -92,7 +97,10 @@ Both publishing paths remain disabled; no switch is written during qualification
 ## Remaining prototype-suite work
 
 Applications 2–4 are explicitly **UNASSIGNED**, per operator direction. These are
-concrete implementation slots, not invented application/product requirements:
+concrete coverage-verification slots, not invented application identities or
+preselected product requirements. Apply a capability only when that application
+actually selects it; record explicit non-applicability rather than inventing a CMS
+or reader surface to satisfy the matrix:
 
 | Slot | Next implementation and acceptance task |
 |---|---|
