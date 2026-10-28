@@ -1,6 +1,7 @@
 import { defineConfig } from '@playwright/test';
 import base from './playwright.config';
-export default defineConfig(base, {
+export default defineConfig({
+  ...base,
   testDir: './tools/reference/browser',
   timeout: 180000,
   projects: [320, 360, 390, 768, 1440].map(width => ({

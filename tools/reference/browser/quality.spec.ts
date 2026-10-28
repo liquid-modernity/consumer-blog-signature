@@ -103,7 +103,16 @@ test('all affected built page shells have one main and a working keyboard skip t
     await expect(page.locator('html')).toHaveAttribute('data-gaga-runtime','ready');
     const skip=page.locator('a.gaga-skip-link');
     await expect(skip).toHaveCount(1);
+    const autofocus=await page.locator('[autofocus]').count()>0;
     await page.keyboard.press('Tab');
+    let backwardSteps=0;
+    if(autofocus){
+      // Preserve native Search autofocus; reach the existing skip link using real keyboard navigation.
+      const limit=await page.locator('a[href],button,input,select,textarea,[tabindex]').count()+1;
+      while(!(await skip.evaluate(el=>el===document.activeElement))&&backwardSteps<limit){
+        await page.keyboard.press('Shift+Tab');backwardSteps++;
+      }
+    }
     await expect(skip).toBeFocused();
     await settle(page);
     const visible=await skip.evaluate(el=>{const b=el.getBoundingClientRect();return b.x>=0&&b.y>=0&&b.right<=innerWidth&&b.bottom<=innerHeight;});
@@ -113,7 +122,7 @@ test('all affected built page shells have one main and a working keyboard skip t
       const targets=[...document.querySelectorAll<HTMLElement>('[id]')].filter(el=>el.id===id);
       const target=targets[0];return {mainCount:document.querySelectorAll('main,[role="main"]').length,targetCount:targets.length,targetTag:target?.tagName,targetRole:target?.getAttribute('role'),focusOnTarget:document.activeElement===target,containsContent:!!target?.querySelector('h1,article,section'),hash:location.hash};
     },href!.slice(1));
-    results.push({path:route.path,skipVisible:visible,href,...semantic});
+    results.push({path:route.path,skipVisible:visible,autofocus,backwardSteps,href,...semantic});
     expect.soft(semantic.mainCount,route.path+' main').toBe(1);
     expect.soft(semantic.targetCount,route.path+' unique skip target').toBe(1);
     expect.soft(semantic.targetTag==='MAIN'||semantic.targetRole==='main',route.path+' target is main').toBe(true);
