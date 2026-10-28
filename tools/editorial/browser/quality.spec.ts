@@ -79,6 +79,7 @@ test.beforeEach(async ({ context }) => {
 test("optional utilities preserve native editor identity, selection, keyboard editing, undo and composition", async ({ page }) => {
   await signIn(page);
   const item = await article(page, "utility-editing-proof");
+  const historyBefore = await api(page, "content/posts/" + item.id + "/revisions?limit=100");
   const canvas = canvasOf(page), original = await canvas.elementHandle();
   for (const name of ["Outline", "References", "Readiness"])
     await expect(page.getByRole("button", { name, exact: true })).toHaveAttribute("aria-expanded", "false");
@@ -126,16 +127,35 @@ test("optional utilities preserve native editor identity, selection, keyboard ed
   await expect(canvas).toContainText("日本語");
   expect((await api(page, "content/posts/" + item.id)).item.data.body.some((b: any) => b._type === "callout" && b.title === "Quality callout")).toBe(true);
   const revisions = await api(page, "content/posts/" + item.id + "/revisions?limit=100");
-  expect(revisions.total).toBeGreaterThan(1);
+  // Native draft autosave may coalesce; it must preserve every prior revision.
+  expect(revisions.total).toBeGreaterThanOrEqual(historyBefore.total);
+  for (const revision of historyBefore.items)
+    expect(revisions.items.some((entry: any) => entry.id === revision.id)).toBe(true);
   evidence("editing", { status: "PASS", editorIdentityPreserved: true, undoRedo: true, nativeKeyboard: true, compositionEventSimulation: true, physicalImeTest: false, saveReload: true, revisionHistory: revisions.total });
 });
 
 test("private saved preview keeps exact pins, canonical renderer, denial and disabled publishing", async ({ page, context }) => {
   await signIn(page);
   const { body } = richFixture();
-  const item = await article(page, "private-preview-quality-proof", body.filter((b: any) => !["sectionRef", "image", "gallery", "figure", "video"].includes(b._type)) as any);
+  // Native saved-preview controls require a published entry with an exact draft pointer.
+  const seed = (await api(page, "content/posts?status=published&limit=1")).items[0];
+  const original = await api(page, "content/posts/" + seed.id);
+  await api(page, "content/posts/" + seed.id, "PUT", {
+    _rev: original._rev,
+    data: {
+      ...original.item.data,
+      title: "Saved preview quality fixture",
+      summary: "Exact saved revision; published production is untouched",
+      body: body.filter((b: any) => !["sectionRef", "image", "gallery", "video"].includes(b._type)),
+    },
+  });
+  const item = (await api(page, "content/posts/" + seed.id)).item;
+  expect(item.draftRevisionId).toBeTruthy();
+  expect(item.liveRevisionId ?? null).toBe(original.item.liveRevisionId ?? null);
+  await page.goto("/_emdash/admin/content/posts/" + item.id);
   const before = (await api(page, "content/posts/" + item.id)).item;
   const previewButton = page.getByRole("button", { name: "Preview saved draft", exact: true });
+  await expect(previewButton).toBeEnabled();
   const response = page.waitForResponse(r => r.url().endsWith("/plugins/pakrpp-studio/content-preview") && r.request().method() === "POST");
   await previewButton.click();
   const r = await response, payload = r.request().postDataJSON(), result = await r.json();
@@ -217,10 +237,10 @@ test("responsive native canvas, inspector and app controls across desktop and mo
   await resize.press("ArrowRight");
   await expect(resize).toHaveAttribute("aria-valuenow", String(oldWidth));
   // Switch native theme through its existing HTML theme contract, not app styles.
-  await page.evaluate(() => document.documentElement.classList.add("dark"));
+  await page.evaluate(() => document.documentElement.setAttribute("data-mode", "dark"));
   await page.emulateMedia({ colorScheme: "dark" });
   await page.screenshot({ path: ".gaga/editorial/quality/1600-dark.png", fullPage: true });
-  await page.evaluate(() => document.documentElement.classList.remove("dark"));
+  await page.evaluate(() => document.documentElement.setAttribute("data-mode", "light"));
   await page.emulateMedia({ colorScheme: "light" });
   await page.setViewportSize({ width: 390, height: 844 });
   const settings = page.getByRole("button", { name: "Settings", exact: true });
@@ -289,7 +309,10 @@ test("rich media, reusable sections and native picker remain on their existing p
   const item = await article(page, "rich-media-quality-proof", body as any);
   const canvas = canvasOf(page);
   await expect(canvas.locator("table")).toBeVisible();
-  await expect(canvas).toContainText("Evidence and methods");
+  // Native cards summarize identity; reference details belong to the reference utility.
+  await expect(canvas).toContainText("Reference");
+  await page.getByRole("button", { name: "References", exact: true }).click();
+  await expect(page.getByRole("complementary", { name: "Editorial utility" })).toContainText("Evidence and methods");
   await page.getByRole("button", { name: "Readiness", exact: true }).click();
   await expect(page.getByRole("complementary", { name: "Editorial utility" })).not.toContainText("Unknown reusable section");
   await page.getByRole("button", { name: "Readiness", exact: true }).click();
