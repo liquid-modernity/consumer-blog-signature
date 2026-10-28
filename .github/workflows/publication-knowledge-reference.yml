@@ -1,0 +1,83 @@
+name: Publication and Knowledge reference qualification
+on:
+  push:
+    branches: [review/publication-knowledge-v1]
+permissions:
+  contents: read
+jobs:
+  reference:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    defaults:
+      run:
+        shell: bash
+    env:
+      ASTRO_TELEMETRY_DISABLED: '1'
+      WRANGLER_SEND_METRICS: 'false'
+      GAGA_CONTENT_RELEASE_ENABLED: 'false'
+      PUBLIC_GIT_SHA: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.23.4'
+      - name: Exact runtime and external evidence
+        run: |
+          npm install --global npm@10.9.3 --ignore-scripts --no-audit --no-fund
+          mkdir -p "$RUNNER_TEMP/publication-knowledge"
+          echo "GAGA_EVIDENCE_DIRECTORY=$RUNNER_TEMP/publication-knowledge" >> "$GITHUB_ENV"
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import {writeFileSync} from 'node:fs';
+          import {execFileSync} from 'node:child_process';
+          const runtime={node:process.version,npm:execFileSync('npm',['--version'],{encoding:'utf8'}).trim(),runner:process.env.RUNNER_OS,image:process.env.ImageOS,imageVersion:process.env.ImageVersion,source:process.env.GITHUB_SHA};
+          assert.equal(runtime.node,'v22.23.4');assert.equal(runtime.npm,'10.9.3');
+          writeFileSync(process.env.RUNNER_TEMP+'/publication-knowledge/runtime.json',JSON.stringify(runtime,null,2)+'\n');
+          JS
+      - name: Clean official-registry installation
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npx --no-install playwright install --with-deps chromium
+      - name: Reproducible public-package reference verification
+        run: npm run reference:verify | tee "$GAGA_EVIDENCE_DIRECTORY/reference.log"
+      - name: Workflow lint, audit and source preservation
+        if: always()
+        run: |
+          go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.7 -shellcheck= .github/workflows/publication-knowledge-reference.yml
+          npm audit --audit-level=low --json > "$GAGA_EVIDENCE_DIRECTORY/audit.json"
+          git diff --exit-code
+          test -z "$(git ls-files --others --exclude-standard)"
+      - name: Preserve diagnostics and exact receipt
+        if: always()
+        run: |
+          if [ -d .gaga/reference ]; then cp -R .gaga/reference "$GAGA_EVIDENCE_DIRECTORY/"; fi
+          if [ -f .gaga/browser-results.json ]; then cp .gaga/browser-results.json "$GAGA_EVIDENCE_DIRECTORY/"; fi
+          if [ -d test-results ]; then cp -R test-results "$GAGA_EVIDENCE_DIRECTORY/"; fi
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import {readFileSync,writeFileSync,existsSync} from 'node:fs';
+          import {execFileSync} from 'node:child_process';
+          import {createHash} from 'node:crypto';
+          import {sourceIdentity} from './tools/gaga/source-identity.mjs';
+          const dir=process.env.GAGA_EVIDENCE_DIRECTORY,read=n=>JSON.parse(readFileSync(dir+'/'+n)),sha=p=>createHash('sha256').update(readFileSync(p)).digest('hex');
+          const source=sourceIdentity(),browser=existsSync(dir+'/browser-results.json')?read('browser-results.json'):null;
+          assert.equal(sha('package-lock.json'),'5eaf8946c85601681837807ac2bca5c8d4547bd784014dd7dab07d44e3e8b9ee');
+          assert.equal(sha('cms/package-lock.json'),'62b398d8c74d91f0fa4b5c1c40818737c225e574aecbe14637fd6f86c4c2eef5');
+          assert.equal(sha('content/emdash/published.json'),'9caa6924b6ebbbc4d545cbee4f4fa8996ec30036c998aed114f951088dd0e37d');
+          if(existsSync('dist/search-index.json'))assert.equal(sha('dist/search-index.json'),'5b982d6827606ed194604511f83156cb0697c04115df253177581df24ce6a807');
+          assert.equal(sha('.gaga/composition-plan.json'),'9bcb42ad793a612b9322c81cac78d64a680ee51d779dbd65ab908c6375eda7c7');
+          const consumer=existsSync(dir+'/consumer-receipt.json')?read('consumer-receipt.json'):null;
+          const status=browser&&browser.stats.expected===10&&browser.stats.unexpected===0&&browser.stats.skipped===0&&browser.stats.flaky===0&&consumer?.status==='PASS'?'QUALIFIED':'BLOCKED';
+          const receipt={schema:'consumer.reference-evidence/v1',status,source,runtime:read('runtime.json'),workerd:execFileSync('node_modules/.bin/workerd',['--version'],{encoding:'utf8'}).trim(),browser:browser?.stats??null,consumerStatus:consumer?.status??null,appLockSha256:sha('package-lock.json'),cmsLockSha256:sha('cms/package-lock.json'),exportSha256:sha('content/emdash/published.json'),searchSha256:existsSync('dist/search-index.json')?sha('dist/search-index.json'):null,compositionSha256:sha('.gaga/composition-plan.json'),studioSource:'952ab4ca4b75c6236456276c2439a8276b17883d',reused:{cmsTypesBuildStartupAndSavedPreview:'40676100962; all CMS/Studio/dependency inputs unchanged',editorialSemanticQualification:'40676100962; public package and body inputs unchanged',nativeSettingsFocus:'Separate native-owner issue; no app workaround'},production:{mainPromotions:0,deployments:0,workerUpdates:0,providerMutations:0,contentWrites:0,schemaWrites:0,credentialChanges:0,publishUnpublishOperations:0,publishingSwitchChanges:0,packagePublications:0},run:process.env.GITHUB_RUN_ID};
+          writeFileSync(dir+'/qualification-receipt.json',JSON.stringify(receipt,null,2)+'\n');
+          assert.equal(status,'QUALIFIED','Reference qualification must finish all ten browser cases');
+          JS
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: publication-knowledge-reference-evidence
+          path: ${{ runner.temp }}/publication-knowledge
+          if-no-files-found: error

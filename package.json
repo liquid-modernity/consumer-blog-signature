@@ -37,7 +37,8 @@
     "test:editorial": "node --test tools/editorial/*.test.mjs",
     "editorial:prepare": "node tools/editorial/prepare.mjs",
     "editorial:studio": "bash scripts/cms-local.sh studio",
-    "test:editorial:ui": "playwright test --config playwright.editorial.config.ts"
+    "test:editorial:ui": "playwright test --config playwright.editorial.config.ts",
+    "reference:verify": "node tools/gaga/prepare.mjs && node --test tools/reference/*.test.mjs tools/gaga/application.test.mjs tools/gaga/registry-adoption.test.mjs && npm test && npm run check && npm run build && npm run test:consumer && npm run test:ui"
   },
   "dependencies": {
     "@astrojs/mdx": "7.0.8",
