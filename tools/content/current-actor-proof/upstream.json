@@ -1,7 +1,8 @@
 {
   "repository": "https://github.com/emdash-cms/emdash",
-  "baseline": "0409cd220949d7f8ea4856b2f49b75e99c2b4119",
-  "patchSha256": "e3424e37ec8ae06f79c3e868b88ffa3b62bff58ef7bd591a9f4e8e9eb8d11c8a",
-  "scope": "Unpublished upstream-ready review candidate only; not an official release or production patch.",
-  "compressedPatchSha256": "98d3006b2dc676cceebf66996abcf430af5527277bc0ea0a9347fd1e6d83c4ed"
+  "baseline": "ec03a5e0f6c3a836ea33f3547d8f22e87e0901a3",
+  "patchSha256": "1cbf84747cfe8063e85895b0eea76e4756437dd91ae238ff7e84b330944f4b2e",
+  "scope": "Current-upstream contribution compatibility proof only; unchanged native implementation, no application integration or production operation.",
+  "compressedPatchSha256": "56f86c19bc135ae4f54450b06acfba39fa60277696ce48c8a1427dc98acb15f0",
+  "qualifiedImplementation": "ad171ccd8071266d430d596f5b0e111281fc3d68"
 }

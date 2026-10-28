@@ -62,7 +62,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: emdash-cms/emdash
-          ref: 0409cd220949d7f8ea4856b2f49b75e99c2b4119
+          ref: ec03a5e0f6c3a836ea33f3547d8f22e87e0901a3
           path: native-host
           persist-credentials: false
       - uses: actions/setup-node@v4
@@ -79,20 +79,18 @@ jobs:
           cp -a native-host "$native_host"
           echo "NATIVE_HOST=$native_host" >> "$GITHUB_ENV"
           echo "GAGA_EVIDENCE_DIRECTORY=$RUNNER_TEMP/current-actor-evidence" >> "$GITHUB_ENV"
-          echo "GAGA_AUTH_APPLICATION=$GITHUB_WORKSPACE" >> "$GITHUB_ENV"
-          echo "GAGA_AUTH_EVIDENCE=$RUNNER_TEMP/current-actor-evidence/delayed-apply.jsonl" >> "$GITHUB_ENV"
           node --input-type=module - <<'JS'
           import {readFileSync} from 'node:fs';
           import {createHash} from 'node:crypto';
           import {gunzipSync} from 'node:zlib';
           import assert from 'node:assert/strict';
           const pin=JSON.parse(readFileSync('tools/content/current-actor-proof/upstream.json'));
-          assert.equal(pin.baseline,'0409cd220949d7f8ea4856b2f49b75e99c2b4119');
+          assert.equal(pin.baseline,'ec03a5e0f6c3a836ea33f3547d8f22e87e0901a3');
           const packed=readFileSync('tools/content/current-actor-proof/upstream.patch.gz');
           assert.equal(createHash('sha256').update(packed).digest('hex'),pin.compressedPatchSha256);
           assert.equal(createHash('sha256').update(gunzipSync(packed)).digest('hex'),pin.patchSha256);
           JS
-          test "$(git -C "$native_host" rev-parse HEAD)" = 0409cd220949d7f8ea4856b2f49b75e99c2b4119
+          test "$(git -C "$native_host" rev-parse HEAD)" = ec03a5e0f6c3a836ea33f3547d8f22e87e0901a3
           gzip -dc tools/content/current-actor-proof/upstream.patch.gz | git -C "$native_host" apply --check
           gzip -dc tools/content/current-actor-proof/upstream.patch.gz | git -C "$native_host" apply
           cp tools/content/current-actor-proof/upstream.json "$RUNNER_TEMP/current-actor-evidence/"
@@ -101,7 +99,6 @@ jobs:
           test "$(node --version)" = v22.23.4
           [[ "$(npm --version)" == 10.* ]]
           { echo "ImageOS=$ImageOS"; echo "ImageVersion=$ImageVersion"; uname -a; node --version; npm --version; pnpm --version; } > "$GAGA_EVIDENCE_DIRECTORY/runtime.txt"
-          npm ci --ignore-scripts --no-audit --no-fund
           cd "$NATIVE_HOST"
           pnpm install --frozen-lockfile > "$GAGA_EVIDENCE_DIRECTORY/install.log" 2>&1
           find node_modules/.pnpm -path '*/workerd/bin/workerd' -type f -exec {} --version \; >> "$GAGA_EVIDENCE_DIRECTORY/runtime.txt"
@@ -166,45 +163,12 @@ jobs:
         if: always() && steps.native-build.outcome == 'success'
         working-directory: ${{ env.NATIVE_HOST }}
         run: pnpm --dir docs build > "$GAGA_EVIDENCE_DIRECTORY/docs.log" 2>&1
-      - name: Read-only documentation dependency diagnosis
-        if: always() && steps.native-build.outcome == 'success'
-        run: |
-          node --input-type=module - <<'JS'
-          import {createRequire} from 'node:module';
-          import {readFileSync,writeFileSync,existsSync,readdirSync} from 'node:fs';
-          import {resolve,dirname,join} from 'node:path';
-          import {pathToFileURL} from 'node:url';
-          const chunks=resolve(process.env.NATIVE_HOST,'docs/dist/server/.prerender/chunks');
-          const report=[];
-          for(const origin of [resolve(process.env.NATIVE_HOST,'docs/package.json'), ...(existsSync(chunks)?readdirSync(chunks).filter(n=>n.startsWith('TabItem_')).map(n=>join(chunks,n)):[])]) {
-            const entry={origin};
-            try {
-              const file=createRequire(origin).resolve('satteri'); entry.resolved=file;
-              let parent=dirname(file); while(!existsSync(join(parent,'package.json'))&&parent!==dirname(parent))parent=dirname(parent);
-              const meta=JSON.parse(readFileSync(join(parent,'package.json')));entry.package={name:meta.name,version:meta.version,main:meta.main,exports:meta.exports};
-              entry.htmlToHastSource=readFileSync(file,'utf8').includes('export function htmlToHast');
-              try { entry.exports=Object.keys(await import(pathToFileURL(file).href)); } catch(error) {entry.loadError=error.message;}
-            } catch(error) {entry.error=error.message;}
-            report.push(entry);
-          }
-          writeFileSync(process.env.GAGA_EVIDENCE_DIRECTORY+'/docs-export-inspection.json',JSON.stringify(report,null,2));
-          JS
-      - name: Affected application regressions
-        if: always() && steps.native-build.outcome == 'success'
-        run: node --test tools/content/approval.test.mjs tools/content/content.test.mjs > "$GAGA_EVIDENCE_DIRECTORY/application-regressions.log" 2>&1
-      - name: Actual application intent to native apply and revocation matrix
-        if: always() && steps.native-build.outcome == 'success'
-        run: |
-          cp tools/content/current-actor.integration.test.ts "$NATIVE_HOST/packages/core/tests/integration/runtime/gaga-delayed-apply.test.ts"
-          cd "$NATIVE_HOST"
-          pnpm --filter emdash exec vitest run tests/integration/runtime/gaga-delayed-apply.test.ts > "$GAGA_EVIDENCE_DIRECTORY/gaga-delayed-apply.log" 2>&1
       - name: Workflow lint
         if: always()
         run: go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.7 -shellcheck= .github/workflows/editorial-studio.yml > "$GAGA_EVIDENCE_DIRECTORY/workflow-lint.log" 2>&1
       - name: Preserve exact qualified upstream diff and unchanged application locks
         if: always()
         run: |
-          rm -f "$NATIVE_HOST/packages/core/tests/integration/runtime/gaga-delayed-apply.test.ts"
           git -C "$NATIVE_HOST" add -N .
           git -C "$NATIVE_HOST" diff --binary > "$GAGA_EVIDENCE_DIRECTORY/qualified-upstream.patch"
           git -C "$NATIVE_HOST" status --short > "$GAGA_EVIDENCE_DIRECTORY/upstream-status.txt"
