@@ -54,8 +54,8 @@ test('settled saved library layout, tab strip, touch targets and keyboard focus'
   expect.soft(before.activeAnimations).toBe(0);
   expect.soft(before.documentWidth).toBeLessThanOrEqual(before.viewport+1);
   for(const [name,b] of Object.entries({page:before.page,header:before.header,head:before.head,stats:before.stats,nav:before.nav,item:before.item})) {
-    expect.soft(b.x,name+' left').toBeGreaterThanOrEqual(-1);
-    expect.soft(b.right,name+' right').toBeLessThanOrEqual(before.viewport+1);
+    expect.soft(b.x,name+' left').toBeGreaterThanOrEqual(before.page.x-1);
+    expect.soft(b.right,name+' right').toBeLessThanOrEqual(before.page.right+1);
   }
   expect.soft(Number(before.item.opacity),'settled saved item opacity').toBe(1);
   for(const tab of before.tabs) {
@@ -74,6 +74,7 @@ test('settled saved library layout, tab strip, touch targets and keyboard focus'
   await page.keyboard.press('End');
   const keyboardEnd=await tabs.last().evaluate(el=>el===document.activeElement);
   expect.soft(keyboardEnd,'End moves to final library tab').toBe(true);
+  await settle(page);
   const endGeometry=await tabs.last().evaluate(el=>{const r=el.getBoundingClientRect(),nav=el.closest<HTMLElement>('[data-gaga-library-nav]')!,n=nav.getBoundingClientRect();return {x:r.x,right:r.right,navX:n.x,navRight:n.right,scrollLeft:nav.scrollLeft};});
   if(keyboardEnd){expect.soft(endGeometry.x).toBeGreaterThanOrEqual(endGeometry.navX-1);expect.soft(endGeometry.right).toBeLessThanOrEqual(endGeometry.navRight+1);}
 
