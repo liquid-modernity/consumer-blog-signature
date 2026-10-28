@@ -61,6 +61,9 @@ jobs:
         run: |
           npm run editorial:prepare
           npx --no-install playwright install --with-deps chromium
+          npx --no-install playwright test --config playwright.editorial.config.ts integration.spec.ts quality.spec.ts --grep-invert '^Orca announces' | tee "$GAGA_EVIDENCE_DIRECTORY/browser.log"
+          cp .gaga/editorial/browser-results.json .gaga/editorial/packed-integration.json .gaga/editorial/packed-integration.png "$GAGA_EVIDENCE_DIRECTORY/"
+          # One independent headed AT smoke; functional cases stay on the established headless path.
           # Ephemeral runner tools only; no application dependency or lock changes.
           sudo apt-get update -qq
           sudo apt-get install -y orca dbus-x11 pulseaudio speech-dispatcher-espeak-ng
@@ -78,10 +81,10 @@ jobs:
           orca --replace --enable=speech --disable=braille --debug --debug-file="$GAGA_ORCA_LOG" -u "$RUNNER_TEMP/orca-prefs" > "$GAGA_EVIDENCE_DIRECTORY/orca-process.log" 2>&1 &
           orca_pid=$!
           trap 'kill "$orca_pid" 2>/dev/null || true' EXIT
-          npx --no-install playwright test --config playwright.editorial.config.ts integration.spec.ts quality.spec.ts | tee "$GAGA_EVIDENCE_DIRECTORY/browser.log"
+          npx --no-install playwright test --config playwright.editorial.config.ts quality.spec.ts --grep '^Orca announces' | tee "$GAGA_EVIDENCE_DIRECTORY/screen-reader.log"
+          cp .gaga/editorial/browser-results.json "$GAGA_EVIDENCE_DIRECTORY/screen-reader-results.json"
           SH
-          dbus-run-session -- xvfb-run -a bash "$RUNNER_TEMP/editorial-screen-reader.sh"
-          cp .gaga/editorial/browser-results.json .gaga/editorial/packed-integration.json .gaga/editorial/packed-integration.png "$GAGA_EVIDENCE_DIRECTORY/"
+          dbus-run-session -- xvfb-run -a -s '-screen 0 1920x1440x24' bash "$RUNNER_TEMP/editorial-screen-reader.sh"
       - name: Preserve isolated editor screenshots and diagnostics
         if: always()
         run: |
@@ -117,7 +120,8 @@ jobs:
           assert.equal(read('packed-integration.json').status,'PASS');assert.equal(read('browser-results.json').stats.unexpected,0);
           const editorBrowser=read('browser-results.json');assert.equal(editorBrowser.stats.expected,9);
           for(const file of ['editing','saved-preview','responsive','rich-media'])assert.equal(read('editorial/quality/'+file+'.json').status,'PASS');
-          const a11y=read('editorial/quality/accessibility.json');assert.equal(a11y.status,'APP_CONTROLS_PASS_NATIVE_ISSUES_RETAINED');assert.equal(a11y.screenReaderSession,'ORCA_HEADFUL_SMOKE');
+          const a11y=read('editorial/quality/accessibility.json');assert.equal(a11y.status,'APP_CONTROLS_PASS_NATIVE_ISSUES_RETAINED');assert.equal(a11y.screenReaderSession,'SEPARATE_ORCA_SMOKE');
+          const sr=read('screen-reader-results.json');assert.equal(sr.stats.expected,1);assert.equal(sr.stats.unexpected,0);assert.equal(sr.stats.skipped,0);assert.equal(sr.stats.flaky,0);assert.equal(read('editorial/quality/screen-reader.json').status,'PASS');
           const publicationBrowser=read('publication-browser-results.json');assert.equal(publicationBrowser.stats.expected,4);assert.equal(publicationBrowser.stats.unexpected,0);
           for(const browser of [read('browser-results.json'),publicationBrowser]){assert.equal(browser.stats.skipped,0);assert.equal(browser.stats.flaky,0);}
           for(const audit of ['audit.json','cms-audit.json'])assert.equal(read(audit).metadata.vulnerabilities.total,0);

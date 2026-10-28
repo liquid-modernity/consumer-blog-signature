@@ -273,24 +273,7 @@ test("keyboard disclosures and public accessibility tree retain native limitatio
   const controlsAx = tree.nodes.filter((node: any) => node.role?.value === "button" && ["Outline", "References", "Readiness"].includes(node.name?.value));
   expect(controlsAx).toHaveLength(3);
   const textbox = tree.nodes.filter((node: any) => node.role?.value === "textbox");
-  let screenReaderSession = "NOT_RUN";
-  if (process.env.GAGA_EDITORIAL_SCREEN_READER === "orca") {
-    const log = process.env.GAGA_ORCA_LOG!;
-    let start = readFileSync(log, "utf8").length;
-    const newSpeech = () => readFileSync(log, "utf8").slice(start);
-    await outline.focus();
-    await expect.poll(newSpeech).toMatch(/SPEECH OUTPUT:[^\n]*Outline/);
-    start = readFileSync(log, "utf8").length;
-    await page.keyboard.press("Tab");
-    await expect(page.getByRole("button", { name: "References", exact: true })).toBeFocused();
-    await expect.poll(newSpeech).toMatch(/SPEECH OUTPUT:[^\n]*References/);
-    start = readFileSync(log, "utf8").length;
-    await page.keyboard.press("Space");
-    await expect(page.getByRole("button", { name: "References", exact: true })).toHaveAttribute("aria-expanded", "true");
-    await expect.poll(newSpeech).toMatch(/SPEECH OUTPUT:[^\n]*expanded/);
-    evidence("screen-reader", { status: "PASS", implementation: "Orca", focusedControlAnnouncements: ["Outline", "References"], expandedStateAnnouncement: true, logScope: "fresh lines after each interaction", audibleHumanReview: false });
-    screenReaderSession = "ORCA_HEADFUL_SMOKE";
-  }
+  const screenReaderSession = "SEPARATE_ORCA_SMOKE";
   evidence("accessibility", { status: "APP_CONTROLS_PASS_NATIVE_ISSUES_RETAINED", nativeTextboxNames: textbox.map((node: any) => node.name?.value ?? ""), appControlNames: controlsAx.map((node: any) => node.name.value), disclosureKeyboard: true, focusVisible: true, screenReaderSession, nativeTextboxNameFixed: false, nativeReadOnlyBridgeFixed: false });
   await cdp.detach();
 });
@@ -366,4 +349,32 @@ test("rich media, reusable sections and native picker remain on their existing p
   expect(afterInsertion.map((b: any) => b._key)).toEqual(body.map(b => b._key));
   expect(afterInsertion.find((b: any) => b._type === "sectionRef").id).toBe(sections[0].id);
   evidence("rich-media", { status: "PASS", inlineMarkerAtSelection: true, types: [...new Set(body.map(b => b._type))], nativeTable: true, actualMediaUpload: true, pickerOpenCancelFocus: true, sectionIdentity: sections[0].id, persistedBodyUnchanged: true, videoPlayback: "NOT_TESTED" });
+});
+
+
+test("Orca announces app disclosure names and state through a fresh keyboard sequence", async ({ page }) => {
+  expect(process.env.GAGA_EDITORIAL_SCREEN_READER).toBe("orca");
+  await signIn(page); await article(page, "screen-reader-quality-proof");
+  const log = process.env.GAGA_ORCA_LOG!;
+  let start = readFileSync(log, "utf8").length;
+  const newSpeech = () => readFileSync(log, "utf8").slice(start);
+  // Establish native field focus before traversing app controls; let AT process each step.
+  await page.getByRole("textbox", { name: "Dek / Summary", exact: true }).focus();
+  await expect.poll(newSpeech).toMatch(/SPEECH OUTPUT:[^\n]*Summary/);
+  start = readFileSync(log, "utf8").length;
+  await page.keyboard.press("Tab");
+  await expect.poll(newSpeech).toMatch(/SPEECH OUTPUT:[^\n]*Insert citation or cross-reference/);
+  start = readFileSync(log, "utf8").length;
+  await page.keyboard.press("Tab");
+  await expect(page.getByRole("button", { name: "Outline", exact: true })).toBeFocused();
+  await expect.poll(newSpeech).toMatch(/SPEECH OUTPUT:[^\n]*Outline/);
+  start = readFileSync(log, "utf8").length;
+  await page.keyboard.press("Tab");
+  await expect(page.getByRole("button", { name: "References", exact: true })).toBeFocused();
+  await expect.poll(newSpeech).toMatch(/SPEECH OUTPUT:[^\n]*References/);
+  start = readFileSync(log, "utf8").length;
+  await page.keyboard.press("Space");
+  await expect(page.getByRole("button", { name: "References", exact: true })).toHaveAttribute("aria-expanded", "true");
+  await expect.poll(newSpeech).toMatch(/SPEECH OUTPUT:[^\n]*expanded/);
+  evidence("screen-reader", { status: "PASS", implementation: "Orca", focusedControlAnnouncements: ["Summary", "Insert citation or cross-reference", "Outline", "References"], expandedStateAnnouncement: true, logScope: "fresh lines after each keyboard interaction", audibleHumanReview: false });
 });
