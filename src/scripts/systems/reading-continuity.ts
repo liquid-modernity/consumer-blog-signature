@@ -400,6 +400,7 @@ function switchLibraryTab(tabId: string) {
     const isActive = tab.dataset.gagaLibraryTab === tabId;
     tab.classList.toggle('is-active', isActive);
     tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    tab.tabIndex = isActive ? 0 : -1;
   });
 
   sections.forEach((sec) => {
@@ -544,6 +545,17 @@ function wireLibraryTabs() {
     if (!tabBtn) return;
     const tabId = tabBtn.dataset.gagaLibraryTab;
     if (tabId) switchLibraryTab(tabId);
+  });
+
+  nav.addEventListener('keydown', (event) => {
+    const tabs = [...nav.querySelectorAll<HTMLElement>('[data-gaga-library-tab]')];
+    const index = tabs.findIndex(tab => tab === event.target);
+    if (index < 0 || !['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+    event.preventDefault();
+    const next = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1
+      : (index + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+    switchLibraryTab(tabs[next].dataset.gagaLibraryTab!);
+    tabs[next].focus();
   });
 
   // Check initial hash

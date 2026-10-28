@@ -36,7 +36,8 @@ async function metrics(page: Page) {
   });
 }
 
-test.beforeEach(async ({context}) => {
+test.beforeEach(async ({context, page}) => {
+  page.setDefaultTimeout(5000);
   await context.route('**/*', route => ['localhost','127.0.0.1'].includes(new URL(route.request().url()).hostname) ? route.continue() : route.abort());
 });
 
@@ -65,7 +66,7 @@ test('settled saved library layout, tab strip, touch targets and keyboard focus'
   const tabs=nav.locator('[data-gaga-library-tab]');
   for(const name of ['highlights','notes','quotes','history','saved']) {
     const tab=nav.locator('[data-gaga-library-tab="'+name+'"]');
-    await tab.click();
+    if(info.project.name==='1440') await tab.click(); else await tab.tap();
     await expect(tab).toHaveAttribute('aria-selected','true');
     await expect(page.locator('[data-gaga-library-section]:not([hidden])')).toHaveAttribute('data-gaga-library-section',name);
   }
@@ -73,6 +74,9 @@ test('settled saved library layout, tab strip, touch targets and keyboard focus'
   await page.keyboard.press('End');
   const keyboardEnd=await tabs.last().evaluate(el=>el===document.activeElement);
   expect.soft(keyboardEnd,'End moves to final library tab').toBe(true);
+  const endGeometry=await tabs.last().evaluate(el=>{const r=el.getBoundingClientRect(),nav=el.closest<HTMLElement>('[data-gaga-library-nav]')!,n=nav.getBoundingClientRect();return {x:r.x,right:r.right,navX:n.x,navRight:n.right,scrollLeft:nav.scrollLeft};});
+  if(keyboardEnd){expect.soft(endGeometry.x).toBeGreaterThanOrEqual(endGeometry.navX-1);expect.soft(endGeometry.right).toBeLessThanOrEqual(endGeometry.navRight+1);}
+
   await page.keyboard.press('Home');
   await page.keyboard.press('ArrowRight');
   const keyboardRight=await tabs.nth(1).evaluate(el=>el===document.activeElement);
@@ -86,7 +90,7 @@ test('settled saved library layout, tab strip, touch targets and keyboard focus'
   expect.soft(await nav.getAttribute('role'),'native tab-list semantics').toBe('tablist');
   await settle(page);
   const after=await metrics(page);
-  record(info.project.name+'-interaction',{before,after,keyboardEnd,keyboardRight,keyboardLeft,focus,storage:await page.evaluate(()=>JSON.parse(localStorage.getItem('gaga:saved:v1')??'[]'))});
+  record(info.project.name+'-interaction',{before,after,keyboardEnd,keyboardRight,keyboardLeft,endGeometry,focus,storage:await page.evaluate(()=>JSON.parse(localStorage.getItem('gaga:saved:v1')??'[]'))});
   expect.soft(after.documentWidth).toBeLessThanOrEqual(after.viewport+1);
   expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('gaga:saved:v1')??'[]'))).toEqual(saved);
 });
@@ -96,10 +100,12 @@ test('all affected built page shells have one main and a working keyboard skip t
   const results=[];
   for(const route of inventory.routes) {
     await page.goto(route.path);
+    await expect(page.locator('html')).toHaveAttribute('data-gaga-runtime','ready');
     const skip=page.locator('a.gaga-skip-link');
     await expect(skip).toHaveCount(1);
     await page.keyboard.press('Tab');
     await expect(skip).toBeFocused();
+    await settle(page);
     const visible=await skip.evaluate(el=>{const b=el.getBoundingClientRect();return b.x>=0&&b.y>=0&&b.right<=innerWidth&&b.bottom<=innerHeight;});
     const href=await skip.getAttribute('href');
     await page.keyboard.press('Enter');

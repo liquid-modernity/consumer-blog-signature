@@ -51,28 +51,28 @@ const copy = {
     </div>
 
     <!-- Knowledge Section Tabs -->
-    <nav class="gaga-library-nav" data-gaga-library-nav aria-label="Navigasi Bagian Pustaka">
-      <button type="button" class="gaga-library-nav__item is-active" data-gaga-library-tab="saved" role="tab" aria-selected="true" aria-controls="section-saved">
+    <nav class="gaga-library-nav" data-gaga-library-nav role="tablist" aria-label="Navigasi Bagian Pustaka">
+      <button type="button" class="gaga-library-nav__item is-active" data-gaga-library-tab="saved" role="tab" tabindex="0" aria-selected="true" aria-controls="section-saved">
         <Icon name="bookmark" />
         <span>Artikel Tersimpan</span>
         <span class="gaga-library-nav__badge" data-gaga-badge-saved>0</span>
       </button>
-      <button type="button" class="gaga-library-nav__item" data-gaga-library-tab="highlights" role="tab" aria-selected="false" aria-controls="section-highlights">
+      <button type="button" class="gaga-library-nav__item" data-gaga-library-tab="highlights" role="tab" tabindex="-1" aria-selected="false" aria-controls="section-highlights">
         <Icon name="edit" />
         <span>Sorotan</span>
         <span class="gaga-library-nav__badge" data-gaga-badge-highlights>0</span>
       </button>
-      <button type="button" class="gaga-library-nav__item" data-gaga-library-tab="notes" role="tab" aria-selected="false" aria-controls="section-notes">
+      <button type="button" class="gaga-library-nav__item" data-gaga-library-tab="notes" role="tab" tabindex="-1" aria-selected="false" aria-controls="section-notes">
         <Icon name="format_quote" />
         <span>Catatan</span>
         <span class="gaga-library-nav__badge" data-gaga-badge-notes>0</span>
       </button>
-      <button type="button" class="gaga-library-nav__item" data-gaga-library-tab="quotes" role="tab" aria-selected="false" aria-controls="section-quotes">
+      <button type="button" class="gaga-library-nav__item" data-gaga-library-tab="quotes" role="tab" tabindex="-1" aria-selected="false" aria-controls="section-quotes">
         <Icon name="format_quote" />
         <span>Kutipan</span>
         <span class="gaga-library-nav__badge" data-gaga-badge-quotes>0</span>
       </button>
-      <button type="button" class="gaga-library-nav__item" data-gaga-library-tab="history" role="tab" aria-selected="false" aria-controls="section-history">
+      <button type="button" class="gaga-library-nav__item" data-gaga-library-tab="history" role="tab" tabindex="-1" aria-selected="false" aria-controls="section-history">
         <Icon name="history" />
         <span>Riwayat Baca</span>
         <span class="gaga-library-nav__badge" data-gaga-badge-history>0</span>
@@ -90,7 +90,7 @@ const copy = {
   </section>
 
   <!-- SECTION 1: SAVED ARTICLES -->
-  <section class="gaga-saved-section gaga-library-section" id="section-saved" data-gaga-library-section="saved" data-gaga-saved-bookmarks-section aria-labelledby="gaga-saved-bookmarks-title">
+  <section class="gaga-saved-section gaga-library-section" id="section-saved" data-gaga-library-section="saved" role="tabpanel" data-gaga-saved-bookmarks-section aria-labelledby="gaga-saved-bookmarks-title">
     <div class="gaga-saved-section__head">
       <h3 id="gaga-saved-bookmarks-title">Artikel Tersimpan</h3>
       <p>Artikel dan esai yang Anda simpan untuk dibaca kembali.</p>
@@ -104,7 +104,7 @@ const copy = {
   </section>
 
   <!-- SECTION 2: HIGHLIGHTS -->
-  <section class="gaga-saved-section gaga-library-section" id="section-highlights" data-gaga-library-section="highlights" hidden aria-labelledby="gaga-library-highlights-title">
+  <section class="gaga-saved-section gaga-library-section" id="section-highlights" data-gaga-library-section="highlights" role="tabpanel" hidden aria-labelledby="gaga-library-highlights-title">
     <div class="gaga-saved-section__head">
       <h3 id="gaga-library-highlights-title">Sorotan Pengetahuan</h3>
       <p>Koleksi kalimat dan wawasan berharga yang Anda tandai saat membaca.</p>
@@ -119,7 +119,7 @@ const copy = {
   </section>
 
   <!-- SECTION 3: NOTES -->
-  <section class="gaga-saved-section gaga-library-section" id="section-notes" data-gaga-library-section="notes" hidden aria-labelledby="gaga-library-notes-title">
+  <section class="gaga-saved-section gaga-library-section" id="section-notes" data-gaga-library-section="notes" role="tabpanel" hidden aria-labelledby="gaga-library-notes-title">
     <div class="gaga-saved-section__head">
       <h3 id="gaga-library-notes-title">Catatan & Refleksi</h3>
       <p>Anotasi pemikiran pribadi yang Anda sematkan pada bagian artikel.</p>
@@ -134,7 +134,7 @@ const copy = {
   </section>
 
   <!-- SECTION 4: QUOTES -->
-  <section class="gaga-saved-section gaga-library-section" id="section-quotes" data-gaga-library-section="quotes" hidden aria-labelledby="gaga-library-quotes-title">
+  <section class="gaga-saved-section gaga-library-section" id="section-quotes" data-gaga-library-section="quotes" role="tabpanel" hidden aria-labelledby="gaga-library-quotes-title">
     <div class="gaga-saved-section__head">
       <h3 id="gaga-library-quotes-title">Kutipan Pilihan</h3>
       <p>Kutipan penting yang siap disalin dan dibagikan.</p>
@@ -149,7 +149,7 @@ const copy = {
   </section>
 
   <!-- SECTION 5: READING HISTORY -->
-  <section class="gaga-saved-section gaga-library-section" id="section-history" data-gaga-library-section="history" hidden data-gaga-continuity-status-section aria-labelledby="gaga-saved-status-title">
+  <section class="gaga-saved-section gaga-library-section" id="section-history" data-gaga-library-section="history" role="tabpanel" hidden data-gaga-continuity-status-section aria-labelledby="gaga-saved-status-title">
     <div class="gaga-saved-section__head">
       <h3 id="gaga-saved-status-title">Riwayat Baca & Progres</h3>
       <p>Jejak pembacaan dan kontinuitas posisi baca Anda di seluruh artikel.</p>
@@ -309,3 +309,57 @@ const copy = {
     </div>
   </template>
 </section>
+
+<style>
+  .gaga-saved-screen {
+    min-inline-size: 0;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .gaga-saved-screen > .gaga-screen-section-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .gaga-library-head {
+    min-inline-size: 0;
+    flex-wrap: wrap;
+  }
+
+  .gaga-library-head__titles {
+    min-inline-size: 0;
+    flex: 1 1 auto;
+  }
+
+  .gaga-library-stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    inline-size: min(100%, 20rem);
+    min-inline-size: 0;
+    gap: .25rem;
+    padding-inline: .5rem;
+  }
+
+  .gaga-library-nav {
+    min-inline-size: 0;
+    max-inline-size: 100%;
+  }
+
+  .gaga-library-nav__item {
+    flex: 0 0 auto;
+    min-block-size: 44px;
+    min-inline-size: 44px;
+  }
+
+  .gaga-saved-item,
+  .gaga-saved-link {
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .gaga-library-nav__item:focus-visible {
+    outline: 2px solid var(--gaga-ink);
+    outline-offset: -3px;
+  }
+</style>

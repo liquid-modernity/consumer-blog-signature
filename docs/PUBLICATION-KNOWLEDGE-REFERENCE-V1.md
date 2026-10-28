@@ -27,11 +27,11 @@ candidate remains application code until independently qualified public adoption
 | Editorial | HTML/KaTeX rendering and reference composition | Extraction candidate | Harvest A05–A11; `editorial/portable-text.mjs`; renderer/provider separation still required |
 | Editorial | Current-actor native apply and publishing activation | Deferred | Supported upstream adoption/qualification and separate policy/activation authorization required; publishing disabled |
 | Experience | Saved-reading, storage and event primitives | Public and qualified | Engine public `runtime/saved-reading`, `runtime/storage`, `runtime/events`; no Arsenal implementation claimed |
-| Experience | Saved-reading UI and continuity composition | Extraction candidate | Harvest A16/A17; application selectors, keys, retention and locale; fresh reference browser save/reload/remove plus independent Engine consumer |
+| Experience | Saved-reading UI and continuity composition | Extraction candidate | Harvest A16/A17; application selectors, keys, retention and locale; qualified save/reload/remove and independent Engine consumer; focused five-width settled layout and keyboard tab-strip evidence in `tools/reference/browser/quality.spec.ts` |
 | Experience | Reader preference composition | Application-owned | `src/scripts/systems/reader-preferences.ts`, public Engine ports; existing qualification reused, not a new complete preference audit |
 | Experience | Dynamic Notch, visual signature and branded interaction | Intentionally kept local | `src/components/frame/ActionRuntime.astro`, app UI/config; existing desktop/mobile tests |
 | Site | Read-only projection, assembly and Search matching | Public and qualified | Corps Astro/Starlight/EmDash → Arsenal assembly → Engine Search → Corps Cloudflare; native workerd proof |
-| Site | Taxonomy, listing, archive and discovery composition | Extraction candidate | Harvest A12–A15; `src/lib/content.ts`, `discovery.ts`, pages; fresh public routes/discovery plus unchanged output identities |
+| Site | Taxonomy, listing, archive and discovery composition | Extraction candidate | Harvest A12–A15; `src/lib/content.ts`, `discovery.ts`, pages; public route/discovery evidence plus whole-build main/skip-target inventory and keyboard verification; Search/composition identities preserved |
 | Site | Exact URLs, crawl policy, ranks, content and identity | Intentionally kept local | `src/config/routes.ts`, `discovery.ts`, brand/content; not universal package policy |
 
 Engine owns execution primitives; Corps owns provider/framework compatibility;
@@ -68,10 +68,36 @@ connect the visible article action and existing canonical toggle command. It doe
 not change UI markup, keys, saved-item shape, lifecycle, retention or Engine APIs.
 The pre-correction hosted browser failure is preserved in external evidence.
 
-The Site smoke records each route heading and main-landmark count. Some existing
-standalone page shells lack a main landmark; fixing their semantics/skip-link
-targets is an application accessibility follow-up, not covered by this narrow
-reader binding correction. No complete accessibility-conformance claim is made.
+The focused responsive/semantic continuation preserves the qualified functional
+slice at `1df87908a0c9dcda003275ff2ea60850942cd317` / run `40697899137`.
+`PageFrame` now uses the existing main wrapper from `AppFrameBase` instead of
+suppressing its semantics. The skip-link keeps its existing unique focusable
+`#gaga-main` target; landing/preview documents without that shell are inventoried
+separately. The whole built app-shell route set is checked statically and by
+keyboard, so representative pages cannot conceal a route-specific broken target.
+
+Saved Library's own scoped styles bound the grid/header, retain a horizontally
+scrollable tab strip and provide 44px tab targets. Its existing handler now
+supports roving focus with arrows/Home/End; these changes do not alter save or
+retention logic. Settled rendering is measured at 320/360/390/768/1440px without
+disabling motion. The focused workflow reruns only affected build/native/browser
+checks and the preserved Save journey, rather than the full prior functional suite.
+
+Run after the clean install/browser setup above:
+
+```sh
+npm run check
+npm run build
+python3 tools/reference/html-semantics.py
+npm run test:consumer
+npx playwright test --config playwright.reference-quality.config.ts
+npx playwright test reference.spec.ts --grep 'reference Experience saves'
+```
+
+The inventory is observation data; browser assertions and the qualification
+receipt enforce PASS. No complete accessibility-conformance claim is made.
+Physical iOS/Safari, full screen-reader usability and a complete contrast audit
+remain explicit limitations unless separately executed.
 
 CMS typing/build/startup, revision-pinned preview and Studio functional tests are
 reused from 40676100962 only after byte comparisons establish unchanged CMS,
@@ -113,7 +139,8 @@ runtime acceptance test. This fixture does not pretend those unknown products
 are implemented or that independent configuration alone proves a second full
 application. Product-specific backlog can replace these slots when supplied.
 
-Next bounded extraction candidate: Site discovery/list composition (harvest
-A12–A15) only after app 2 supplies its real route/filter requirements. Do not
-extract the whole Studio, introduce `@gaga/blog`, or publish a generic reader SDK
-from this single reference application.
+Experience extraction remains conditional on a second real consumer. Site
+extraction (harvest A12–A15) remains conditional on a second real application's
+route/discovery requirements. This responsive/semantic completion extracts neither.
+Do not extract the whole Studio, introduce `@gaga/blog`, or publish a generic reader
+SDK from this single reference application.
