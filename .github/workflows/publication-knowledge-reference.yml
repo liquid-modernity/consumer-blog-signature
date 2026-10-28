@@ -42,7 +42,13 @@ jobs:
           npm ci --ignore-scripts --no-audit --no-fund
           npx --no-install playwright install --with-deps chromium
       - name: Reproducible public-package reference verification
-        run: npm run reference:verify | tee "$GAGA_EVIDENCE_DIRECTORY/reference.log"
+        run: |
+          npm run check | tee "$GAGA_EVIDENCE_DIRECTORY/types.log"
+          npm run build | tee "$GAGA_EVIDENCE_DIRECTORY/build.log"
+          python3 tools/reference/html-semantics.py
+          node tools/gaga/consumer.mjs > "$GAGA_EVIDENCE_DIRECTORY/consumer.log" 2>&1
+          npx --no-install playwright test --config playwright.reference-quality.config.ts | tee "$GAGA_EVIDENCE_DIRECTORY/quality.log"
+          npx --no-install playwright test reference.spec.ts --grep 'reference Experience saves' | tee "$GAGA_EVIDENCE_DIRECTORY/saved-journey.log"
       - name: Workflow lint, audit and source preservation
         if: always()
         run: |
@@ -53,6 +59,7 @@ jobs:
       - name: Preserve diagnostics and exact receipt
         if: always()
         run: |
+          if [ -d .gaga/reference-quality ]; then cp -R .gaga/reference-quality "$GAGA_EVIDENCE_DIRECTORY/"; fi
           if [ -d .gaga/reference ]; then cp -R .gaga/reference "$GAGA_EVIDENCE_DIRECTORY/"; fi
           if [ -f .gaga/browser-results.json ]; then cp .gaga/browser-results.json "$GAGA_EVIDENCE_DIRECTORY/"; fi
           if [ -d test-results ]; then cp -R test-results "$GAGA_EVIDENCE_DIRECTORY/"; fi
@@ -71,10 +78,12 @@ jobs:
           assert.equal(sha('.gaga/composition-plan.json'),'9bcb42ad793a612b9322c81cac78d64a680ee51d779dbd65ab908c6375eda7c7');
           const consumer=existsSync(dir+'/consumer-receipt.json')?read('consumer-receipt.json'):null;
           const audit=read('audit.json');assert.equal(audit.metadata.vulnerabilities.total,0);
-          const status=browser&&browser.stats.expected===10&&browser.stats.unexpected===0&&browser.stats.skipped===0&&browser.stats.flaky===0&&consumer?.status==='PASS'?'QUALIFIED':'BLOCKED';
-          const receipt={schema:'consumer.reference-evidence/v1',status,source,runtime:read('runtime.json'),workerd:execFileSync('node_modules/.bin/workerd',['--version'],{encoding:'utf8'}).trim(),browser:browser?.stats??null,consumerStatus:consumer?.status??null,audit:audit.metadata.vulnerabilities,appLockSha256:sha('package-lock.json'),cmsLockSha256:sha('cms/package-lock.json'),exportSha256:sha('content/emdash/published.json'),searchSha256:existsSync('dist/search-index.json')?sha('dist/search-index.json'):null,compositionSha256:sha('.gaga/composition-plan.json'),studioSource:'952ab4ca4b75c6236456276c2439a8276b17883d',reused:{cmsTypesBuildStartupAndSavedPreview:'40676100962; all CMS/Studio/dependency inputs unchanged',editorialSemanticQualification:'40676100962; public package and body inputs unchanged',nativeSettingsFocus:'Separate native-owner issue; no app workaround'},production:{mainPromotions:0,deployments:0,workerUpdates:0,providerMutations:0,contentWrites:0,schemaWrites:0,credentialChanges:0,publishUnpublishOperations:0,publishingSwitchChanges:0,packagePublications:0},run:process.env.GITHUB_RUN_ID};
+          const quality=existsSync(dir+'/reference-quality/browser-results.json')?read('reference-quality/browser-results.json'):null;
+          const html=read('reference-quality/html-semantics.json');
+          const status=quality&&quality.stats.expected===10&&quality.stats.unexpected===0&&quality.stats.skipped===0&&quality.stats.flaky===0&&html.status==='PASS'&&browser&&browser.stats.expected===2&&browser.stats.unexpected===0&&browser.stats.skipped===0&&browser.stats.flaky===0&&consumer?.status==='PASS'?'QUALIFIED':'BLOCKED';
+          const receipt={schema:'consumer.reference-evidence/v1',status,source,runtime:read('runtime.json'),workerd:execFileSync('node_modules/.bin/workerd',['--version'],{encoding:'utf8'}).trim(),browser:browser?.stats??null,quality:quality?.stats??null,htmlStatus:html.status,htmlRoutes:html.routes.length,consumerStatus:consumer?.status??null,audit:audit.metadata.vulnerabilities,appLockSha256:sha('package-lock.json'),cmsLockSha256:sha('cms/package-lock.json'),exportSha256:sha('content/emdash/published.json'),searchSha256:existsSync('dist/search-index.json')?sha('dist/search-index.json'):null,compositionSha256:sha('.gaga/composition-plan.json'),studioSource:'952ab4ca4b75c6236456276c2439a8276b17883d',reused:{cmsTypesBuildStartupAndSavedPreview:'40676100962; all CMS/Studio/dependency inputs unchanged',editorialSemanticQualification:'40676100962; public package and body inputs unchanged',nativeSettingsFocus:'Separate native-owner issue; no app workaround'},production:{mainPromotions:0,deployments:0,workerUpdates:0,providerMutations:0,contentWrites:0,schemaWrites:0,credentialChanges:0,publishUnpublishOperations:0,publishingSwitchChanges:0,packagePublications:0},run:process.env.GITHUB_RUN_ID};
           writeFileSync(dir+'/qualification-receipt.json',JSON.stringify(receipt,null,2)+'\n');
-          assert.equal(status,'QUALIFIED','Reference qualification must finish all ten browser cases');
+          assert.equal(status,'QUALIFIED','Quality qualification must finish ten responsive/semantic cases and both saved-journey cases');
           JS
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
