@@ -55,8 +55,9 @@ const presentation = resolveNotchPresentation(experienceConfig.notch);
   import { getUnifiedScrollMetrics, resolveReadingScrollContext } from '../../scripts/systems/reading-scroll';
 
   function setupActionRuntime() {
-    const island = document.querySelector<HTMLElement>('[data-gaga-action-runtime]');
-    if (!island || island.dataset.wired === 'true') return;
+    const candidate = document.querySelector<HTMLElement>('[data-gaga-action-runtime]');
+    if (!candidate || candidate.dataset.wired === 'true') return;
+    const island = candidate;
     island.dataset.wired = 'true';
     const container = island.closest<HTMLElement>('[data-gaga-action-runtime-container]')!;
     const toggle = island.querySelector<HTMLButtonElement>('[data-gaga-action-island-toggle]')!;

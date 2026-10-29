@@ -483,7 +483,7 @@ const socialSection = sectionById.get('social');
 
   function bootRootIndex() {
     syncSavedRootSection();
-    onRuntimeEvent('quickActionsSync', syncSavedRootSection);
+    onRuntimeEvent('quickActionsSyncRequested', syncSavedRootSection);
     window.addEventListener('pageshow', syncSavedRootSection);
     window.addEventListener('storage', event => { if (event.key === storageKeys.saved || event.key === null) syncSavedRootSection(); });
     initRootViewportSynchronizer();
