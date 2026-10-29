@@ -31,11 +31,13 @@ test('reference Experience saves the visible article, survives reload, lists and
   await page.goto(article); await expect(page.locator('html')).toHaveAttribute('data-gaga-runtime', 'ready');
   const frame = page.locator('[data-gaga-app-frame]'), id = await frame.getAttribute('data-gaga-page-id'); expect(id).toBeTruthy();
   const save = page.locator('[data-gaga-action="save-reading"][data-gaga-quick-action="save"]');
+  await page.locator('[data-gaga-action-island-toggle]').click();
   await expect(save).toBeVisible(); await save.click();
   await expect.poll(() => page.evaluate(key => JSON.parse(localStorage.getItem(key) ?? '[]').map((x: { id: string }) => x.id), savedKey)).toContain(id);
   await expect(save).toHaveAttribute('aria-pressed', 'true');
   const persisted = await page.evaluate(key => localStorage.getItem(key), savedKey);
   await page.reload(); await expect(page.locator('html')).toHaveAttribute('data-gaga-runtime', 'ready');
+  await page.locator('[data-gaga-action-island-toggle]').click();
   await expect(save).toHaveAttribute('aria-pressed', 'true');
   expect(await page.evaluate(key => localStorage.getItem(key), savedKey)).toBe(persisted);
   await page.goto('/saved'); await expect(page.locator('html')).toHaveAttribute('data-gaga-runtime', 'ready');
@@ -47,6 +49,7 @@ test('reference Experience saves the visible article, survives reload, lists and
   await expect(item).toHaveCount(0);
   await expect.poll(() => page.evaluate(key => JSON.parse(localStorage.getItem(key) ?? '[]').length, savedKey)).toBe(0);
   await page.goto(article); await expect(page.locator('html')).toHaveAttribute('data-gaga-runtime', 'ready');
+  await page.locator('[data-gaga-action-island-toggle]').click();
   await expect(save).toHaveAttribute('aria-pressed', 'false');
 });
 

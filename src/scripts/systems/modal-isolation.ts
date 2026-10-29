@@ -15,6 +15,14 @@ function frameChildren() {
 
 function backgroundElements() {
   const skipLink = document.querySelector<HTMLElement>('.gaga-skip-link');
+  if (activeOwner === 'reader-panel') {
+    const panel = document.querySelector<HTMLElement>('[data-gaga-reader-panel]');
+    const main = document.querySelector<HTMLElement>('[data-gaga-main-region]');
+    const mainChildren = Array.from(main?.children ?? []).filter((element): element is HTMLElement => element instanceof HTMLElement && !element.contains(panel));
+    const frameSiblings = frameChildren().filter(element => element !== main && !element.contains(panel));
+    const notchBackground = Array.from(document.querySelectorAll<HTMLElement>('[data-gaga-island-bar], [data-gaga-notch-context], [data-gaga-notch-system]'));
+    return [...(skipLink ? [skipLink] : []), ...frameSiblings, ...mainChildren, ...notchBackground];
+  }
   if (activeOwner === 'context-surface') {
     const frame = appFrame();
     const main = frame?.querySelector<HTMLElement>(':scope > [data-gaga-main-region]');

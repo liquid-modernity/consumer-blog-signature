@@ -217,3 +217,10 @@ body:has(.gaga-app-frame) {
 .gaga-app-frame[data-gaga-context-intent='reading'] .gaga-main-region {
   scroll-padding-block-start: 1rem;
 }
+
+// Rails reserve space only when this route actually renders one.
+.gaga-app-frame:not(:has([data-gaga-left-rail])) .gaga-main-region { padding-inline-start: 0; }
+.gaga-app-frame:not(:has([data-gaga-right-rail])) .gaga-main-region { padding-inline-end: 0; }
+.gaga-app-frame .gaga-main-region { scroll-padding-block-start: 4rem; }
+.gaga-app-frame:has([data-gaga-notch-placement='bottom']) .gaga-main-region { padding-block-end: 4rem; }
+.gaga-app-frame:has([data-gaga-notch-placement='bottom']) .gaga-outline-stack { bottom: calc(var(--gaga-safe-area-bottom, 0px) + 4rem); }

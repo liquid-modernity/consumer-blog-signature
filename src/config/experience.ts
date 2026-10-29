@@ -1,3 +1,4 @@
+import { notchPresentation } from './contextual-ux.mjs';
 import type { GagaActionId } from './actions';
 
 export type ExperienceContext = 'article' | 'archive' | 'graph' | 'topic' | 'library' | 'default';
@@ -17,6 +18,7 @@ export type ExperienceContextInput = {
 };
 
 export const experienceConfig = {
+  notch: notchPresentation,
   reading: { mode: 'immersive', density: 'comfortable', defaultContentWidth: 'reading' },
   navigation: { globalRail: 'vertical-icon-only', contextLeftRail: 'context-aware', contextRightRail: 'context-aware' },
   compact: { dock: 'contextual', articleDock: 'hidden', outlinePeek: 'semantic', fullBleedMedia: true },
@@ -25,7 +27,7 @@ export const experienceConfig = {
   labels: { mouse: 'hover', keyboard: 'focus', touch: 'contextual' },
   surfaces: {
     article: {
-      notchActionIds: ['smart-back', 'share', 'save', 'focusmode', 'speak', 'context-info', 'settings'],
+      notchActionIds: ['smart-back', 'copy-link', 'share', 'save', 'focusmode', 'speak', 'context-info', 'settings'],
       dockActionIds: [],
       dockMode: 'hidden'
     },
@@ -58,11 +60,11 @@ export const experienceConfig = {
 } as const;
 
 export function resolveExperienceContext({ pathname, pageId = '', contentKind = '', contentClass = '' }: ExperienceContextInput): ExperienceContext {
-  if (contentKind === 'article' || contentClass === 'article-flagship' || pathname === '/article' || pathname.startsWith('/article/')) return 'article';
+  if (contentKind === 'article' || contentClass === 'article-flagship' || pathname === '/article' || pathname.startsWith('/article/') || pathname.startsWith('/publications/')) return 'article';
   if (pageId === 'archive' || pathname === '/archive' || pathname.startsWith('/archive/')) return 'archive';
   if (pageId === 'graph' || pathname === '/graphs' || pathname.startsWith('/graphs/')) return 'graph';
   if (contentKind === 'topic' || pageId.includes('topic') || pathname === '/topics' || pathname.startsWith('/topics/')) return 'topic';
-  if (pageId === 'library' || pathname === '/library' || pathname.startsWith('/library/')) return 'library';
+  if (pageId === 'library' || pathname === '/saved' || pathname === '/library' || pathname.startsWith('/library/')) return 'library';
   return 'default';
 }
 

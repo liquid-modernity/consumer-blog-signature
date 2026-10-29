@@ -1,7 +1,7 @@
 import { createOutlinePeekCapability } from '@gaga/engine-runtime/runtime/outline-peek';
 import { onRuntimeEvent, requestLeftRail, requestReaderPanel, type SurfaceCommandDetail } from '@gaga/engine-runtime/runtime/events';
 import { getOutlinePeekAttachment, outlinePeekRequiresTableOfContents, supportsOutlinePeek } from '../../config/systems';
-import { articleReadingScopeIsActive, resolveReadingScrollContext } from './reading-scroll';
+import { articleReadingScopeIsActive, resolveReadingScrollContext, getUnifiedScrollMetrics } from './reading-scroll';
 
 let initialized = false;
 
@@ -63,6 +63,11 @@ export function initOutlinePeek() {
   function syncDynamicVisibility() {
     const context = resolveReadingScrollContext();
     if (!context || !stack || isOpen()) return;
+    const percentage = Math.round(getUnifiedScrollMetrics().percentage);
+    const progress = stack.querySelector<HTMLElement>('[data-gaga-outline-progress]');
+    if (progress) progress.textContent = percentage + '%';
+    const opener = stack.querySelector<HTMLElement>('[data-gaga-outline-opener]');
+    opener?.setAttribute('aria-label', `Daftar isi — ${currentLabel?.textContent ?? ''} — ${percentage}%`);
     const measurements = context.scrollContext.measure();
     const delta = measurements.scrollTop - lastScrollTop;
     if (measurements.scrollTop > 140 && delta > 11) stack.dataset.gagaVisibility = 'micro';

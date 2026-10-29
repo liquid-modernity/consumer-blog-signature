@@ -97,13 +97,13 @@ const showGagaDock = false;
   <slot name="before-main" />
   {mainElement === 'main' ? (
     <main id="gaga-main" class="gaga-main-region" data-gaga-main-region tabindex="-1">
-      {showActionRuntime && <ActionRuntime context={runtimeContext} pageTitle={pageTitle} workspaceId={workspaceId} />}
+      {showActionRuntime && <ActionRuntime context={runtimeContext} pageTitle={pageTitle} workspaceId={workspaceId}><ReaderPreferences slot="reader" preferences={shell.readerPreferences} /></ActionRuntime>}
       <slot />
       <slot name="after-content" />
     </main>
   ) : (
     <div id="gaga-main" class="gaga-main-region" data-gaga-main-region tabindex="-1">
-      {showActionRuntime && <ActionRuntime context={runtimeContext} pageTitle={pageTitle} workspaceId={workspaceId} />}
+      {showActionRuntime && <ActionRuntime context={runtimeContext} pageTitle={pageTitle} workspaceId={workspaceId}><ReaderPreferences slot="reader" preferences={shell.readerPreferences} /></ActionRuntime>}
       <slot />
       <slot name="after-content" />
     </div>
@@ -118,9 +118,8 @@ const showGagaDock = false;
   >
     <div class="gaga-hover-preview-card__meta" data-gaga-hover-preview-meta></div>
     <p class="gaga-hover-preview-card__title" data-gaga-hover-preview-title></p>
-    <p class="gaga-hover-preview-card__snippet" data-gaga-hover-preview-snippet></p>
+    <p class="gaga-hover-preview-card__snippet" data-gaga-hover-preview-snippet data-gaga-info-field="snippet"></p>
   </aside>
-  <ReaderPreferences preferences={shell.readerPreferences} />
 </div>
 <script>
   import '../../scripts/app';
@@ -129,8 +128,9 @@ const showGagaDock = false;
 <style is:global>
   .gaga-hover-preview-card {
     position: fixed;
-    inset-block-end: 1.5rem;
-    inset-inline-end: 1.5rem;
+    inset: auto;
+    max-block-size: min(40vh, 18rem);
+    overflow: auto;
     z-index: 45;
     inline-size: min(22rem, calc(100vw - 2rem));
     padding: 0.9rem 1.05rem;
@@ -139,7 +139,7 @@ const showGagaDock = false;
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
     color: var(--gaga-ink);
-    pointer-events: none;
+    pointer-events: auto;
     box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.14);
     transition: opacity 0.16s ease, transform 0.16s ease;
   }
@@ -176,9 +176,5 @@ const showGagaDock = false;
     overflow: hidden;
   }
 
-  @media (max-width: 767px) {
-    .gaga-hover-preview-card {
-      display: none !important;
-    }
-  }
+  @media (prefers-reduced-motion: reduce) { .gaga-hover-preview-card { transition: none; } }
 </style>

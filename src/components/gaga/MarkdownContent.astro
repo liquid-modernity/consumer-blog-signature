@@ -142,7 +142,7 @@ const entityNavigationLabel = i18nLabel(isAuthor ? 'entity.authorNavigation' : '
               class="gaga-article-pager__link"
               data-gaga-preview
               data-gaga-preview-title={prevPub.title}
-              data-gaga-preview-summary={prevPub.summary}
+              data-gaga-preview-snippet={prevPub.summary}
               data-gaga-preview-meta={prevPub.metaText}
               data-gaga-preview-href={prevPub.canonicalHref}
             >
@@ -158,7 +158,7 @@ const entityNavigationLabel = i18nLabel(isAuthor ? 'entity.authorNavigation' : '
               class="gaga-article-pager__link"
               data-gaga-preview
               data-gaga-preview-title={nextPub.title}
-              data-gaga-preview-summary={nextPub.summary}
+              data-gaga-preview-snippet={nextPub.summary}
               data-gaga-preview-meta={nextPub.metaText}
               data-gaga-preview-href={nextPub.canonicalHref}
             >
@@ -249,9 +249,12 @@ const entityNavigationLabel = i18nLabel(isAuthor ? 'entity.authorNavigation' : '
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1.5rem;
+    inline-size: 100%;
+    max-inline-size: var(--gaga-content-width, 44rem);
+    margin-inline: auto;
     margin-top: 2.5rem;
     padding-top: 1.35rem;
-    border-top: 1px solid color-mix(in srgb, var(--sl-color-gray-5) 55%, transparent);
+    border-top: 1px solid color-mix(in srgb, var(--gaga-line) 55%, transparent);
   }
 
   .gaga-article-pager__col--end {
@@ -276,14 +279,14 @@ const entityNavigationLabel = i18nLabel(isAuthor ? 'entity.authorNavigation' : '
     font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: var(--sl-color-gray-3);
+    color: var(--gaga-muted);
   }
 
   .gaga-article-pager__title {
     font-size: 0.94rem;
     font-weight: 600;
     line-height: 1.4;
-    color: var(--sl-color-white);
+    color: var(--gaga-ink);
   }
 
   .gaga-article-pager__link:hover .gaga-article-pager__title,

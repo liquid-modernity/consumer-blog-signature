@@ -1,9 +1,8 @@
 ---
 import RailToggle from '../navigation/RailToggle.astro';
-import SummaryBlock from '../information/SummaryBlock.astro';
 import ContextDiscoveryBlock from '../information/ContextDiscoveryBlock.astro';
 import Icon from '../ui/Icon.astro';
-import RightRailMeta from './RightRailMeta.astro';
+import { contextualRails } from '../../config/contextual-ux.mjs';
 import type { RightRailInput } from './component-inputs';
 
 interface Props {
@@ -23,8 +22,10 @@ const contextSignalCount = (rail.facts?.length ?? 0) + (rail.discovery?.length ?
 const contextRichness = contextSignalCount >= 5 ? 'rich' : contextSignalCount >= 2 ? 'standard' : 'minimal';
 const railHeaderLabel = isRootPage ? rail.labels.railLabel : rail.labels.outlineTitle;
 const railHeaderRole = contextRole;
+const enabled = contextualRails(cleanCurrentPath).right && hasDiscovery;
 ---
 
+{enabled && <>
 <button
   class="gaga-context-surface__scrim"
   type="button"
@@ -86,5 +87,6 @@ const railHeaderRole = contextRole;
     </button>
   </div>
 
-  <div class="gaga-right-rail__body"></div>
+  <div class="gaga-right-rail__body"><ContextDiscoveryBlock items={rail.discovery} /></div>
 </aside>
+</>}

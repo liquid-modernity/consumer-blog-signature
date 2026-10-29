@@ -5,13 +5,13 @@ import type { RightRailInput } from './component-inputs';
 
 interface Props { rail: RightRailInput; }
 const { rail } = Astro.props;
-const outlineItems = rail.outlineItems;
+const outlineItems = rail.outlineItems.filter(item => item.slug !== '_top');
 const outlinePeekId = 'gaga-outline-peek';
 const outlineTitleId = 'gaga-outline-peek-title';
 const outlineOpenLabelId = 'gaga-outline-peek-open-label';
 const outlineCurrentLabelId = 'gaga-outline-peek-current-label';
 const outlineCounterLabelId = 'gaga-outline-peek-counter-label';
-const hasOutlinePeek = outlineItems.length > 0;
+const hasOutlinePeek = outlineItems.length > 0 && (rail.kind === 'article' || Astro.url.pathname === '/');
 const initialOutlineLabel = outlineItems[0]?.text ?? rail.labels.outlineFallback;
 ---
 {hasOutlinePeek ? (
@@ -24,12 +24,12 @@ const initialOutlineLabel = outlineItems[0]?.text ?? rail.labels.outlineFallback
       data-gaga-action="toggle-outline"
       aria-controls={outlinePeekId}
       aria-expanded="false"
-      aria-label="Gaga Dynamic Outline Peek — Daftar Isi"
+      aria-label={`Daftar isi — ${initialOutlineLabel}`}
     >
       <span id={outlineOpenLabelId} class="gaga-visually-hidden" data-gaga-i18n-key={rail.labels.outlineOpenPrefix.key} data-gaga-i18n-id={rail.labels.outlineOpenPrefix.id} data-gaga-i18n-en={rail.labels.outlineOpenPrefix.en}>{rail.labels.outlineOpenPrefix.id}</span>
       <span id={outlineCounterLabelId} class="gaga-visually-hidden"><span data-gaga-outline-current-index>1</span>/<span data-gaga-outline-total>{outlineItems.length}</span></span>
-      <span id={outlineCurrentLabelId} class="gaga-visually-hidden" data-gaga-outline-current-label>{initialOutlineLabel}</span>
-      <span class="gaga-outline-peek-preview__title">Gaga Dynamic Outline Peek</span>
+      <span id={outlineCurrentLabelId} class="gaga-outline-peek-preview__title" data-gaga-outline-current-label>{initialOutlineLabel}</span>
+      <span data-gaga-outline-progress aria-hidden="true">0%</span>
     </button>
 
     <span class="gaga-outline-peek__scrim" data-gaga-outline-scrim aria-hidden="true"></span>

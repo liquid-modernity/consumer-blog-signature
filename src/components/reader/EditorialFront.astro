@@ -33,9 +33,7 @@ const [projection, publications, topics, archiveYears] = await Promise.all([
 const rootSections = getEnabledRootSections();
 const sectionById = new Map(rootSections.map((sec) => [sec.id, sec]));
 const limit = navigationConfig.homepagePublicationLimit;
-const latestPublications = publications.length > 0
-  ? Array.from({ length: limit }, (_, idx) => publications[idx % publications.length])
-  : [];
+const latestPublications = publications.slice(0, limit);
 const recentYears = archiveYears.slice(0, navigationConfig.archivePreviewYears.length);
 
 const latestSection = sectionById.get('latest');
@@ -353,13 +351,22 @@ const socialSection = sectionById.get('social');
 <script>
   import { readArray } from '@gaga/engine-runtime/runtime/storage';
   import { isSavedItem, type SavedItem } from '@gaga/engine-runtime/reader';
+  import { onRuntimeEvent } from '@gaga/engine-runtime/runtime/events';
+  import { storageKeys } from '../../config/systems';
 
   function syncSavedRootSection() {
     const listEl = document.querySelector<HTMLUListElement>('[data-pakrpp-saved-root-list]');
     if (!listEl) return;
 
-    const saved = readArray<SavedItem>('gaga:saved-items:v1', isSavedItem).slice(0, 5);
-    if (saved.length === 0) return;
+    const saved = readArray<SavedItem>(storageKeys.saved, isSavedItem).slice(0, 5);
+    if (saved.length === 0) {
+      const empty = document.createElement('li');
+      empty.className = 'pakrpp-tree-list__empty';
+      empty.dataset.pakrppSavedEmpty = '';
+      empty.textContent = 'Belum ada bacaan tersimpan di perangkat ini.';
+      listEl.replaceChildren(empty);
+      return;
+    }
 
     const nodes = saved.map((entry) => {
       const li = document.createElement('li');
@@ -476,6 +483,9 @@ const socialSection = sectionById.get('social');
 
   function bootRootIndex() {
     syncSavedRootSection();
+    onRuntimeEvent('quickActionsSync', syncSavedRootSection);
+    window.addEventListener('pageshow', syncSavedRootSection);
+    window.addEventListener('storage', event => { if (event.key === storageKeys.saved || event.key === null) syncSavedRootSection(); });
     initRootViewportSynchronizer();
   }
 

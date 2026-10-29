@@ -1,166 +1,62 @@
 import { initInformationSurface as initEngineInformationSurface } from '@gaga/engine-runtime/runtime/information-surface';
-import { requestFeedback, requestOutline } from '@gaga/engine-runtime/runtime/events';
 import { getInformationPreviewRestoreDelayMs } from '../../config/systems';
+import { positionLinkPreview } from '../../config/contextual-ux.mjs';
 
 let initialized = false;
-
-function syncDualHoverPreviewSurface() {
-  const getField = (name: string) => document.querySelector<HTMLElement>(`[data-gaga-info-field="${name}"]`);
-  const defaults = {
-    previewTitle: getField('previewTitle')?.textContent?.trim(),
-    contextMeta: getField('contextMeta')?.textContent?.trim(),
-    publishedDate: getField('publishedDate')?.textContent?.trim()
-  };
-
-  const card = document.querySelector<HTMLElement>('[data-gaga-hover-preview-card]');
-  const cardMeta = document.querySelector<HTMLElement>('[data-gaga-hover-preview-meta]');
-  const cardTitle = document.querySelector<HTMLElement>('[data-gaga-hover-preview-title]');
-  const cardSnippet = document.querySelector<HTMLElement>('[data-gaga-hover-preview-snippet]');
-
-  const island = document.querySelector<HTMLElement>('[data-gaga-action-runtime]');
-  const statusBadge = document.querySelector<HTMLElement>('[data-gaga-island-status-badge]');
-  const peekTitle = document.querySelector<HTMLElement>('[data-gaga-island-peek-title]');
-
-  let restoreTimer = 0;
-  let savedBadgeText: string | null = null;
-  let savedPeekText: string | null = null;
-
-  const applyExtended = (target: HTMLElement) => {
-    window.clearTimeout(restoreTimer);
-
-    const previewTitle = target.dataset.gagaPreviewTitle?.trim() || target.textContent?.trim() || '';
-    const previewType = target.dataset.gagaPreviewType?.trim() || '';
-    const previewTopics = target.dataset.gagaPreviewTopics?.trim() || '';
-    const previewReadTime = target.dataset.gagaPreviewReadTime?.trim() || '';
-    const previewDate = target.dataset.gagaPreviewDate?.trim() || '';
-    const previewMeta = target.dataset.gagaPreviewMeta?.trim()
-      || [previewType, previewTopics, previewDate, previewReadTime].filter(Boolean).join(' · ');
-    const previewSnippet = target.dataset.gagaPreviewSnippet?.trim() || '';
-
-    // 1. Legacy info field sync (if present)
-    const titleEl = getField('previewTitle');
-    if (titleEl && previewTitle) titleEl.textContent = previewTitle;
-    const metaEl = getField('contextMeta');
-    if (metaEl && previewMeta) metaEl.textContent = previewMeta;
-    const dateEl = getField('publishedDate');
-    if (dateEl && previewDate) dateEl.textContent = previewDate;
-
-    // 2. Gaga Dynamic Notch Island status sync
-    if (statusBadge) {
-      if (savedBadgeText === null) {
-        savedBadgeText = statusBadge.textContent?.trim() ?? statusBadge.dataset.gagaDefaultBadge ?? 'INDEKS';
-      }
-      const badgeLabel = previewType
-        ? `PRATINJAU · ${previewType.toUpperCase()}`
-        : previewTopics
-          ? `PRATINJAU · ${previewTopics.split(',')[0].trim().toUpperCase()}`
-          : 'PRATINJAU';
-      statusBadge.textContent = badgeLabel;
-    }
-    if (peekTitle && previewTitle) {
-      if (savedPeekText === null) {
-        savedPeekText = peekTitle.textContent?.trim() ?? '';
-      }
-      peekTitle.textContent = previewTitle;
-    }
-    if (island) {
-      island.dataset.gagaIntent = 'aware';
-    }
-
-    // 3. Minimalist floating summary card sync
-    if (card && previewTitle && (previewSnippet || previewMeta)) {
-      if (cardMeta) {
-        cardMeta.textContent = previewMeta || 'Publikasi PakRPP';
-        cardMeta.toggleAttribute('hidden', !previewMeta);
-      }
-      if (cardTitle) {
-        cardTitle.textContent = previewTitle;
-      }
-      if (cardSnippet) {
-        cardSnippet.textContent = previewSnippet;
-        cardSnippet.toggleAttribute('hidden', !previewSnippet);
-      }
-      card.removeAttribute('hidden');
-    }
-  };
-
-  const scheduleRestore = () => {
-    window.clearTimeout(restoreTimer);
-    restoreTimer = window.setTimeout(() => {
-      if (card) {
-        card.setAttribute('hidden', '');
-      }
-      if (statusBadge && savedBadgeText !== null) {
-        statusBadge.textContent = statusBadge.dataset.gagaDefaultBadge || savedBadgeText;
-        savedBadgeText = null;
-      }
-      if (peekTitle && savedPeekText !== null) {
-        peekTitle.textContent = savedPeekText;
-        savedPeekText = null;
-      }
-      if (island) {
-        delete island.dataset.gagaIntent;
-      }
-      const titleEl = getField('previewTitle');
-      if (titleEl && defaults.previewTitle) titleEl.textContent = defaults.previewTitle;
-      const metaEl = getField('contextMeta');
-      if (metaEl && defaults.contextMeta) metaEl.textContent = defaults.contextMeta;
-      const dateEl = getField('publishedDate');
-      if (dateEl && defaults.publishedDate) dateEl.textContent = defaults.publishedDate;
-    }, 220);
-  };
-
-  document.addEventListener('pointerover', (event) => {
-    const target = event.target instanceof Element
-      ? event.target.closest<HTMLElement>('[data-gaga-preview]')
-      : null;
-    if (target) {
-      applyExtended(target);
-    }
-  }, { passive: true });
-
-  document.addEventListener('pointerout', (event) => {
-    const target = event.target instanceof Element
-      ? event.target.closest<HTMLElement>('[data-gaga-preview]')
-      : null;
-    if (!target) return;
-    const related = event.relatedTarget instanceof Element
-      ? event.relatedTarget.closest<HTMLElement>('[data-gaga-preview]')
-      : null;
-    if (related !== target) {
-      scheduleRestore();
-    }
-  }, { passive: true });
-
-  document.addEventListener('focusin', (event) => {
-    const target = event.target instanceof Element
-      ? event.target.closest<HTMLElement>('[data-gaga-preview]')
-      : null;
-    if (target) applyExtended(target);
-  });
-
-  document.addEventListener('focusout', (event) => {
-    const target = event.target instanceof Element
-      ? event.target.closest<HTMLElement>('[data-gaga-preview]')
-      : null;
-    if (target) scheduleRestore();
-  });
-}
-
 export function initInformationSurface() {
-  if (initialized) return;
+  const card = document.querySelector<HTMLElement>('[data-gaga-hover-preview-card]');
+  if (initialized || !card) return;
   initialized = true;
-  initEngineInformationSurface({
-    ctaText: 'Baca Publikasi',
+  let active: HTMLElement | null = null, suppressed: HTMLElement | null = null;
+  const id = 'gaga-link-preview';
+  card.id = id; card.setAttribute('role', 'tooltip');
+  function unbind() {
+    if (!active) return;
+    const remaining = (active.getAttribute('aria-describedby') ?? '').split(/\s+/).filter(value => value && value !== id);
+    if (remaining.length) active.setAttribute('aria-describedby', remaining.join(' ')); else active.removeAttribute('aria-describedby');
+  }
+  function close() { card!.hidden = true; unbind(); }
+  function position() {
+    if (!active || card!.hidden) return;
+    const rect = active.getBoundingClientRect();
+    if (rect.bottom < 0 || rect.top > innerHeight) { close(); return; }
+    const point = positionLinkPreview(rect, card!.getBoundingClientRect(), { width: innerWidth, height: innerHeight });
+    card!.style.left = point.left + 'px'; card!.style.top = point.top + 'px'; card!.style.width = point.width + 'px';
+  }
+  // The public document port scopes Engine preview projection to its own card, never page metadata.
+  const projection = {
+    querySelector: ((selector: string) => selector === '[data-gaga-right-rail]' ? card : card.querySelector(selector)) as Document['querySelector'],
+    querySelectorAll: card.querySelectorAll.bind(card) as Document['querySelectorAll'],
+    addEventListener: document.addEventListener.bind(document),
+    removeEventListener: document.removeEventListener.bind(document),
+    get activeElement() { return document.activeElement; }
+  };
+  const capability = initEngineInformationSurface({
+    document: projection,
     restoreDelayMs: getInformationPreviewRestoreDelayMs(),
-    requestFeedback,
-    requestOutline,
-    getFeedback: ({ title }) => ({
-      label: `Preview ${title}`,
-      x: window.innerWidth - 220,
-      y: 64,
-      source: 'information-preview'
-    })
+    ctaText: 'Baca publikasi',
+    getFeedback: ({ target, title, href }) => {
+      let url: URL;
+      try { url = new URL(href ?? '', location.href); } catch { close(); return undefined; }
+      if (url.origin !== location.origin || !['http:', 'https:'].includes(url.protocol) || target === suppressed) return undefined;
+      unbind(); active = target;
+      const label = card.querySelector<HTMLElement>('[data-gaga-hover-preview-title]'); if (label) label.textContent = title;
+      const meta = card.querySelector<HTMLElement>('[data-gaga-hover-preview-meta]'); if (meta) meta.textContent = target.dataset.gagaPreviewMeta ?? '';
+      card.hidden = matchMedia('(hover: none)').matches && !target.matches(':focus-visible');
+      if (!card.hidden) {
+        target.setAttribute('aria-describedby', [...new Set((target.getAttribute('aria-describedby') ?? '').split(/\s+/).filter(Boolean).concat(id))].join(' '));
+        position();
+      }
+      return undefined;
+    }
   });
-  syncDualHoverPreviewSurface();
+  card.dataset.gagaPreviewReady = 'true';
+  const observer = new MutationObserver(() => {
+    if (!card.hasAttribute('data-gaga-preview-state')) { close(); active = null; suppressed = null; }
+  });
+  observer.observe(card, { attributes: true, attributeFilter: ['data-gaga-preview-state'] });
+  document.addEventListener('keydown', event => { if (event.key === 'Escape' && !card.hidden) { suppressed = active; close(); } });
+  document.addEventListener('scroll', position, { capture: true, passive: true });
+  window.addEventListener('resize', position, { passive: true });
+  window.addEventListener('pagehide', () => { capability.cleanup(); observer.disconnect(); }, { once: true });
 }

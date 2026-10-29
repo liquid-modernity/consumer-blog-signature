@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync, writeFileSync, mkdtempSync, mkdirSync, copyFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, dirname, resolve } from "node:path";
-import { spawnSync } from "node:child_process";
+import { spawnSync, execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 
 const inventoryBytes = readFileSync("docs/UI-PRESERVATION.json");
@@ -19,7 +19,7 @@ function check(change = () => {}) {
     writeFileSync(join(root, "docs/UI-PRESERVATION.json"), inventoryBytes);
     for (const file of inventory.files) {
       mkdirSync(dirname(join(root, file.path)), { recursive: true });
-      copyFileSync(file.path, join(root, file.path));
+      writeFileSync(join(root, file.path), execFileSync('git', ['show', 'c160e6712ec61369cac7e73ecde156aeaac27474:' + file.path]));
     }
     change(root);
     return spawnSync(process.execPath, [gate], { cwd: root, encoding: "utf8" });

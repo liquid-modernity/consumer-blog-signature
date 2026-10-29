@@ -77,7 +77,7 @@ const articleTitleId = '_top';
           <p class="gaga-article-header__dek" data-gaga-article-dek>{identity.subtitle}</p>
         ) : null}
 
-        <div class="gaga-article-header__bar" aria-label="Informasi baca dan aksi cepat">
+        <div class="gaga-article-header__bar" aria-label="Informasi publikasi">
           {readingMetaItems.length > 0 && (
             <div class="gaga-article-header__meta">
               {readingMetaItems.map((item, idx) => (
@@ -88,15 +88,7 @@ const articleTitleId = '_top';
               ))}
             </div>
           )}
-          <div class="gaga-article-header__quick-actions">
-            <button type="button" class="gaga-article-header__action-btn" data-gaga-action="save-reading" data-gaga-quick-action="save">
-              Simpan
-            </button>
-            <span aria-hidden="true">·</span>
-            <button type="button" class="gaga-article-header__action-btn" data-gaga-action="share-page">
-              Salin Tautan
-            </button>
-          </div>
+
         </div>
       </header>
       <CoverageTimeline coverage={coverage} language={language} />

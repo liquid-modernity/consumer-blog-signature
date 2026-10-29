@@ -3,6 +3,7 @@ import NavItem from '../navigation/NavItem.astro';
 import NavGroup from '../navigation/NavGroup.astro';
 import RailToggle from '../navigation/RailToggle.astro';
 import Icon from '../ui/Icon.astro';
+import { contextualRails } from '../../config/contextual-ux.mjs';
 import type { LeftRailInput } from './component-inputs';
 
 interface Props {
@@ -12,13 +13,15 @@ interface Props {
 }
 
 const { rail, workspaceId, contextRole } = Astro.props;
+const enabled = contextualRails(Astro.url.pathname).left && rail.groups.some(group => group.items.length > 0);
 ---
+{enabled && <>
 <aside
   id="gaga-left-rail"
   class="gaga-left-rail gaga-left-rail--tree"
   data-gaga-left-rail
   data-gaga-state="collapsed"
-  data-gaga-has-content="false"
+  data-gaga-has-content="true"
   data-gaga-signature-surface="context-left-rail"
   data-gaga-workspace={workspaceId}
   data-gaga-context-role={contextRole}
@@ -38,12 +41,13 @@ const { rail, workspaceId, contextRole } = Astro.props;
   </div>
 
   <nav class="gaga-left-rail__nav gaga-left-rail__tree-nav" aria-label={`${rail.title} context navigation`}>
-    <div class="gaga-nav-groups gaga-left-rail__context-groups"></div>
+    <div class="gaga-nav-groups gaga-left-rail__context-groups">{rail.groups.map(group => <NavGroup {...group} currentPath={rail.currentPath} />)}</div>
     <div class="gaga-left-rail__global-projection" data-gaga-global-navigation-projection hidden></div>
   </nav>
 </aside>
 <div class="gaga-rail-scrim" data-gaga-left-rail-scrim data-gaga-action="toggle-left-rail"></div>
 
+</>}
 <style is:global>
   .gaga-left-rail--tree:not([data-gaga-state='collapsed']) .gaga-left-rail__global-projection {
     display: block;

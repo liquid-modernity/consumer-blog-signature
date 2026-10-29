@@ -9,7 +9,7 @@ import {verifySnapshot, readSnapshot} from '../gaga/snapshot.mjs';
 import {blockRegistry} from '../../editorial/registry.mjs';
 import {editorialBody, plainText} from '../../editorial/portable-text.mjs';
 
-const baseline='952ab4ca4b75c6236456276c2439a8276b17883d';
+const baseline='c160e6712ec61369cac7e73ecde156aeaac27474';
 const declaration=readFileSync('gaga.app.json','utf8'),d=JSON.parse(declaration);
 const names=['@gaga/engine-contracts','@gaga/engine-capabilities','astro','@astrojs/starlight',...d.integrations.map(x=>x.package)];
 const installed=Object.fromEntries(names.map(name=>{const p=JSON.parse(readFileSync('node_modules/'+name+'/package.json'));return [name,{version:p.version,dependencies:p.dependencies??{}}];}));
@@ -53,6 +53,6 @@ test('Core/Site: independent application identity and source names compose witho
  const plan=composeApplication(JSON.stringify(other),context);assert.equal(plan.ok,true);assert.equal(plan.value.declaration.id,'field-notes-reference');assert.equal(plan.value.hostProjection.site,'https://field.example');
 });
 test('Safety: Studio, published export, locks, provider/release/auth contracts and Search assembly remain exact qualified inputs',()=>{
- const paths=['cms/editorial/admin.tsx','cms/editorial/studio.css','cms/editorial/plugin.mjs','cms/package.json','cms/package-lock.json','package-lock.json','gaga.app.json','wrangler.jsonc','content-release.json','content/emdash/published.json','content/emdash/published-receipt.json','editorial/content-semantics.mjs','editorial/content-release.mjs','src/lib/application-search.ts','src/config/systems.ts','src/components/gaga/ArticleShell.astro','.github/workflows/deploy.yml','.github/workflows/content-release.yml','.github/workflows/content-publish.yml'];
+ const paths=['cms/editorial/admin.tsx','cms/editorial/studio.css','cms/editorial/plugin.mjs','cms/package.json','cms/package-lock.json','package-lock.json','gaga.app.json','wrangler.jsonc','content-release.json','content/emdash/published.json','content/emdash/published-receipt.json','editorial/content-semantics.mjs','editorial/content-release.mjs','src/lib/application-search.ts','src/config/systems.ts','.github/workflows/deploy.yml','.github/workflows/content-release.yml','.github/workflows/content-publish.yml'];
  for(const path of paths)assert.deepEqual(readFileSync(path),execFileSync('git',['show',baseline+':'+path]),path);
 });

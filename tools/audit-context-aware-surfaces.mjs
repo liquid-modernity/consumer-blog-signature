@@ -99,8 +99,8 @@ const rightRailSource = read('src/components/frame/RightInfoRail.astro');
 if (rightRailSource.includes('const Meta = () =>')) {
   fail('RightInfoRail must not return Astro markup from frontmatter TypeScript');
 }
-if (!rightRailSource.includes("import RightRailMeta from './RightRailMeta.astro'")) {
-  fail('RightInfoRail metadata rendering must use the dedicated RightRailMeta component');
+if (!rightRailSource.includes('<ContextDiscoveryBlock items={rail.discovery}') || !rightRailSource.includes('contextualRails(cleanCurrentPath).right && hasDiscovery')) {
+  fail('RightInfoRail must render meaningful discovery through its dedicated component only on eligible routes');
 }
 if (!fs.existsSync('src/components/frame/RightRailMeta.astro')) {
   fail('RightRailMeta component missing');
@@ -113,7 +113,7 @@ if (failures.length) {
 }
 
 console.log('GAGA context-aware surface audit OK');
-console.log('✓ Dynamic Global Navigation is the sole global destination authority');
+console.log('✓ The canonical global navigation projection remains the destination authority');
 console.log('✓ Dynamic Notch Island owns context-surface triggering');
 console.log('✓ Dynamic Outline Peek is the sole article outline surface');
 console.log('✓ left rail is route-local context; right rail is context intelligence');

@@ -1,0 +1,44 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { execFileSync, spawnSync } from 'node:child_process';
+import { resolveNotchPresentation, contextualRails, positionLinkPreview } from '../../src/config/contextual-ux.mjs';
+const base = 'c160e6712ec61369cac7e73ecde156aeaac27474';
+test('validated presentation presets have deterministic desktop/mobile defaults and side fallbacks', () => {
+  assert.deepEqual(resolveNotchPresentation(undefined, 1440), { placement: 'top', shape: 'notch' });
+  assert.deepEqual(resolveNotchPresentation(undefined, 390), { placement: 'top', shape: 'island' });
+  for (const placement of ['top', 'bottom', 'left', 'right']) for (const shape of ['island', 'pill']) {
+    assert.deepEqual(resolveNotchPresentation({ placement, shape }, 1440), { placement, shape });
+    assert.deepEqual(resolveNotchPresentation({ placement, shape }, 320), ['left', 'right'].includes(placement) ? { placement: 'top', shape: 'island' } : { placement, shape });
+  }
+  for (const value of [{ placement: 'bottom', shape: 'notch' }, { placement: 'random', shape: 'pill' }, { placement: 'top', shape: 'custom' }, { placement: 'top', shape: 'notch', style: 'arbitrary' }, null]) assert.throws(() => resolveNotchPresentation(value), /Unsupported/);
+  for (const width of [0, -1, NaN, Infinity]) assert.throws(() => resolveNotchPresentation(undefined, width));
+});
+test('only meaningful route families are eligible for rails, with no global empty reservations', () => {
+  for (const path of ['/', '/saved', '/search', '/publications/article', '/publications', '/archive/2026', '/about']) assert.deepEqual(contextualRails(path), { left: false, right: false });
+  assert.deepEqual(contextualRails('/topics/teknologi/'), { left: true, right: true });
+  assert.deepEqual(contextualRails('/sections'), { left: true, right: false });
+  assert.deepEqual(contextualRails('/knowledge/index'), { left: true, right: false });
+});
+test('link preview flips and clamps without changing anchor or page identity', () => {
+  const anchor = { left: 295, top: 700, bottom: 725 }, before = structuredClone(anchor);
+  const p = positionLinkPreview(anchor, { width: 352, height: 130 }, { width: 390, height: 844 });
+  assert.equal(p.top, 560); assert.equal(p.left, 30); assert.equal(p.width, 352); assert.deepEqual(anchor, before);
+  assert.deepEqual(positionLinkPreview({ left: -10, top: 50, bottom: 70 }, { width: 352, height: 100 }, { width: 320, height: 844 }), { left: 8, top: 80, width: 304 });
+});
+test('all public packages, CMS/source authority and release guards remain byte-identical', () => {
+  for (const path of ['package.json','package-lock.json','cms/package-lock.json','gaga.app.json','content-release.json','content/emdash/published.json','content/emdash/published-receipt.json','cms/editorial/plugin.mjs','cms/editorial/admin.tsx','cms/editorial/studio.css','tools/gaga/preservation.mjs','docs/UI-PRESERVATION.json','.github/workflows/deploy.yml','.github/workflows/content-release.yml','.github/workflows/content-publish.yml']) assert.deepEqual(readFileSync(path), execFileSync('git', ['show',base+':'+path]), path);
+});
+test('existing saved state and Save dispatch have no alternate store or duplicate app implementation', () => {
+  const root=readFileSync('src/components/reader/EditorialFront.astro','utf8'),notch=readFileSync('src/components/frame/ActionRuntime.astro','utf8'),adapter=readFileSync('src/scripts/systems/saved-reading.ts','utf8');
+  assert.ok(root.includes('readArray<SavedItem>(storageKeys.saved, isSavedItem)'));
+  assert.ok(!root.includes('gaga:saved-items:v1')); assert.ok(!root.includes('idx % publications.length'));
+  assert.ok(adapter.includes('createSavedReadingCapability(')); assert.ok(adapter.includes('buttonSelector:'));
+  assert.ok(notch.includes("if (button?.dataset.gagaAction === 'save-reading') return;"));
+  assert.ok(!notch.includes("document.addEventListener('pointerover'"));
+});
+
+test('reviewed UI is still rejected by the unchanged historical production preservation admission', () => {
+ const r=spawnSync(process.execPath,['tools/gaga/preservation.mjs'],{encoding:'utf8'});
+ assert.notEqual(r.status,0);assert.match(r.stderr,/Unintended application UI\/style\/routing change/);
+});

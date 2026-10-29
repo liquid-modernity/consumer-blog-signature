@@ -50,35 +50,6 @@
   box-shadow: 0 .7rem 2rem rgba(0, 0, 0, .24);
 }
 
-.gaga-action-runtime__perimeter {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  inline-size: 100%;
-  block-size: 100%;
-  overflow: visible;
-  pointer-events: none;
-}
-
-.gaga-action-runtime__perimeter-track,
-.gaga-action-runtime__perimeter-progress {
-  fill: none;
-  vector-effect: non-scaling-stroke;
-  stroke-width: 1;
-}
-
-.gaga-action-runtime__perimeter-track {
-  stroke: color-mix(in srgb, var(--gaga-line-strong) 70%, transparent);
-}
-
-.gaga-action-runtime__perimeter-progress {
-  stroke: var(--gaga-blue);
-  stroke-linecap: round;
-  stroke-dasharray: 1;
-  stroke-dashoffset: var(--gaga-action-progress-offset);
-  transition: stroke-dashoffset .1s linear;
-}
-
 .gaga-action-runtime__actions,
 .gaga-action-runtime__status,
 .gaga-action-runtime__toggle,

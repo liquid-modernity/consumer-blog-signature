@@ -78,13 +78,27 @@ function openSearch() {
   return true;
 }
 
+function currentPageURL() {
+  const href = document.querySelector<HTMLLinkElement>('link[rel="canonical"]')?.href;
+  try { const url = new URL(href ?? location.href); if (['https:', 'http:'].includes(url.protocol)) return url.href; } catch { /* The active public URL remains the fallback. */ }
+  return location.href;
+}
+
+function copyCurrentPage(pointer: { x?: number; y?: number }) {
+  if (navigator.clipboard) navigator.clipboard.writeText(currentPageURL())
+    .then(() => requestToast({ message: 'Tautan disalin ke papan klip', tone: 'ok', ...pointer }))
+    .catch(() => requestToast({ message: 'Gagal menyalin tautan. Gunakan alamat halaman ini.', tone: 'warn', ...pointer }));
+  else window.prompt('Salin tautan halaman ini', currentPageURL());
+  return true;
+}
+
 function shareCurrentPage(pointer: { x?: number; y?: number }) {
   const shareData = {
     title: document.title,
     text: document.querySelector('meta[name="description"]')?.getAttribute('content') || document.title,
-    url: window.location.href
+    url: currentPageURL()
   };
-  if (typeof navigator !== 'undefined' && navigator.share && navigator.canShare?.(shareData)) {
+  if (typeof navigator !== 'undefined' && navigator.share && (!navigator.canShare || navigator.canShare(shareData))) {
     navigator.share(shareData)
       .then(() => requestToast({ message: 'Tautan berhasil dibagikan', tone: 'ok', x: pointer.x, y: pointer.y }))
       .catch((err) => {
@@ -92,11 +106,7 @@ function shareCurrentPage(pointer: { x?: number; y?: number }) {
           requestToast({ message: 'Berbagi dibatalkan', tone: 'info', x: pointer.x, y: pointer.y });
         }
       });
-  } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
-    navigator.clipboard.writeText(window.location.href)
-      .then(() => requestToast({ message: 'Tautan disalin ke papan klip', tone: 'ok', x: pointer.x, y: pointer.y }))
-      .catch(() => requestToast({ message: 'Gagal menyalin tautan', tone: 'warn', x: pointer.x, y: pointer.y }));
-  }
+  } else copyCurrentPage(pointer);
   return true;
 }
 
@@ -124,6 +134,7 @@ function runBuiltInCommand(command: GagaActionCommand, detail: SiteCommandDetail
     return true;
   }
   if (command === 'open-search') return openSearch();
+  if (command === 'copy-page-link') return copyCurrentPage(pointer);
   if (command === 'share-page') return shareCurrentPage(pointer);
   if (command === 'smart-back') return smartBack(pointer);
   if (command === 'reset-knowledge-graph') return resetKnowledgeGraph(pointer);

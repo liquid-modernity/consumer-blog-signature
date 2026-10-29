@@ -8,7 +8,7 @@ interface Props {
 
 const { preferences } = Astro.props;
 ---
-<section class="gaga-reader-panel" data-gaga-reader-panel data-gaga-state="closed" role="dialog" aria-modal="true" aria-labelledby="gaga-reader-panel-title" aria-hidden="true" inert>
+<section id="gaga-reader-panel" class="gaga-reader-panel" data-gaga-reader-panel data-gaga-state="closed" role="dialog" aria-modal="true" aria-labelledby="gaga-reader-panel-title" aria-hidden="true" inert>
   <div class="gaga-reader-panel__head">
     <h2 id="gaga-reader-panel-title"><Icon name={preferences.titleIcon} /> <span data-gaga-i18n-key={preferences.title.key} data-gaga-i18n-id={preferences.title.id} data-gaga-i18n-en={preferences.title.en}>{preferences.title.id}</span></h2>
     <button type="button" data-gaga-reader-close data-gaga-action={preferences.closeAction.command} aria-label={preferences.closeAction.label.id} data-gaga-tooltip data-gaga-i18n-key={preferences.closeAction.label.key} data-gaga-i18n-id={preferences.closeAction.label.id} data-gaga-i18n-en={preferences.closeAction.label.en} data-gaga-i18n-target="aria">×</button>

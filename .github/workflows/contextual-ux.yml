@@ -1,0 +1,124 @@
+name: Contextual UX V1.1 qualification
+on:
+  push:
+    branches: [review/contextual-ux-repair-v1.1]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  contextual:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: bash
+    env:
+      ASTRO_TELEMETRY_DISABLED: '1'
+      WRANGLER_SEND_METRICS: 'false'
+      GAGA_CONTENT_RELEASE_ENABLED: 'false'
+      PUBLIC_GIT_SHA: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.23.4'
+      - name: Exact runtime and clean unchanged locked dependencies
+        run: |
+          npm install --global npm@10.9.3 --ignore-scripts --no-audit --no-fund
+          mkdir -p "$RUNNER_TEMP/contextual-ux"
+          echo "GAGA_EVIDENCE_DIRECTORY=$RUNNER_TEMP/contextual-ux" >> "$GITHUB_ENV"
+          node --input-type=module <<'JS'
+          import assert from'node:assert/strict';import{execFileSync}from'node:child_process';import{writeFileSync}from'node:fs';
+          const r={node:process.version,npm:execFileSync('npm',['--version'],{encoding:'utf8'}).trim(),runner:process.env.RUNNER_OS,image:process.env.ImageOS,imageVersion:process.env.ImageVersion};assert.equal(r.node,'v22.23.4');assert.equal(r.npm,'10.9.3');writeFileSync(process.env.RUNNER_TEMP+'/contextual-ux/runtime.json',JSON.stringify(r,null,2)+'\n');
+          JS
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm ci --prefix cms --ignore-scripts --no-audit --no-fund
+      - name: Focused contextual, existing release safety, editorial and content regressions
+        run: |
+          npm run test:gaga | tee "$GAGA_EVIDENCE_DIRECTORY/gaga-tests.log"
+          npm run test:cms | tee "$GAGA_EVIDENCE_DIRECTORY/cms-tests.log"
+          node --test tools/contextual/contracts.test.mjs tools/reference/integration.test.mjs tools/content/content.test.mjs tools/editorial/portable-text.test.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/contextual-tests.log"
+          npm test | tee "$GAGA_EVIDENCE_DIRECTORY/signature.log"
+      - name: Application and unchanged CMS types, exact publication build
+        run: |
+          npm run check | tee "$GAGA_EVIDENCE_DIRECTORY/types.log"
+          node node_modules/typescript/bin/tsc --project cms/tsconfig.json --noEmit
+          export PUBLIC_BUILD_TIME="$(git show -s --format=%cI HEAD)"
+          npm run build | tee "$GAGA_EVIDENCE_DIRECTORY/build.log"
+          npm run test:consumer | tee "$GAGA_EVIDENCE_DIRECTORY/consumer.log"
+      - run: npx --no-install playwright install --with-deps chromium
+      - name: Read exact sealed baseline, with no production endpoint or configuration mutation
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          node tools/contextual/read-baseline-artifact.mjs > "$GAGA_EVIDENCE_DIRECTORY/baseline-artifact.json"
+          python3 - <<'PY'
+          import os,json,zipfile,hashlib
+          from pathlib import Path
+          target=Path(os.environ['RUNNER_TEMP'])/'contextual-baseline';target.mkdir()
+          with zipfile.ZipFile(Path(os.environ['RUNNER_TEMP'])/'contextual-baseline.zip') as z:
+            for f in z.infolist():assert not f.filename.startswith('/') and '..' not in Path(f.filename).parts
+            m=json.loads(z.read('.gaga/deployment-manifest.json'));assert m['sourceCommit']=='c160e6712ec61369cac7e73ecde156aeaac27474'
+            for f in m['files']:assert hashlib.sha256(z.read(f['path'])).hexdigest()==f['sha256']
+            z.extractall(target)
+          PY
+      - name: Reproduce defects against immutable canonical bytes in isolation
+        run: |
+          pushd "$RUNNER_TEMP/contextual-baseline"
+          node "$GITHUB_WORKSPACE/tools/gaga/preview.mjs" > "$GAGA_EVIDENCE_DIRECTORY/baseline-preview.log" 2>&1 &
+          baseline_preview_pid=$!
+          popd
+          trap 'kill "$baseline_preview_pid" 2>/dev/null || true; wait "$baseline_preview_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:4173/ -o /dev/null; then break; fi
+            sleep 1
+          done
+          npx --no-install playwright test --config playwright.contextual-baseline.config.ts | tee "$GAGA_EVIDENCE_DIRECTORY/baseline-tests.log"
+      - name: All ten mandatory browser assertions with only required disclosure steps
+        run: |
+          npm run test:ui | tee "$GAGA_EVIDENCE_DIRECTORY/release-browser.log"
+          node tools/gaga/browser-contract.mjs --report .gaga/browser-results.json
+          cp .gaga/browser-results.json "$GAGA_EVIDENCE_DIRECTORY/release-browser-results.json"
+      - name: Five-width contextual functionality and light/dark visual evidence
+        run: npx --no-install playwright test --config playwright.contextual.config.ts | tee "$GAGA_EVIDENCE_DIRECTORY/contextual-browser.log"
+      - name: Existing five-width Saved Library and main/skip-link regression
+        run: npx --no-install playwright test --config playwright.reference-quality.config.ts | tee "$GAGA_EVIDENCE_DIRECTORY/reference-browser.log"
+      - name: Audit, workflow lint and preserved production-admission boundary
+        run: |
+          npm audit --audit-level=low --json > "$GAGA_EVIDENCE_DIRECTORY/audit.json"
+          go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.7 -shellcheck= .github/workflows/contextual-ux.yml
+          if node tools/gaga/preservation.mjs > "$GAGA_EVIDENCE_DIRECTORY/historical-preservation.log" 2>&1; then
+            echo 'Unexpected admission of changed UI by the unchanged historical guard' >&2
+            exit 1
+          fi
+      - name: Exact source, unchanged authorities and qualification receipt
+        run: |
+          node --input-type=module <<'JS'
+          import assert from'node:assert/strict';import{readFileSync,writeFileSync}from'node:fs';import{execFileSync}from'node:child_process';import{createHash}from'node:crypto';import{sourceIdentity}from'./tools/gaga/source-identity.mjs';import{assertBrowserReport}from'./tools/gaga/browser-contract.mjs';
+          const dir=process.env.GAGA_EVIDENCE_DIRECTORY,read=p=>JSON.parse(readFileSync(p)),hash=p=>createHash('sha256').update(readFileSync(p)).digest('hex');
+          const source=sourceIdentity();assert.equal(source.commit,process.env.GITHUB_SHA);const base='c160e6712ec61369cac7e73ecde156aeaac27474';
+          execFileSync('git',['diff','--exit-code',base,'HEAD','--','cms','editorial','package.json','package-lock.json','gaga.app.json','content','content-release.json','wrangler.jsonc','vendor','tools/gaga/preservation.mjs','docs/UI-PRESERVATION.json','.github/workflows/deploy.yml','.github/workflows/content-release.yml','.github/workflows/content-publish.yml']);
+          const browser=assertBrowserReport(read('.gaga/browser-results.json')),contextual=read('.gaga/contextual-ux/browser-results.json').stats,reference=read('.gaga/reference-quality/browser-results.json').stats,baseline=read('.gaga/contextual-ux/baseline-results.json').stats;
+          for(const [stats,count] of [[contextual,20],[reference,10],[baseline,2]]){assert.equal(stats.expected,count);assert.equal(stats.unexpected,0);assert.equal(stats.skipped,0);assert.equal(stats.flaky,0);}
+          const audit=read(dir+'/audit.json');assert.equal(audit.metadata.vulnerabilities.total,0);
+          assert.equal(hash('package-lock.json'),'5eaf8946c85601681837807ac2bca5c8d4547bd784014dd7dab07d44e3e8b9ee');assert.equal(hash('cms/package-lock.json'),'62b398d8c74d91f0fa4b5c1c40818737c225e574aecbe14637fd6f86c4c2eef5');assert.equal(hash('content/emdash/published.json'),'9caa6924b6ebbbc4d545cbee4f4fa8996ec30036c998aed114f951088dd0e37d');assert.equal(hash('dist/search-index.json'),'5b982d6827606ed194604511f83156cb0697c04115df253177581df24ce6a807');
+          writeFileSync(dir+'/qualification-receipt.json',JSON.stringify({status:'QUALIFIED',source,runtime:read(dir+'/runtime.json'),workerd:execFileSync('node_modules/.bin/workerd',['--version'],{encoding:'utf8'}).trim(),browser,contextual,reference,baseline,audit:audit.metadata.vulnerabilities,changedFiles:execFileSync('git',['diff','--name-only',base,'HEAD'],{encoding:'utf8'}).trim().split('\n'),productionAdmission:'NOT GRANTED: unchanged historical UI preservation guard rejects reviewed UX changes',productionMutations:0,mainPromotions:0,deployments:0,packagePublications:0,run:process.env.GITHUB_RUN_ID},null,2)+'\n');
+          JS
+          git diff --exit-code
+          test -z "$(git ls-files --others --exclude-standard)"
+      - name: Preserve executed evidence and diagnostic captures
+        if: always()
+        run: |
+          if [ -d .gaga/contextual-ux ]; then cp -R .gaga/contextual-ux "$GAGA_EVIDENCE_DIRECTORY/"; fi
+          if [ -d .gaga/reference-quality ]; then cp -R .gaga/reference-quality "$GAGA_EVIDENCE_DIRECTORY/"; fi
+          if [ -f .gaga/browser-results.json ]; then cp .gaga/browser-results.json "$GAGA_EVIDENCE_DIRECTORY/"; fi
+          if [ -d test-results ]; then cp -R test-results "$GAGA_EVIDENCE_DIRECTORY/"; fi
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: contextual-ux-evidence
+          path: ${{ runner.temp }}/contextual-ux
+          if-no-files-found: error

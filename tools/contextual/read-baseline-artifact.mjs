@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import { writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+const api='https://api.github.com/repos/liquid-modernity/consumer-blog-signature/actions/artifacts/12881395842';
+const headers={Authorization:'Bearer '+process.env.GH_TOKEN,Accept:'application/vnd.github+json'};
+const metadata=await fetch(api,{headers,redirect:'error'});assert.equal(metadata.status,200);const m=await metadata.json();
+assert.equal(m.workflow_run.head_sha,'c160e6712ec61369cac7e73ecde156aeaac27474');assert.equal(m.expired,false);assert.equal(m.name,'production-publication-candidate');
+const response=await fetch(api+'/zip',{headers,redirect:'manual'});assert.equal(response.status,302);const url=new URL(response.headers.get('location'));assert.equal(url.protocol,'https:');
+const archive=await fetch(url,{redirect:'error'});assert.equal(archive.status,200);const bytes=Buffer.from(await archive.arrayBuffer());const sha=createHash('sha256').update(bytes).digest('hex');
+assert.equal(sha,'d3b06ce3931ccc007907eab34cec9118c32f7f9c826b19206d9b12f08f21661b');assert.equal(m.digest,'sha256:'+sha);writeFileSync(process.env.RUNNER_TEMP+'/contextual-baseline.zip',bytes);console.log(JSON.stringify({status:'PASS',artifactId:m.id,source:m.workflow_run.head_sha,sha256:sha,registryWrites:0}));

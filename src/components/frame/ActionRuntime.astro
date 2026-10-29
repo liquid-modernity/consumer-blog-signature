@@ -1,1207 +1,167 @@
 ---
 import Icon from '../ui/Icon.astro';
-import { actionById } from '../../config/actions';
-import { experienceSurfaceProfile, type ExperienceContext } from '../../config/experience';
 import { i18nLabel } from '../../config/i18n';
+import { actionById } from '../../config/actions';
+import { experienceConfig, experienceSurfaceProfile, type ExperienceContext } from '../../config/experience';
 import { globalNavigationProjection } from '../../config/context-rails';
-import {
-  getEnabledRootSections,
-   getEnabledTopics,
-  styleArchetypeRegistry
-} from '../../config/pakrpp-architecture';
-import { routes } from '../../config/routes';
-import { normalizeSitePath } from '../../lib/url-semantics';
-
-interface Props {
-  className?: string;
-  context?: ExperienceContext;
-  pageTitle?: string;
-  workspaceId?: string;
-}
-
-const {
-  className = '',
-  context = 'default',
-  pageTitle = 'PakRPP',
-  workspaceId = 'page'
-} = Astro.props;
-
-const currentPath = normalizeSitePath(Astro.url.pathname);
+import { contextualRails, resolveNotchPresentation } from '../../config/contextual-ux.mjs';
+interface Props { className?: string; context?: ExperienceContext; pageTitle?: string; workspaceId?: string; }
+const { className = '', context = 'default', pageTitle = 'PakRPP' } = Astro.props;
+const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
 const profile = experienceSurfaceProfile(context);
-const actions = profile.notchActionIds
-  .map((id) => actionById(id))
-  .filter((action) => Boolean(action.command));
-
+const railPolicy = contextualRails(path);
+const actions = profile.notchActionIds.filter(id => !['smart-back', 'settings'].includes(id) && (id !== 'context-info' || railPolicy.right)).map(actionById);
+const primary = actions.filter(action => ['save', 'copy-link', 'search', 'graph-reset'].includes(action.id));
+const secondary = actions.filter(action => !primary.includes(action));
 const global = globalNavigationProjection();
-const globalItems = global.items;
-const infoGroups = global.groups;
-const archetypes = styleArchetypeRegistry;
-const notchThemes = [
-  { id: 'default', label: 'Blueprint', summary: 'Tema gelap biru struktural khas PakRPP' },
-  { id: 'dark', label: 'Gelap', summary: 'Tema gelap monokrom untuk fokus baca malam' },
-  { id: 'paper', label: 'Kertas', summary: 'Tema terang hangat menyerupai kertas cetak' },
-  { id: 'sepia', label: 'Sepia', summary: 'Tema klasik hangat untuk bacaan panjang' }
-] as const;
-const archetypeShortLabels: Record<string, string> = {
-  editorial: 'Editorial',
-  brutalism: 'Brutalism',
-  blueprintism: 'Blueprint',
-  enterprise: 'Institusional'
-};
-const rootSections = getEnabledRootSections();
-const canonicalTopics = getEnabledTopics();
-
-const isCurrent = (href: string) => href === '/'
-  ? currentPath === '/'
-  : currentPath === href || currentPath.startsWith(`${href}/`);
-
-const isInfoActive = infoGroups.some((group) => group.items.some((item) => isCurrent(item.href)));
-
-// Determine semantic context mode for the Dynamic Island
-type IslandContextMode = 'article' | 'index' | 'topics' | 'archive' | 'knowledge' | 'saved' | 'system';
-
-const islandMode: IslandContextMode = (() => {
-  if (context === 'article' || currentPath.startsWith('/publications/')) return 'article';
-  if (currentPath === '/' || currentPath === '/latest' || currentPath === '/publications') return 'index';
-  if (currentPath.startsWith('/topics')) return 'topics';
-  if (currentPath.startsWith('/archive')) return 'archive';
-  if (currentPath.startsWith('/knowledge') || currentPath.startsWith('/graphs') || currentPath.startsWith('/tags')) return 'knowledge';
-  if (currentPath.startsWith('/saved') || currentPath.startsWith('/library')) return 'saved';
-  return 'system';
-})();
-
-const contextBadgeMap: Record<IslandContextMode, string> = {
-  article: 'BACA',
-  index: 'INDEKS',
-  topics: 'TOPIK',
-  archive: 'ARSIP',
-  knowledge: 'PENGETAHUAN',
-  saved: 'TERSIMPAN',
-  system: workspaceId.toUpperCase()
-};
-
-const activeBadgeText = contextBadgeMap[islandMode];
-
-// Select up to 3 contextual quick items for the Peek state
-const peekQuickLinks = (() => {
-  if (islandMode === 'index') {
-    return [
-      { label: 'Cari', href: '/search', icon: 'search' },
-      { label: 'Publikasi', href: routes.publications.index, icon: 'article' },
-      { label: 'Topik', href: routes.topics.index, icon: 'grid_view' }
-    ];
-  }
-  if (islandMode === 'topics' || islandMode === 'archive') {
-    return canonicalTopics.map((t) => ({
-      label: t.label,
-      href: routes.topics.detail(t.slug),
-      icon: 'grid_view'
-    }));
-  }
-  if (islandMode === 'knowledge') {
-    return [
-      { label: 'Graf', href: routes.knowledge.graph, icon: 'account_tree' },
-      { label: 'Indeks', href: routes.knowledge.index, icon: 'lan' },
-      { label: 'Rujukan', href: routes.knowledge.references, icon: 'book' }
-    ];
-  }
-  return [
-    { label: 'Beranda', href: '/', icon: 'home' },
-    { label: 'Cari', href: '/search', icon: 'search' },
-    { label: 'Tersimpan', href: routes.discovery.saved, icon: 'bookmark' }
-  ];
-})();
-
 const islandLabel = i18nLabel('actionIsland.label');
-const toolbarLabel = i18nLabel('actionIsland.toolbar');
-const progressLabel = i18nLabel('actionIsland.progress');
 const toggleLabel = i18nLabel('actionIsland.toggle');
-const actionsLabel = i18nLabel('actionIsland.actions');
+const presentation = resolveNotchPresentation(experienceConfig.notch);
 ---
-<div
-  data-gaga-surface="action-runtime"
-  data-gaga-signature-surface="dynamic-global-navigation"
-  class={`gaga-action-runtime-container ${className}`}
-  data-gaga-action-runtime-container
->
-  <nav
-    class="gaga-action-runtime gaga-dynamic-island"
-    aria-label={islandLabel.id}
-    data-gaga-i18n-key={islandLabel.key}
-    data-gaga-i18n-id={islandLabel.id}
-    data-gaga-i18n-en={islandLabel.en}
-    data-gaga-i18n-target="aria"
-    data-gaga-action-runtime
-    data-gaga-global-nav
-    data-gaga-context={context}
-    data-gaga-island-mode={islandMode}
-    data-gaga-state="collapsed"
-    data-gaga-live-state="idle"
-  >
-    <div
-      class="gaga-action-runtime__shell"
-      role="toolbar"
-      aria-label={toolbarLabel.id}
-      data-gaga-i18n-key={toolbarLabel.key}
-      data-gaga-i18n-id={toolbarLabel.id}
-      data-gaga-i18n-en={toolbarLabel.en}
-      data-gaga-i18n-target="aria"
-    >
-      {context === 'article' ? (
-        <svg class="gaga-action-runtime__perimeter" viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true" focusable="false">
-          <path class="gaga-action-runtime__perimeter-track" pathLength="1" d="M0.5 0.5 H99.5 V29 Q99.5 39.5 89 39.5 H11 Q0.5 39.5 0.5 29 Z" />
-          <path class="gaga-action-runtime__perimeter-progress" pathLength="1" d="M0.5 0.5 H99.5 V29 Q99.5 39.5 89 39.5 H11 Q0.5 39.5 0.5 29 Z" />
-        </svg>
-      ) : null}
-
-      {/* STAGE 1 & 2 BAR: IDLE COMPACT + PEEK BAR */}
+<div class={`gaga-action-runtime-container gaga-contextual-notch-container ${className}`} data-gaga-action-runtime-container data-gaga-notch-placement={presentation.placement} data-gaga-notch-shape={presentation.shape} data-gaga-notch-config={JSON.stringify(experienceConfig.notch)}>
+  <nav class="gaga-action-runtime gaga-dynamic-island gaga-contextual-notch" data-gaga-action-runtime data-gaga-global-nav data-gaga-context={context} data-gaga-state="collapsed" data-gaga-level="0" aria-label={islandLabel.id} data-gaga-i18n-id={islandLabel.id} data-gaga-i18n-en={islandLabel.en} data-gaga-i18n-target="aria">
+    <div class="gaga-action-runtime__shell">
       <div class="gaga-island-bar" data-gaga-island-bar>
-        <a
-          class="gaga-island-brand"
-          href="/"
-          aria-label="PakRPP Knowledge Publication System"
-          data-gaga-tooltip="PakRPP"
-        >
-          <span class="gaga-island-brand__sensor" aria-hidden="true"></span>
-          <span class="gaga-island-brand__name">PakRPP</span>
-        </a>
-
-        {/* PEEK LAYER: Shown on Hover / Long-Press (data-gaga-state="peek") */}
-        <div class="gaga-island-peek" data-gaga-island-peek>
-          <span class="gaga-island-peek__sep" aria-hidden="true"></span>
-          <span class="gaga-island-peek__title" data-gaga-island-peek-title>
-            {islandMode === 'article' ? pageTitle : activeBadgeText}
-          </span>
-
-          {islandMode === 'article' ? (
-            <div class="gaga-island-peek__actions">
-              {actions.slice(0, 3).map((action) => (
-                <button
-                  type="button"
-                  class="gaga-island-chip"
-                  data-gaga-action={action.command}
-                  data-gaga-action-id={action.id}
-                  aria-label={action.label.id}
-                  title={action.label.id}
-                >
-                  {action.icon && <Icon name={action.icon} />}
-                  <span>{action.label.id}</span>
-                </button>
-              ))}
-            </div>
-          ) : (
-            <div class="gaga-island-peek__actions">
-              {peekQuickLinks.map((item) => (
-                <a
-                  href={item.href}
-                  class:list={['gaga-island-chip', isCurrent(item.href) && 'gaga-is-current']}
-                >
-                  <Icon name={item.icon} />
-                  <span>{item.label}</span>
-                </a>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* IDLE STATUS INDICATOR (Right side of Compact Capsule) */}
-        <div class="gaga-action-runtime__status" data-gaga-action-runtime-status aria-live="polite">
-          {context === 'article' ? (
-            <span
-              class="gaga-action-runtime__reading-progress"
-              data-gaga-reading-progress
-              role="progressbar"
-              aria-label={progressLabel.id}
-              data-gaga-i18n-key={progressLabel.key}
-              data-gaga-i18n-id={progressLabel.id}
-              data-gaga-i18n-en={progressLabel.en}
-              data-gaga-i18n-target="aria"
-              aria-valuemin="0"
-              aria-valuemax="100"
-              aria-valuenow="0"
-            >
-              <span data-gaga-reading-progress-value>0%</span>
-            </span>
-          ) : (
-            <span
-              class="gaga-action-runtime__context-label"
-              data-gaga-island-status-badge
-              data-gaga-default-badge={activeBadgeText}
-              data-gaga-i18n-key={actionsLabel.key}
-              data-gaga-i18n-id={activeBadgeText}
-              data-gaga-i18n-en={activeBadgeText}
-            >
-              {activeBadgeText}
-            </span>
-          )}
-        </div>
-
-        {/* EXPAND / COLLAPSE TRIGGER */}
-        <button
-          type="button"
-          class="gaga-action-runtime__toggle"
-          data-gaga-action-island-toggle
-          aria-expanded="false"
-          aria-label={toggleLabel.id}
-          data-gaga-i18n-key={toggleLabel.key}
-          data-gaga-i18n-id={toggleLabel.id}
-          data-gaga-i18n-en={toggleLabel.en}
-          data-gaga-i18n-target="aria"
-        >
-          <span aria-hidden="true"><Icon name="menu" /></span>
-        </button>
-
-        <div class="gaga-action-runtime__live" data-gaga-action-runtime-live hidden></div>
+        <button type="button" class="gaga-notch-button" data-gaga-action="smart-back" aria-label="Kembali" disabled={path === '/'}><Icon name="arrow_back" /></button>
+        <a href="/" class="gaga-island-brand" aria-label="PakRPP — Beranda"><span aria-hidden="true" class="gaga-island-brand__sensor"></span><span>PakRPP</span></a>
+        <button type="button" class="gaga-action-runtime__toggle gaga-notch-button" data-gaga-action-island-toggle aria-label={toggleLabel.id} data-gaga-i18n-id={toggleLabel.id} data-gaga-i18n-en={toggleLabel.en} data-gaga-i18n-target="aria" aria-expanded="false" aria-controls="gaga-notch-context"><Icon name="menu" /></button>
       </div>
-
-      {/* STAGE 3: EXPANDED CONTEXT-AWARE DYNAMIC ISLAND CARD */}
-      <div class="gaga-island-expanded" data-gaga-notch-tray>
-        {/* ZONE A: CONTEXT-AWARE PRIMARY DECK */}
-        <section class="gaga-island-zone gaga-island-zone--context" aria-label="Konteks Halaman Aktif">
-          <div class="gaga-island-zone__header">
-            <span class="gaga-island-zone__kicker">
-              KONTEKS AKTIF · {activeBadgeText}
-            </span>
-            <span class="gaga-island-zone__page-title" data-gaga-island-focus-title>
-              {pageTitle}
-            </span>
-          </div>
-
-          {/* Context-specific controls based on islandMode */}
-          {islandMode === 'index' && (
-            <div class="gaga-island-context-deck">
-              <div class="gaga-island-anchor-pills" role="group" aria-label="Loncat ke bagian halaman utama">
-                {rootSections.map((sec) => (
-                  <a href={`/#${sec.anchor}`} class="gaga-island-pill" data-gaga-island-anchor>
-                    #{sec.label}
-                  </a>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {(islandMode === 'topics' || islandMode === 'archive') && (
-            <div class="gaga-island-context-deck">
-              <div class="gaga-island-anchor-pills" role="group" aria-label="Filter Topik & Arsip">
-                {canonicalTopics.map((topic) => (
-                  <a
-                    href={routes.topics.detail(topic.slug)}
-                    class:list={['gaga-island-pill', isCurrent(routes.topics.detail(topic.slug)) && 'gaga-is-current']}
-                  >
-                    Topik: {topic.label}
-                  </a>
-                ))}
-                <a href={routes.archive.index} class:list={['gaga-island-pill', isCurrent(routes.archive.index) && 'gaga-is-current']}>
-                  Arsip Kronologis
-                </a>
-                <a href={routes.archive.year(2026)} class:list={['gaga-island-pill', isCurrent(routes.archive.year(2026)) && 'gaga-is-current']}>
-                  2026
-                </a>
-                <a href={routes.archive.year(2025)} class:list={['gaga-island-pill', isCurrent(routes.archive.year(2025)) && 'gaga-is-current']}>
-                  2025
-                </a>
-              </div>
-            </div>
-          )}
-
-          {islandMode === 'knowledge' && (
-            <div class="gaga-island-context-deck">
-              <div class="gaga-island-anchor-pills" role="group" aria-label="Eksplorasi Pengetahuan">
-                <a href={routes.knowledge.graph} class:list={['gaga-island-pill', isCurrent(routes.knowledge.graph) && 'gaga-is-current']}>
-                  Graf Pengetahuan
-                </a>
-                <a href={routes.knowledge.index} class:list={['gaga-island-pill', isCurrent(routes.knowledge.index) && 'gaga-is-current']}>
-                  Indeks Sistematis
-                </a>
-                <a href={routes.knowledge.tags} class:list={['gaga-island-pill', isCurrent(routes.knowledge.tags) && 'gaga-is-current']}>
-                  Tag Lintas Topik
-                </a>
-                <a href={routes.knowledge.references} class:list={['gaga-island-pill', isCurrent(routes.knowledge.references) && 'gaga-is-current']}>
-                  Rujukan Primer
-                </a>
-              </div>
-            </div>
-          )}
-
-          {/* Contextual runtime actions for the active surface */}
-          <div class="gaga-action-runtime__actions gaga-island-runtime-actions" data-gaga-action-runtime-actions>
-            {actions.map((action, index) => (
-              <button
-                type="button"
-                class={`gaga-action-runtime__btn ${index === 0 ? 'gaga-action-runtime__btn--anchor' : ''}`}
-                data-gaga-action={action.command}
-                data-gaga-action-id={action.id}
-                data-gaga-quick-action={action.id}
-                data-gaga-active="false"
-                data-gaga-tooltip={action.label.id}
-                aria-label={action.label.id}
-                data-gaga-i18n-key={action.label.key}
-                data-gaga-i18n-id={action.label.id}
-                data-gaga-i18n-en={action.label.en}
-                data-gaga-i18n-target="aria"
-              >
-                {action.icon ? (
-                  <span class="gaga-action-runtime__icon" aria-hidden="true"><Icon name={action.icon} /></span>
-                ) : null}
-                <span class="gaga-action-runtime__label" data-gaga-i18n-key={action.label.key} data-gaga-i18n-id={action.label.id} data-gaga-i18n-en={action.label.en}>{action.label.id}</span>
-              </button>
-            ))}
-          </div>
-        </section>
-
-        {/* ZONE B: GLOBAL NAVIGATION & SYSTEM DIRECTORY */}
-        <section class="gaga-island-zone gaga-island-zone--nav" aria-label="Navigasi Global">
-          <div class="gaga-island-global-nav">
-            {globalItems.map((item) => (
-              <a
-                class:list={['gaga-island-nav-item', isCurrent(item.href) && 'gaga-is-current']}
-                href={item.href}
-                aria-label={item.label}
-                aria-current={isCurrent(item.href) ? 'page' : undefined}
-                data-gaga-global-destination={item.id}
-              >
-                <Icon name={item.icon} />
-                <span>{item.label}</span>
-              </a>
-            ))}
-
-            <button
-              class:list={['gaga-island-nav-item', 'gaga-notch-info-trigger', isInfoActive && 'gaga-is-current']}
-              type="button"
-              aria-label="Direktori Informasi"
-              aria-expanded="false"
-              aria-haspopup="dialog"
-              data-gaga-info-trigger
-            >
-              <Icon name="info" />
-              <span>Direktori</span>
-            </button>
-          </div>
-
-          <div
-            class="gaga-notch-info-flyout"
-            role="dialog"
-            aria-label="Information & publication surface"
-            data-gaga-info-flyout
-            hidden
-          >
-            <div class="gaga-notch-info-flyout__head">
-              <span class="gaga-notch-info-flyout__kicker">DIREKTORI SISTEM · PAKRPP</span>
-              <button
-                class="gaga-notch-info-flyout__close"
-                type="button"
-                aria-label="Close information"
-                data-gaga-info-close
-              >
-                <Icon name="close" />
-              </button>
-            </div>
-            <div class="gaga-notch-info-flyout__groups">
-              {infoGroups.map((group) => (
-                <section class="gaga-notch-info-flyout__group">
-                  <p>{group.label}</p>
-                  <div class="gaga-notch-info-flyout__links">
-                    {group.items.map((link) => (
-                      <a
-                        href={link.href}
-                        class:list={['gaga-notch-info-flyout__link', isCurrent(link.href) && 'gaga-is-current']}
-                      >
-                        <Icon name={link.icon} />
-                        <span>{link.label}</span>
-                      </a>
-                    ))}
-                  </div>
-                </section>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ZONE C: DYNAMIC STYLE ARCHETYPES & APPEARANCE */}
-        <section class="gaga-island-zone gaga-island-zone--archetypes" aria-label="Kustomisasi Tema, Arketipe Desain & Token Tampilan">
-          <div class="gaga-notch-appearance-grid">
-            <div class="gaga-notch-appearance-group" role="group" aria-label="Tema Warna">
-              <span class="gaga-notch-appearance-group__label">TEMA</span>
-              <div class="gaga-notch-archetypes">
-                {notchThemes.map((t) => (
-                  <button
-                    type="button"
-                    class="gaga-notch-archetype-btn"
-                    data-gaga-reader-pref="theme"
-                    data-gaga-reader-value={t.id}
-                    title={t.summary}
-                    aria-pressed="false"
-                  >
-                    {t.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div class="gaga-notch-appearance-group" role="group" aria-label="Arketipe Desain">
-              <span class="gaga-notch-appearance-group__label">ARKETIPE</span>
-              <div class="gaga-notch-archetypes">
-                {archetypes.map((arch) => (
-                  <button
-                    type="button"
-                    class="gaga-notch-archetype-btn"
-                    data-gaga-reader-pref="identity"
-                    data-gaga-reader-value={arch.id}
-                    title={arch.summary}
-                    aria-pressed="false"
-                  >
-                    {archetypeShortLabels[arch.id] ?? arch.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <button
-              type="button"
-              class="gaga-notch-archetype-btn gaga-notch-archetype-btn--tokens"
-              data-gaga-action="toggle-reader-preferences"
-              title="Buka panel penuh untuk kustomisasi tipografi, ukuran teks, kerapatan, dan token tampilan"
-            >
-              <Icon name="settings" />
-              <span>Token &amp; Tampilan</span>
-            </button>
-          </div>
-        </section>
-      </div>
+      <section id="gaga-notch-context" class="gaga-notch-context" data-gaga-notch-context hidden inert aria-label="Aksi kontekstual">
+        <p class="gaga-notch-page-title" data-gaga-island-focus-title>{pageTitle}</p>
+        <div class="gaga-notch-actions" data-gaga-action-runtime-actions>
+          {primary.map(action => <button type="button" class="gaga-notch-button" data-gaga-action={action.id === 'save' ? 'save-reading' : action.command} data-gaga-action-id={action.id} data-gaga-quick-action={action.id} aria-label={action.label.id} aria-pressed={action.kind === 'toggle' ? 'false' : undefined}><Icon name={action.icon ?? 'article'} /><span>{action.label.id}</span></button>)}
+          <button type="button" class="gaga-notch-button" data-gaga-notch-more aria-expanded="false" aria-controls="gaga-notch-system"><Icon name="tune" /><span>Pembaca &amp; navigasi</span></button>
+        </div>
+        {context === 'article' && <span class="gaga-visually-hidden" role="progressbar" aria-label="Progres membaca" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-gaga-reading-progress><span data-gaga-reading-progress-value>0%</span></span>}
+      </section>
+      <section id="gaga-notch-system" class="gaga-notch-system" data-gaga-notch-system hidden inert aria-label="Pembaca dan navigasi">
+        <div class="gaga-notch-actions">
+          {secondary.map(action => <button type="button" class="gaga-notch-button" data-gaga-action={action.command} data-gaga-action-id={action.id} data-gaga-quick-action={action.id} aria-label={action.label.id}><Icon name={action.icon ?? 'article'} /><span>{action.label.id}</span></button>)}
+          <button type="button" class="gaga-notch-button" data-gaga-action="toggle-reader-preferences" aria-controls="gaga-reader-panel" aria-expanded="false"><Icon name="settings" /><span>Preferensi pembaca</span></button>
+        </div>
+        <div class="gaga-notch-navigation" aria-label="Navigasi situs">{global.items.map(item => <a href={item.href} aria-current={path === item.href ? 'page' : undefined}><Icon name={item.icon} /><span>{item.label}</span></a>)}</div>
+        <details><summary>Direktori informasi</summary>{global.groups.map(group => <section><h2>{group.label}</h2><ul>{group.items.map(item => <li><a href={item.href}>{item.label}</a></li>)}</ul></section>)}</details>
+      </section>
+      <slot name="reader" />
+      <div data-gaga-action-runtime-live class="gaga-action-runtime__live" hidden></div>
     </div>
   </nav>
 </div>
-
 <script>
-  import { onRuntimeEvent } from '@gaga/engine-runtime/runtime/events';
+  import { actionForCommand } from '../../config/actions';
+  import { resolveNotchPresentation } from '../../config/contextual-ux.mjs';
+  import { onRuntimeEvent, requestOutline, requestReaderPanel } from '@gaga/engine-runtime/runtime/events';
   import { runSiteCommand } from '../../scripts/systems/site-commands';
   import { getUnifiedScrollMetrics, resolveReadingScrollContext } from '../../scripts/systems/reading-scroll';
-  import {
-    applyIdentity,
-    applyTheme,
-    readIdentityPreference,
-    readThemePreference
-  } from '../../scripts/systems/theme';
-
-  type IslandState = 'micro' | 'collapsed' | 'peek' | 'expanded';
 
   function setupActionRuntime() {
-    const runtime = document.querySelector<HTMLElement>('[data-gaga-action-runtime]');
-    if (!runtime || runtime.dataset.wired === 'true') return;
-    const island = runtime;
+    const island = document.querySelector<HTMLElement>('[data-gaga-action-runtime]');
+    if (!island || island.dataset.wired === 'true') return;
     island.dataset.wired = 'true';
-
-    // Synchronize active Theme and Design Archetype buttons inside the Notch
-    applyTheme(readThemePreference());
-    applyIdentity(readIdentityPreference());
-
-    const toggle = island.querySelector<HTMLButtonElement>('[data-gaga-action-island-toggle]');
-    const infoTrigger = island.querySelector<HTMLButtonElement>('[data-gaga-info-trigger]');
-    const infoFlyout = island.querySelector<HTMLElement>('[data-gaga-info-flyout]');
-    const progress = island.querySelector<HTMLElement>('[data-gaga-reading-progress]');
-    const progressValue = island.querySelector<HTMLElement>('[data-gaga-reading-progress-value]');
-    const statusBadge = island.querySelector<HTMLElement>('[data-gaga-island-status-badge]');
-    const peekTitle = island.querySelector<HTMLElement>('[data-gaga-island-peek-title]');
-    const focusTitle = island.querySelector<HTMLElement>('[data-gaga-island-focus-title]');
-    const defaultBadge = statusBadge?.dataset.gagaDefaultBadge ?? 'INDEKS';
-    const defaultTitle = focusTitle?.textContent?.trim() ?? 'PakRPP';
-
-    const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
-    let unsubscribeScroll: (() => void) | null = null;
-    let lastScrollTop = 0;
-    let scheduled = false;
-    let hoverTimer = 0;
-    let longPressTimer = 0;
-    let intentTimer = 0;
-
-    const isSpeaking = () => island.dataset.gagaLiveState === 'speaking';
-    const isExpanded = () => island.dataset.gagaState === 'expanded';
-    const isPeek = () => island.dataset.gagaState === 'peek';
-
-    function setInfoOpen(open: boolean) {
-      if (!infoFlyout || !infoTrigger) return;
-      infoFlyout.toggleAttribute('hidden', !open);
-      infoTrigger.setAttribute('aria-expanded', open ? 'true' : 'false');
-      if (open) setState('expanded');
-    }
-
-    function setState(state: IslandState) {
-      if (isSpeaking() && state !== 'expanded') return;
+    const container = island.closest<HTMLElement>('[data-gaga-action-runtime-container]')!;
+    const toggle = island.querySelector<HTMLButtonElement>('[data-gaga-action-island-toggle]')!;
+    const context = island.querySelector<HTMLElement>('[data-gaga-notch-context]')!;
+    const system = island.querySelector<HTMLElement>('[data-gaga-notch-system]')!;
+    const more = island.querySelector<HTMLButtonElement>('[data-gaga-notch-more]')!;
+    const reader = island.querySelector<HTMLElement>('[data-gaga-reader-panel]');
+    const finePointer = matchMedia('(hover: hover) and (pointer: fine)');
+    let hoverTimer = 0, touchTimer = 0, unsubscribe: (() => void) | undefined;
+    const readerOpen = () => reader?.dataset.gagaState === 'open';
+    function setState(state: 'collapsed' | 'peek' | 'expanded', restore = false) {
+      if (state !== 'expanded' && readerOpen()) requestReaderPanel({ action: 'close', source: 'click' });
       island.dataset.gagaState = state;
-      toggle?.setAttribute('aria-expanded', state === 'expanded' ? 'true' : 'false');
-      if (state !== 'expanded' && infoFlyout && !infoFlyout.hasAttribute('hidden')) {
-        infoFlyout.setAttribute('hidden', '');
-        infoTrigger?.setAttribute('aria-expanded', 'false');
-      }
+      island.dataset.gagaLevel = state === 'collapsed' ? '0' : state === 'peek' ? '1' : '2';
+      context.hidden = state === 'collapsed'; context.inert = context.hidden;
+      system.hidden = state !== 'expanded'; system.inert = system.hidden;
+      toggle.setAttribute('aria-expanded', String(state !== 'collapsed'));
+      more.setAttribute('aria-expanded', String(state === 'expanded'));
+      if (state !== 'collapsed') requestOutline({ action: 'close', source: 'notch-open' });
+      if (restore) (state === 'peek' ? more : toggle).focus({ preventScroll: true });
     }
-
-    function acknowledgeIntent() {
-      if (isExpanded() || isSpeaking()) return;
-      island.dataset.gagaIntent = 'aware';
-      window.clearTimeout(intentTimer);
-      intentTimer = window.setTimeout(() => {
-        delete island.dataset.gagaIntent;
-      }, 900);
+    function position() {
+      const preset = resolveNotchPresentation(JSON.parse(container.dataset.gagaNotchConfig!), innerWidth);
+      container.dataset.gagaNotchPlacement = preset.placement; container.dataset.gagaNotchShape = preset.shape;
     }
-
-    function updateProgress() {
-      scheduled = false;
-      const metrics = getUnifiedScrollMetrics();
-      if (progress && progressValue) {
-        const percentage = Math.max(0, Math.min(100, metrics.percentage));
-        const rounded = Math.round(percentage);
-        const progressRatio = percentage / 100;
-        island.style.setProperty('--gaga-action-progress-offset', `${1 - progressRatio}`);
-        progressValue.textContent = `${rounded}%`;
-        progress.setAttribute('aria-valuenow', String(rounded));
-      }
-
-      const delta = metrics.scrollTop - lastScrollTop;
-      if (!isExpanded() && !isPeek() && !isSpeaking()) {
-        if (metrics.scrollTop > 140 && delta > 10) setState('micro');
-        else if (delta < -6 || metrics.scrollTop < 84) {
-          setState('collapsed');
-          acknowledgeIntent();
-        }
-      }
-      lastScrollTop = metrics.scrollTop;
+    function progress() {
+      const value = Math.round(getUnifiedScrollMetrics().percentage);
+      island.querySelector('[data-gaga-reading-progress]')?.setAttribute('aria-valuenow', String(value));
+      const label = island.querySelector('[data-gaga-reading-progress-value]'); if (label) label.textContent = value + '%';
     }
-
-    function scheduleProgress() {
-      if (scheduled) return;
-      scheduled = true;
-      requestAnimationFrame(updateProgress);
-    }
-
-    function bindReadingProgress() {
-      unsubscribeScroll?.();
-      const context = resolveReadingScrollContext();
-      unsubscribeScroll = context?.scrollContext.addChangeListener(scheduleProgress) ?? null;
-      lastScrollTop = getUnifiedScrollMetrics().scrollTop;
-      scheduleProgress();
-    }
-
-    // Hover -> Peek (Stage 2), Click -> Expanded (Stage 3)
-    island.addEventListener('pointerenter', () => {
-      acknowledgeIntent();
-      if (!finePointer.matches || isSpeaking() || isExpanded()) return;
-      window.clearTimeout(hoverTimer);
-      hoverTimer = window.setTimeout(() => {
-        if (!isExpanded()) setState('peek');
-      }, 65);
-    });
-
-    island.addEventListener('pointerleave', () => {
-      if (!finePointer.matches || isSpeaking()) return;
-      window.clearTimeout(hoverTimer);
-      hoverTimer = window.setTimeout(() => {
-        if (isPeek() && !island.matches(':focus-within')) {
-          setState('collapsed');
-        }
-      }, 240);
-    });
-
-    // Touch long-press -> Peek, tap -> Expanded
-    island.addEventListener('touchstart', () => {
-      if (isExpanded() || isSpeaking()) return;
-      window.clearTimeout(longPressTimer);
-      longPressTimer = window.setTimeout(() => {
-        if (!isExpanded()) setState('peek');
-      }, 280);
-    }, { passive: true });
-
-    island.addEventListener('touchend', () => {
-      window.clearTimeout(longPressTimer);
-    }, { passive: true });
-
-    island.addEventListener('click', (event) => {
-      const target = event.target as HTMLElement;
-
-      // Allow links inside the island to navigate normally
-      const anchor = target.closest<HTMLAnchorElement>('a[href]');
-      if (anchor) {
-        if (anchor.hasAttribute('data-gaga-island-anchor')) {
-          setState('collapsed');
-        }
-        return;
-      }
-
-      const infoBtn = target.closest<HTMLButtonElement>('[data-gaga-info-trigger]');
-      if (infoBtn) {
-        event.stopPropagation();
-        setInfoOpen(infoFlyout ? infoFlyout.hasAttribute('hidden') : false);
-        return;
-      }
-
-      const closeBtn = target.closest<HTMLButtonElement>('[data-gaga-info-close]');
-      if (closeBtn) {
-        event.stopPropagation();
-        setInfoOpen(false);
-        infoTrigger?.focus();
-        return;
-      }
-
-      // Theme & Archetype buttons inside the Notch are handled by theme.ts on document;
-      // keep the Notch open so the user can live-preview themes and archetypes.
-      const prefBtn = target.closest<HTMLButtonElement>('[data-gaga-reader-pref]');
-      if (prefBtn) {
-        return;
-      }
-
-      const islandToggle = target.closest<HTMLButtonElement>('[data-gaga-action-island-toggle]');
-      if (islandToggle) {
-        setState(isExpanded() ? 'collapsed' : 'expanded');
-        return;
-      }
-
+    function bindScroll() { unsubscribe?.(); unsubscribe = resolveReadingScrollContext()?.scrollContext.addChangeListener(progress); progress(); }
+    island.addEventListener('pointerenter', () => { clearTimeout(hoverTimer); if (finePointer.matches && island.dataset.gagaState === 'collapsed') hoverTimer = window.setTimeout(() => setState('peek'), 120); });
+    island.addEventListener('pointerleave', () => { clearTimeout(hoverTimer); if (finePointer.matches) hoverTimer = window.setTimeout(() => { if (island.dataset.gagaState === 'peek' && !island.matches(':focus-within')) setState('collapsed'); }, 300); });
+    island.addEventListener('touchstart', () => { if (island.dataset.gagaState === 'collapsed') touchTimer = window.setTimeout(() => setState('peek'), 280); }, { passive: true });
+    island.addEventListener('touchend', () => clearTimeout(touchTimer), { passive: true });
+    island.addEventListener('touchcancel', () => clearTimeout(touchTimer), { passive: true });
+    island.addEventListener('click', event => {
+      const target = event.target instanceof Element ? event.target : null;
+      if (!target || target.closest('[data-gaga-reader-panel]')) return;
+      if (target.closest('[data-gaga-action-island-toggle]')) { clearTimeout(hoverTimer); setState(island.dataset.gagaState === 'collapsed' ? 'peek' : 'collapsed'); return; }
+      if (target.closest('[data-gaga-notch-more]')) { setState(island.dataset.gagaState === 'expanded' ? 'peek' : 'expanded'); return; }
+      if (target.closest('a[href], summary')) return;
       const button = target.closest<HTMLButtonElement>('[data-gaga-action]');
-      const command = button?.dataset.gagaAction;
-      if (button && command) {
-        // Stop propagation so @gaga/engine-runtime's document listener does not double-toggle the Reader Panel
-        event.preventDefault();
-        event.stopPropagation();
-
-        if (command !== 'speak' && command !== 'toggle-focus-mode') {
-          setState('collapsed');
-        }
-
-        runSiteCommand(command as any, {
-          source: 'action-runtime',
-          target: button,
-          pointer: { x: event.clientX, y: event.clientY }
-        });
+      // Let the single Engine Save listener receive the real click exactly once.
+      if (button?.dataset.gagaAction === 'save-reading') return;
+      const action = actionForCommand(button?.dataset.gagaAction);
+      if (button && action?.command) {
+        event.preventDefault(); event.stopPropagation();
+        if (action.command === 'toggle-reader-preferences') setState('expanded');
+        runSiteCommand(action.command, { source: 'click', target: button, pointer: { x: event.clientX, y: event.clientY } });
         return;
       }
-
-      // Clicking the capsule background/status in collapsed or peek state expands to Full Dynamic Island
-      if (!isExpanded()) {
-        setState('expanded');
-      }
+      if (target.closest('[data-gaga-island-bar]')) setState('expanded');
     });
-
-    // Context-aware Live Activity sync when hovering article previews on the page
-    document.addEventListener('pointerover', (event) => {
-      const previewTarget = event.target instanceof Element
-        ? event.target.closest<HTMLElement>('[data-gaga-preview]')
-        : null;
-      if (!previewTarget) return;
-
-      const meta = previewTarget.dataset.gagaPreviewMeta;
-      const title = previewTarget.dataset.gagaPreviewTitle;
-      const readTime = previewTarget.dataset.gagaPreviewReadTime;
-      const pubType = previewTarget.dataset.gagaPreviewType;
-
-      if (statusBadge && (pubType || readTime)) {
-        statusBadge.textContent = [pubType, readTime].filter(Boolean).join(' · ');
-      }
-      if (peekTitle && title) {
-        peekTitle.textContent = title;
-      }
-      if (focusTitle && meta && title) {
-        focusTitle.textContent = `${title} (${meta})`;
-      }
-      acknowledgeIntent();
-    }, { passive: true });
-
-    document.addEventListener('pointerout', (event) => {
-      const fromPreview = event.target instanceof Element
-        ? event.target.closest<HTMLElement>('[data-gaga-preview]')
-        : null;
-      if (!fromPreview) return;
-      const related = event.relatedTarget instanceof Element
-        ? event.relatedTarget.closest<HTMLElement>('[data-gaga-preview]')
-        : null;
-      if (related) return;
-
-      if (statusBadge) statusBadge.textContent = defaultBadge;
-      if (peekTitle) peekTitle.textContent = defaultTitle;
-      if (focusTitle) focusTitle.textContent = defaultTitle;
-    }, { passive: true });
-
-    island.addEventListener('focusin', acknowledgeIntent);
-
-    document.addEventListener('pointerdown', (event) => {
-      if ((!isExpanded() && !isPeek()) || island.contains(event.target as Node) || isSpeaking()) return;
-      setState('collapsed');
-    }, { passive: true });
-
-    document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape' && (isExpanded() || isPeek()) && !isSpeaking()) {
-        setState('collapsed');
-      }
+    island.addEventListener('keydown', event => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault(); event.stopPropagation();
+      if (readerOpen()) requestReaderPanel({ action: 'close', source: 'keyboard' });
+      else setState(island.dataset.gagaState === 'expanded' ? 'peek' : 'collapsed', true);
     });
-
-    bindReadingProgress();
-    onRuntimeEvent('layoutChanged', bindReadingProgress);
-    window.addEventListener('resize', scheduleProgress, { passive: true });
-
-    window.addEventListener('pagehide', () => {
-      unsubscribeScroll?.();
-      window.clearTimeout(hoverTimer);
-      window.clearTimeout(longPressTimer);
-      window.clearTimeout(intentTimer);
-    }, { once: true });
+    document.addEventListener('pointerdown', event => { if (event.target instanceof Node && !island.contains(event.target)) setState('collapsed'); }, { passive: true });
+    onRuntimeEvent('readerPanelCommand', detail => { if (detail.action === 'open' || detail.action === 'toggle' && !readerOpen()) setState('expanded'); });
+    onRuntimeEvent('layoutChanged', () => { position(); bindScroll(); });
+    window.addEventListener('resize', position, { passive: true });
+    window.addEventListener('pagehide', () => { unsubscribe?.(); clearTimeout(hoverTimer); clearTimeout(touchTimer); }, { once: true });
+    position(); bindScroll(); setState('collapsed');
   }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', setupActionRuntime, { once: true });
-  } else {
-    setupActionRuntime();
-  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setupActionRuntime, { once: true }); else setupActionRuntime();
 </script>
-
-<style>
-  .gaga-dynamic-island {
-    --gaga-island-spring: cubic-bezier(0.22, 1.28, 0.36, 1);
-    --gaga-island-bg: #0f0f0e;
-    --gaga-island-ink: #f7f6f2;
-    --gaga-island-muted: #a8a69e;
-    --gaga-island-line: rgba(247, 246, 242, 0.14);
-    --gaga-island-accent: #f7f6f2;
-    --gaga-island-accent-soft: rgba(247, 246, 242, 0.12);
-    max-inline-size: min(48rem, calc(100vw - var(--gaga-safe-area-left) - var(--gaga-safe-area-right) - 1rem));
-    color: var(--gaga-island-ink);
-  }
-
-  .gaga-dynamic-island .gaga-action-runtime__shell {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0;
-    min-block-size: 2.3rem;
-    padding: 0.2rem 0.65rem 0.24rem;
-    border: 0;
-    border-radius: 0 0 1.25rem 1.25rem;
-    background: var(--gaga-island-bg);
-    color: var(--gaga-island-ink);
-    box-shadow: 0 0.35rem 1.2rem rgba(0, 0, 0, 0.14);
-    transition:
-      transform 0.36s var(--gaga-island-spring),
-      border-radius 0.32s var(--gaga-island-spring),
-      padding 0.28s var(--gaga-island-spring),
-      background-color 0.2s ease,
-      box-shadow 0.28s ease;
-  }
-
-  /* STAGE 1: IDLE COMPACT BAR */
-  .gaga-island-bar {
-    position: relative;
-    z-index: 3;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.35rem;
-    min-block-size: 1.85rem;
-    cursor: pointer;
-  }
-
-  .gaga-island-brand {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.45rem;
-    padding: 0.22rem 0.38rem;
-    border-radius: 999px;
-    color: var(--gaga-island-ink);
-    font: 600 0.82rem / 1 var(--gaga-font-ui);
-    letter-spacing: -0.01em;
-    text-decoration: none;
-    white-space: nowrap;
-  }
-
-  .gaga-island-brand:is(:hover, :focus-visible) {
-    color: #ffffff;
-    background: var(--gaga-island-accent-soft);
-  }
-
-  .gaga-island-brand__sensor {
-    inline-size: 0.78rem;
-    block-size: 0.78rem;
-    border-radius: 999px;
-    border: 1.6px solid currentColor;
-    background: transparent;
-    box-shadow: none;
-    box-sizing: border-box;
-  }
-
-  /* PEEK LAYER: Hidden in Idle Compact (collapsed / micro), revealed in Peek */
-  .gaga-island-peek {
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
-    max-inline-size: 0;
-    opacity: 0;
-    overflow: hidden;
-    pointer-events: none;
-    transition:
-      max-inline-size 0.36s var(--gaga-island-spring),
-      opacity 0.2s ease;
-  }
-
-  .gaga-dynamic-island[data-gaga-state='peek'] .gaga-island-peek {
-    max-inline-size: 34rem;
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  .gaga-island-peek__sep {
-    inline-size: 1px;
-    block-size: 0.95rem;
-    background: var(--gaga-island-line);
-    flex: none;
-  }
-
-  .gaga-island-peek__title {
-    max-inline-size: 11rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font: 600 0.74rem / 1.2 var(--gaga-font-ui);
-    color: var(--gaga-island-muted);
-  }
-
-  .gaga-island-peek__actions {
-    display: flex;
-    align-items: center;
-    gap: 0.2rem;
-  }
-
-  .gaga-island-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.26rem;
-    padding: 0.24rem 0.5rem;
-    border: 1px solid var(--gaga-island-line);
-    border-radius: 999px;
-    background: transparent;
-    color: var(--gaga-island-ink);
-    font: 600 0.72rem / 1 var(--gaga-font-ui);
-    text-decoration: none;
-    cursor: pointer;
-    white-space: nowrap;
-  }
-
-  .gaga-island-chip:is(:hover, :focus-visible, .gaga-is-current) {
-    color: #ffffff;
-    background: var(--gaga-island-accent-soft);
-    border-color: rgba(247, 246, 242, 0.38);
-  }
-
-  /* In Idle Compact state, hide the toggle button and status text so capsule is pure PakRPP pill */
-  .gaga-dynamic-island[data-gaga-state='collapsed'] .gaga-action-runtime__toggle,
-  .gaga-dynamic-island[data-gaga-state='collapsed'] .gaga-action-runtime__status {
-    max-inline-size: 0;
-    min-inline-size: 0;
-    padding-inline: 0;
-    opacity: 0;
-    overflow: hidden;
-    border-width: 0;
-    pointer-events: none;
-  }
-
-  .gaga-dynamic-island[data-gaga-state='peek'] .gaga-action-runtime__toggle,
-  .gaga-dynamic-island[data-gaga-state='expanded'] .gaga-action-runtime__toggle {
-    max-inline-size: 2.2rem;
-    min-inline-size: 2rem;
-    padding-inline: 0.45rem;
-    color: var(--gaga-island-ink);
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  .gaga-dynamic-island .gaga-action-runtime__status {
-    min-inline-size: auto;
-    padding-inline: 0.48rem;
-    color: var(--gaga-island-muted);
-    font-variant-numeric: tabular-nums;
-  }
-
-  /* STAGE 3: EXPANDED CARD */
-  .gaga-island-expanded {
-    position: relative;
-    z-index: 3;
-    display: none;
-    flex-direction: column;
-    gap: 0.55rem;
-    padding: 0.55rem 0.35rem 0.35rem;
-    margin-top: 0.3rem;
-    border-top: 1px solid var(--gaga-island-line);
-    color: var(--gaga-island-ink);
-    animation: gagaIslandExpand 0.32s var(--gaga-island-spring);
-  }
-
-  .gaga-dynamic-island[data-gaga-state='expanded'] .gaga-action-runtime__shell {
-    padding: 0.38rem 0.65rem 0.6rem;
-    border-radius: 0 0 1.45rem 1.45rem;
-    background: var(--gaga-island-bg);
-    box-shadow: 0 1rem 2.6rem rgba(0, 0, 0, 0.28);
-  }
-
-  .gaga-dynamic-island[data-gaga-state='expanded'] .gaga-island-expanded {
-    display: flex;
-  }
-
-  @keyframes gagaIslandExpand {
-    from {
-      opacity: 0;
-      transform: translateY(-6px) scale(0.97);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
-  }
-
-  .gaga-island-zone {
-    display: flex;
-    flex-direction: column;
-    gap: 0.38rem;
-  }
-
-  .gaga-island-zone + .gaga-island-zone {
-    padding-top: 0.48rem;
-    border-top: 1px solid var(--gaga-island-line);
-  }
-
-  .gaga-island-zone__header {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 0.75rem;
-    padding-inline: 0.2rem;
-  }
-
-  .gaga-island-zone__kicker {
-    font: 700 0.66rem / 1 var(--gaga-font-mono);
-    letter-spacing: 0.06em;
-    color: var(--gaga-island-muted);
-    white-space: nowrap;
-  }
-
-  .gaga-island-zone__page-title {
-    font: 600 0.76rem / 1.2 var(--gaga-font-ui);
-    color: var(--gaga-island-muted);
-    max-inline-size: 24rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .gaga-island-anchor-pills {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.25rem;
-  }
-
-  .gaga-island-pill {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.24rem 0.52rem;
-    border: 1px solid var(--gaga-island-line);
-    border-radius: 0.45rem;
-    font: 600 0.72rem / 1.1 var(--gaga-font-mono);
-    color: var(--gaga-island-ink);
-    text-decoration: none;
-    white-space: nowrap;
-  }
-
-  .gaga-island-pill:is(:hover, :focus-visible, .gaga-is-current) {
-    color: #ffffff;
-    background: var(--gaga-island-accent-soft);
-    border-color: rgba(247, 246, 242, 0.38);
-  }
-
-  .gaga-island-runtime-actions {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.22rem;
-  }
-
-  /* Ensure runtime action buttons are visible inside the Expanded card */
-  .gaga-dynamic-island[data-gaga-state='expanded'] .gaga-action-runtime__btn {
-    max-inline-size: none;
-    min-inline-size: 2rem;
-    padding: 0.34rem 0.58rem;
-    color: var(--gaga-island-ink);
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  .gaga-dynamic-island .gaga-action-runtime__btn:is(:hover, :focus-visible),
-  .gaga-dynamic-island .gaga-action-runtime__toggle:is(:hover, :focus-visible) {
-    color: #ffffff;
-    background: var(--gaga-island-accent-soft);
-  }
-
-  .gaga-island-global-nav {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.22rem;
-  }
-
-  .gaga-island-nav-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.32rem;
-    padding: 0.3rem 0.55rem;
-    border: 0;
-    border-radius: 0.55rem;
-    background: transparent;
-    color: var(--gaga-island-ink);
-    font: 600 0.75rem / 1 var(--gaga-font-ui);
-    text-decoration: none;
-    cursor: pointer;
-    white-space: nowrap;
-  }
-
-  .gaga-island-nav-item:is(:hover, :focus-visible, .gaga-is-current) {
-    color: #ffffff;
-    background: var(--gaga-island-accent-soft);
-  }
-
-  .gaga-notch-appearance-grid {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.42rem 0.65rem;
-  }
-
-  .gaga-notch-appearance-group {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.32rem;
-  }
-
-  .gaga-notch-appearance-group__label {
-    font: 700 0.62rem / 1 var(--gaga-font-mono);
-    letter-spacing: 0.06em;
-    color: var(--gaga-island-muted);
-    padding-inline: 0.12rem;
-    user-select: none;
-  }
-
-  .gaga-notch-archetypes {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.22rem;
-  }
-
-  .gaga-notch-archetype-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    padding: 0.24rem 0.5rem;
-    border: 1px solid var(--gaga-island-line);
-    border-radius: var(--gaga-radius-sm, 0.45rem);
-    background: transparent;
-    color: var(--gaga-island-ink);
-    font: 600 0.71rem / 1.2 var(--gaga-font-mono);
-    cursor: pointer;
-    white-space: nowrap;
-    transition: background-color 0.14s ease, color 0.14s ease, border-color 0.14s ease;
-  }
-
-  .gaga-notch-archetype-btn:is(:hover, :focus-visible),
-  .gaga-notch-archetype-btn[data-gaga-active='true'],
-  .gaga-notch-archetype-btn[aria-pressed='true'] {
-    color: #ffffff;
-    background: var(--gaga-island-accent-soft);
-    border-color: rgba(247, 246, 242, 0.42);
-  }
-
-  .gaga-notch-archetype-btn--tokens {
-    margin-inline-start: auto;
-    font-weight: 700;
-    border-color: rgba(247, 246, 242, 0.32);
-  }
-
-  .gaga-notch-info-flyout {
-    padding: 0.55rem 0.35rem 0.25rem;
-    border-top: 1px solid var(--gaga-island-line);
-  }
-
-  .gaga-notch-info-flyout[hidden] {
-    display: none;
-  }
-
-  .gaga-notch-info-flyout__head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 0.45rem;
-  }
-
-  .gaga-notch-info-flyout__kicker {
-    font: 700 0.66rem / 1 var(--gaga-font-mono);
-    letter-spacing: 0.06em;
-    color: var(--gaga-island-muted);
-  }
-
-  .gaga-notch-info-flyout__close {
-    display: grid;
-    place-items: center;
-    inline-size: 1.5rem;
-    block-size: 1.5rem;
-    border: 0;
-    border-radius: 0.35rem;
-    background: transparent;
-    color: var(--gaga-island-muted);
-    cursor: pointer;
-  }
-
-  .gaga-notch-info-flyout__groups {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
-    gap: 0.55rem;
-  }
-
-  .gaga-notch-info-flyout__group > p {
-    margin: 0 0 0.2rem;
-    font: 700 0.66rem / 1.2 var(--gaga-font-mono);
-    color: var(--gaga-island-muted);
-    text-transform: uppercase;
-  }
-
-  .gaga-notch-info-flyout__links {
-    display: flex;
-    flex-direction: column;
-    gap: 0.14rem;
-  }
-
-  .gaga-notch-info-flyout__link {
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
-    padding: 0.22rem 0.38rem;
-    border-radius: 0.35rem;
-    color: var(--gaga-island-ink);
-    font-size: 0.76rem;
-    text-decoration: none;
-  }
-
-  .gaga-notch-info-flyout__link:is(:hover, :focus-visible, .gaga-is-current) {
-    color: #ffffff;
-    background: var(--gaga-island-accent-soft);
-  }
-
-  @media (max-width: 767px) {
-    .gaga-island-peek__title,
-    .gaga-island-zone__page-title {
-      max-inline-size: 9rem;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .gaga-dynamic-island .gaga-action-runtime__shell,
-    .gaga-island-peek,
-    .gaga-island-expanded {
-      animation: none;
-      transition: none;
-    }
-  }
+<style is:global>
+  .gaga-app-frame .gaga-contextual-notch-container { inset: auto; top: var(--gaga-safe-area-top, 0px); left: 50%; transform: translateX(-50%); inline-size: max-content; max-inline-size: calc(100vw - 1rem); padding: 0; }
+  .gaga-app-frame .gaga-contextual-notch-container[data-gaga-notch-placement='bottom'] { top: auto; bottom: calc(var(--gaga-safe-area-bottom, 0px) + .5rem); }
+  .gaga-app-frame .gaga-contextual-notch-container[data-gaga-notch-placement='left'] { top: 50%; left: .5rem; transform: translateY(-50%); }
+  .gaga-app-frame .gaga-contextual-notch-container[data-gaga-notch-placement='right'] { top: 50%; left: auto; right: .5rem; transform: translateY(-50%); }
+  .gaga-contextual-notch { max-inline-size: calc(100vw - 1rem); color: #f7f6f2; }
+  .gaga-contextual-notch .gaga-action-runtime__shell { display: block; max-block-size: calc(100dvh - 1rem - var(--gaga-safe-area-top, 0px)); overflow: auto; padding: .25rem .5rem; border: 1px solid #454540; border-radius: 0 0 1.1rem 1.1rem; background: #151513; color: #f7f6f2; animation: none !important; transform: none; box-shadow: 0 .35rem 1.25rem #0003; }
+  .gaga-contextual-notch-container[data-gaga-notch-shape='island'] .gaga-action-runtime__shell { border-radius: 1rem; margin-block-start: .5rem; }
+  .gaga-contextual-notch-container[data-gaga-notch-shape='pill'] .gaga-action-runtime__shell { border-radius: 1.5rem; }
+  .gaga-contextual-notch .gaga-island-bar { display: grid; grid-template-columns: 2.75rem minmax(0, 1fr) 2.75rem; gap: .25rem; min-block-size: 2.75rem; }
+  .gaga-contextual-notch .gaga-island-brand { display: inline-flex; gap: .5rem; justify-content: center; align-items: center; min-block-size: 2.75rem; padding-inline: .4rem; color: inherit; text-decoration: none; font: 600 .9rem var(--gaga-font-ui); }
+  .gaga-contextual-notch .gaga-island-brand__sensor { inline-size: .7rem; block-size: .7rem; border: 1px solid currentColor; border-radius: 50%; }
+  .gaga-contextual-notch .gaga-notch-button { display: inline-flex; align-items: center; justify-content: center; gap: .4rem; min-block-size: 2.75rem; min-inline-size: 2.75rem; max-inline-size: 100%; padding: .45rem .65rem; border: 1px solid #56564e; border-radius: .6rem; background: transparent; color: inherit; font: inherit; font-size: .85rem; cursor: pointer; opacity: 1; visibility: visible; pointer-events: auto; }
+  .gaga-contextual-notch .gaga-notch-button:disabled { opacity: .4; cursor: default; }
+  .gaga-contextual-notch :is(button,a,summary):focus-visible { outline: 2px solid #fff; outline-offset: -3px; }
+  .gaga-contextual-notch .gaga-notch-button:is(:hover,[aria-pressed='true']) { background: #363632; }
+  .gaga-contextual-notch .gaga-notch-context, .gaga-contextual-notch .gaga-notch-system { inline-size: min(28rem, calc(100vw - 2.25rem)); padding: .6rem 0; border-block-start: 1px solid #454540; }
+  .gaga-contextual-notch [hidden] { display: none !important; }
+  .gaga-contextual-notch .gaga-notch-page-title { margin: 0 0 .6rem; font-size: .9rem; line-height: 1.45; overflow-wrap: anywhere; }
+  .gaga-contextual-notch .gaga-notch-actions { display: flex; flex-wrap: wrap; gap: .4rem; }
+  .gaga-contextual-notch [role='progressbar'] { display: block; margin-block-start: .6rem; font: .75rem var(--gaga-font-mono); }
+  .gaga-contextual-notch .gaga-notch-navigation { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .4rem; margin-block: .75rem; }
+  .gaga-contextual-notch a { color: inherit; }
+  .gaga-contextual-notch .gaga-notch-navigation a { display: flex; align-items: center; gap: .4rem; padding: .5rem; min-block-size: 2.75rem; border-radius: .5rem; text-decoration: none; }
+  .gaga-contextual-notch :is(a[aria-current],a:hover) { background: #363632; }
+  .gaga-contextual-notch summary { padding: .75rem .25rem; min-block-size: 2.75rem; cursor: pointer; }
+  .gaga-contextual-notch details h2 { font-size: .9rem; }
+  .gaga-contextual-notch details ul { padding-inline-start: 1.25rem; }
+  .gaga-contextual-notch details a { display: inline-block; padding-block: .5rem; }
+  .gaga-contextual-notch .gaga-reader-panel { position: static; inset: auto; display: none; inline-size: min(28rem, calc(100vw - 2.25rem)); width: auto; max-block-size: none; max-height: none; overflow: visible; transform: none; opacity: 1; border: 0; border-radius: 0; box-shadow: none; background: #151513; color: #f7f6f2; transition: none; }
+  .gaga-contextual-notch .gaga-reader-panel[data-gaga-state='open'] { display: block; transform: none; }
+  .gaga-contextual-notch:has([data-gaga-reader-panel][data-gaga-state='open']) .gaga-notch-context,
+  .gaga-contextual-notch:has([data-gaga-reader-panel][data-gaga-state='open']) .gaga-notch-system > :not(.gaga-notch-actions),
+  .gaga-contextual-notch:has([data-gaga-reader-panel][data-gaga-state='open']) .gaga-notch-system .gaga-notch-actions > :not([data-gaga-action='toggle-reader-preferences']) { display: none; }
+  .gaga-contextual-notch .gaga-reader-panel :is(h2,legend,label,summary,button,span) { color: inherit; }
+  .gaga-contextual-notch .gaga-reader-panel button { border-color: #77776c; background: #242421; }
+  .gaga-contextual-notch .gaga-reader-panel button[data-gaga-active='true'] { background: #f7f6f2; color: #151513; }
+  @media(prefers-reduced-motion:reduce) { .gaga-contextual-notch *, .gaga-contextual-notch-container { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
 </style>

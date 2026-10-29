@@ -1,11 +1,11 @@
 export const gagaSignatureSurfaceContract = {
   dynamicGlobalNavigation: {
-    owns: ['global-destinations', 'global-search', 'information-surface', 'reader-settings'],
+    owns: ['global-destination-projection', 'global-search-route'],
     mustNotOwn: ['route-local-navigation', 'article-outline', 'context-intelligence']
   },
   dynamicNotchIsland: {
-    owns: ['workspace-actions', 'context-surface-trigger', 'reading-progress', 'transient-action-feedback'],
-    mustNotOwn: ['global-destination-list', 'article-outline-tree']
+    owns: ['workspace-actions', 'context-surface-trigger', 'nested-navigation-projection', 'reader-settings', 'reading-progress', 'transient-action-feedback'],
+    mustNotOwn: ['global-destination-registry', 'article-outline-tree']
   },
   dynamicOutlinePeek: {
     owns: ['article-outline', 'current-heading', 'compact-outline-navigation'],

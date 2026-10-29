@@ -1,3 +1,4 @@
+import { inferPublicationType, inferCanonicalTopics } from './pakrpp-content';
 import {
   formatContentDate,
   resolveContentDateLocale,
@@ -385,9 +386,9 @@ export function getPageContext(input: PageContextInput): PageContext {
   if (kind === 'article') {
     const articleIndex = articleRecord ? articles.indexOf(articleRecord) : -1;
     const objectId = contentId ?? (articleIndex >= 0 ? `pub_${String(articleIndex + 1).padStart(3, '0')}` : undefined);
-    const pubTypeId = inferArticlePublicationType(articleRecord, String(metadata.title ?? ''));
+    const pubTypeId = articleRecord ? inferPublicationType(articleRecord) : inferArticlePublicationType(articleRecord, String(metadata.title ?? ''));
     const pubType = resolvePublicationType(pubTypeId);
-    const canonicalTopicIds = inferArticleCanonicalTopics(articleRecord, metadata.topics ?? []);
+    const canonicalTopicIds = articleRecord ? inferCanonicalTopics(articleRecord) : inferArticleCanonicalTopics(articleRecord, metadata.topics ?? []);
     const canonicalTopicValues: PageContextValue[] = canonicalTopicIds.map((topicId) => {
       const t = resolveCanonicalTopic(topicId);
       return {
@@ -415,11 +416,12 @@ export function getPageContext(input: PageContextInput): PageContext {
     const contextLabel = [pubType.label, rawTopics, metadata.readTime].filter(Boolean).join(' · ');
 
     pushFact(fact('objectId', 'fingerprint', 'OBJEK', 'OBJECT', value(objectId)));
-    pushFact(fact('publicationType', 'category', 'TIPE', 'TYPE', value(`${pubType.label} (${pubType.id})`)));
+    pushFact(fact('publicationType', 'category', 'TIPE', 'TYPE', value(pubType.label)));
     pushFact(fact('contextMeta', 'sell', 'LABEL ARTIKEL', 'ARTICLE LABEL', value(contextLabel)));
     pushFact(fact('publishedDate', 'calendar_month', 'DITERBITKAN', 'PUBLISHED', dateValue(metadata.publishedAt, locale)));
     pushFact(fact('updatedDate', 'sync', 'DIPERBARUI', 'UPDATED', dateValue(updatedAt, locale)));
     pushFact(fact('author', 'person', 'PENULIS', 'AUTHOR', resolvedAuthors.length ? linkedValues(resolvedAuthors) : value(metadata.author ?? defaultAuthor)));
+    pushFact(fact('section', 'category', 'RUBRIK', 'SECTION', value(articleRecord?.section)));
     pushFact(fact('contributors', 'person', 'KONTRIBUTOR', 'CONTRIBUTORS', linkedValues(resolvedContributors)));
     pushFact(fact('readTime', 'schedule', 'WAKTU BACA', 'READ TIME', value(metadata.readTime)));
     pushFact(fact('topic', 'grid_view', 'TOPIK', 'TOPIC', canonicalTopicValues.length ? canonicalTopicValues : canonicalTopic ? [{ text: canonicalTopic.topic, href: canonicalTopic.href }] : (metadata.topics ?? []).map((t) => ({ text: t }))));

@@ -19,6 +19,8 @@ type SpecRow = {
 const { rail } = Astro.props;
 
 const rows: SpecRow[] = [];
+const readerFacts = new Set(['publicationType', 'author', 'contributors', 'readTime', 'topic', 'topics', 'tags', 'section', 'publishedDate', 'updatedDate']);
+const knowledgeFacts = (rail.facts ?? []).filter(fact => ['objectId', 'knowledgeRelations', 'graph'].includes(fact.id));
 const seenIds = new Set<string>();
 
 function addRow(id: string, label: { key?: string; id: string; en: string }, values: PageContextValue[]) {
@@ -27,20 +29,8 @@ function addRow(id: string, label: { key?: string; id: string; en: string }, val
   rows.push({ id, label, values });
 }
 
-if (rail.snippet && rail.snippet.trim().length > 0) {
-  addRow(
-    'snippet',
-    {
-      key: rail.labels.articleSnippet.key,
-      id: rail.labels.articleSnippet.id,
-      en: rail.labels.articleSnippet.en
-    },
-    [{ text: rail.snippet.trim() }]
-  );
-}
-
 for (const fact of rail.facts ?? []) {
-  if (fact.values && fact.values.length > 0) {
+  if (readerFacts.has(fact.id) && !(fact.id === 'updatedDate' && rail.updatedAtDisplay?.datetime === rail.publishedDate?.datetime) && fact.values && fact.values.length > 0) {
     addRow(fact.id, { id: fact.label.id, en: fact.label.en }, fact.values);
   }
 }
@@ -57,7 +47,7 @@ if (rail.publishedDate?.text) {
   );
 }
 
-if (rail.updatedAtDisplay?.text) {
+if (rail.updatedAtDisplay?.text && rail.updatedAtDisplay.datetime !== rail.publishedDate?.datetime) {
   addRow(
     'updatedDate',
     {
@@ -183,6 +173,10 @@ if (rail.tags?.length && !seenIds.has('tags')) {
     </div>
   </section>
 ) : null}
+{knowledgeFacts.length > 0 && <details class="gaga-page-metadata-spec" data-gaga-knowledge-details>
+  <summary>Objek &amp; relasi pengetahuan</summary>
+  <dl>{knowledgeFacts.map(fact => <div><dt>{fact.label.id}</dt><dd>{fact.values.map((item, index) => <>{index > 0 && ' · '}{item.href ? <a href={item.href}>{item.text}</a> : item.text}</>)}</dd></div>)}</dl>
+</details>}
 
 <style>
   @layer gaga.core {

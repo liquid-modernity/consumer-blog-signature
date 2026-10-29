@@ -18,7 +18,10 @@ test('mandatory matrix is the five actual unchanged assertions on desktop/mobile
     for(const m of text.matchAll(/\btest\(\s*(['"])(.*?)\1/g))cases.push({file,title:m[2]});
     const baseline=execFileSync('git',['show',contract.baselineCommit+':tools/gaga/browser/'+file],{encoding:'utf8'});
     const first=file==='application.spec.ts'?'test("native publication':'test(\'reference Site';
-    assert.equal(text.slice(text.indexOf(first)),baseline.slice(baseline.indexOf(first)),'Existing mandatory assertions changed');
+    const openStep = "  await page.locator('[data-gaga-action-island-toggle]').click();\n";
+    if (file === 'reference.spec.ts') assert.equal(text.split(openStep).length - 1, 3, 'Only three disclosure steps are added to the existing saved journey');
+    const assertions = file === 'reference.spec.ts' ? text.replaceAll(openStep, '') : text;
+    assert.equal(assertions.slice(assertions.indexOf(first)),baseline.slice(baseline.indexOf(first)),'Existing mandatory assertions changed');
   }
   assert.deepEqual(contract.cases,cases);assert.equal(cases.length,5);
   assert.deepEqual(releaseQualification(),{browserPassed:10,browserFailed:0,consumer:'PASS',auditVulnerabilities:0});

@@ -21,7 +21,7 @@
   display: flex;
   inline-size: max-content;
   max-inline-size: min(100%, 26rem);
-  min-block-size: 2.25rem;
+  min-block-size: 2.75rem;
   margin-inline: auto;
   padding: .34rem 1.05rem .38rem;
   border: 0;
@@ -41,6 +41,9 @@
   font:600 .78rem/1.2 var(--gaga-font-ui);
   letter-spacing:-.01em;
   white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  min-inline-size:0;
 }
 
 .gaga-outline-peek__scrim {

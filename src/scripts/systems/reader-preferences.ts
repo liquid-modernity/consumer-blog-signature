@@ -210,12 +210,8 @@ export function initReaderPreferences() {
       if (getConfiguredLeftRailState(document.documentElement.dataset.gagaLayout) !== 'expanded') {
         requestLeftRail({ action: 'collapse', source: 'reader-open' });
       }
-      // Also collapse the Gaga Notch when the Reader Preferences panel opens
       const notch = document.querySelector<HTMLElement>('[data-gaga-action-runtime]');
-      if (notch && (notch.dataset.gagaState === 'expanded' || notch.dataset.gagaState === 'peek')) {
-        notch.dataset.gagaState = 'collapsed';
-        notch.querySelector('[data-gaga-action-island-toggle]')?.setAttribute('aria-expanded', 'false');
-      }
+      if (notch) { notch.dataset.gagaState = 'expanded'; notch.dataset.gagaLevel = '2'; }
     },
     requestQuickActionsSync
   });
@@ -257,7 +253,7 @@ export function initReaderPreferences() {
       event.stopPropagation();
       requestReaderPanel({
         action: 'close',
-        source: 'reader-panel-close',
+        source: 'click',
         x: event.clientX,
         y: event.clientY
       });

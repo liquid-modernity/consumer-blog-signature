@@ -1,6 +1,7 @@
 import { createSavedReadingCapability } from '@gaga/engine-runtime/runtime/saved-reading';
-import { type SavedItem } from '@gaga/engine-runtime/reader';
+import { isSavedItem, type SavedItem } from '@gaga/engine-runtime/reader';
 import { requestQuickActionsSync } from '@gaga/engine-runtime/runtime/events';
+import { readArray } from '@gaga/engine-runtime/runtime/storage';
 import { storageKeys } from '../../config/systems';
 
 function currentItem(): SavedItem | null {
@@ -15,10 +16,19 @@ function currentItem(): SavedItem | null {
 }
 
 export function initSavedReading() {
-  createSavedReadingCapability({
+  const capability = createSavedReadingCapability({
     storageKey: storageKeys.saved,
     buttonSelector: '[data-gaga-action="toggle-save"], [data-gaga-action="save-reading"]',
     getCurrentItem: currentItem,
-    requestQuickActionsSync
+    requestQuickActionsSync: detail => {
+      requestQuickActionsSync(detail);
+      queueMicrotask(() => capability.refresh());
+    },
+    getFeedback: ({ action, item }) => {
+      const stored = readArray(storageKeys.saved, isSavedItem).some(entry => entry.id === item.id);
+      const persisted = stored === (action === 'saved');
+      return { message: persisted ? (stored ? 'Bacaan disimpan di perangkat ini.' : 'Bacaan dihapus dari daftar tersimpan.') : 'Penyimpanan tidak tersedia. Bacaan belum tersimpan.', tone: persisted ? 'ok' : 'warn', source: 'saved-reading' };
+    }
   });
+  window.addEventListener('storage', event => { if (event.key === storageKeys.saved || event.key === null) capability.refresh(); });
 }

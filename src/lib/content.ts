@@ -16,6 +16,7 @@ export { toArticlePreview };
 export type { ArticleMonthGroup, ArticlePreview, ArticlePreviewOptions, ArticleRecord };
 
 export type ConsumerArticleRecord = ArticleRecord & {
+  publicationType?: string;
   contentId?: string;
   authorRefs: string[];
   contributorRefs: string[];
@@ -183,6 +184,7 @@ export async function getArticles(): Promise<ConsumerArticleRecord[]> {
           id: doc.id,
           href: entryToHref(doc),
           metadata: { ...metadata, title: metadata.title ?? doc.id, contentKind: 'article' },
+          publicationType: typeof (doc.data as { type?: unknown }).type === 'string' ? (doc.data as { type: string }).type : undefined,
           contentId: typeof doc.data.contentId === 'string' ? doc.data.contentId : undefined,
           authorRefs: stringArray(doc.data.authorRefs),
           contributorRefs: stringArray((doc.data as { contributorRefs?: unknown }).contributorRefs),

@@ -13,6 +13,7 @@ import {
   referenceRegistry,
   resolveCanonicalTopic,
   resolvePublicationType,
+  publicationTypeRegistry,
   seriesRegistry,
   validatePublicationInvariant,
   type CanonicalPublication,
@@ -89,7 +90,8 @@ function extractYearMonth(isoOrDate?: string): { year: string; month: string } {
   return { year: '2026', month: '10' };
 }
 
-function inferPublicationType(article: ConsumerArticleRecord): string {
+export function inferPublicationType(article: ConsumerArticleRecord): string {
+  if (article.publicationType && publicationTypeRegistry.some(type => type.id === article.publicationType)) return article.publicationType;
   const rawId = article.id.toLowerCase();
   const title = article.metadata.title.toLowerCase();
   if (article.storyFormat && article.storyFormat !== 'standard') {
@@ -105,7 +107,7 @@ function inferPublicationType(article: ConsumerArticleRecord): string {
   return 'essay';
 }
 
-function inferCanonicalTopics(article: ConsumerArticleRecord): string[] {
+export function inferCanonicalTopics(article: ConsumerArticleRecord): string[] {
   const matched = new Set<string>();
   for (const raw of [...article.topics, ...article.topicRefs, ...article.tags]) {
     const resolved = resolveCanonicalTopic(raw);
