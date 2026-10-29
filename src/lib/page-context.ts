@@ -389,7 +389,9 @@ export function getPageContext(input: PageContextInput): PageContext {
     const pubTypeId = articleRecord ? inferPublicationType(articleRecord) : inferArticlePublicationType(articleRecord, String(metadata.title ?? ''));
     const pubType = resolvePublicationType(pubTypeId);
     const canonicalTopicIds = articleRecord ? inferCanonicalTopics(articleRecord) : inferArticleCanonicalTopics(articleRecord, metadata.topics ?? []);
-    const canonicalTopicValues: PageContextValue[] = canonicalTopicIds.map((topicId) => {
+    const readerTopicValues: PageContextValue[] = metadata.topics?.length
+      ? metadata.topics.map(text => { const group = topicGroups.find(candidate => candidate.topic === text); return { text, ...(group ? { href: group.href } : {}) }; })
+      : canonicalTopicIds.map((topicId) => {
       const t = resolveCanonicalTopic(topicId);
       return {
         text: t?.label ?? topicId,
@@ -408,8 +410,8 @@ export function getPageContext(input: PageContextInput): PageContext {
       relationAuthorIds
     );
 
-    const rawTopics = canonicalTopicValues.length
-      ? canonicalTopicValues.map((item) => item.text).join(', ')
+    const rawTopics = readerTopicValues.length
+      ? readerTopicValues.map((item) => item.text).join(', ')
       : (metadata.topics ?? []).length
         ? (metadata.topics ?? []).join(', ')
         : canonicalTopic?.topic ?? '';
@@ -424,7 +426,7 @@ export function getPageContext(input: PageContextInput): PageContext {
     pushFact(fact('section', 'category', 'RUBRIK', 'SECTION', value(articleRecord?.section)));
     pushFact(fact('contributors', 'person', 'KONTRIBUTOR', 'CONTRIBUTORS', linkedValues(resolvedContributors)));
     pushFact(fact('readTime', 'schedule', 'WAKTU BACA', 'READ TIME', value(metadata.readTime)));
-    pushFact(fact('topic', 'grid_view', 'TOPIK', 'TOPIC', canonicalTopicValues.length ? canonicalTopicValues : canonicalTopic ? [{ text: canonicalTopic.topic, href: canonicalTopic.href }] : (metadata.topics ?? []).map((t) => ({ text: t }))));
+    pushFact(fact('topic', 'grid_view', 'TOPIK', 'TOPIC', readerTopicValues.length ? readerTopicValues : canonicalTopic ? [{ text: canonicalTopic.topic, href: canonicalTopic.href }] : (metadata.topics ?? []).map((t) => ({ text: t }))));
     pushFact(fact('tags', 'sell', 'TAG', 'TAGS', tagValues(metadata.tags ?? [], tagGroups)));
     pushFact(fact('knowledgeRelations', 'hub', 'RELASI PENGETAHUAN', 'KNOWLEDGE RELATIONS', relationValues));
     pushFact(fact('graph', 'account_tree', 'GRAPH', 'GRAPH', contentId ? [{ text: 'Local graph', href: `/graphs?focus=${encodeURIComponent(contentId)}` }] : []));

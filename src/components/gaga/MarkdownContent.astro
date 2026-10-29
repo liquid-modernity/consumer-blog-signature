@@ -75,7 +75,7 @@ if (!isRootPage) {
     const currentPub = currentIdx >= 0 ? canonicalPubs[currentIdx] : null;
     if (currentPub) {
       const pubTypeLabel = resolvePublicationType(currentPub.type).label;
-      const topicLabels = currentPub.topics.map((t) => resolveCanonicalTopic(t)?.label ?? t).join(', ');
+      const topicLabels = (rightRail?.topics?.length ? rightRail.topics : currentPub.topics.map((t) => resolveCanonicalTopic(t)?.label ?? t)).join(', ');
       readingMetaItems = [
         pubTypeLabel,
         topicLabels,

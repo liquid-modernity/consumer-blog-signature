@@ -48,6 +48,9 @@ for d in posts:
     assert page.canonical.rstrip('/') == origin + path, ('canonical', path, page.canonical)
     assert page.title.strip() == item['data']['title'], ('title', path)
     metadata = item['data']['metadata']
+    assert page.description == item['data'].get('summary'), ('summary',path)
+    if metadata.get('topics'): assert page.fields.get('topic','').strip() == ' · '.join(metadata['topics']), ('published topic labels',path,page.fields.get('topic'))
+    if metadata.get('tags'): assert page.fields.get('tags','').strip() == ' · '.join('#'+tag for tag in metadata['tags']), ('published tag labels',path)
     if metadata.get('type') in labels: assert page.fields.get('publicationType','').strip() == labels[metadata['type']], ('explicit published type',path,page.fields.get('publicationType'),metadata['type'])
     if metadata.get('readTime'): assert page.fields.get('readTime','').strip() == metadata['readTime'], ('readTime',path)
     if metadata.get('section'): assert page.fields.get('section','').strip() == metadata['section'], ('section',path)

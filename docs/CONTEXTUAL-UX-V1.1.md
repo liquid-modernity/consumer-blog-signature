@@ -78,3 +78,11 @@ now resolves the existing published group by the active route and supplied label
 Missing groups fail the build rather than inventing an Unknown Topic/zero count.
 No authored topic file or CMS taxonomy is changed. Emitted-page proof binds all
 five topic memberships to the existing admitted topicRefs.
+
+The same review exposed two legacy public topic labels being replaced by inferred
+canonical graph classifications (Reader Experience / Publishing Systems became
+Teknologi). Header and reader facts now prefer the existing published topic labels
+from PageContext. Known topic routes come from published groups; unknown labels
+remain text rather than inventing links. Existing application graph inference is
+unchanged and remains in the explicit knowledge view. All seven emitted article
+summaries, topic labels and tags are compared directly to the admitted export.
