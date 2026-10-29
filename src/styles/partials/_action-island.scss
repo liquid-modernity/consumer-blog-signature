@@ -118,22 +118,7 @@
   flex: none;
 }
 
-.gaga-action-runtime__status {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-inline-size: 3.2rem;
-  padding-inline: .42rem;
-  color: var(--gaga-muted);
-  font: 800 var(--gaga-type-label-size) / 1 var(--gaga-font-mono);
-  letter-spacing: .04em;
-  white-space: nowrap;
-}
 
-.gaga-action-runtime__reading-progress {
-  color: var(--gaga-ink);
-  font-variant-numeric: tabular-nums;
-}
 
 .gaga-action-runtime__toggle {
   padding-inline: .54rem;
