@@ -830,6 +830,7 @@ function initSmartSpeaker(): SpeakerController {
         };
 
         utt.onerror = (err) => {
+          if (currentUtterance !== utt) return;
           console.warn('[Gaga Speech] Block error:', err);
           currentIndex++;
           speakNextBlock();
@@ -864,6 +865,8 @@ function initSmartSpeaker(): SpeakerController {
     },
 
     stop() {
+      this.state = 'idle';
+      currentUtterance = null;
       stopKeepAlive();
       if (synth) {
         synth.cancel();
@@ -994,12 +997,14 @@ function closeSpeechDock() {
   if (!speechDockEl) return;
 
   if (speechDockEmbedded) {
+    const restoreFocus = speechDockEl.contains(document.activeElement);
     const runtime = speechDockEl.closest<HTMLElement>('[data-gaga-action-runtime]');
     speechDockEl.innerHTML = '';
     speechDockEl.hidden = true;
     speechDockEl.removeAttribute('role');
     speechDockEl.removeAttribute('aria-label');
     if (runtime) {
+      if (restoreFocus) runtime.querySelector<HTMLElement>('[data-gaga-action-island-toggle]')?.focus({preventScroll:true});
       runtime.dataset.gagaLiveState = 'idle';
       runtime.dataset.gagaState = 'collapsed';
       runtime.querySelector('[data-gaga-action-island-toggle]')?.setAttribute('aria-expanded', 'false');

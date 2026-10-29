@@ -53,6 +53,7 @@ const initialOutlineLabel = outlineItems[0]?.text ?? '';
           <Icon name="outline" />
           <span>{rail.labels.outlineTitle.id}</span>
         </h2>
+        <span class="gaga-visually-hidden" data-gaga-outline-sheet-current-label aria-live="polite">{initialOutlineLabel}</span>
       </header>
       <div class="gaga-outline-peek__scroll" data-gaga-outline-peek-scroll>
         <TocBlock emptyList={pendingOutline} items={outlineItems} showTitle={false} wrapper="nav" ariaLabelledby={outlineTitleId} />

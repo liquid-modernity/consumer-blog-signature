@@ -39,7 +39,7 @@ const presentation = resolveNotchPresentation(experienceConfig.notch);
         <form action="/search" role="search" class="gaga-notch-search" data-gaga-notch-search hidden inert>
           <label for="notch-query" class="gaga-visually-hidden">Cari publikasi</label><input id="notch-query" type="search" name="q" placeholder="Cari publikasi…" required /><button class="gaga-notch-button" type="submit" aria-label="Cari"><Icon name="search" /></button>
         </form>
-        {context === 'article' && <span class="gaga-notch-progress" role="progressbar" aria-label="Progres membaca" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-gaga-reading-progress><span class="gaga-visually-hidden" data-gaga-reading-progress-value>0%</span></span>}
+        {context === 'article' && <span class="gaga-visually-hidden" role="progressbar" aria-label="Progres membaca" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-gaga-reading-progress><span class="gaga-visually-hidden" data-gaga-reading-progress-value>0%</span></span>}
       </section>
       <section id="gaga-notch-system" class="gaga-notch-system" data-gaga-notch-system hidden inert aria-label="Pembaca dan navigasi">
         <div class="gaga-notch-actions">
@@ -197,8 +197,6 @@ const presentation = resolveNotchPresentation(experienceConfig.notch);
   .gaga-contextual-notch .gaga-reader-panel button[data-gaga-active='true']:focus-visible { outline-color: var(--gaga-island-bg); }
   .gaga-contextual-notch .gaga-notch-search { display:flex; gap:.25rem; margin-block:.5rem; }
   .gaga-contextual-notch .gaga-notch-search input { min-inline-size:0; inline-size:100%; border:0; border-radius:.5rem; padding:.7rem; color:var(--gaga-island-ink); background:var(--gaga-island-hover); font:inherit; }
-  .gaga-contextual-notch .gaga-notch-progress { block-size:3px; background:var(--gaga-island-hover); border-radius:3px; overflow:hidden; margin-block:.5rem 0; }
-  .gaga-contextual-notch .gaga-notch-progress::after { content:''; display:block; block-size:100%; inline-size:var(--reading-progress,0%); background:var(--gaga-island-ink); }
   .gaga-contextual-notch[data-gaga-live-state='speaking'] :is(.gaga-notch-context,.gaga-notch-system) { display:none; }
   .gaga-contextual-notch :is(.gaga-notch-context,.gaga-notch-system,.gaga-reader-panel) { animation:gaga-island-reveal .18s ease-out; }
   @keyframes gaga-island-reveal { from { opacity:.5; transform:translateY(-3px); } to { opacity:1; transform:translateY(0); } }
