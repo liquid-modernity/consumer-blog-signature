@@ -68,6 +68,8 @@ jobs:
             for f in m['files']:assert hashlib.sha256(z.read(f['path'])).hexdigest()==f['sha256']
             z.extractall(target)
           PY
+      - name: Verify date-only Search projection correction against the sealed baseline
+        run: python3 tools/contextual/search-proof.py "$RUNNER_TEMP/contextual-baseline/dist/search-index.json" dist/search-index.json
       - name: Reproduce defects against immutable canonical bytes in isolation
         run: |
           pushd "$RUNNER_TEMP/contextual-baseline"
@@ -107,7 +109,7 @@ jobs:
           const browser=assertBrowserReport(read('.gaga/browser-results.json')),contextual=read('.gaga/contextual-ux/browser-results.json').stats,reference=read('.gaga/reference-quality/browser-results.json').stats,baseline=read('.gaga/contextual-ux/baseline-results.json').stats;
           for(const [stats,count] of [[contextual,20],[reference,10],[baseline,2]]){assert.equal(stats.expected,count);assert.equal(stats.unexpected,0);assert.equal(stats.skipped,0);assert.equal(stats.flaky,0);}
           const audit=read(dir+'/audit.json');assert.equal(audit.metadata.vulnerabilities.total,0);
-          assert.equal(hash('package-lock.json'),'5eaf8946c85601681837807ac2bca5c8d4547bd784014dd7dab07d44e3e8b9ee');assert.equal(hash('cms/package-lock.json'),'62b398d8c74d91f0fa4b5c1c40818737c225e574aecbe14637fd6f86c4c2eef5');assert.equal(hash('content/emdash/published.json'),'9caa6924b6ebbbc4d545cbee4f4fa8996ec30036c998aed114f951088dd0e37d');assert.equal(hash('dist/search-index.json'),'5b982d6827606ed194604511f83156cb0697c04115df253177581df24ce6a807');
+          assert.equal(hash('package-lock.json'),'5eaf8946c85601681837807ac2bca5c8d4547bd784014dd7dab07d44e3e8b9ee');assert.equal(hash('cms/package-lock.json'),'62b398d8c74d91f0fa4b5c1c40818737c225e574aecbe14637fd6f86c4c2eef5');assert.equal(hash('content/emdash/published.json'),'9caa6924b6ebbbc4d545cbee4f4fa8996ec30036c998aed114f951088dd0e37d');assert.equal(hash('dist/search-index.json'),'baee3af23ce389f90c49d3825f009d5a8963e5a4356465c9a6d6ee4573dbbccf');assert.equal(read(dir+'/search-equivalence.json').status,'PASS');
           writeFileSync(dir+'/qualification-receipt.json',JSON.stringify({status:'QUALIFIED',source,runtime:read(dir+'/runtime.json'),workerd:execFileSync('node_modules/.bin/workerd',['--version'],{encoding:'utf8'}).trim(),browser,contextual,reference,baseline,audit:audit.metadata.vulnerabilities,changedFiles:execFileSync('git',['diff','--name-only',base,'HEAD'],{encoding:'utf8'}).trim().split('\n'),productionAdmission:'NOT GRANTED: unchanged historical UI preservation guard rejects reviewed UX changes',productionMutations:0,mainPromotions:0,deployments:0,packagePublications:0,run:process.env.GITHUB_RUN_ID},null,2)+'\n');
           JS
           git diff --exit-code

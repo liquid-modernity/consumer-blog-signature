@@ -65,3 +65,9 @@ is unchanged and rejects these reviewed UI changes. Its regression fixtures use
 the historical canonical bytes. Any later promotion/release requires explicit
 review and exact-source admission of the new approved presentation. This task
 neither promotes nor deploys nor changes content-release policy or switches.
+
+The pinned Engine date input is date/pubDate and updatedDate/updated. The CMS
+projection now supplies those aliases from existing published editorial dates.
+Search consequently gains the missing dates and chronological ordering. Hosted
+comparison against the exact sealed baseline rejects every non-date field change,
+checks dates against the admitted records, and preserves historical/new hashes.
