@@ -86,3 +86,11 @@ from PageContext. Known topic routes come from published groups; unknown labels
 remain text rather than inventing links. Existing application graph inference is
 unchanged and remains in the explicit knowledge view. All seven emitted article
 summaries, topic labels and tags are compared directly to the admitted export.
+
+The resting top/bottom chrome reserves space outside the application's scrolling
+viewport. Initial paragraph padding alone allowed scrolled text underneath the
+Notch. Existing scroll owners and Engine metrics remain intact; CSS reduces the
+viewport and removes double initial clearance. Supported side placements retain
+the full viewport. Browser geometry asserts that resting chrome and the reading
+viewport do not overlap for every preset at all five widths. Expanded actions and
+preferences are deliberately requested overlays.

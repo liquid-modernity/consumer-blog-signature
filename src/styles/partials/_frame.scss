@@ -224,3 +224,19 @@ body:has(.gaga-app-frame) {
 .gaga-app-frame .gaga-main-region { scroll-padding-block-start: 4rem; }
 .gaga-app-frame:has([data-gaga-notch-placement='bottom']) .gaga-main-region { padding-block-end: 4rem; }
 .gaga-app-frame:has([data-gaga-notch-placement='bottom']) .gaga-outline-stack { bottom: calc(var(--gaga-safe-area-bottom, 0px) + 4rem); }
+
+// Reserve resting chrome outside the scroll viewport, not just above its first paragraph.
+.gaga-app-frame:has([data-gaga-action-runtime-container]) {
+  --gaga-notch-clearance-top: 0px;
+  --gaga-notch-clearance-bottom: 0px;
+}
+.gaga-app-frame:has([data-gaga-notch-placement='top']) { --gaga-notch-clearance-top: calc(4.5rem + var(--gaga-safe-area-top, 0px)); }
+.gaga-app-frame:has([data-gaga-notch-placement='bottom']) { --gaga-notch-clearance-bottom: calc(4.5rem + var(--gaga-safe-area-bottom, 0px)); }
+.gaga-app-frame:has([data-gaga-action-runtime-container][data-gaga-notch-placement]) .gaga-main-region {
+  margin-block-start: var(--gaga-notch-clearance-top);
+  min-block-size: 0;
+  block-size: calc(100dvh - var(--gaga-notch-clearance-top) - var(--gaga-notch-clearance-bottom));
+  scroll-padding-block-start: 1rem;
+}
+.gaga-app-frame:has([data-gaga-action-runtime-container]) .content-panel:not(:has([data-pakrpp-root-index])),
+.gaga-app-frame[data-gaga-content-kind='article']:has([data-gaga-action-runtime-container]) .gaga-article-scroll__inner { padding-block-start: 1.75rem; }
