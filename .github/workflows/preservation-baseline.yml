@@ -41,7 +41,7 @@ jobs:
           node --input-type=module - <<'JS'
           import{sourceIdentity}from'./tools/gaga/source-identity.mjs';import{writeFileSync,readFileSync}from'node:fs';import{createHash}from'node:crypto';import{execFileSync}from'node:child_process';import assert from'node:assert/strict';
           const source=sourceIdentity();assert.equal(source.commit,process.env.GITHUB_SHA);
-          const allowed=[".github/workflows/preservation-baseline.yml", "public/_redirects", "tools/gaga/asset-routes.mjs", "tools/gaga/browser/reference.spec.ts", "tools/gaga/consumer.mjs", "tools/gaga/production-readback.mjs", "tools/gaga/production-readback.test.mjs"].sort();
+          const allowed=[".github/workflows/preservation-baseline.yml", "public/_redirects", "tools/gaga/asset-routes.mjs", "tools/gaga/consumer.mjs", "tools/gaga/production-readback.mjs", "tools/gaga/production-readback.test.mjs"].sort();
           const changed=execFileSync('git',['diff','--name-only','34c3917bcb56671a273da22211d121b6c9a9d635','HEAD'],{encoding:'utf8'}).trim().split('\n').sort();assert.deepEqual(changed,allowed);
           const digest=p=>createHash('sha256').update(readFileSync(p)).digest('hex');
           assert.equal(digest('docs/UI-PRESERVATION.json'),'0fc6f482051c2f35c08e943c0924fb60567316f3e094d10b917c937bca816d4b');
