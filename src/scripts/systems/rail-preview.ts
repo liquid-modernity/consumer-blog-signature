@@ -19,6 +19,7 @@ export function attachRailPreview({
   openDelayMs = 120,
   closeDelayMs = 220
 }: RailPreviewOptions) {
+  let restoringFocus = false;
   let openTimer: number | undefined;
   let closeTimer: number | undefined;
 
@@ -52,7 +53,9 @@ export function attachRailPreview({
     else closeTimer = window.setTimeout(apply, closeDelayMs);
   };
 
-  rail.addEventListener('focusin', () => open(true));
+  rail.addEventListener('focusin', event => {
+    if (!restoringFocus && event.target instanceof Element && event.target.matches(':focus-visible')) open(true);
+  });
 
   rail.addEventListener('focusout', (event) => {
     const next = event.relatedTarget;
@@ -63,7 +66,9 @@ export function attachRailPreview({
     if (event.key === 'Escape' && rail.dataset.gagaHoverExpanded === 'true') {
       event.preventDefault();
       close(true);
+      restoringFocus = true;
       rail.querySelector<HTMLElement>('.gaga-rail-toggle')?.focus({ preventScroll: true });
+      restoringFocus = false;
     }
   });
 
