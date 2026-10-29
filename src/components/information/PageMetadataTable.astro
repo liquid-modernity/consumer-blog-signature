@@ -24,10 +24,10 @@ const knowledgeFacts = (rail.facts ?? []).filter(fact => ['objectId', 'knowledge
 const seenIds = new Set<string>();
 
 function addRow(id: string, label: { key?: string; id: string; en: string }, values: PageContextValue[]) {
-  if (id === 'topic') id = 'topics';
+  const identity = id === 'topic' ? 'topics' : id;
   values = values.filter((item, index) => values.findIndex(other => other.text === item.text && other.href === item.href) === index);
-  if (!values.length || seenIds.has(id)) return;
-  seenIds.add(id);
+  if (!values.length || seenIds.has(identity)) return;
+  seenIds.add(identity);
   rows.push({ id, label, values });
 }
 
