@@ -86,12 +86,12 @@ test('Notch hierarchy, keyboard/touch, presets, nested preferences and persisten
   await page.keyboard.press('Escape'); await expect(island).toHaveAttribute('data-gaga-level','0'); await expect(opener(page)).toBeFocused();
   await page.reload(); await expect(page.locator('html')).toHaveAttribute('data-gaga-runtime','ready'); expect(await page.evaluate(()=>localStorage.getItem('gaga:reader:v2'))).toBe(state.reader); expect(await page.evaluate(()=>localStorage.getItem('gaga:theme:v2'))).toBe(state.theme); expect(await page.evaluate(()=>localStorage.getItem('gaga:language:v1'))).toBe(state.language);
   const container=page.locator('[data-gaga-action-runtime-container]');
-  for(const preset of [{placement:'top',shape:'notch'},{placement:'top',shape:'island'},{placement:'bottom',shape:'pill'},{placement:'left',shape:'island'},{placement:'right',shape:'pill'}]){
+  for(const preset of [{placement:'top',shape:'notch'},{placement:'top',shape:'island'},{placement:'top',shape:'pill'},{placement:'bottom',shape:'pill'},{placement:'bottom',shape:'island'},{placement:'left',shape:'island'},{placement:'left',shape:'pill'},{placement:'right',shape:'pill'},{placement:'right',shape:'island'}]){
     await container.evaluate((el,p)=>{(el as HTMLElement).dataset.gagaNotchConfig=JSON.stringify(p);window.dispatchEvent(new Event('resize'));},preset);
     await settle(page); const resting=await geometry(page,'[data-gaga-action-runtime]');
     const reading=await page.locator('[data-gaga-main-region]').boundingBox(),placementAtRest=await container.getAttribute('data-gaga-notch-placement');expect(reading).not.toBeNull();
     if(placementAtRest==='top')expect(reading!.y).toBeGreaterThanOrEqual(resting.panel!.bottom);
-    if(placementAtRest==='bottom')expect(reading!.y+reading!.height).toBeLessThanOrEqual(resting.panel!.top);
+    if(placementAtRest==='bottom'){expect(reading!.y+reading!.height).toBeLessThanOrEqual(resting.panel!.top);const handle=page.locator('[data-gaga-outline-opener]');if(await handle.isVisible()){const box=await handle.boundingBox();expect(box!.y+box!.height).toBeLessThanOrEqual(resting.panel!.top);}}
     await opener(page).click(); await settle(page); await geometry(page,'[data-gaga-action-runtime]');
     await page.keyboard.press('Escape');
     const placement=await container.getAttribute('data-gaga-notch-placement'); expect(placement).toBe(Number(info.project.name)<1280&&['left','right'].includes(preset.placement)?'top':preset.placement);

@@ -217,7 +217,7 @@ body:has(.gaga-app-frame) {
 // Rails reserve space only when this route actually renders one.
 .gaga-app-frame:not(:has([data-gaga-left-rail])) .gaga-main-region { padding-inline-start: 0; }
 .gaga-app-frame:not(:has([data-gaga-right-rail])) .gaga-main-region { padding-inline-end: 0; }
-.gaga-app-frame:has([data-gaga-notch-placement='bottom']) .gaga-outline-stack { bottom: calc(var(--gaga-safe-area-bottom, 0px) + 4rem); }
+.gaga-app-frame:has([data-gaga-notch-placement='bottom']) .gaga-outline-stack { bottom: var(--gaga-notch-clearance-bottom, 4.5rem); }
 
 // Reserve resting chrome outside the scroll viewport, not just above its first paragraph.
 .gaga-app-frame:has([data-gaga-notch-placement='top']) { --gaga-notch-clearance-top: calc(4.5rem + var(--gaga-safe-area-top, 0px)); }
