@@ -18,6 +18,7 @@ test('reference Site surfaces and machine discovery retain the admitted public r
   for (const path of ['/publications', '/knowledge', '/knowledge/index', '/topics', '/tags', '/archive/2026']) {
     const response = await page.goto(path); expect(response?.status(), path).toBe(200);
     await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
+    if(path==='/knowledge/index'){await expect(page.getByRole('heading',{level:1}).first()).toHaveText('Indeks Pengetahuan Sistematis');await page.reload();await expect(page.getByRole('heading',{level:1}).first()).toHaveText('Indeks Pengetahuan Sistematis');}
     surfaces.push({path, heading: await page.getByRole('heading', {level: 1}).first().innerText(), mainLandmarkCount: await page.locator('main, [role=main]').count()});
   }
   mkdirSync('.gaga/reference', { recursive: true });

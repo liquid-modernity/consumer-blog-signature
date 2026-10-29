@@ -1,3 +1,4 @@
+import {verifyStaticAssetRoutes} from './asset-routes.mjs';
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { readFileSync, writeFileSync, mkdirSync, cpSync } from "node:fs";
@@ -116,7 +117,9 @@ try {
 } finally {
   await runtime.stop();
 }
+const assetRoutes = await verifyStaticAssetRoutes();
 const receipt = {
+  assetRoutes,
   status: "PASS",
   sourceCommit: process.env.GITHUB_SHA ?? null,
   node: process.version,
