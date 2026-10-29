@@ -122,10 +122,10 @@ jobs:
           mkdir -p "$RUNNER_TEMP/staging-evidence"
           printf 'GAGA_EVIDENCE_DIRECTORY=%s/staging-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
           node --input-type=module <<'JS'
-          import assert from 'node:assert/strict';import{readFileSync}from'node:fs';import{createHash}from'node:crypto';
+          import assert from 'node:assert/strict';import{readFileSync}from'node:fs';import{createHash}from'node:crypto';import{releaseQualification}from'./tools/gaga/browser-contract.mjs';
           const m=JSON.parse(readFileSync('.gaga/deployment-manifest.json'));
           assert.equal(m.sourceCommit,process.env.GITHUB_SHA);
-          assert.deepEqual(m.qualification,{browserPassed:4,browserFailed:0,consumer:'PASS',auditVulnerabilities:0});
+          assert.deepEqual(m.qualification,releaseQualification());
           for(const f of m.files){assert.ok(/^(dist\/|worker\/bundle\.mjs$|wrangler\.jsonc$)/.test(f.path)&&!f.path.split('/').includes('..'));assert.equal(createHash('sha256').update(readFileSync(f.path)).digest('hex'),f.sha256);}
           const config=JSON.parse(readFileSync('wrangler.jsonc'));
           assert.equal(config.name,'consumer-blog-signature');assert.deepEqual(config.compatibility_flags,['no_nodejs_compat','no_nodejs_compat_v2']);

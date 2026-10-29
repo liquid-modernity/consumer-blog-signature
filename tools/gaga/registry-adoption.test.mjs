@@ -50,9 +50,19 @@ test('only the two Arsenal dependencies change; Engine, CMS, application behavio
  const previous=JSON.parse(execFileSync('git',['show',baseline+':package-lock.json'],{encoding:'utf8'})),current=read('package-lock.json');
  for(const name of ['@gaga/arsenal','@gaga/arsenal-contracts']){previous.packages[''].dependencies[name]=current.packages[''].dependencies[name];previous.packages['node_modules/'+name]=current.packages['node_modules/'+name];}
  assert.deepEqual(current,previous,'Unrelated dependency identity changed');
- for(const path of ['cms/package.json','cms/package-lock.json','gaga.app.json','wrangler.jsonc','content-release.json','content/emdash/published.json','content/emdash/published-receipt.json','editorial/content-semantics.mjs','editorial/registry.mjs','editorial/portable-text.mjs','editorial/markdown.mjs','editorial/search.mjs','editorial/content-release.mjs','cms/editorial/plugin.mjs','cms/astro.cloudflare.config.mjs','cms/astro.studio.config.mjs','.github/workflows/deploy.yml'])
+ for(const path of ['cms/package.json','cms/package-lock.json','gaga.app.json','wrangler.jsonc','content-release.json','content/emdash/published.json','content/emdash/published-receipt.json','editorial/content-semantics.mjs','editorial/registry.mjs','editorial/portable-text.mjs','editorial/markdown.mjs','editorial/search.mjs','editorial/content-release.mjs','cms/editorial/plugin.mjs','cms/astro.cloudflare.config.mjs','cms/astro.studio.config.mjs'])
   assert.deepEqual(readFileSync(path),execFileSync('git',['show',baseline+':'+path]),path);
 });
 test('private Arsenal implementation stays inaccessible',async()=>{
  await assert.rejects(import('@gaga/arsenal'+'/dist/portable-content.mjs'),{code:'ERR_PACKAGE_PATH_NOT_EXPORTED'});
+});
+
+
+test('the production workflow retains the historical release path except its qualified browser contract gate',()=>{
+ const previous=execFileSync('git',['show',baseline+':.github/workflows/deploy.yml'],{encoding:'utf8'});
+ const current=readFileSync('.github/workflows/deploy.yml','utf8');
+ const before="import assert from'node:assert/strict';import{readFileSync,writeFileSync}from'node:fs';\n          const stats=JSON.parse(readFileSync('.gaga/browser-results.json')).stats;assert.equal(stats.expected,4);assert.equal(stats.unexpected,0);assert.equal(stats.skipped,0);assert.equal(stats.flaky,0);";
+ const after="import{assertBrowserReport}from'./tools/gaga/browser-contract.mjs';import{readFileSync,writeFileSync}from'node:fs';\n          const stats=assertBrowserReport(JSON.parse(readFileSync('.gaga/browser-results.json')));";
+ assert.equal(current.split(after).length,2,'Missing or duplicate shared browser gate');
+ assert.equal(current.replace(after,before),previous,'An unrelated production workflow change was introduced');
 });

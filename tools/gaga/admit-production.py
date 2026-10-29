@@ -1,5 +1,5 @@
 """Download one successful candidate's exact deployment ZIP; never rebuild."""
-import hashlib,json,os,stat,urllib.request,urllib.error,zipfile
+import hashlib,json,os,stat,subprocess,urllib.request,urllib.error,zipfile
 from pathlib import Path,PurePosixPath
 root=Path.cwd();out=Path(os.environ['GAGA_EVIDENCE_DIRECTORY']).resolve();assert not out.is_relative_to(root);out.mkdir(parents=True,exist_ok=True)
 run_id=os.environ['QUALIFICATION_RUN'];assert run_id.isdigit();sha=os.environ['GITHUB_SHA'];repo=os.environ['GITHUB_REPOSITORY'];assert repo=='liquid-modernity/consumer-blog-signature'
@@ -21,7 +21,7 @@ assert a['workflow_run']['head_sha']==sha and a['workflow_run']['id']==int(run_i
 archive=out.parent/'qualified-publication.zip';archive.write_bytes(get('/actions/artifacts/'+str(a['id'])+'/zip'));digest=hashlib.sha256(archive.read_bytes()).hexdigest();assert a['digest']=='sha256:'+digest
 with zipfile.ZipFile(archive) as z:
  manifest=json.loads(z.read('.gaga/deployment-manifest.json'));assert manifest['production'] is True and manifest['sourceCommit']==sha and str(manifest['qualificationRun'])==run_id
- assert manifest['qualification']=={'browserPassed':4,'browserFailed':0,'consumer':'PASS','auditVulnerabilities':0}
+ assert manifest['qualification']==json.loads(subprocess.check_output(['node','tools/gaga/browser-contract.mjs','--qualification'],text=True))
  expected={x['path']:x['sha256'] for x in manifest['files']};assert len(expected)==len(manifest['files']);expected['.gaga/deployment-manifest.json']=hashlib.sha256(z.read('.gaga/deployment-manifest.json')).hexdigest()
  members=[i for i in z.infolist() if not i.is_dir()];assert len(members)==len(expected) and {i.filename for i in members}==set(expected)
  for item in members:

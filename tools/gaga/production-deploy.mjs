@@ -5,6 +5,7 @@ import {resolve} from 'node:path';
 import {createHash} from 'node:crypto';
 import {spawnSync} from 'node:child_process';
 import {sourceIdentity} from './source-identity.mjs';
+import {releaseQualification} from './browser-contract.mjs';
 const root=process.cwd(),out=process.env.GAGA_EVIDENCE_DIRECTORY,phase=process.env.PUBLICATION_PHASE,token=process.env.CLOUDFLARE_API_TOKEN,account=process.env.CLOUDFLARE_ACCOUNT_ID;
 assert.ok(out&&token&&account);assert.ok(!resolve(out).startsWith(root+'/'));mkdirSync(out,{recursive:true});assert.ok(['preflight','deploy','rollback'].includes(phase));
 const load=path=>JSON.parse(readFileSync(path)),sha=path=>createHash('sha256').update(readFileSync(path)).digest('hex'),redact=s=>String(s).replaceAll(token,'[REDACTED]').replaceAll(account,'[ACCOUNT]');
@@ -27,7 +28,7 @@ const fingerprint=rows=>rows.filter(x=>x.id!==name).map(({id,etag,modified_on})=
 function artifact(){
  assert.equal(process.env.GITHUB_REF,'refs/heads/main','Production deployment requires canonical main');
  const m=load('.gaga/deployment-manifest.json'),a=load(resolve(out,'artifact-admission.json'));assert.equal(a.status,'PASS');assert.equal(a.sourceCommit,process.env.GITHUB_SHA);assert.equal(sha(a.archive),a.artifactSha256,'Qualified ZIP changed');
- assert.equal(m.sourceCommit,process.env.GITHUB_SHA);assert.equal(m.production,true);assert.equal(String(m.qualificationRun),String(a.qualificationRun));assert.deepEqual(m.qualification,{browserPassed:4,browserFailed:0,consumer:'PASS',auditVulnerabilities:0});
+ assert.equal(m.sourceCommit,process.env.GITHUB_SHA);assert.equal(m.production,true);assert.equal(String(m.qualificationRun),String(a.qualificationRun));assert.deepEqual(m.qualification,releaseQualification());
  const source=sourceIdentity();assert.equal(source.commit,m.sourceCommit);assert.equal(source.tree,m.sourceTree);assert.equal(source.sha256,m.sourceSha256);
  for(const f of m.files){assert.ok(/^(dist\/|worker\/bundle\.mjs$|wrangler\.jsonc$)/.test(f.path)&&!f.path.split('/').includes('..'));assert.equal(sha(f.path),f.sha256,'Qualified artifact changed: '+f.path);}
  assert.equal(sha('content/emdash/published.json'),m.productionExportSha256);assert.equal(sha('content/emdash/published-receipt.json'),m.contentReceiptSha256);

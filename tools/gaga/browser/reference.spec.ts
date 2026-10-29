@@ -1,11 +1,12 @@
 import { test, expect } from '@playwright/test';
 import { build } from 'esbuild';
 import { readFileSync, mkdirSync, writeFileSync } from 'node:fs';
+import { browserRequestAllowed } from '../browser-contract.mjs';
 
 const article = '/publications/akal-imitasi-sebagai-pekerja-tanpa-dignity';
 const savedKey = 'gaga:saved:v1';
 test.beforeEach(async ({ context }) => {
-  await context.route('**/*', route => ['localhost', '127.0.0.1'].includes(new URL(route.request().url()).hostname) ? route.continue() : route.abort());
+  await context.route('**/*', route => browserRequestAllowed(route.request().url(), process.env.GAGA_PRODUCTION_BROWSER_URL) ? route.continue() : route.abort());
 });
 
 test('reference Site surfaces and machine discovery retain the admitted public record set', async ({ page }, info) => {

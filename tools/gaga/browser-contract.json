@@ -1,0 +1,36 @@
+{
+  "schema": "consumer.release-browser/v1",
+  "baselineCommit": "6f024794df6a827eff56002c08848b1f6af7346e",
+  "browserQualificationRun": 40831505660,
+  "projects": [
+    "desktop",
+    "mobile"
+  ],
+  "cases": [
+    {
+      "file": "application.spec.ts",
+      "title": "native publication shell and Dynamic Notch remain interactive"
+    },
+    {
+      "file": "application.spec.ts",
+      "title": "real publication, public Engine Search and knowledge routes keep application presentation"
+    },
+    {
+      "file": "reference.spec.ts",
+      "title": "reference Site surfaces and machine discovery retain the admitted public record set"
+    },
+    {
+      "file": "reference.spec.ts",
+      "title": "reference Experience saves the visible article, survives reload, lists and removes it"
+    },
+    {
+      "file": "reference.spec.ts",
+      "title": "independent Experience consumer uses the published selector and storage ports"
+    }
+  ],
+  "localOrigins": [
+    "http://127.0.0.1:4173",
+    "http://localhost:4173"
+  ],
+  "productionOrigin": "https://consumer-blog-signature.ratriatra.workers.dev"
+}

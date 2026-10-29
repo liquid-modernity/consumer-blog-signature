@@ -1,0 +1,86 @@
+name: Release browser contract qualification
+on:
+  push:
+    branches: [review/release-browser-contract-v1]
+permissions:
+  contents: read
+jobs:
+  browser-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    env:
+      ASTRO_TELEMETRY_DISABLED: '1'
+      WRANGLER_SEND_METRICS: 'false'
+      GAGA_CONTENT_RELEASE_ENABLED: 'false'
+      PUBLIC_GIT_SHA: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.23.4'
+      - name: Exact runtime and clean committed dependencies
+        run: |
+          npm install --global npm@10.9.3 --ignore-scripts --no-audit --no-fund
+          mkdir -p "$RUNNER_TEMP/browser-contract"
+          echo "GAGA_EVIDENCE_DIRECTORY=$RUNNER_TEMP/browser-contract" >> "$GITHUB_ENV"
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';import{execFileSync}from'node:child_process';import{writeFileSync}from'node:fs';
+          const runtime={node:process.version,npm:execFileSync('npm',['--version'],{encoding:'utf8'}).trim(),runner:process.env.RUNNER_OS,image:process.env.ImageOS,imageVersion:process.env.ImageVersion};
+          assert.equal(runtime.node,'v22.23.4');assert.equal(runtime.npm,'10.9.3');writeFileSync(process.env.RUNNER_TEMP+'/browser-contract/runtime.json',JSON.stringify(runtime,null,2)+'\n');
+          JS
+          npm ci --ignore-scripts --no-audit --no-fund
+      - name: Shared contract, artifact admission, provider guards and preservation regressions
+        run: |
+          npm run test:gaga | tee "$GAGA_EVIDENCE_DIRECTORY/tests.log"
+          node tools/gaga/boundaries.mjs
+          node tools/gaga/preservation.mjs
+      - name: Application types, exact build and native Search compatibility
+        run: |
+          npm run check | tee "$GAGA_EVIDENCE_DIRECTORY/types.log"
+          export PUBLIC_BUILD_TIME="$(git show -s --format=%cI HEAD)"
+          npm run build | tee "$GAGA_EVIDENCE_DIRECTORY/build.log"
+          npm run test:consumer | tee "$GAGA_EVIDENCE_DIRECTORY/consumer.log"
+      - run: npx --no-install playwright install --with-deps chromium
+      - name: Actual Chromium origin isolation without production requests
+        run: node tools/gaga/browser-origin-proof.mjs > "$GAGA_EVIDENCE_DIRECTORY/origin-proof.json"
+      - name: All ten unchanged mandatory browser cases
+        run: |
+          npm run test:ui | tee "$GAGA_EVIDENCE_DIRECTORY/browser.log"
+          node tools/gaga/browser-contract.mjs --report .gaga/browser-results.json
+      - name: Audit and directly affected workflow lint
+        run: |
+          npm audit --audit-level=low --json > "$GAGA_EVIDENCE_DIRECTORY/audit.json"
+          go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.7 -shellcheck= .github/workflows/release-browser-contract.yml .github/workflows/deploy.yml .github/workflows/arsenal-dogfood.yml .github/workflows/editorial-integration.yml
+      - name: Source scope, unchanged production inputs and qualification receipt
+        run: |
+          node --input-type=module <<'JS'
+          import assert from'node:assert/strict';import{readFileSync,writeFileSync}from'node:fs';import{execFileSync}from'node:child_process';import{createHash}from'node:crypto';import{sourceIdentity}from'./tools/gaga/source-identity.mjs';import{assertBrowserReport}from'./tools/gaga/browser-contract.mjs';
+          const base='6f024794df6a827eff56002c08848b1f6af7346e',dir=process.env.GAGA_EVIDENCE_DIRECTORY,sha=p=>createHash('sha256').update(readFileSync(p)).digest('hex');
+          const allowed=['.github/workflows/arsenal-dogfood.yml','.github/workflows/deploy.yml','.github/workflows/editorial-integration.yml','.github/workflows/release-browser-contract.yml','playwright.config.ts','tools/gaga/admit-production.py','tools/gaga/application.test.mjs','tools/gaga/browser-contract.json','tools/gaga/browser-contract.mjs','tools/gaga/browser-contract.test.mjs','tools/gaga/browser-origin-proof.mjs','tools/gaga/browser/reference.spec.ts','tools/gaga/deployment-manifest.mjs','tools/gaga/production-admission.test.mjs','tools/gaga/production-deploy.mjs','tools/gaga/production-deploy.test.mjs','tools/gaga/registry-adoption.test.mjs'].sort();
+          const changed=execFileSync('git',['diff','--name-only',base,'HEAD'],{encoding:'utf8'}).trim().split('\n').sort();assert.deepEqual(changed,allowed);
+          execFileSync('git',['diff','--exit-code',base,'HEAD','--','src','cms','editorial','content','vendor','package.json','package-lock.json','wrangler.jsonc','content-release.json','tools/gaga/preservation.mjs','tools/gaga/preservation.test.mjs','docs/UI-PRESERVATION.json']);
+          const browser=assertBrowserReport(JSON.parse(readFileSync('.gaga/browser-results.json'))),audit=JSON.parse(readFileSync(dir+'/audit.json'));assert.equal(audit.metadata.vulnerabilities.total,0);
+          const source=sourceIdentity();assert.equal(source.commit,process.env.GITHUB_SHA);
+          const receipt={status:'QUALIFIED',source,changedFiles:changed,runtime:JSON.parse(readFileSync(dir+'/runtime.json')),workerd:execFileSync('node_modules/.bin/workerd',['--version'],{encoding:'utf8'}).trim(),browser,originProof:JSON.parse(readFileSync(dir+'/origin-proof.json')),audit:audit.metadata.vulnerabilities,applicationLock:sha('package-lock.json'),cmsLock:sha('cms/package-lock.json'),export:sha('content/emdash/published.json'),search:sha('dist/search-index.json'),composition:sha('.gaga/composition-plan.json'),reused:{preservation:40830055305,cms:40831513434,applicationResponsiveSemantics:40752951927},productionWrites:0,deployments:0,run:process.env.GITHUB_RUN_ID};
+          writeFileSync(dir+'/qualification-receipt.json',JSON.stringify(receipt,null,2)+'\n');
+          JS
+          git diff --exit-code
+          test -z "$(git ls-files --others --exclude-standard)"
+      - name: Preserve browser diagnostics
+        if: always()
+        run: |
+          if [ -f .gaga/browser-results.json ]; then cp .gaga/browser-results.json "$GAGA_EVIDENCE_DIRECTORY/"; fi
+          if [ -d test-results ]; then cp -R test-results "$GAGA_EVIDENCE_DIRECTORY/"; fi
+          if [ -f .gaga/consumer-receipt.json ]; then cp .gaga/consumer-receipt.json "$GAGA_EVIDENCE_DIRECTORY/"; fi
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: release-browser-contract-evidence
+          path: ${{ runner.temp }}/browser-contract
+          if-no-files-found: error

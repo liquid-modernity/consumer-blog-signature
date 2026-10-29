@@ -80,6 +80,6 @@ test("maintained CI propagates failed commands through pipes and gates staging o
     1,
   );
   const guard = readFileSync("tools/gaga/deployment-manifest.mjs", "utf8");
-  assert.ok(guard.includes("browser.unexpected"));
+  assert.ok(guard.includes("assertBrowserReport"));
   assert.ok(guard.includes("audit.metadata.vulnerabilities.total"));
 });
