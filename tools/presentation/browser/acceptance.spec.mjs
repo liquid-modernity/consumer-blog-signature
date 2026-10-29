@@ -20,6 +20,7 @@ test.beforeEach(async({page,context},info)=>{
 });
 test('open Notch and relevant Outline states preserve theme, current identity and keyboard access',async({page},info)=>{
  await ready(page);await expect(page.locator('html')).toHaveAttribute('data-gaga-theme',info.project.metadata.theme);
+ const title=await page.locator('h1').innerText();
  const before=await page.locator('[data-gaga-page-metadata-table]').innerText(),id=await page.locator('[data-gaga-app-frame]').getAttribute('data-gaga-page-id');
  await toggle(page).focus();await page.keyboard.press('Enter');await expect(island(page)).toHaveAttribute('data-gaga-level','1');within(await bounds(page,'[data-gaga-action-runtime]'));await shot(page,info,'notch-level1');
  await page.locator('[data-gaga-notch-more]').focus();await page.keyboard.press('Enter');await expect(island(page)).toHaveAttribute('data-gaga-level','2');await shot(page,info,'notch-level2');within(await bounds(page,'[data-gaga-action-runtime]'));
@@ -29,7 +30,7 @@ test('open Notch and relevant Outline states preserve theme, current identity an
  expect(await page.locator('[data-gaga-page-metadata-table]').innerText()).toBe(before);expect(await page.locator('[data-gaga-app-frame]').getAttribute('data-gaga-page-id')).toBe(id);
  // Leave a real in-progress read: the last heading may already complete a short desktop article.
  await page.locator('[data-gaga-article-body]').evaluate(body=>{let owner=body.parentElement;while(owner&&owner.scrollHeight<=owner.clientHeight+10)owner=owner.parentElement;if(!owner)throw Error('Expected an actual reading scroll owner');owner.scrollTop=Math.min(30,(owner.scrollHeight-owner.clientHeight)*.1);});await settled(page);
- await ready(page,'/saved');await expect(page.locator('[data-gaga-continuity-continue]')).toBeVisible();await settled(page);within(await bounds(page,'[data-gaga-continuity-continue]'));expect(await page.locator('[data-gaga-main-region]').evaluate(el=>el.scrollWidth-el.clientWidth)).toBeLessThanOrEqual(1);await shot(page,info,'saved-after-reading');
+ await ready(page,'/saved');await expect(page.locator('[data-gaga-continuity-continue]')).toBeVisible();await expect(page.locator('[data-gaga-continuity-continue-label]')).toContainText(title);expect(await page.locator('[data-gaga-continuity-continue-link]').getAttribute('href')).toMatch(new RegExp('^'+article+'(?:#|$)'));await settled(page);within(await bounds(page,'[data-gaga-continuity-continue]'));expect(await page.locator('[data-gaga-main-region]').evaluate(el=>el.scrollWidth-el.clientWidth)).toBeLessThanOrEqual(1);await shot(page,info,'saved-after-reading');
  await ready(page,'/');await page.locator('[data-gaga-outline-opener]').click();await expect(page.locator('[data-gaga-outline-peek]')).toHaveAttribute('data-gaga-state','open');await shot(page,info,'root-outline-open');await page.keyboard.press('Escape');
  for(const route of ['/topics/teknologi','/sections','/saved']){await ready(page,route);await expect(page.locator('[data-gaga-outline-opener]')).toHaveCount(0);}
  record(info,'notch-outline',{status:'PASS',activePageStable:true,outlineRoutes:['root','article'],notOn:['topic','sections','saved']});
