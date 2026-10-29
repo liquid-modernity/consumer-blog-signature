@@ -54,7 +54,7 @@ const initialOutlineLabel = outlineItems[0]?.text ?? '';
           <span>{rail.labels.outlineTitle.id}</span>
         </h2>
         <p class="gaga-outline-peek__status" aria-live="polite">
-          <span data-gaga-outline-sheet-current-index>1</span><span>/{outlineItems.length}</span>
+          <span data-gaga-outline-sheet-current-index>1</span><span>/<span data-gaga-outline-sheet-total>{outlineItems.length}</span></span>
           <span aria-hidden="true">·</span>
           <span data-gaga-outline-sheet-current-label>{initialOutlineLabel}</span>
         </p>

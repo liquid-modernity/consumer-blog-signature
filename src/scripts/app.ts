@@ -60,7 +60,7 @@ async function boot() {
     hasCapability('[data-gaga-nav-child-panel]')
       ? import('./systems/collapsed-nav').then(({ initCollapsedNav }) => initCollapsedNav()).catch(err => console.warn('[GAGA] Collapsed nav init failed:', err))
       : Promise.resolve(),
-    hasCapability('[data-gaga-toc-block] a[href^="#"]')
+    hasCapability('[data-gaga-toc-block]')
       ? import('./systems/toc-spy').then(({ initTocSpy }) => initTocSpy()).catch(err => console.warn('[GAGA] Toc spy init failed:', err))
       : Promise.resolve()
   ]);

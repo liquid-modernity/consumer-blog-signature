@@ -55,7 +55,7 @@ test('all admitted articles bind Outline links to real headings; empty and singl
   await ready(page,'/publications/'+post.item.slug);
   const headings=await page.locator('[data-gaga-article-body] h2[id], [data-gaga-article-body] h3[id]').evaluateAll(nodes=>nodes.map(n=>({href:'#'+n.id,text:n.textContent.trim()})));
   const opener=page.locator('[data-gaga-outline-opener]');
-  if(headings.length){await expect(opener).toBeVisible();expect(await page.locator('[data-gaga-outline-peek] [data-gaga-info-field="outline"] a').evaluateAll(nodes=>nodes.map(n=>({href:n.getAttribute('href'),text:n.textContent.trim()})))).toEqual(headings);await expect(page.locator('[data-gaga-outline-total]')).toHaveText(String(headings.length));}
+  if(headings.length){await expect(opener).toBeVisible();expect(await page.locator('[data-gaga-outline-peek] [data-gaga-info-field="outline"] a').evaluateAll(nodes=>nodes.map(n=>({href:n.getAttribute('href'),text:n.textContent.trim()})))).toEqual(headings);await expect(page.locator('[data-gaga-outline-total]')).toHaveText(String(headings.length));await expect(page.locator('[data-gaga-outline-sheet-total]')).toHaveText(String(headings.length));}
   else await expect(opener).toBeHidden();
   results.push({id:post.applicationId,revision:post.pin.liveRevisionId,headings});
  }

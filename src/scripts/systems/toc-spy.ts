@@ -32,7 +32,7 @@ export function hydrateDomOutlineIfSparse(readingRoot: HTMLElement) {
     if (stack) {
       for (const label of stack.querySelectorAll('[data-gaga-outline-current-label], [data-gaga-outline-sheet-current-label]')) label.textContent = headings[0].textContent?.trim() ?? '';
       for (const index of stack.querySelectorAll('[data-gaga-outline-current-index], [data-gaga-outline-sheet-current-index]')) index.textContent = '1';
-      const total = stack.querySelector('[data-gaga-outline-total]'); if (total) total.textContent = String(headings.length);
+      for (const total of stack.querySelectorAll('[data-gaga-outline-total], [data-gaga-outline-sheet-total]')) total.textContent = String(headings.length);
       stack.removeAttribute('data-gaga-outline-pending'); stack.hidden = false;
     }
   }
