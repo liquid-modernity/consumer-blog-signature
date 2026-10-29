@@ -1,0 +1,72 @@
+name: Theme and presentation acceptance
+on:
+  push:
+    branches: [review/theme-presentation-acceptance-v1]
+permissions:
+  contents: read
+jobs:
+  presentation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      ASTRO_TELEMETRY_DISABLED: '1'
+      WRANGLER_SEND_METRICS: 'false'
+      GAGA_CONTENT_RELEASE_ENABLED: 'false'
+      APPLICATION_REF: 7ca9f5708fd92fab50e3ba689fe3a011adaf07ad
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          path: application
+          ref: ${{ env.APPLICATION_REF }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          path: proof
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.23.4'
+      - name: Exact source and clean locked runtime
+        working-directory: application
+        run: |
+          npm install --global npm@10.9.3 --ignore-scripts --no-audit --no-fund
+          test "$(node --version)" = v22.23.4
+          test "$(npm --version)" = 10.9.3
+          test "$(git rev-parse HEAD)" = "$APPLICATION_REF"
+          mkdir -p "$RUNNER_TEMP/presentation"
+          echo "GAGA_EVIDENCE_DIRECTORY=$RUNNER_TEMP/presentation" >> "$GITHUB_ENV"
+          echo "GAGA_APPLICATION_DIR=$PWD" >> "$GITHUB_ENV"
+          node --input-type=module <<'JS'
+          import{writeFileSync}from'node:fs';import{execFileSync}from'node:child_process';
+          writeFileSync(process.env.RUNNER_TEMP+'/presentation/runtime.json',JSON.stringify({node:process.version,npm:execFileSync('npm',['--version'],{encoding:'utf8'}).trim(),image:process.env.ImageOS,imageVersion:process.env.ImageVersion,application:process.env.APPLICATION_REF,proof:process.env.GITHUB_SHA},null,2));
+          JS
+          npm ci --ignore-scripts --no-audit --no-fund
+      - name: Build the exact unchanged candidate for isolated browser proof
+        working-directory: application
+        run: |
+          export PUBLIC_GIT_SHA="$APPLICATION_REF"
+          export PUBLIC_BUILD_TIME="$(git show -s --format=%cI HEAD)"
+          npm run build > "$GAGA_EVIDENCE_DIRECTORY/build.log" 2>&1
+          npx --no-install playwright install --with-deps chromium
+      - name: Complete theme by viewport acceptance matrix
+        working-directory: application
+        run: node node_modules/@playwright/test/cli.js test --config "$GITHUB_WORKSPACE/proof/tools/presentation/playwright.config.mjs" | tee "$GAGA_EVIDENCE_DIRECTORY/browser.log"
+      - name: Source preservation and workflow lint
+        if: always()
+        working-directory: application
+        run: |
+          git diff --exit-code
+          test -z "$(git ls-files --others --exclude-standard)"
+          node --input-type=module <<'JS'
+          import{writeFileSync}from'node:fs';import{sourceIdentity}from'./tools/gaga/source-identity.mjs';
+          writeFileSync(process.env.GAGA_EVIDENCE_DIRECTORY+'/application-source.json',JSON.stringify(sourceIdentity(),null,2));
+          JS
+          go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.7 -shellcheck= ../proof/.github/workflows/presentation-acceptance.yml
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: presentation-acceptance-evidence
+          path: ${{ runner.temp }}/presentation
+          if-no-files-found: error
