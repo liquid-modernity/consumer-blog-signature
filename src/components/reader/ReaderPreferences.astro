@@ -1,166 +1,78 @@
 ---
 import Icon from '../ui/Icon.astro';
 import type { ReaderPreferencesInput } from '../frame/component-inputs';
-
-interface Props {
-  preferences: ReaderPreferencesInput;
-}
-
+interface Props { preferences: ReaderPreferencesInput; }
 const { preferences } = Astro.props;
+const typography = [
+  { key:'fontFamily', group:preferences.fontFamily },
+  { key:'font', group:preferences.font }
+];
+const advanced = [
+  {key:'density',group:preferences.density},
+  {key:'lineHeight',group:preferences.lineHeight},
+  {key:'letterSpacing',group:preferences.letterSpacing},
+  {key:'measure',group:preferences.measure},
+  {key:'contrast',group:preferences.contrast},
+  {key:'motion',group:preferences.motion},
+  {key:'links',group:preferences.links},
+  {key:'sfx',group:preferences.sfx}
+];
 ---
 <section id="gaga-reader-panel" class="gaga-reader-panel" data-gaga-reader-panel data-gaga-state="closed" role="dialog" aria-modal="true" aria-labelledby="gaga-reader-panel-title" aria-hidden="true" inert>
   <div class="gaga-reader-panel__head">
-    <h2 id="gaga-reader-panel-title"><Icon name={preferences.titleIcon} /> <span data-gaga-i18n-key={preferences.title.key} data-gaga-i18n-id={preferences.title.id} data-gaga-i18n-en={preferences.title.en}>{preferences.title.id}</span></h2>
-    <button type="button" data-gaga-reader-close data-gaga-action={preferences.closeAction.command} aria-label={preferences.closeAction.label.id} data-gaga-tooltip data-gaga-i18n-key={preferences.closeAction.label.key} data-gaga-i18n-id={preferences.closeAction.label.id} data-gaga-i18n-en={preferences.closeAction.label.en} data-gaga-i18n-target="aria">×</button>
+    <h2 id="gaga-reader-panel-title" data-gaga-i18n-id="Preferensi pembaca" data-gaga-i18n-en="Reader preferences">Preferensi pembaca</h2>
+    <button type="button" data-gaga-reader-close data-gaga-action="close-top-surface" aria-label="Kembali ke aksi" title="Kembali ke aksi"><Icon name="arrow_back" /></button>
   </div>
   <div class="gaga-reader-panel__grid">
     <fieldset class="gaga-reader-panel__presets" data-gaga-reader-presets-primary>
-      <legend data-gaga-i18n-key={preferences.presets.legend.key} data-gaga-i18n-id={preferences.presets.legend.id} data-gaga-i18n-en={preferences.presets.legend.en}>{preferences.presets.legend.id}</legend>
+      <legend class="gaga-visually-hidden">Preset</legend>
       <div class="gaga-reader-panel__preset-actions">
-        {preferences.presets.options.map((preset) => (
-          <button
-            type="button"
-            data-gaga-reader-preset={preset.value}
-            data-gaga-reader-theme={preset.theme}
-            data-gaga-reader-density={preset.density}
-            data-gaga-reader-font={preset.font}
-            data-gaga-reader-sfx={preset.sfx}
-            data-gaga-i18n-key={preset.labelKey}
-            data-gaga-i18n-id={preset.label}
-            data-gaga-i18n-en={preset.labelEn}
-            aria-pressed={preset.checked ? 'true' : 'false'}
-            data-gaga-active={String(preset.checked)}
-          >
-            {preset.label}
-          </button>
-        ))}
+        {preferences.presets.options.map(preset => <button type="button" data-gaga-reader-preset={preset.value} data-gaga-reader-theme={preset.theme} data-gaga-reader-density={preset.density} data-gaga-reader-font={preset.font} data-gaga-reader-sfx={preset.sfx} data-gaga-i18n-key={preset.labelKey} data-gaga-i18n-id={preset.label} data-gaga-i18n-en={preset.labelEn} aria-pressed={preset.checked ? 'true':'false'} data-gaga-active={String(preset.checked)}>{preset.label}</button>)}
       </div>
       <div class="gaga-reader-panel__preset-meta">
-        <span
-          class="gaga-reader-panel__preset-status"
-          data-gaga-reader-preset-status
-          data-gaga-reader-custom-id={preferences.presets.custom.id}
-          data-gaga-reader-custom-en={preferences.presets.custom.en}
-          data-gaga-i18n-key={preferences.presets.custom.key}
-          data-gaga-i18n-id={preferences.presets.custom.id}
-          data-gaga-i18n-en={preferences.presets.custom.en}
-        >
-          {preferences.presets.custom.id}
-        </span>
-        <button
-          class="gaga-reader-panel__reset"
-          type="button"
-          data-gaga-reader-reset
-          data-gaga-reader-preset={preferences.presets.resetPreset}
-          data-gaga-reader-theme={preferences.presets.resetTheme}
-          data-gaga-reader-density={preferences.presets.resetDensity}
-          data-gaga-reader-font={preferences.presets.resetFont}
-          data-gaga-reader-sfx={preferences.presets.resetSfx}
-          data-gaga-i18n-key={preferences.presets.reset.key}
-          data-gaga-i18n-id={preferences.presets.reset.id}
-          data-gaga-i18n-en={preferences.presets.reset.en}
-        >
-          {preferences.presets.reset.id}
-        </button>
+        <span class="gaga-visually-hidden" data-gaga-reader-preset-status data-gaga-reader-custom-id={preferences.presets.custom.id} data-gaga-reader-custom-en={preferences.presets.custom.en}>{preferences.presets.custom.id}</span>
+        <button type="button" data-gaga-reader-reset data-gaga-reader-preset={preferences.presets.resetPreset} data-gaga-reader-theme={preferences.presets.resetTheme} data-gaga-reader-density={preferences.presets.resetDensity} data-gaga-reader-font={preferences.presets.resetFont} data-gaga-reader-sfx={preferences.presets.resetSfx} data-gaga-i18n-id={preferences.presets.reset.id} data-gaga-i18n-en={preferences.presets.reset.en}>{preferences.presets.reset.id}</button>
       </div>
     </fieldset>
-    <details class="gaga-reader-panel__advanced" data-gaga-reader-advanced open>
-      <summary data-gaga-i18n-key={preferences.advanced.summary.key} data-gaga-i18n-id={preferences.advanced.summary.id} data-gaga-i18n-en={preferences.advanced.summary.en}>{preferences.advanced.summary.id}</summary>
+    <fieldset class="gaga-reader-themes">
+      <legend data-gaga-i18n-id={preferences.theme.legend.id} data-gaga-i18n-en={preferences.theme.legend.en}>{preferences.theme.legend.id}</legend>
+      {preferences.theme.options.map(theme => <button type="button" data-gaga-reader-pref="theme" data-gaga-reader-value={theme.value} data-gaga-i18n-key={theme.labelKey} data-gaga-i18n-id={theme.label} data-gaga-i18n-en={theme.labelEn}><span class="gaga-reader-swatch" data-theme-swatch={theme.value} aria-hidden="true"></span>{theme.label}</button>)}
+    </fieldset>
+    <p class="gaga-reader-specimen" data-gaga-reader-specimen>Ruang untuk gagasan.<br /><small data-gaga-i18n-id="Tampilan bacaan mengikuti pilihan Anda." data-gaga-i18n-en="Your reading appearance follows these choices.">Tampilan bacaan mengikuti pilihan Anda.</small></p>
+    {typography.map(({key,group}) => group && <fieldset class="gaga-reader-segments"><legend data-gaga-i18n-id={group.legend.id} data-gaga-i18n-en={group.legend.en}>{group.legend.id}</legend>{group.options.map(option => <button type="button" data-gaga-reader-pref={key} data-gaga-reader-value={option.value} class:list={{'gaga-font-specimen':key==='fontFamily'}}>{option.label}</button>)}</fieldset>)}
+    <details class="gaga-reader-panel__advanced" data-gaga-reader-advanced>
+      <summary data-gaga-i18n-id="Ritme &amp; kenyamanan" data-gaga-i18n-en="Rhythm &amp; comfort">Ritme &amp; kenyamanan</summary>
       <div class="gaga-reader-panel__advanced-grid">
-        <fieldset>
-          <legend data-gaga-i18n-key={preferences.language.legend.key} data-gaga-i18n-id={preferences.language.legend.id} data-gaga-i18n-en={preferences.language.legend.en}>{preferences.language.legend.id}</legend>
-          {preferences.language.options.map((option) => (
-            <label><input type="radio" name="gaga-language" value={option.value} data-gaga-language-option checked={option.checked} /> {option.label}</label>
-          ))}
-        </fieldset>
-        <fieldset>
-          <legend data-gaga-i18n-key={preferences.theme.legend.key} data-gaga-i18n-id={preferences.theme.legend.id} data-gaga-i18n-en={preferences.theme.legend.en}>{preferences.theme.legend.id}</legend>
-          {preferences.theme.options.map((theme) => (
-            <button type="button" data-gaga-reader-pref="theme" data-gaga-reader-value={theme.value} data-gaga-i18n-key={theme.labelKey} data-gaga-i18n-id={theme.label} data-gaga-i18n-en={theme.labelEn}>{theme.label}</button>
-          ))}
-        </fieldset>
-        <fieldset>
-          <legend data-gaga-i18n-id="Arketipe Desain" data-gaga-i18n-en="Design Archetype">Arketipe Desain</legend>
-          <button type="button" data-gaga-reader-pref="identity" data-gaga-reader-value="editorial">Editorial</button>
-          <button type="button" data-gaga-reader-pref="identity" data-gaga-reader-value="blueprintism">Blueprint</button>
-          <button type="button" data-gaga-reader-pref="identity" data-gaga-reader-value="brutalism">Brutalism</button>
-          <button type="button" data-gaga-reader-pref="identity" data-gaga-reader-value="enterprise">Institusional</button>
-        </fieldset>
-        {preferences.fontFamily && (
-          <fieldset>
-            <legend data-gaga-i18n-id={preferences.fontFamily.legend.id} data-gaga-i18n-en={preferences.fontFamily.legend.en}>{preferences.fontFamily.legend.id}</legend>
-            {preferences.fontFamily.options.map((option) => (
-              <button type="button" data-gaga-reader-pref="fontFamily" data-gaga-reader-value={option.value}>{option.label}</button>
-            ))}
-          </fieldset>
-        )}
-        <fieldset>
-          <legend data-gaga-i18n-key={preferences.font.legend.key} data-gaga-i18n-id={preferences.font.legend.id} data-gaga-i18n-en={preferences.font.legend.en}>{preferences.font.legend.id}</legend>
-          {preferences.font.options.map((option) => (
-            <button type="button" data-gaga-reader-pref="font" data-gaga-reader-value={option.value}>{option.label}</button>
-          ))}
-        </fieldset>
-        <fieldset>
-          <legend data-gaga-i18n-key={preferences.density.legend.key} data-gaga-i18n-id={preferences.density.legend.id} data-gaga-i18n-en={preferences.density.legend.en}>{preferences.density.legend.id}</legend>
-          {preferences.density.options.map((option) => (
-            <button type="button" data-gaga-reader-pref="density" data-gaga-reader-value={option.value} data-gaga-i18n-key={option.labelKey} data-gaga-i18n-id={option.label} data-gaga-i18n-en={option.labelEn}>{option.label}</button>
-          ))}
-        </fieldset>
-        {preferences.lineHeight && (
-          <fieldset>
-            <legend data-gaga-i18n-id={preferences.lineHeight.legend.id} data-gaga-i18n-en={preferences.lineHeight.legend.en}>{preferences.lineHeight.legend.id}</legend>
-            {preferences.lineHeight.options.map((option) => (
-              <button type="button" data-gaga-reader-pref="lineHeight" data-gaga-reader-value={option.value}>{option.label}</button>
-            ))}
-          </fieldset>
-        )}
-        {preferences.letterSpacing && (
-          <fieldset>
-            <legend data-gaga-i18n-id={preferences.letterSpacing.legend.id} data-gaga-i18n-en={preferences.letterSpacing.legend.en}>{preferences.letterSpacing.legend.id}</legend>
-            {preferences.letterSpacing.options.map((option) => (
-              <button type="button" data-gaga-reader-pref="letterSpacing" data-gaga-reader-value={option.value}>{option.label}</button>
-            ))}
-          </fieldset>
-        )}
-        {preferences.measure && (
-          <fieldset>
-            <legend data-gaga-i18n-id={preferences.measure.legend.id} data-gaga-i18n-en={preferences.measure.legend.en}>{preferences.measure.legend.id}</legend>
-            {preferences.measure.options.map((option) => (
-              <button type="button" data-gaga-reader-pref="measure" data-gaga-reader-value={option.value}>{option.label}</button>
-            ))}
-          </fieldset>
-        )}
-        {preferences.contrast && (
-          <fieldset>
-            <legend data-gaga-i18n-id={preferences.contrast.legend.id} data-gaga-i18n-en={preferences.contrast.legend.en}>{preferences.contrast.legend.id}</legend>
-            {preferences.contrast.options.map((option) => (
-              <button type="button" data-gaga-reader-pref="contrast" data-gaga-reader-value={option.value}>{option.label}</button>
-            ))}
-          </fieldset>
-        )}
-        {preferences.motion && (
-          <fieldset>
-            <legend data-gaga-i18n-id={preferences.motion.legend.id} data-gaga-i18n-en={preferences.motion.legend.en}>{preferences.motion.legend.id}</legend>
-            {preferences.motion.options.map((option) => (
-              <button type="button" data-gaga-reader-pref="motion" data-gaga-reader-value={option.value}>{option.label}</button>
-            ))}
-          </fieldset>
-        )}
-        {preferences.links && (
-          <fieldset>
-            <legend data-gaga-i18n-id={preferences.links.legend.id} data-gaga-i18n-en={preferences.links.legend.en}>{preferences.links.legend.id}</legend>
-            {preferences.links.options.map((option) => (
-              <button type="button" data-gaga-reader-pref="links" data-gaga-reader-value={option.value}>{option.label}</button>
-            ))}
-          </fieldset>
-        )}
-        <fieldset class="gaga-reader-panel__sfx" data-gaga-reader-sfx-control>
-          <legend data-gaga-i18n-key={preferences.sfx.legend.key} data-gaga-i18n-id={preferences.sfx.legend.id} data-gaga-i18n-en={preferences.sfx.legend.en}>{preferences.sfx.legend.id}</legend>
-          {preferences.sfx.options.map((option) => (
-            <button type="button" data-gaga-reader-pref="sfx" data-gaga-reader-value={option.value} data-gaga-i18n-key={option.labelKey} data-gaga-i18n-id={option.label} data-gaga-i18n-en={option.labelEn}>{option.icon ? <Icon name={option.icon} /> : null} {option.label}</button>
-          ))}
-        </fieldset>
+        {advanced.map(({key,group}) => group && <fieldset class="gaga-reader-segments"><legend data-gaga-i18n-id={group.legend.id} data-gaga-i18n-en={group.legend.en}>{group.legend.id}</legend>{group.options.map(option => <button type="button" data-gaga-reader-pref={key} data-gaga-reader-value={option.value}>{option.label}</button>)}</fieldset>)}
       </div>
+    </details>
+    <details class="gaga-reader-panel__advanced">
+      <summary data-gaga-i18n-id="Bahasa &amp; karakter" data-gaga-i18n-en="Language &amp; character">Bahasa &amp; karakter</summary>
+      <fieldset><legend data-gaga-i18n-id={preferences.language.legend.id} data-gaga-i18n-en={preferences.language.legend.en}>{preferences.language.legend.id}</legend>{preferences.language.options.map(option => <label><input type="radio" name="gaga-language" value={option.value} data-gaga-language-option checked={option.checked} />{option.label}</label>)}</fieldset>
+      <fieldset class="gaga-reader-segments"><legend data-gaga-i18n-id="Arketipe desain" data-gaga-i18n-en="Design archetype">Arketipe desain</legend>{[{value:'editorial',label:'Editorial'},{value:'blueprintism',label:'Blueprint'},{value:'brutalism',label:'Brutalism'},{value:'enterprise',label:'Institusional'}].map(option => <button type="button" data-gaga-reader-pref="identity" data-gaga-reader-value={option.value}>{option.label}</button>)}</fieldset>
     </details>
   </div>
 </section>
+<style is:global>
+.gaga-contextual-notch .gaga-reader-panel { padding:.25rem; }
+.gaga-contextual-notch .gaga-reader-panel__head { display:flex; justify-content:space-between; align-items:center; padding:0 0 .5rem; border:0; }
+.gaga-contextual-notch .gaga-reader-panel__head h2 { font:600 .9rem var(--gaga-font-ui); margin:0; }
+.gaga-contextual-notch .gaga-reader-panel__grid,.gaga-contextual-notch .gaga-reader-panel__advanced-grid { display:grid; grid-template-columns:minmax(0,1fr); gap:1rem; }
+.gaga-contextual-notch .gaga-reader-panel fieldset { margin:0; padding:0; border:0; min-inline-size:0; }
+.gaga-contextual-notch .gaga-reader-panel legend { font:.78rem var(--gaga-font-ui); color:var(--gaga-island-muted); padding-block:0 .4rem; letter-spacing:normal; text-transform:none; }
+.gaga-contextual-notch .gaga-reader-panel button { border:0; border-radius:.5rem; background:transparent; font:.85rem var(--gaga-font-ui); padding:.55rem .65rem; }
+.gaga-contextual-notch .gaga-reader-panel button:is(:hover,[aria-pressed='true']) { background:var(--gaga-island-hover); color:var(--gaga-island-ink); }
+.gaga-contextual-notch .gaga-reader-panel [data-gaga-reader-reset] { padding-inline:0; color:var(--gaga-island-muted); text-decoration:underline; }
+.gaga-contextual-notch .gaga-reader-panel__preset-meta { margin:0; justify-content:flex-end; }
+.gaga-contextual-notch .gaga-reader-panel .gaga-reader-panel__advanced { border:0; padding:0; background:transparent; }
+.gaga-contextual-notch .gaga-reader-panel summary { padding:.25rem 0; color:var(--gaga-island-muted); font:.85rem var(--gaga-font-ui); }
+.gaga-contextual-notch .gaga-reader-panel label { display:inline-flex; align-items:center; gap:.35rem; min-block-size:44px; margin-inline-end:.75rem; }
+.gaga-contextual-notch .gaga-reader-panel [data-gaga-reader-pref='theme'] { display:inline-flex; align-items:center; gap:.4rem; }
+.gaga-reader-swatch { display:inline-block; inline-size:1rem; block-size:1rem; border-radius:50%; background:var(--gaga-island-ink); }
+.gaga-reader-swatch[data-theme-swatch='dark'] { background:var(--gaga-island-bg); outline:1px solid var(--gaga-island-muted); }
+.gaga-reader-swatch[data-theme-swatch='default'] { background:var(--gaga-focus-ring); }
+.gaga-contextual-notch .gaga-reader-specimen { margin:0; padding:.75rem; border-radius:.5rem; font:var(--gaga-article-font-size,1rem)/var(--gaga-article-line-height,1.6) var(--gaga-font-body); letter-spacing:var(--gaga-article-letter-spacing,0); }
+.gaga-reader-specimen small { font-size:.78em; }
+.gaga-font-specimen[data-gaga-reader-value='serif'] { font-family:var(--gaga-font-display) !important; }
+.gaga-font-specimen[data-gaga-reader-value='mono'] { font-family:var(--gaga-font-mono) !important; }
+</style>

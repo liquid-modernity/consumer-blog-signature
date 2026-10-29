@@ -27,7 +27,7 @@ export const experienceConfig = {
   labels: { mouse: 'hover', keyboard: 'focus', touch: 'contextual' },
   surfaces: {
     article: {
-      notchActionIds: ['smart-back', 'copy-link', 'share', 'save', 'focusmode', 'speak', 'context-info', 'settings'],
+      notchActionIds: ['smart-back', 'search', 'copy-link', 'share', 'save', 'focusmode', 'speak', 'context-info', 'settings'],
       dockActionIds: [],
       dockMode: 'hidden'
     },

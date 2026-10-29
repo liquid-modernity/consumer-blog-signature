@@ -14,7 +14,7 @@ export const responsiveShellConfig = {
     desktopMin: 1280
   },
   behavior: {
-    informationPreviewRestoreDelayMs: 900
+    informationPreviewRestoreDelayMs: 500
   },
   surfaces: {
     gagaDock: {

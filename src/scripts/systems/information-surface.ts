@@ -9,18 +9,20 @@ export function initInformationSurface() {
   initialized = true;
   let active: HTMLElement | null = null, suppressed: HTMLElement | null = null;
   const id = 'gaga-link-preview';
+  let pointer: {x:number; y:number} | null = null;
   card.id = id; card.setAttribute('role', 'tooltip');
   function unbind() {
     if (!active) return;
     const remaining = (active.getAttribute('aria-describedby') ?? '').split(/\s+/).filter(value => value && value !== id);
     if (remaining.length) active.setAttribute('aria-describedby', remaining.join(' ')); else active.removeAttribute('aria-describedby');
   }
-  function close() { card!.hidden = true; unbind(); }
+  function close() { card!.hidden = true; pointer = null; unbind(); }
   function position() {
     if (!active || card!.hidden) return;
     const rect = active.getBoundingClientRect();
     if (rect.bottom < 0 || rect.top > innerHeight) { close(); return; }
-    const point = positionLinkPreview(rect, card!.getBoundingClientRect(), { width: innerWidth, height: innerHeight });
+    const anchor = pointer ?? { x:rect.left, y:rect.bottom };
+    const point = positionLinkPreview({left:anchor.x, top:anchor.y, bottom:anchor.y}, card!.getBoundingClientRect(), { width: innerWidth, height: innerHeight });
     card!.style.left = point.left + 'px'; card!.style.top = point.top + 'px'; card!.style.width = point.width + 'px';
   }
   // The public document port scopes Engine preview projection to its own card, never page metadata.
@@ -50,6 +52,8 @@ export function initInformationSurface() {
       return undefined;
     }
   });
+  document.addEventListener('pointermove', event => { if (event.pointerType !== 'mouse' || !active?.contains(event.target as Node)) return; pointer = {x:event.clientX,y:event.clientY}; position(); }, {passive:true});
+  document.addEventListener('focusin', () => { pointer = null; position(); });
   card.dataset.gagaPreviewReady = 'true';
   const observer = new MutationObserver(() => {
     if (!card.hasAttribute('data-gaga-preview-state')) { close(); active = null; suppressed = null; }

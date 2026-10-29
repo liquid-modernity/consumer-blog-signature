@@ -52,14 +52,6 @@ export function attachRailPreview({
     else closeTimer = window.setTimeout(apply, closeDelayMs);
   };
 
-  rail.addEventListener('pointerenter', (event) => {
-    if (event.pointerType === 'mouse' && precisePointer()) open();
-  });
-
-  rail.addEventListener('pointerleave', (event) => {
-    if (event.pointerType === 'mouse') close();
-  });
-
   rail.addEventListener('focusin', () => open(true));
 
   rail.addEventListener('focusout', (event) => {

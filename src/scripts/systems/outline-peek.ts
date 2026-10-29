@@ -67,8 +67,8 @@ export function initOutlinePeek() {
     const context = resolveReadingScrollContext();
     if (!context || !stack || isOpen()) return;
     const percentage = Math.round(getUnifiedScrollMetrics().percentage);
-    const progress = stack.querySelector<HTMLElement>('[data-gaga-outline-progress]');
-    if (progress) progress.textContent = percentage + '%';
+    const progress = stack.querySelector<HTMLProgressElement>('[data-gaga-outline-progress]');
+    if (progress) progress.value = percentage;
     const opener = stack.querySelector<HTMLElement>('[data-gaga-outline-opener]');
     opener?.setAttribute('aria-label', `Daftar isi — ${currentLabel?.textContent ?? ''} — ${percentage}%`);
     const measurements = context.scrollContext.measure();

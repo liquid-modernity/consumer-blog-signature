@@ -135,10 +135,19 @@ function projectPresetSelection(selection: ReaderPresetSelection) {
   if (selection === 'custom' && status) projectStatus(status, customId, customEn);
 }
 
+function syncSpecimen() {
+  const specimen = document.querySelector<HTMLElement>('[data-gaga-reader-specimen]');
+  if (!specimen) return;
+  const style = getComputedStyle(document.body);
+  for (const key of ['--gaga-article-font-size','--gaga-article-line-height','--gaga-article-letter-spacing','--gaga-font-body']) specimen.style.setProperty(key,style.getPropertyValue(key));
+  specimen.style.background = style.getPropertyValue('--gaga-bg') || style.backgroundColor;
+  specimen.style.color = style.getPropertyValue('--gaga-ink') || style.color;
+}
 function syncPresetSelection() {
   const selection = matchingReaderPreset(currentPresetValues()) ?? 'custom';
   writeJson(storageKeys.reader, { ...readReaderState(), preset: selection });
   projectPresetSelection(selection);
+  syncSpecimen();
 }
 
 /**
@@ -240,6 +249,7 @@ export function initReaderPreferences() {
       setIdentityPreference(defaultIdentity);
     }
     projectPresetSelection(preset);
+    syncSpecimen();
   };
 
   document.addEventListener('click', (event) => {

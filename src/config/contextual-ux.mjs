@@ -22,6 +22,6 @@ export function positionLinkPreview(anchor, box, viewport) {
 }
 
 export function outlineForRoute(items, path, kind) {
-  if (path !== '/' && kind !== 'article') return [];
+  if (kind !== 'article') return [];
   return items.filter(item => item.slug !== '_top');
 }

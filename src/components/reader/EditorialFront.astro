@@ -409,7 +409,7 @@ const socialSection = sectionById.get('social');
         statusBadge.dataset.gagaDefaultBadge = badge;
       }
       if (peekTitle) peekTitle.textContent = title;
-      if (focusTitle) focusTitle.textContent = title;
+      if (focusTitle) focusTitle.textContent = document.querySelector('h1')?.textContent?.trim() || 'PakRPP';
 
       for (const pill of document.querySelectorAll<HTMLAnchorElement>('[data-gaga-island-anchor]')) {
         const href = pill.getAttribute('href') ?? '';

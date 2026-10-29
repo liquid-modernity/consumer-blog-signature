@@ -24,6 +24,8 @@ const knowledgeFacts = (rail.facts ?? []).filter(fact => ['objectId', 'knowledge
 const seenIds = new Set<string>();
 
 function addRow(id: string, label: { key?: string; id: string; en: string }, values: PageContextValue[]) {
+  if (id === 'topic') id = 'topics';
+  values = values.filter((item, index) => values.findIndex(other => other.text === item.text && other.href === item.href) === index);
   if (!values.length || seenIds.has(id)) return;
   seenIds.add(id);
   rows.push({ id, label, values });
@@ -124,17 +126,17 @@ if (rail.tags?.length && !seenIds.has('tags')) {
           <tr>
             <th
               scope="col"
-              data-gaga-i18n-id="ATRIBUT"
-              data-gaga-i18n-en="ATTRIBUTE"
+              data-gaga-i18n-id="Atribut"
+              data-gaga-i18n-en="Attribute"
             >
-              ATRIBUT
+              Atribut
             </th>
             <th
               scope="col"
-              data-gaga-i18n-id="SPESIFIKASI & KONTEKS HALAMAN"
-              data-gaga-i18n-en="PAGE SPECIFICATION & CONTEXT"
+              data-gaga-i18n-id="Konteks publikasi"
+              data-gaga-i18n-en="Publication context"
             >
-              SPESIFIKASI & KONTEKS HALAMAN
+              Konteks publikasi
             </th>
           </tr>
         </thead>
@@ -174,7 +176,7 @@ if (rail.tags?.length && !seenIds.has('tags')) {
   </section>
 ) : null}
 {knowledgeFacts.length > 0 && <details class="gaga-page-metadata-spec" data-gaga-knowledge-details>
-  <summary>Objek &amp; relasi pengetahuan</summary>
+  <summary>Pengetahuan</summary>
   <dl>{knowledgeFacts.map(fact => <div><dt>{fact.label.id}</dt><dd>{fact.values.map((item, index) => <>{index > 0 && ' · '}{item.href ? <a href={item.href}>{item.text}</a> : item.text}</>)}</dd></div>)}</dl>
 </details>}
 
@@ -184,7 +186,7 @@ if (rail.tags?.length && !seenIds.has('tags')) {
       margin-block: 3rem 1.5rem;
       max-inline-size: var(--gaga-content-width, 44rem);
       margin-inline: auto;
-      border-block-start: 2px solid var(--gaga-line-strong, var(--gaga-line));
+      border: 0;
       padding-block-start: 1.25rem;
       color: var(--gaga-ink);
     }
@@ -192,7 +194,7 @@ if (rail.tags?.length && !seenIds.has('tags')) {
     .gaga-page-metadata-spec__table-wrap {
       inline-size: 100%;
       overflow-x: auto;
-      border: 1px solid var(--gaga-line);
+      border: 0;
       background: var(--gaga-surface);
     }
 
@@ -285,4 +287,12 @@ if (rail.tags?.length && !seenIds.has('tags')) {
       }
     }
   }
+</style>
+
+<style>
+[data-gaga-knowledge-details] summary { cursor:pointer; min-block-size:44px; font-weight:600; }
+[data-gaga-knowledge-details] dl { display:grid; gap:.75rem; font-size:.85rem; }
+[data-gaga-knowledge-details] dd { margin:.25rem 0 0; overflow-wrap:anywhere; color:var(--gaga-muted); }
+[data-gaga-knowledge-details] a { color:var(--gaga-ink); text-decoration:underline; }
+[data-gaga-knowledge-details] summary:focus-visible { outline:2px solid var(--gaga-focus-ring); outline-offset:3px; }
 </style>

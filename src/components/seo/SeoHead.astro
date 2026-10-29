@@ -41,7 +41,8 @@ const {
   locale = 'id-ID'
 } = Astro.props;
 
-const resolvedTitle = title ?? seoTitle(metadata, seoConfig.text);
+const pageName = metadata.title ?? title ?? seoTitle(metadata, seoConfig.text);
+const resolvedTitle = pageName.toLowerCase() === siteConfig.name.toLowerCase() ? siteConfig.name : `${pageName} · ${siteConfig.name}`;
 const resolvedSocialTitle = socialTitle ?? resolvedTitle;
 const canonical = canonicalUrl(metadata, pathname, seoConfig.canonical);
 const description = seoDescription(metadata, seoConfig.text);

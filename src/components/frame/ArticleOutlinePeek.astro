@@ -31,7 +31,7 @@ const initialOutlineLabel = outlineItems[0]?.text ?? '';
       <span id={outlineOpenLabelId} class="gaga-visually-hidden" data-gaga-i18n-key={rail.labels.outlineOpenPrefix.key} data-gaga-i18n-id={rail.labels.outlineOpenPrefix.id} data-gaga-i18n-en={rail.labels.outlineOpenPrefix.en}>{rail.labels.outlineOpenPrefix.id}</span>
       <span id={outlineCounterLabelId} class="gaga-visually-hidden"><span data-gaga-outline-current-index>1</span>/<span data-gaga-outline-total>{outlineItems.length}</span></span>
       <span id={outlineCurrentLabelId} class="gaga-outline-peek-preview__title" data-gaga-outline-current-label>{initialOutlineLabel}</span>
-      <span data-gaga-outline-progress aria-hidden="true">0%</span>
+      <progress data-gaga-outline-progress max="100" value="0" aria-label="Progres membaca"></progress>
     </button>
 
     <span class="gaga-outline-peek__scrim" data-gaga-outline-scrim aria-hidden="true"></span>
@@ -53,11 +53,6 @@ const initialOutlineLabel = outlineItems[0]?.text ?? '';
           <Icon name="outline" />
           <span>{rail.labels.outlineTitle.id}</span>
         </h2>
-        <p class="gaga-outline-peek__status" aria-live="polite">
-          <span data-gaga-outline-sheet-current-index>1</span><span>/<span data-gaga-outline-sheet-total>{outlineItems.length}</span></span>
-          <span aria-hidden="true">·</span>
-          <span data-gaga-outline-sheet-current-label>{initialOutlineLabel}</span>
-        </p>
       </header>
       <div class="gaga-outline-peek__scroll" data-gaga-outline-peek-scroll>
         <TocBlock emptyList={pendingOutline} items={outlineItems} showTitle={false} wrapper="nav" ariaLabelledby={outlineTitleId} />

@@ -8,12 +8,13 @@
     "rightCollapsedRem": 3
   },
   "desktop": {
-    "hoverPreviewFinePointerOnly": true,
+    "hoverPreviewFinePointerOnly": false,
     "hoverOpenDelayMs": 120,
     "hoverCloseDelayMs": 220,
     "escapeClosesHoverPreview": true,
     "focusPreviewImmediate": true,
-    "dynamicNotchContextTriggerTogglesRightRail": true
+    "dynamicNotchContextTriggerTogglesRightRail": true,
+    "pointerCrossingExpandsRail": false
   },
   "tabletLarge": {
     "leftRail": "collapsed",

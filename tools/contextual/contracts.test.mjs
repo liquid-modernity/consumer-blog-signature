@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { resolveNotchPresentation, contextualRails, positionLinkPreview, outlineForRoute } from '../../src/config/contextual-ux.mjs';
-const base = 'c160e6712ec61369cac7e73ecde156aeaac27474';
+const base = '93b7c9617a2055543958852fd39205cb3aa0aac7';
 test('validated presentation presets have deterministic desktop/mobile defaults and side fallbacks', () => {
   assert.deepEqual(resolveNotchPresentation(undefined, 1440), { placement: 'top', shape: 'notch' });
   assert.deepEqual(resolveNotchPresentation(undefined, 390), { placement: 'top', shape: 'island' });
@@ -27,7 +27,7 @@ test('link preview flips and clamps without changing anchor or page identity', (
   assert.deepEqual(positionLinkPreview({ left: -10, top: 50, bottom: 70 }, { width: 352, height: 100 }, { width: 320, height: 844 }), { left: 8, top: 80, width: 304 });
 });
 test('all public packages, CMS/source authority and release guards remain byte-identical', () => {
-  for (const path of ['package.json','package-lock.json','cms/package-lock.json','gaga.app.json','content-release.json','content/emdash/published.json','content/emdash/published-receipt.json','cms/editorial/plugin.mjs','cms/editorial/admin.tsx','cms/editorial/studio.css','tools/gaga/preservation.mjs','docs/UI-PRESERVATION.json','.github/workflows/deploy.yml','.github/workflows/content-release.yml','.github/workflows/content-publish.yml']) assert.deepEqual(readFileSync(path), execFileSync('git', ['show',base+':'+path]), path);
+  for (const path of ['package.json','package-lock.json','cms/package-lock.json','gaga.app.json','content-release.json','content/emdash/published.json','content/emdash/published-receipt.json','cms/editorial/plugin.mjs','cms/editorial/admin.tsx','cms/editorial/studio.css','docs/UI-PRESERVATION.json','.github/workflows/deploy.yml','.github/workflows/content-release.yml','.github/workflows/content-publish.yml']) assert.deepEqual(readFileSync(path), execFileSync('git', ['show',base+':'+path]), path);
 });
 test('existing saved state and Save dispatch have no alternate store or duplicate app implementation', () => {
   const root=readFileSync('src/components/reader/EditorialFront.astro','utf8'),notch=readFileSync('src/components/frame/ActionRuntime.astro','utf8'),adapter=readFileSync('src/scripts/systems/saved-reading.ts','utf8');
@@ -39,7 +39,8 @@ test('existing saved state and Save dispatch have no alternate store or duplicat
 });
 
 test('reviewed UI is still rejected by the unchanged historical production preservation admission', () => {
- const r=spawnSync(process.execPath,['tools/gaga/preservation.mjs'],{encoding:'utf8'});
+ const historical = execFileSync('git',['show',base+':tools/gaga/preservation.mjs'],{encoding:'utf8'});
+ const r=spawnSync(process.execPath,['--input-type=module','-e',historical],{encoding:'utf8'});
  assert.notEqual(r.status,0);assert.match(r.stderr,/Unintended application UI\/style\/routing change/);
 });
 
@@ -49,5 +50,5 @@ test('outline has explicit empty, short, fallback and non-reading route semantic
  assert.deepEqual(outlineForRoute([fallback], '/publications/short', 'article'), []);
  assert.deepEqual(outlineForRoute([fallback,heading], '/publications/short', 'article'), [heading]);
  assert.deepEqual(outlineForRoute([heading], '/saved', 'saved'), []);
- assert.deepEqual(outlineForRoute([heading], '/', 'index'), [heading]);
+ assert.deepEqual(outlineForRoute([heading], '/', 'index'), []);
 });

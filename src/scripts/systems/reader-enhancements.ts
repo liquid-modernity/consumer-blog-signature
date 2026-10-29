@@ -18,6 +18,7 @@ interface SpeakerController {
   mode: SpeechMode;
   currentText: string;
   rate: number;
+  progress: number;
   voice: SpeechSynthesisVoice | null;
   playSelection: (text: string, lang: string) => void;
   playArticle: (elements: HTMLElement[], lang: string) => void;
@@ -718,6 +719,7 @@ function initSmartSpeaker(): SpeakerController {
     mode: 'article',
     currentText: '',
     rate: 1.0,
+    progress: 0,
     voice: null,
 
     playSelection(text: string, lang: string) {
@@ -727,6 +729,7 @@ function initSmartSpeaker(): SpeakerController {
       }
       this.stop();
       this.mode = 'selection';
+      this.progress = 0;
       this.currentText = text;
       this.state = 'playing';
 
@@ -740,11 +743,14 @@ function initSmartSpeaker(): SpeakerController {
         this.voice = matchedVoice;
       }
 
+      utt.onboundary = event => { if (currentUtterance !== utt) return; this.progress = Math.min(1,event.charIndex / Math.max(1,text.length)); const bar = speechDockEl?.querySelector<HTMLProgressElement>('progress'); if (bar) bar.value = this.progress; };
       utt.onstart = () => {
         this.state = 'playing';
         renderSpeechDock(this);
       };
       utt.onend = () => {
+        if (currentUtterance !== utt) return;
+        this.progress = 1;
         this.state = 'completed';
         renderSpeechDock(this);
         setTimeout(() => {
@@ -770,6 +776,7 @@ function initSmartSpeaker(): SpeakerController {
       if (!synth) return;
       this.stop();
       this.mode = 'article';
+      this.progress = 0;
 
       const validElements = elements.filter((el) => el.innerText.trim().length > 0);
       if (!validElements.length) {
@@ -791,6 +798,7 @@ function initSmartSpeaker(): SpeakerController {
         if (this.state !== 'playing' || currentIndex >= validElements.length) {
           if (currentIndex >= validElements.length) {
             clearActiveBlockHighlight();
+            this.progress = 1;
             this.state = 'completed';
             renderSpeechDock(this);
             setTimeout(() => {
@@ -806,6 +814,7 @@ function initSmartSpeaker(): SpeakerController {
         el.classList.add('gaga-speech-active-sentence');
         el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
+        this.progress = currentIndex / validElements.length;
         this.currentText = blockText;
         renderSpeechDock(this);
 
@@ -815,6 +824,7 @@ function initSmartSpeaker(): SpeakerController {
         if (matchedVoice) utt.voice = matchedVoice;
 
         utt.onend = () => {
+          if (currentUtterance !== utt) return;
           currentIndex++;
           speakNextBlock();
         };
@@ -861,6 +871,8 @@ function initSmartSpeaker(): SpeakerController {
       document.querySelectorAll('.gaga-speech-active-sentence').forEach((el) => {
         el.classList.remove('gaga-speech-active-sentence');
       });
+      currentUtterance = null;
+      this.progress = 0;
       this.state = 'idle';
       this.currentText = '';
       closeSpeechDock();
@@ -931,6 +943,7 @@ function renderSpeechDock(controller: SpeakerController) {
       ? controller.currentText.slice(0, 67) + '...'
       : controller.currentText;
 
+  const focused = speechDockEl.contains(document.activeElement) ? (document.activeElement as HTMLElement)?.dataset.speech : null;
   speechDockEl.innerHTML = `
     <div class="gaga-speech-dock__inner">
       <div class="gaga-speech-dock__info">
@@ -943,6 +956,7 @@ function renderSpeechDock(controller: SpeakerController) {
         <span class="gaga-speech-dock__text" title="${escapeHtml(controller.currentText)}">${escapeHtml(snippet)}</span>
       </div>
 
+      <progress max="1" value="${controller.progress}" aria-label="Kemajuan narasi${controller.mode === 'article' ? ' per bagian' : ''}"></progress>
       <div class="gaga-speech-dock__controls">
         ${
           controller.state === 'playing'
@@ -965,6 +979,7 @@ function renderSpeechDock(controller: SpeakerController) {
     </div>
   `;
 
+  if (focused) speechDockEl.querySelector<HTMLElement>(`[data-speech="${focused}"]`)?.focus({preventScroll:true});
   speechDockEl.querySelector('[data-speech="pause"]')?.addEventListener('click', () => controller.pause());
   speechDockEl.querySelector('[data-speech="resume"]')?.addEventListener('click', () => controller.resume());
   speechDockEl.querySelector('[data-speech="stop"]')?.addEventListener('click', () => controller.stop());

@@ -11,9 +11,9 @@ const groups = groupArticlesByMonth(articles, surfaceLocale);
 ---
 <section class="gaga-archive-screen" aria-label="Arsip Kronologis">
   <div class="gaga-archive-log" aria-label="Daftar arsip berdasarkan bulan" data-gaga-preview-scope>
-    {groups.map((group) => (
-      <section class="gaga-archive-month" data-gaga-motion>
-        <h2 id={`archive-${group.slug}`}>{group.month}</h2>
+    {groups.map((group, index) => (
+      <details class="gaga-archive-month" open={index === 0}>
+        <summary><h2 id={`archive-${group.slug}`}>{group.month}</h2></summary>
         <ol>
           {group.articles.map((article) => {
             const preview = toArticlePreview(article, surfaceLocale, contentDefaults.preview);
@@ -38,7 +38,15 @@ const groups = groupArticlesByMonth(articles, surfaceLocale);
             );
           })}
         </ol>
-      </section>
+      </details>
     ))}
   </div>
 </section>
+
+<style>
+.gaga-archive-month { border:0; padding-block:1rem; }
+.gaga-archive-month summary { cursor:pointer; min-block-size:44px; }
+.gaga-archive-month summary h2 { display:inline; font-size:1.25rem; }
+.gaga-archive-month a { text-decoration:underline; text-underline-offset:.18em; }
+.gaga-archive-month summary:focus-visible { outline:2px solid var(--gaga-focus-ring); outline-offset:4px; }
+</style>

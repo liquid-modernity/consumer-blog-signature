@@ -86,7 +86,8 @@ if (failures.length) {
 
 console.log('GAGA rail interaction audit OK');
 console.log('✓ calibrated desktop rail geometry');
-console.log('✓ delayed fine-pointer hover previews + immediate keyboard preview');
+if (policy.desktop.pointerCrossingExpandsRail !== false || preview.includes("rail.addEventListener('pointerenter'")) throw Error('Pointer crossing must not expand a contextual rail');
+console.log('✓ explicit pointer controls + immediate keyboard preview; crossing cannot expand rails');
 console.log('✓ Escape closes transient rail preview');
 console.log('✓ Dynamic Notch context trigger toggles desktop right rail');
 console.log('✓ tablet-mini side sheet + mobile bottom sheet');

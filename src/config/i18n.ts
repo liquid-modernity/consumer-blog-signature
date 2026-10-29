@@ -81,7 +81,7 @@ export const localeDictionary = {
     'reader.sfxOn': 'Aktif',
     'reader.sfxOff': 'Nonaktif',
 
-    'outline.title': 'Bagian halaman',
+    'outline.title': 'Daftar Isi',
     'outline.fallback': 'Outline',
     'outline.openPrefix': 'Buka outline:',
     'outline.close': 'Tutup outline',
@@ -230,7 +230,7 @@ export const localeDictionary = {
     'reader.sfxOn': 'On',
     'reader.sfxOff': 'Off',
 
-    'outline.title': 'Page sections',
+    'outline.title': 'Contents',
     'outline.fallback': 'Outline',
     'outline.openPrefix': 'Open outline:',
     'outline.close': 'Close outline',

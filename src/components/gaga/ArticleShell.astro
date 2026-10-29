@@ -24,8 +24,7 @@ const {
   routeIdentity,
   missingTitleSource,
   breadcrumbs = [],
-  coverage,
-  readingMetaItems = []
+  coverage
 } = Astro.props;
 const title = identity.title;
 if (!title) throw new Error(`Article title is required for ${missingTitleSource}.`);
@@ -77,19 +76,6 @@ const articleTitleId = '_top';
           <p class="gaga-article-header__dek" data-gaga-article-dek>{identity.subtitle}</p>
         ) : null}
 
-        <div class="gaga-article-header__bar" aria-label="Informasi publikasi">
-          {readingMetaItems.length > 0 && (
-            <div class="gaga-article-header__meta">
-              {readingMetaItems.map((item, idx) => (
-                <>
-                  {idx > 0 && <span aria-hidden="true">·</span>}
-                  <span>{item}</span>
-                </>
-              ))}
-            </div>
-          )}
-
-        </div>
       </header>
       <CoverageTimeline coverage={coverage} language={language} />
       <section class="gaga-continuity-resume" data-gaga-continuity-resume hidden aria-labelledby="gaga-continuity-resume-title">
@@ -104,33 +90,6 @@ const articleTitleId = '_top';
     </div>
   </div>
 
-  <div
-    class="gaga-article-chrome gaga-article-reading-utilities"
-    data-gaga-article-reading-utilities
-    role="group"
-    aria-label={actions.readingUtilitiesLabel.id}
-    data-gaga-i18n-key={actions.readingUtilitiesLabel.key}
-    data-gaga-i18n-id={actions.readingUtilitiesLabel.id}
-    data-gaga-i18n-en={actions.readingUtilitiesLabel.en}
-    data-gaga-i18n-target="aria"
-  >
-    <div class="gaga-article-chrome__start">
-      <section class="gaga-continuity-current" data-gaga-continuity-current hidden aria-labelledby="gaga-continuity-current-title">
-        <Icon name="article" />
-        <span class="gaga-continuity-current__label">
-        <span id="gaga-continuity-current-title" data-gaga-i18n-key={actions.readingStatusLabel.key} data-gaga-i18n-id={actions.readingStatusLabel.id} data-gaga-i18n-en={actions.readingStatusLabel.en}>{actions.readingStatusLabel.id}</span>
-        <span class="gaga-continuity-current__summary-separator" aria-hidden="true">·</span>
-        <span data-gaga-continuity-current-summary>
-          <span data-gaga-continuity-current-summary-status="unset" data-gaga-i18n-key={actions.readingStatusUnset.key} data-gaga-i18n-id={actions.readingStatusUnset.id} data-gaga-i18n-en={actions.readingStatusUnset.en}>{actions.readingStatusUnset.id}</span>
-          <span data-gaga-continuity-current-summary-status="read-next" data-gaga-i18n-key={actions.readingStatusReadNext.key} data-gaga-i18n-id={actions.readingStatusReadNext.id} data-gaga-i18n-en={actions.readingStatusReadNext.en} hidden>{actions.readingStatusReadNext.id}</span>
-          <span data-gaga-continuity-current-summary-status="in-progress" data-gaga-i18n-key={actions.readingStatusInProgress.key} data-gaga-i18n-id={actions.readingStatusInProgress.id} data-gaga-i18n-en={actions.readingStatusInProgress.en} hidden>{actions.readingStatusInProgress.id}</span>
-          <span data-gaga-continuity-current-summary-status="reference" data-gaga-i18n-key={actions.readingStatusReference.key} data-gaga-i18n-id={actions.readingStatusReference.id} data-gaga-i18n-en={actions.readingStatusReference.en} hidden>{actions.readingStatusReference.id}</span>
-          <span data-gaga-continuity-current-summary-status="completed" data-gaga-i18n-key={actions.readingStatusCompleted.key} data-gaga-i18n-id={actions.readingStatusCompleted.id} data-gaga-i18n-en={actions.readingStatusCompleted.en} hidden>{actions.readingStatusCompleted.id}</span>
-        </span>
-        </span>
-      </section>
-    </div>
-  </div>
 </article>
 
 <style>
