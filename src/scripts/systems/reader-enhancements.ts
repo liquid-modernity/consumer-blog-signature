@@ -812,7 +812,7 @@ function initSmartSpeaker(): SpeakerController {
         const blockText = el.innerText.trim();
         clearActiveBlockHighlight();
         el.classList.add('gaga-speech-active-sentence');
-        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        el.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches || document.body.dataset.gagaReaderMotion === 'reduced' ? 'auto' : 'smooth', block: 'nearest' });
 
         this.progress = currentIndex / validElements.length;
         this.currentText = blockText;
@@ -1005,10 +1005,10 @@ function closeSpeechDock() {
     speechDockEl.removeAttribute('role');
     speechDockEl.removeAttribute('aria-label');
     if (runtime) {
-      if (restoreFocus) runtime.querySelector<HTMLElement>('[data-gaga-action-island-toggle]')?.focus({preventScroll:true});
       runtime.dataset.gagaLiveState = 'idle';
       runtime.dataset.gagaState = 'collapsed';
       runtime.querySelector('[data-gaga-action-island-toggle]')?.setAttribute('aria-expanded', 'false');
+      if (restoreFocus) runtime.querySelector<HTMLElement>('[data-gaga-action-island-toggle]')?.focus({preventScroll:true});
     }
   } else {
     speechDockEl.remove();

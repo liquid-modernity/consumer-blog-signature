@@ -200,8 +200,16 @@ const presentation = resolveNotchPresentation(experienceConfig.notch);
   .gaga-contextual-notch input:focus-visible { outline:2px solid var(--gaga-island-ink); outline-offset:-3px; }
   .gaga-contextual-notch .gaga-notch-search input::placeholder { color:var(--gaga-island-muted); opacity:1; }
   .gaga-contextual-notch .gaga-notch-search input { min-inline-size:0; inline-size:100%; border:0; border-radius:.5rem; padding:.7rem; color:var(--gaga-island-ink); background:var(--gaga-island-hover); font:inherit; }
-  .gaga-contextual-notch[data-gaga-live-state='speaking'] :is(.gaga-notch-context,.gaga-notch-system) { display:none; }
+  .gaga-contextual-notch[data-gaga-live-state='speaking'] :is(.gaga-island-bar,.gaga-notch-context,.gaga-notch-system) { display:none; }
   .gaga-contextual-notch :is(.gaga-notch-context,.gaga-notch-system,.gaga-reader-panel) { animation:gaga-island-reveal .18s ease-out; }
+  .gaga-contextual-notch .gaga-action-runtime__live { inline-size:min(28rem,calc(100vw - 2.25rem)); }
+  .gaga-contextual-notch .gaga-speech-dock__inner { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:.5rem; align-items:center; }
+  .gaga-contextual-notch .gaga-speech-dock__info { min-inline-size:0; }
+  .gaga-contextual-notch .gaga-speech-dock__text { display:block; max-inline-size:100%; color:var(--gaga-island-muted); }
+  .gaga-contextual-notch .gaga-speech-dock__badge { color:var(--gaga-island-ink); font:600 .75rem var(--gaga-font-ui); }
+  .gaga-contextual-notch .gaga-action-runtime__live .gaga-speech-dock__btn { min-block-size:44px; min-inline-size:44px; color:var(--gaga-island-ink); background:transparent; }
+  .gaga-contextual-notch .gaga-action-runtime__live .gaga-speech-dock__btn:focus-visible { outline:2px solid var(--gaga-island-ink); outline-offset:-3px; }
+  .gaga-contextual-notch .gaga-speech-dock__inner progress { grid-column:1/-1; grid-row:2; inline-size:100%; block-size:3px; accent-color:var(--gaga-island-ink); }
   @keyframes gaga-island-reveal { from { opacity:.5; transform:translateY(-3px); } to { opacity:1; transform:translateY(0); } }
   @media(prefers-reduced-motion:reduce) { .gaga-contextual-notch *, .gaga-contextual-notch-container { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
 </style>
