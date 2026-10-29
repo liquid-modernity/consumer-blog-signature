@@ -72,7 +72,9 @@ test('Notch hierarchy, keyboard/touch, presets, nested preferences and persisten
   await settings(page); const panel=page.locator('[data-gaga-reader-panel]'); await expect(panel).toHaveAttribute('aria-hidden','false');
   await expect.poll(() => panel.evaluate(el=>el.contains(document.activeElement))).toBe(true);
   await panel.locator('[data-gaga-reader-pref="theme"][data-gaga-reader-value="paper"]').click();
-  await panel.locator('[data-gaga-reader-pref="font"]').last().click();
+  const enlarged=panel.locator('[data-gaga-reader-pref="font"]').last();await enlarged.click();await enlarged.focus();await page.keyboard.press('Space');
+  const focus=await enlarged.evaluate(el=>{const s=getComputedStyle(el);return {visible:el.matches(':focus-visible'),style:s.outlineStyle,width:parseFloat(s.outlineWidth),color:s.outlineColor,background:s.backgroundColor};});
+  expect(focus.visible).toBe(true);expect(focus.style).not.toBe('none');expect(focus.width).toBeGreaterThanOrEqual(2);expect(focus.color).not.toBe(focus.background);
   await panel.locator('[data-gaga-reader-pref="fontFamily"]').last().click();
   await panel.locator('[data-gaga-reader-pref="identity"][data-gaga-reader-value="editorial"]').click();
   await panel.locator('[data-gaga-language-option][value="en"]').check();
@@ -94,7 +96,7 @@ test('Notch hierarchy, keyboard/touch, presets, nested preferences and persisten
   await page.emulateMedia({reducedMotion:'reduce'}); await opener(page).click(); await settle(page); await geometry(page,'[data-gaga-action-runtime]');
 });
 
-test('unique ordered publications, anchored previews, active metadata, rails, pager and outline', async ({ page }, info) => {
+test('unique ordered publications, anchored previews, active metadata, rails, pager and outline', async ({ page, context }, info) => {
   await ready(page,'/'); const links=page.locator('.pakrpp-publication-list .pakrpp-publication-row__title');
   const hrefs=await links.evaluateAll(nodes=>nodes.map(n=>n.getAttribute('href')));
   const exportData=JSON.parse(readFileSync('content/emdash/published.json','utf8')); const posts=exportData.documents.filter((d:any)=>d.pin.collection==='posts');
@@ -112,6 +114,20 @@ test('unique ordered publications, anchored previews, active metadata, rails, pa
   await page.screenshot({path:directory+'/'+info.project.name+'-preview.png'});
   if(Number(info.project.name)===1440){await card.hover();await expect(card).toBeVisible();}
   await page.keyboard.press('Escape'); await expect(card).toBeHidden();
+  const canonical=await page.locator('link[rel="canonical"]').getAttribute('href');
+  await context.grantPermissions(['clipboard-read','clipboard-write']); await actions(page);
+  await page.locator('[data-gaga-action-runtime] [data-gaga-action="copy-page-link"]').click();
+  await expect.poll(()=>page.evaluate(()=>navigator.clipboard.readText())).toBe(canonical);
+  await page.locator('[data-gaga-notch-more]').click();
+  if(!await page.evaluate(()=>typeof navigator.share==='function')) {
+    await page.evaluate(()=>navigator.clipboard.writeText('previous clipboard'));
+    await page.locator('[data-gaga-notch-system] [data-gaga-action="share-page"]').click();
+    await expect.poll(()=>page.evaluate(()=>navigator.clipboard.readText())).toBe(canonical);
+  }
+  await page.evaluate(()=>{Object.defineProperty(navigator,'share',{configurable:true,value:async(data:ShareData)=>{(window as Window & { sharedPage?: ShareData }).sharedPage=data;}});});
+  await page.locator('[data-gaga-notch-system] [data-gaga-action="share-page"]').click();
+  expect(await page.evaluate(()=>(window as Window & { sharedPage?: ShareData }).sharedPage?.url)).toBe(canonical);
+  await page.keyboard.press('Escape');await page.keyboard.press('Escape');
   const current=hrefs.indexOf(article); const previous=current+1<hrefs.length?hrefs[current+1]:null,next=current>0?hrefs[current-1]:null;
   if(previous)await expect(page.locator('.gaga-article-pager__col').first().locator('a')).toHaveAttribute('href',previous!);
   if(next)await expect(page.locator('.gaga-article-pager__col').last().locator('a')).toHaveAttribute('href',next!);
@@ -119,6 +135,10 @@ test('unique ordered publications, anchored previews, active metadata, rails, pa
   const outline=page.locator('[data-gaga-outline-opener]'); if(await outline.count()){
     await expect(outline).not.toContainText('Gaga Dynamic Outline Peek'); await outline.click(); await expect(page.locator('[data-gaga-outline-peek]')).toHaveAttribute('data-gaga-state','open'); await page.keyboard.press('Escape');
     await expect(page.locator('[data-gaga-outline-peek]')).toHaveAttribute('data-gaga-state','closed');
+    await outline.click();const headingLink=page.locator('[data-gaga-outline-peek] [data-gaga-info-field="outline"] a').last(),headingText=await headingLink.innerText(),headingHash=await headingLink.getAttribute('href');
+    await headingLink.click();await expect(page.locator('[data-gaga-outline-peek]')).toHaveAttribute('data-gaga-state','closed');
+    await expect.poll(()=>page.evaluate(()=>location.hash)).toBe(headingHash);
+    await expect(page.locator('[data-gaga-outline-current-label]')).toHaveText(headingText);
     await page.locator('[data-gaga-article-scroll]').evaluate(el=>el.scrollTop=el.scrollHeight); await expect(page.locator('[data-gaga-outline-progress]')).toHaveText('100%');
   }
   for(const route of ['/','/search','/saved',article]){await ready(page,route);await expect(page.locator('[data-gaga-left-rail], [data-gaga-right-rail]')).toHaveCount(0);await geometry(page);}

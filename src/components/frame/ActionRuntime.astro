@@ -177,5 +177,6 @@ const presentation = resolveNotchPresentation(experienceConfig.notch);
   .gaga-contextual-notch .gaga-reader-panel :is(h2,legend,label,summary,button,span) { color: inherit; }
   .gaga-contextual-notch .gaga-reader-panel button { min-block-size: 2.75rem; min-inline-size: 2.75rem; border-color: #77776c; background: #242421; }
   .gaga-contextual-notch .gaga-reader-panel button[data-gaga-active='true'] { background: #f7f6f2; color: #151513; }
+  .gaga-contextual-notch .gaga-reader-panel button[data-gaga-active='true']:focus-visible { outline-color: #151513; }
   @media(prefers-reduced-motion:reduce) { .gaga-contextual-notch *, .gaga-contextual-notch-container { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
 </style>
