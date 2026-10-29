@@ -22,8 +22,9 @@ async function geometry(page: Page, panel?: string) {
   const g = await page.evaluate(selector => {
     const node = selector ? document.querySelector<HTMLElement>(selector) : null;
     const box = node?.getBoundingClientRect();
-    return { width: innerWidth, height: innerHeight, mainOverflow: (() => { const m=document.querySelector('[data-gaga-main-region]'); return m ? m.scrollWidth-m.clientWidth : 0; })(), document: document.documentElement.scrollWidth, main: document.querySelector('[data-gaga-main-region]')?.getBoundingClientRect().width, panel: box ? { left: box.left, right: box.right, top: box.top, bottom: box.bottom } : null };
+    return { offenders: Array.from(document.querySelectorAll<HTMLElement>('body *')).filter(el => { const r=el.getBoundingClientRect(); return r.width>0 && (r.right>innerWidth+1 || r.left < -1); }).slice(0,40).map(el=>{const r=el.getBoundingClientRect(),s=getComputedStyle(el);return {tag:el.tagName,class:el.className,left:r.left,right:r.right,width:r.width,client:el.clientWidth,scroll:el.scrollWidth,position:s.position,boxSizing:s.boxSizing,padding:s.padding,whiteSpace:s.whiteSpace,minWidth:s.minWidth,maxWidth:s.maxWidth,text:el.textContent?.trim().slice(0,90)};}), width: innerWidth, height: innerHeight, mainOverflow: (() => { const m=document.querySelector('[data-gaga-main-region]'); return m ? m.scrollWidth-m.clientWidth : 0; })(), document: document.documentElement.scrollWidth, main: document.querySelector('[data-gaga-main-region]')?.getBoundingClientRect().width, panel: box ? { left: box.left, right: box.right, top: box.top, bottom: box.bottom } : null };
   }, panel);
+  writeFileSync(directory+'/geometry-'+g.width+'.json',JSON.stringify(g,null,2));
   expect(g.document).toBeLessThanOrEqual(g.width + 1);
   expect(g.mainOverflow).toBeLessThanOrEqual(1);
   if (g.panel) { expect(g.panel.left).toBeGreaterThanOrEqual(-1); expect(g.panel.right).toBeLessThanOrEqual(g.width + 1); expect(g.panel.top).toBeGreaterThanOrEqual(-1); expect(g.panel.bottom).toBeLessThanOrEqual(g.height + 1); }

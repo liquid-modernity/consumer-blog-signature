@@ -60,7 +60,7 @@ export const experienceConfig = {
 } as const;
 
 export function resolveExperienceContext({ pathname, pageId = '', contentKind = '', contentClass = '' }: ExperienceContextInput): ExperienceContext {
-  if (contentKind === 'article' || contentClass === 'article-flagship' || pathname === '/article' || pathname.startsWith('/article/') || pathname.startsWith('/publications/')) return 'article';
+  if (contentKind === 'article' || contentClass === 'article-flagship' || pathname === '/article' || pathname.startsWith('/article/') || /^\/publications\/[^/]+$/.test(pathname.replace(/\/+$/, ''))) return 'article';
   if (pageId === 'archive' || pathname === '/archive' || pathname.startsWith('/archive/')) return 'archive';
   if (pageId === 'graph' || pathname === '/graphs' || pathname.startsWith('/graphs/')) return 'graph';
   if (contentKind === 'topic' || pageId.includes('topic') || pathname === '/topics' || pathname.startsWith('/topics/')) return 'topic';
