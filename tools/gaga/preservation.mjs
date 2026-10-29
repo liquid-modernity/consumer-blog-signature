@@ -31,6 +31,26 @@ const approvedUx = Object.freeze({
     "src/styles/partials/_outline-peek.scss": "58091ab7af72ba4d7bce4fcbc581b2b0ed70226747a104e32a1d230a44e18b9f"
   }
 });
+// Additive exact V2 profile; historical inventory and earlier admissions remain immutable.
+const approvedPolish = Object.freeze({
+  "sourceCommit": "94fa4483d260d90f7687968c8d14e1b1e8dbb5bc",
+  "sourceTree": "d4f6066c52a9966242d899e6bf1bab5598f30111",
+  "qualification": "https://github.com/liquid-modernity/consumer-blog-signature/actions/runs/40937969581",
+  "acceptanceReceiptSha256": "9fb0731973a21aad8084a753e9703cb5f8de7c54b709b51ed2f5f2c305c7d25e",
+  "files": {
+    "src/components/frame/ActionRuntime.astro": "cb048404b9593733842737a14a88b66bd986013da0b4316b93587c4ad76e70b7",
+    "src/components/frame/AppFrameBase.astro": "7775fccfab96d0f1430401075565a01bb92d1f4fa59b6564e67bd1641ab0a82e",
+    "src/components/frame/ArticleOutlinePeek.astro": "12d5b5e2fb815d39d26493b4b7cdbc9b6b15938fb74dbaf63bb18c9ae5053585",
+    "src/components/frame/LeftRail.astro": "2d9d068f4b58e3f33a08f0ee08adb44a89ce3bf7985b5aaf78dd4805bd3087fe",
+    "src/components/frame/RightInfoRail.astro": "8b13376ca332d19632b409ad935420e5d36f333f210e04bb48134bb4e704c636",
+    "src/components/gaga/ArticleShell.astro": "5ba40e4820a75779485622ef256f854cdaa639f3ac7d00c5b734895ffb705317",
+    "src/components/gaga/MarkdownContent.astro": "a7880f6a08ead406d9100e4286a9035a7f0b930aa10df679dd4d7c0178389f73",
+    "src/styles/partials/_action-island.scss": "be77c541bed174d2c6267892633318c57eb7540f59b46ad471af30d8cd6e8d0b",
+    "src/styles/partials/_content.scss": "361e793ecb93cd1b4fe1fca9d601a31fe6a3fce8fc20f9413fa3633bfc280787",
+    "src/styles/partials/_frame.scss": "16c72655342178657aae90b3d2902a07df163a847f5e37582d8d591bb346e39c",
+    "src/styles/partials/_outline-peek.scss": "42878bdeb3a5ec8548b52977cb1ae683ab27c97de3e75ebe30ab01b98635bff2"
+  }
+});
 const historical = readFileSync("docs/UI-PRESERVATION.json");
 assert.equal(
   createHash("sha256").update(historical).digest("hex"),
@@ -46,13 +66,15 @@ for (const [path, digest] of Object.entries(approvedUx.files)) {
   assert.ok(historicalHashes.has(path) && path !== approvedMain.path && /^[a-f0-9]{64}$/.test(digest));
   assert.notEqual(digest, historicalHashes.get(path));
 }
+for (const [path, digest] of Object.entries(approvedPolish.files)) assert.ok(historicalHashes.has(path) && /^[a-f0-9]{64}$/.test(digest));
 const actual = new Map(inventory.files.map(f => [f.path, createHash("sha256").update(
   readFileSync(f.path, "utf8").replaceAll("@gaga/engine-web", "@gaga/engine-runtime")
     .replaceAll("@gaga/engine/", "@gaga/engine-capabilities/"),
 ).digest("hex")]));
+const polishProfile = Object.entries(approvedPolish.files).every(([path, digest]) => actual.get(path) === digest);
 const historicalProfile = Object.keys(approvedUx.files).every(path => actual.get(path) === historicalHashes.get(path));
 for (const f of inventory.files) {
-  const expected = historicalProfile ? historicalHashes.get(f.path) : approvedUx.files[f.path] ?? historicalHashes.get(f.path);
+  const expected = polishProfile ? approvedPolish.files[f.path] ?? historicalHashes.get(f.path) : historicalProfile ? historicalHashes.get(f.path) : approvedUx.files[f.path] ?? historicalHashes.get(f.path);
   assert.equal(actual.get(f.path), expected, "Unintended application UI/style/routing change: " + f.path);
 }
 console.log(
@@ -61,5 +83,5 @@ console.log(
   "entries; one exact qualified main-landmark correction from",
   approvedMain.sourceCommit,
   approvedMain.qualification,
-  historicalProfile ? "historical profile" : "whole accepted UX profile " + approvedUx.sourceCommit + " " + approvedUx.qualification,
+  polishProfile ? "whole qualified polish profile " + approvedPolish.sourceCommit + " " + approvedPolish.qualification : historicalProfile ? "historical profile" : "whole accepted UX profile " + approvedUx.sourceCommit + " " + approvedUx.qualification,
 );

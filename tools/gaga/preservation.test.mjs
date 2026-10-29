@@ -116,3 +116,23 @@ test("unrelated configuration changes remain rejected in the accepted profile", 
   const r = check(root => {accepted(root);const path=join(root,'src/config/routes.ts');writeFileSync(path,readFileSync(path,'utf8')+'\n// unapproved\n');});
   assert.notEqual(r.status, 0);assert.match(r.stderr, /Unintended application UI\/style\/routing change: src\/config\/routes.ts/);
 });
+
+function polished(root) {
+  for (const file of inventory.files) writeFileSync(join(root, file.path), execFileSync('git', ['show', '94fa4483d260d90f7687968c8d14e1b1e8dbb5bc:' + file.path]));
+}
+test("the whole exact V2 polish profile passes with immutable hosted provenance", () => {
+  const result = check(polished);assert.equal(result.status,0,result.stderr);
+  assert.match(result.stdout,/whole qualified polish profile 94fa4483d260d90f7687968c8d14e1b1e8dbb5bc/);assert.match(result.stdout,/40937969581/);
+});
+test("an unreviewed mixture of V2 and accepted V1 remains rejected", () => {
+ const result=check(root=>{accepted(root);const path='src/components/frame/ActionRuntime.astro';writeFileSync(join(root,path),execFileSync('git',['show','94fa4483d260d90f7687968c8d14e1b1e8dbb5bc:'+path]));});
+ assert.notEqual(result.status,0);assert.match(result.stderr,/Unintended application UI\/style\/routing change/);
+});
+test("additional bytes in the qualified V2 profile still fail closed", () => {
+ const result=check(root=>{polished(root);const path=join(root,'src/components/frame/ActionRuntime.astro');writeFileSync(path,readFileSync(path,'utf8')+'\n<!-- unqualified -->\n');});
+ assert.notEqual(result.status,0);assert.match(result.stderr,/Unintended application UI\/style\/routing change/);
+});
+test("V2 cannot admit unrelated route configuration changes", () => {
+ const result=check(root=>{polished(root);const path=join(root,'src/config/routes.ts');writeFileSync(path,readFileSync(path,'utf8')+'\n// unqualified\n');});
+ assert.notEqual(result.status,0);assert.match(result.stderr,/Unintended application UI\/style\/routing change/);
+});
