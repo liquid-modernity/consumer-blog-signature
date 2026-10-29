@@ -95,3 +95,24 @@ test("the existing historical package-import normalization is preserved", () => 
   });
   assert.equal(result.status, 0, result.stderr);
 });
+
+function accepted(root) {
+  for (const file of inventory.files) writeFileSync(join(root, file.path), execFileSync('git', ['show', '2cd17acdf6a262f184b10c68bf15e77007d2b42d:' + file.path]));
+}
+test("the entire exact accepted UX profile passes with immutable provenance", () => {
+  const r = check(accepted);assert.equal(r.status, 0, r.stderr);
+  assert.match(r.stdout, /whole accepted UX profile 2cd17acdf6a262f184b10c68bf15e77007d2b42d/);
+  assert.match(r.stdout, /40884201685/);
+});
+test("a hybrid of accepted and historical UI bytes is rejected", () => {
+  const r = check(root => {accepted(root);writeFileSync(join(root, inventory.files[0].path), execFileSync('git',['show','c160e6712ec61369cac7e73ecde156aeaac27474:'+inventory.files[0].path]));});
+  assert.notEqual(r.status, 0);assert.match(r.stderr, /Unintended application UI\/style\/routing change/);
+});
+test("additional unaccepted bytes in the accepted UX profile are rejected", () => {
+  const r = check(root => {accepted(root);const path=join(root,inventory.files[0].path);writeFileSync(path,readFileSync(path,'utf8')+'\n<!-- unaccepted -->\n');});
+  assert.notEqual(r.status, 0);assert.match(r.stderr, /Unintended application UI\/style\/routing change/);
+});
+test("unrelated configuration changes remain rejected in the accepted profile", () => {
+  const r = check(root => {accepted(root);const path=join(root,'src/config/routes.ts');writeFileSync(path,readFileSync(path,'utf8')+'\n// unapproved\n');});
+  assert.notEqual(r.status, 0);assert.match(r.stderr, /Unintended application UI\/style\/routing change: src\/config\/routes.ts/);
+});
