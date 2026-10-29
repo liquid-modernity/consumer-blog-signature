@@ -55,7 +55,7 @@ export function initInformationSurface() {
     if (!card.hasAttribute('data-gaga-preview-state')) { close(); active = null; suppressed = null; }
   });
   observer.observe(card, { attributes: true, attributeFilter: ['data-gaga-preview-state'] });
-  document.addEventListener('keydown', event => { if (event.key === 'Escape' && !card.hidden) { suppressed = active; close(); } });
+  document.addEventListener('keydown', event => { if (event.key === 'Escape' && !card.hidden) { event.preventDefault(); event.stopPropagation(); suppressed = active; close(); } }, { capture: true });
   document.addEventListener('scroll', position, { capture: true, passive: true });
   window.addEventListener('resize', position, { passive: true });
   window.addEventListener('pagehide', () => { capability.cleanup(); observer.disconnect(); }, { once: true });

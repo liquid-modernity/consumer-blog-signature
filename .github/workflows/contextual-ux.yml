@@ -38,6 +38,7 @@ jobs:
           npm ci --prefix cms --ignore-scripts --no-audit --no-fund
       - name: Focused contextual, existing release safety, editorial and content regressions
         run: |
+          node tools/gaga/prepare.mjs
           npm run test:gaga | tee "$GAGA_EVIDENCE_DIRECTORY/gaga-tests.log"
           npm run test:cms | tee "$GAGA_EVIDENCE_DIRECTORY/cms-tests.log"
           node --test tools/contextual/contracts.test.mjs tools/reference/integration.test.mjs tools/content/content.test.mjs tools/editorial/portable-text.test.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/contextual-tests.log"
