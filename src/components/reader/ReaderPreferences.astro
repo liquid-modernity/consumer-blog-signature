@@ -36,7 +36,7 @@ const advanced = [
     </fieldset>
     <fieldset class="gaga-reader-themes">
       <legend data-gaga-i18n-id={preferences.theme.legend.id} data-gaga-i18n-en={preferences.theme.legend.en}>{preferences.theme.legend.id}</legend>
-      {preferences.theme.options.map(theme => <button type="button" data-gaga-reader-pref="theme" data-gaga-reader-value={theme.value} data-gaga-i18n-key={theme.labelKey} data-gaga-i18n-id={theme.label} data-gaga-i18n-en={theme.labelEn}><span class="gaga-reader-swatch" data-theme-swatch={theme.value} aria-hidden="true"></span>{theme.label}</button>)}
+      {preferences.theme.options.map(theme => <button type="button" data-gaga-reader-pref="theme" data-gaga-reader-value={theme.value}><span class="gaga-reader-swatch" data-theme-swatch={theme.value} aria-hidden="true"></span><span data-gaga-i18n-key={theme.labelKey} data-gaga-i18n-id={theme.label} data-gaga-i18n-en={theme.labelEn}>{theme.label}</span></button>)}
     </fieldset>
     <p class="gaga-reader-specimen" data-gaga-reader-specimen>Ruang untuk gagasan.<br /><small data-gaga-i18n-id="Tampilan bacaan mengikuti pilihan Anda." data-gaga-i18n-en="Your reading appearance follows these choices.">Tampilan bacaan mengikuti pilihan Anda.</small></p>
     {typography.map(({key,group}) => group && <fieldset class="gaga-reader-segments"><legend data-gaga-i18n-id={group.legend.id} data-gaga-i18n-en={group.legend.en}>{group.legend.id}</legend>{group.options.map(option => <button type="button" data-gaga-reader-pref={key} data-gaga-reader-value={option.value} class:list={{'gaga-font-specimen':key==='fontFamily'}}>{option.label}</button>)}</fieldset>)}
@@ -58,7 +58,7 @@ const advanced = [
 .gaga-contextual-notch .gaga-reader-panel__head { display:flex; justify-content:space-between; align-items:center; padding:0 0 .5rem; border:0; }
 .gaga-contextual-notch .gaga-reader-panel__head h2 { font:600 .9rem var(--gaga-font-ui); margin:0; }
 .gaga-contextual-notch .gaga-reader-panel__grid,.gaga-contextual-notch .gaga-reader-panel__advanced-grid { display:grid; grid-template-columns:minmax(0,1fr); gap:1rem; }
-.gaga-contextual-notch .gaga-reader-panel fieldset { margin:0; padding:0; border:0; min-inline-size:0; }
+.gaga-contextual-notch .gaga-reader-panel fieldset { margin:0; padding:0; border:0; min-inline-size:0; background:transparent; }
 .gaga-contextual-notch .gaga-reader-panel legend { font:.78rem var(--gaga-font-ui); color:var(--gaga-island-muted); padding-block:0 .4rem; letter-spacing:normal; text-transform:none; }
 .gaga-contextual-notch .gaga-reader-panel button { border:0; border-radius:.5rem; background:transparent; font:.85rem var(--gaga-font-ui); padding:.55rem .65rem; }
 .gaga-contextual-notch .gaga-reader-panel button:is(:hover,[aria-pressed='true']) { background:var(--gaga-island-hover); color:var(--gaga-island-ink); }
@@ -72,6 +72,8 @@ const advanced = [
 .gaga-reader-swatch[data-theme-swatch='dark'] { background:var(--gaga-island-bg); outline:1px solid var(--gaga-island-muted); }
 .gaga-reader-swatch[data-theme-swatch='default'] { background:var(--gaga-focus-ring); }
 .gaga-contextual-notch .gaga-reader-specimen { margin:0; padding:.75rem; border-radius:.5rem; font:var(--gaga-article-font-size,1rem)/var(--gaga-article-line-height,1.6) var(--gaga-font-body); letter-spacing:var(--gaga-article-letter-spacing,0); }
+.gaga-contextual-notch .gaga-reader-panel__preset-actions { display:flex; flex-wrap:wrap; gap:.25rem; }
+.gaga-contextual-notch .gaga-reader-panel summary { text-transform:none; letter-spacing:normal; }
 .gaga-reader-specimen small { font-size:.78em; }
 .gaga-font-specimen[data-gaga-reader-value='serif'] { font-family:var(--gaga-font-display) !important; }
 .gaga-font-specimen[data-gaga-reader-value='mono'] { font-family:var(--gaga-font-mono) !important; }

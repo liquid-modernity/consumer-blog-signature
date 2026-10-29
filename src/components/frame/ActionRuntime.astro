@@ -30,13 +30,13 @@ const presentation = resolveNotchPresentation(experienceConfig.notch);
         <button type="button" class="gaga-action-runtime__toggle gaga-notch-button" data-gaga-action-island-toggle aria-label={toggleLabel.id} data-gaga-i18n-id={toggleLabel.id} data-gaga-i18n-en={toggleLabel.en} data-gaga-i18n-target="aria" aria-expanded="false" aria-controls="gaga-notch-context"><Icon name="menu" /></button>
       </div>
       <section id="gaga-notch-context" class="gaga-notch-context" data-gaga-notch-context hidden inert aria-label="Aksi kontekstual">
-        <p class="gaga-notch-page-title" data-gaga-island-focus-title>{path === '/' ? siteConfig.name : pageTitle}</p>
+        {path !== '/' && <p class="gaga-notch-page-title" data-gaga-island-focus-title>{pageTitle}</p>}
         <div class="gaga-notch-actions" data-gaga-action-runtime-actions>
-          {primary.map(action => <button type="button" class="gaga-notch-button" data-gaga-action={action.id === 'search' ? undefined : action.id === 'save' ? 'save-reading' : action.command} data-gaga-notch-search-toggle={action.id === 'search' ? '' : undefined} title={action.label.id} data-gaga-action-id={action.id} data-gaga-quick-action={action.id} aria-label={action.label.id} data-gaga-i18n-id={action.label.id} data-gaga-i18n-en={action.label.en} data-gaga-i18n-target="aria" aria-pressed={action.kind === 'toggle' ? 'false' : undefined}><Icon name={action.icon ?? 'article'} /><span class="gaga-visually-hidden" data-gaga-i18n-id={action.label.id} data-gaga-i18n-en={action.label.en}>{action.label.id}</span></button>)}
+          {primary.map(action => <button type="button" class="gaga-notch-button" data-gaga-action={action.id === 'search' ? undefined : action.id === 'save' ? 'save-reading' : action.command} data-gaga-notch-search-toggle={action.id === 'search' ? '' : undefined} aria-controls={action.id === 'search' ? 'gaga-notch-search' : undefined} aria-expanded={action.id === 'search' ? 'false' : undefined} title={action.label.id} data-gaga-action-id={action.id} data-gaga-quick-action={action.id} aria-label={action.label.id} data-gaga-i18n-id={action.label.id} data-gaga-i18n-en={action.label.en} data-gaga-i18n-target="aria" aria-pressed={action.kind === 'toggle' ? 'false' : undefined}><Icon name={action.icon ?? 'article'} /><span class="gaga-visually-hidden" data-gaga-i18n-id={action.label.id} data-gaga-i18n-en={action.label.en}>{action.label.id}</span></button>)}
           <button type="button" class="gaga-notch-button" data-gaga-action="toggle-reader-preferences" aria-controls="gaga-reader-panel" aria-expanded="false" aria-label="Preferensi pembaca" title="Preferensi pembaca"><Icon name="settings" /><span class="gaga-visually-hidden" data-gaga-i18n-id="Preferensi pembaca" data-gaga-i18n-en="Reader preferences">Preferensi pembaca</span></button>
           <button type="button" class="gaga-notch-button" data-gaga-notch-more aria-label="Navigasi situs" title="Navigasi situs" aria-expanded="false" aria-controls="gaga-notch-system"><Icon name="menu" /><span class="gaga-visually-hidden">Navigasi situs</span></button>
         </div>
-        <form action="/search" role="search" class="gaga-notch-search" data-gaga-notch-search hidden inert>
+        <form id="gaga-notch-search" action="/search" role="search" class="gaga-notch-search" data-gaga-notch-search hidden inert>
           <label for="notch-query" class="gaga-visually-hidden">Cari publikasi</label><input id="notch-query" type="search" name="q" placeholder="Cari publikasi…" required /><button class="gaga-notch-button" type="submit" aria-label="Cari"><Icon name="search" /></button>
         </form>
         {context === 'article' && <span class="gaga-visually-hidden" role="progressbar" aria-label="Progres membaca" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-gaga-reading-progress><span class="gaga-visually-hidden" data-gaga-reading-progress-value>0%</span></span>}
@@ -82,7 +82,7 @@ const presentation = resolveNotchPresentation(experienceConfig.notch);
       island.dataset.gagaState = state;
       island.dataset.gagaLevel = state === 'collapsed' ? '0' : state === 'peek' ? '1' : '2';
       context.hidden = state === 'collapsed'; context.inert = context.hidden;
-      if (state === 'collapsed') { search.hidden = true; search.inert = true; }
+      if (state === 'collapsed') { search.hidden = true; search.inert = true; island.querySelector('[data-gaga-notch-search-toggle]')?.setAttribute('aria-expanded','false'); }
       system.hidden = state !== 'expanded'; system.inert = system.hidden;
       toggle.setAttribute('aria-expanded', String(state !== 'collapsed'));
       more.setAttribute('aria-expanded', String(state === 'expanded'));
@@ -137,7 +137,7 @@ const presentation = resolveNotchPresentation(experienceConfig.notch);
     island.addEventListener('keydown', event => {
       if (event.key !== 'Escape') return;
       event.preventDefault(); event.stopPropagation();
-      if (!search.hidden) { search.hidden = true; search.inert = true; island.querySelector<HTMLElement>('[data-gaga-notch-search-toggle]')?.focus(); return; }
+      if (!search.hidden) { search.hidden = true; search.inert = true; const opener=island.querySelector<HTMLElement>('[data-gaga-notch-search-toggle]'); opener?.setAttribute('aria-expanded','false'); opener?.focus(); return; }
       if (readerOpen()) requestReaderPanel({ action: 'close', source: 'keyboard' });
       else setState(island.dataset.gagaState === 'expanded' ? 'peek' : 'collapsed', true);
     });
@@ -180,7 +180,7 @@ const presentation = resolveNotchPresentation(experienceConfig.notch);
   .gaga-contextual-notch [role='progressbar'] { display: block; margin-block-start: .6rem; font: .75rem var(--gaga-font-mono); }
   .gaga-contextual-notch .gaga-notch-navigation { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .4rem; margin-block: .75rem; }
   .gaga-contextual-notch a { color: inherit; }
-  .gaga-contextual-notch .gaga-notch-navigation a { display: flex; align-items: center; gap: .4rem; padding: .5rem; min-block-size: 2.75rem; border-radius: .5rem; text-decoration: none; }
+  .gaga-contextual-notch .gaga-notch-navigation a { display: flex; align-items: center; gap: .4rem; padding: .5rem; min-block-size: 2.75rem; border-radius: .5rem; text-decoration: underline; text-underline-offset:.18em; }
   .gaga-contextual-notch :is(a[aria-current],a:hover) { background: var(--gaga-island-hover); }
   .gaga-contextual-notch summary { padding: .75rem .25rem; min-block-size: 2.75rem; cursor: pointer; }
   .gaga-contextual-notch details h2 { font-size: .9rem; }
@@ -188,14 +188,17 @@ const presentation = resolveNotchPresentation(experienceConfig.notch);
   .gaga-contextual-notch details a { display: inline-block; padding-block: .5rem; }
   .gaga-contextual-notch .gaga-reader-panel { --gaga-surface: #242421; --gaga-surface-2: #242421; --gaga-surface-subtle: #1b1b18; --gaga-blue: var(--gaga-island-ink); --gaga-muted: var(--gaga-island-muted); --gaga-line: #56564e; position: static; inset: auto; display: none; inline-size: min(28rem, calc(100vw - 2.25rem)); width: auto; max-block-size: none; max-height: none; overflow: visible; transform: none; opacity: 1; border: 0; border-radius: 0; box-shadow: none; background: var(--gaga-island-bg); color: var(--gaga-island-ink); transition: none; }
   .gaga-contextual-notch .gaga-reader-panel[data-gaga-state='open'] { display: block; transform: none; }
-  .gaga-contextual-notch:has([data-gaga-reader-panel][data-gaga-state='open']) .gaga-notch-context,
-  .gaga-contextual-notch:has([data-gaga-reader-panel][data-gaga-state='open']) .gaga-notch-system > :not(.gaga-notch-actions),
-  .gaga-contextual-notch:has([data-gaga-reader-panel][data-gaga-state='open']) .gaga-notch-system .gaga-notch-actions > :not([data-gaga-action='toggle-reader-preferences']) { display: none; }
+  .gaga-contextual-notch:not([data-gaga-reader-closing]):has([data-gaga-reader-panel][data-gaga-state='open']) .gaga-notch-context,
+  .gaga-contextual-notch:not([data-gaga-reader-closing]):has([data-gaga-reader-panel][data-gaga-state='open']) .gaga-notch-system > :not(.gaga-notch-actions),
+  .gaga-contextual-notch:not([data-gaga-reader-closing]):has([data-gaga-reader-panel][data-gaga-state='open']) .gaga-notch-system .gaga-notch-actions > :not([data-gaga-action='toggle-reader-preferences']) { display: none; }
+  .gaga-contextual-notch:not([data-gaga-reader-closing]):has([data-gaga-reader-panel][data-gaga-state='open']) .gaga-island-bar { display:none; }
   .gaga-contextual-notch .gaga-reader-panel :is(h2,legend,label,summary,button,span) { color: inherit; }
   .gaga-contextual-notch .gaga-reader-panel button { min-block-size: 2.75rem; min-inline-size: 2.75rem; border-color: #77776c; background: #242421; }
   .gaga-contextual-notch .gaga-reader-panel button[data-gaga-active='true'] { background: var(--gaga-island-ink); color: var(--gaga-island-bg); }
   .gaga-contextual-notch .gaga-reader-panel button[data-gaga-active='true']:focus-visible { outline-color: var(--gaga-island-ink); }
   .gaga-contextual-notch .gaga-notch-search { display:flex; gap:.25rem; margin-block:.5rem; }
+  .gaga-contextual-notch input:focus-visible { outline:2px solid var(--gaga-island-ink); outline-offset:-3px; }
+  .gaga-contextual-notch .gaga-notch-search input::placeholder { color:var(--gaga-island-muted); opacity:1; }
   .gaga-contextual-notch .gaga-notch-search input { min-inline-size:0; inline-size:100%; border:0; border-radius:.5rem; padding:.7rem; color:var(--gaga-island-ink); background:var(--gaga-island-hover); font:inherit; }
   .gaga-contextual-notch[data-gaga-live-state='speaking'] :is(.gaga-notch-context,.gaga-notch-system) { display:none; }
   .gaga-contextual-notch :is(.gaga-notch-context,.gaga-notch-system,.gaga-reader-panel) { animation:gaga-island-reveal .18s ease-out; }

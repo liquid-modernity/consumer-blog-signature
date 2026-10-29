@@ -982,7 +982,8 @@ function renderSpeechDock(controller: SpeakerController) {
     </div>
   `;
 
-  if (focused) speechDockEl.querySelector<HTMLElement>(`[data-speech="${focused}"]`)?.focus({preventScroll:true});
+  const nextFocus = focused === 'pause' && controller.state === 'paused' ? 'resume' : focused === 'resume' && controller.state === 'playing' ? 'pause' : focused;
+  if (nextFocus) speechDockEl.querySelector<HTMLElement>(`[data-speech="${nextFocus}"]`)?.focus({preventScroll:true});
   speechDockEl.querySelector('[data-speech="pause"]')?.addEventListener('click', () => controller.pause());
   speechDockEl.querySelector('[data-speech="resume"]')?.addEventListener('click', () => controller.resume());
   speechDockEl.querySelector('[data-speech="stop"]')?.addEventListener('click', () => controller.stop());

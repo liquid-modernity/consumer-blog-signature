@@ -210,8 +210,16 @@ export function initReaderPreferences() {
     isDensity: isReaderDensity,
     isFont: isReaderFontScale,
     modalIsolation: {
-      activate: activateModalIsolation,
-      clear: clearModalIsolation
+      activate: owner => {
+        delete document.querySelector<HTMLElement>('[data-gaga-action-runtime]')?.dataset.gagaReaderClosing;
+        activateModalIsolation(owner);
+      },
+      clear: owner => {
+        // Reveal the application-owned return target before Engine restores focus.
+        const island = document.querySelector<HTMLElement>('[data-gaga-action-runtime]');
+        if (island) island.dataset.gagaReaderClosing = 'true';
+        clearModalIsolation(owner);
+      }
     },
     modalOwner: 'reader-panel',
     beforeOpen: () => {
