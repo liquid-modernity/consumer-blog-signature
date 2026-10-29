@@ -169,13 +169,13 @@ const presentation = resolveNotchPresentation(experienceConfig.notch);
   .gaga-contextual-notch details h2 { font-size: .9rem; }
   .gaga-contextual-notch details ul { padding-inline-start: 1.25rem; }
   .gaga-contextual-notch details a { display: inline-block; padding-block: .5rem; }
-  .gaga-contextual-notch .gaga-reader-panel { position: static; inset: auto; display: none; inline-size: min(28rem, calc(100vw - 2.25rem)); width: auto; max-block-size: none; max-height: none; overflow: visible; transform: none; opacity: 1; border: 0; border-radius: 0; box-shadow: none; background: #151513; color: #f7f6f2; transition: none; }
+  .gaga-contextual-notch .gaga-reader-panel { --gaga-surface: #242421; --gaga-surface-2: #242421; --gaga-surface-subtle: #1b1b18; --gaga-blue: #f7f6f2; --gaga-muted: #c5c5ba; --gaga-line: #56564e; position: static; inset: auto; display: none; inline-size: min(28rem, calc(100vw - 2.25rem)); width: auto; max-block-size: none; max-height: none; overflow: visible; transform: none; opacity: 1; border: 0; border-radius: 0; box-shadow: none; background: #151513; color: #f7f6f2; transition: none; }
   .gaga-contextual-notch .gaga-reader-panel[data-gaga-state='open'] { display: block; transform: none; }
   .gaga-contextual-notch:has([data-gaga-reader-panel][data-gaga-state='open']) .gaga-notch-context,
   .gaga-contextual-notch:has([data-gaga-reader-panel][data-gaga-state='open']) .gaga-notch-system > :not(.gaga-notch-actions),
   .gaga-contextual-notch:has([data-gaga-reader-panel][data-gaga-state='open']) .gaga-notch-system .gaga-notch-actions > :not([data-gaga-action='toggle-reader-preferences']) { display: none; }
   .gaga-contextual-notch .gaga-reader-panel :is(h2,legend,label,summary,button,span) { color: inherit; }
-  .gaga-contextual-notch .gaga-reader-panel button { border-color: #77776c; background: #242421; }
+  .gaga-contextual-notch .gaga-reader-panel button { min-block-size: 2.75rem; min-inline-size: 2.75rem; border-color: #77776c; background: #242421; }
   .gaga-contextual-notch .gaga-reader-panel button[data-gaga-active='true'] { background: #f7f6f2; color: #151513; }
   @media(prefers-reduced-motion:reduce) { .gaga-contextual-notch *, .gaga-contextual-notch-container { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
 </style>

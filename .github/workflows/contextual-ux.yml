@@ -90,7 +90,9 @@ jobs:
       - name: Five-width contextual functionality and light/dark visual evidence
         run: npx --no-install playwright test --config playwright.contextual.config.ts | tee "$GAGA_EVIDENCE_DIRECTORY/contextual-browser.log"
       - name: Existing five-width Saved Library and main/skip-link regression
-        run: npx --no-install playwright test --config playwright.reference-quality.config.ts | tee "$GAGA_EVIDENCE_DIRECTORY/reference-browser.log"
+        run: |
+          python3 tools/reference/html-semantics.py
+          npx --no-install playwright test --config playwright.reference-quality.config.ts | tee "$GAGA_EVIDENCE_DIRECTORY/reference-browser.log"
       - name: Audit, workflow lint and preserved production-admission boundary
         run: |
           npm audit --audit-level=low --json > "$GAGA_EVIDENCE_DIRECTORY/audit.json"

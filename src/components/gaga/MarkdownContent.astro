@@ -249,8 +249,8 @@ const entityNavigationLabel = i18nLabel(isAuthor ? 'entity.authorNavigation' : '
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1.5rem;
-    inline-size: 100%;
-    max-inline-size: var(--gaga-content-width, 44rem);
+    inline-size: var(--gaga-reading-measure, 100%);
+    max-inline-size: var(--gaga-article-measure, 40.5rem);
     margin-inline: auto;
     margin-top: 2.5rem;
     padding-top: 1.35rem;
