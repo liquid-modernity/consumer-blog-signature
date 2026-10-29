@@ -87,7 +87,7 @@ async function boot() {
     import('./systems/toast').catch(() => null),
     import('./systems/reader-preferences').catch(() => null),
     import('./systems/saved-reading').catch(() => null),
-    hasCapability('[data-gaga-continuity-current], [data-gaga-saved-page]')
+    hasCapability('[data-gaga-continuity-eligible="true"], [data-gaga-saved-page]')
       ? import('./systems/reading-continuity').catch(() => null)
       : Promise.resolve(null),
     import('./systems/quick-actions-state').catch(() => null),

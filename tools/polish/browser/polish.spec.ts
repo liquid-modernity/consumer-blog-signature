@@ -48,6 +48,7 @@ test('contextual outline and truthful progress bar, no completed-reading footer'
  await ready(page);const handle=page.locator('[data-gaga-outline-opener]');await expect(handle).toBeVisible();await handle.click();const sheet=page.locator('[data-gaga-outline-peek]');await expect(sheet).toHaveAttribute('data-gaga-state','open');await expect(sheet.locator('h2')).toHaveText('Daftar Isi');await bounds(page,'[data-gaga-outline-peek]');
  const link=sheet.locator('a[href^="#"]').last();const hash=await link.getAttribute('href');await link.click();await expect(sheet).toHaveAttribute('data-gaga-state','closed');expect(new URL(page.url()).hash).toBe(hash);await expect(page.locator('[data-gaga-outline-progress]')).toHaveAttribute('max','100');
  await expect.poll(()=>page.locator('[data-gaga-outline-progress]').evaluate((p:HTMLProgressElement)=>p.value)).toBeGreaterThan(0);await expect(page.locator('[data-gaga-article-reading-utilities]')).toHaveCount(0);
+ await page.reload();await expect(page.locator('html')).toHaveAttribute('data-gaga-runtime','ready');expect(await page.evaluate(path=>JSON.parse(localStorage.getItem('gaga:continuity:v1')||'{"items":[]}').items.some((entry:{href:string})=>entry.href===path),article)).toBe(true);
  await page.screenshot({path:out+'/'+info.project.name+'-article.png'});
 });
 
