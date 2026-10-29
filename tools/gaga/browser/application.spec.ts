@@ -12,7 +12,7 @@ test("native publication shell and Dynamic Notch remain interactive", async ({
   await expect(island).toBeVisible();
   const box = await island.boundingBox();
   if (!box) throw Error("Notch has no user-visible hit target");
-  // The preserved design reveals its toggle only AFTER tapping/clicking the capsule.
+  // Use explicit disclosure controls; Back and site identity retain independent behavior.
   const options = { position: { x: 4, y: box.height / 2 } };
   if (info.project.name === "mobile") {
     // Preserve the existing mobile interaction: brand tap navigates home;
@@ -35,7 +35,8 @@ test("native publication shell and Dynamic Notch remain interactive", async ({
     }
     return;
   }
-  await island.click(options);
+  await toggle.click();
+  await page.locator('[data-gaga-notch-more]').click();
   await expect(island).toHaveAttribute("data-gaga-state", "expanded");
   await expect(toggle).toBeVisible();
   await expect(toggle).toHaveAttribute("aria-expanded", "true");

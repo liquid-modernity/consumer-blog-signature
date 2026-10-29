@@ -1,17 +1,18 @@
 ---
 import TocBlock from '../information/TocBlock.astro';
 import Icon from '../ui/Icon.astro';
+import { outlineForRoute } from '../../config/contextual-ux.mjs';
 import type { RightRailInput } from './component-inputs';
 
 interface Props { rail: RightRailInput; }
 const { rail } = Astro.props;
-const outlineItems = rail.outlineItems.filter(item => item.slug !== '_top');
+const outlineItems = outlineForRoute(rail.outlineItems, Astro.url.pathname, rail.kind);
 const outlinePeekId = 'gaga-outline-peek';
 const outlineTitleId = 'gaga-outline-peek-title';
 const outlineOpenLabelId = 'gaga-outline-peek-open-label';
 const outlineCurrentLabelId = 'gaga-outline-peek-current-label';
 const outlineCounterLabelId = 'gaga-outline-peek-counter-label';
-const hasOutlinePeek = outlineItems.length > 0 && (rail.kind === 'article' || Astro.url.pathname === '/');
+const hasOutlinePeek = outlineItems.length > 0;
 const initialOutlineLabel = outlineItems[0]?.text ?? rail.labels.outlineFallback;
 ---
 {hasOutlinePeek ? (

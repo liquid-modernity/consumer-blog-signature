@@ -20,3 +20,8 @@ export function positionLinkPreview(anchor, box, viewport) {
   const left = Math.max(margin, Math.min(anchor.left, viewport.width - width - margin));
   return { left, top, width };
 }
+
+export function outlineForRoute(items, path, kind) {
+  if (path !== '/' && kind !== 'article') return [];
+  return items.filter(item => item.slug !== '_top');
+}

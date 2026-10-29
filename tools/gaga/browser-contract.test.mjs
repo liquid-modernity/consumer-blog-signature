@@ -20,7 +20,12 @@ test('mandatory matrix is the five actual unchanged assertions on desktop/mobile
     const first=file==='application.spec.ts'?'test("native publication':'test(\'reference Site';
     const openStep = "  await page.locator('[data-gaga-action-island-toggle]').click();\n";
     if (file === 'reference.spec.ts') assert.equal(text.split(openStep).length - 1, 3, 'Only three disclosure steps are added to the existing saved journey');
-    const assertions = file === 'reference.spec.ts' ? text.replaceAll(openStep, '') : text;
+    let assertions = file === 'reference.spec.ts' ? text.replaceAll(openStep, '') : text;
+    if (file === 'application.spec.ts') {
+      const controls = "  await toggle.click();\n  await page.locator('[data-gaga-notch-more]').click();";
+      assert.equal(text.split(controls).length, 2, 'Only the obsolete capsule coordinate gesture is replaced');
+      assertions = assertions.replace(controls, '  await island.click(options);').replace('// Use explicit disclosure controls; Back and site identity retain independent behavior.', '// The preserved design reveals its toggle only AFTER tapping/clicking the capsule.');
+    }
     assert.equal(assertions.slice(assertions.indexOf(first)),baseline.slice(baseline.indexOf(first)),'Existing mandatory assertions changed');
   }
   assert.deepEqual(contract.cases,cases);assert.equal(cases.length,5);

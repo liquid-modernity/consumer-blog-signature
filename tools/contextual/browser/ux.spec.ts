@@ -30,6 +30,21 @@ async function geometry(page: Page, panel?: string) {
   return g;
 }
 
+async function contrast(page: Page, selector: string) {
+  const values = await page.locator(selector).evaluateAll(nodes => {
+    const canvas=document.createElement('canvas');canvas.width=canvas.height=1;const ctx=canvas.getContext('2d')!;
+    function rgba(color:string) {ctx.clearRect(0,0,1,1);ctx.fillStyle=color;ctx.fillRect(0,0,1,1);return Array.from(ctx.getImageData(0,0,1,1).data);}
+    function luminance(c:number[]) {const v=c.slice(0,3).map(x=>{x/=255;return x<=.04045?x/12.92:((x+.055)/1.055)**2.4;});return .2126*v[0]+.7152*v[1]+.0722*v[2];}
+    return nodes.filter(n=>n.getClientRects().length&&!(n as HTMLButtonElement).disabled).slice(0,8).map(node=>{
+      const chain:Element[]=[];for(let el:Element|null=node;el;el=el.parentElement)chain.unshift(el);
+      let bg=[255,255,255];for(const el of chain){const c=rgba(getComputedStyle(el).backgroundColor),a=c[3]/255;bg=bg.map((b,i)=>c[i]*a+b*(1-a));}
+      const fg=rgba(getComputedStyle(node).color),a=fg[3]/255,color=bg.map((b,i)=>fg[i]*a+b*(1-a));const x=luminance(color),y=luminance(bg);return {text:node.textContent?.trim(),ratio:(Math.max(x,y)+.05)/(Math.min(x,y)+.05)};
+    });
+  });
+  expect(values.length).toBeGreaterThan(0);for(const value of values)expect(value.ratio,value.text).toBeGreaterThanOrEqual(4.5);
+  return values;
+}
+
 test('one Engine Save state: Notch, reload, root, library, unsave and denied storage', async ({ page }, info) => {
   await ready(page, article); await actions(page); await save(page).click();
   await expect(save(page)).toHaveAttribute('aria-pressed', 'true');
@@ -113,6 +128,7 @@ test('settled five-width light/dark route and panel visual evidence', async ({ p
   const routes=['/',article,'/topics/teknologi','/sections','/saved','/knowledge/index'];
   for(const theme of ['paper','dark']){
     await ready(page,article); await settings(page); await page.locator('[data-gaga-reader-panel] [data-gaga-reader-pref="theme"][data-gaga-reader-value="'+theme+'"]').click();
+    const contrasts=await contrast(page,'[data-gaga-reader-panel] button');writeFileSync(directory+'/'+info.project.name+'-'+theme+'-contrast.json',JSON.stringify({scope:'Representative automated control contrast only; not a full audit',measurements:contrasts}));
     await page.screenshot({path:directory+'/'+info.project.name+'-'+theme+'-preferences.png'});
     await page.locator('[data-gaga-reader-close]').click(); await page.keyboard.press('Escape'); await page.keyboard.press('Escape');
     for(const [index,route] of routes.entries()){

@@ -49,6 +49,7 @@ jobs:
           node node_modules/typescript/bin/tsc --project cms/tsconfig.json --noEmit
           export PUBLIC_BUILD_TIME="$(git show -s --format=%cI HEAD)"
           npm run build | tee "$GAGA_EVIDENCE_DIRECTORY/build.log"
+          python3 tools/contextual/metadata-proof.py
           npm run test:consumer | tee "$GAGA_EVIDENCE_DIRECTORY/consumer.log"
       - run: npx --no-install playwright install --with-deps chromium
       - name: Read exact sealed baseline, with no production endpoint or configuration mutation

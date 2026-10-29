@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { resolveNotchPresentation, contextualRails, positionLinkPreview } from '../../src/config/contextual-ux.mjs';
+import { resolveNotchPresentation, contextualRails, positionLinkPreview, outlineForRoute } from '../../src/config/contextual-ux.mjs';
 const base = 'c160e6712ec61369cac7e73ecde156aeaac27474';
 test('validated presentation presets have deterministic desktop/mobile defaults and side fallbacks', () => {
   assert.deepEqual(resolveNotchPresentation(undefined, 1440), { placement: 'top', shape: 'notch' });
@@ -41,4 +41,13 @@ test('existing saved state and Save dispatch have no alternate store or duplicat
 test('reviewed UI is still rejected by the unchanged historical production preservation admission', () => {
  const r=spawnSync(process.execPath,['tools/gaga/preservation.mjs'],{encoding:'utf8'});
  assert.notEqual(r.status,0);assert.match(r.stderr,/Unintended application UI\/style\/routing change/);
+});
+
+test('outline has explicit empty, short, fallback and non-reading route semantics', () => {
+ const heading={slug:'intro',text:'Introduction'},fallback={slug:'_top',text:'Title'};
+ assert.deepEqual(outlineForRoute([], '/publications/short', 'article'), []);
+ assert.deepEqual(outlineForRoute([fallback], '/publications/short', 'article'), []);
+ assert.deepEqual(outlineForRoute([fallback,heading], '/publications/short', 'article'), [heading]);
+ assert.deepEqual(outlineForRoute([heading], '/saved', 'saved'), []);
+ assert.deepEqual(outlineForRoute([heading], '/', 'index'), [heading]);
 });

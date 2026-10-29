@@ -473,7 +473,7 @@ const socialSection = sectionById.get('social');
       if (!targetEl) return;
       const stage = targetEl.closest<HTMLElement>('[data-pakrpp-viewport-stage]') ?? targetEl;
       event.preventDefault();
-      stage.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      stage.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
       history.replaceState(null, '', `#${id}`);
       if (stage.hasAttribute('data-pakrpp-viewport-stage')) {
         applyStageContext(stage);
