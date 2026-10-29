@@ -136,14 +136,14 @@ test('unique ordered publications, anchored previews, active metadata, rails, pa
   if(previous)await expect(page.locator('.gaga-article-pager__col').first().locator('a')).toHaveAttribute('href',previous!);
   if(next)await expect(page.locator('.gaga-article-pager__col').last().locator('a')).toHaveAttribute('href',next!);
   const alignment=await page.evaluate(()=>{const a=document.querySelector('[data-gaga-article-body]')!.getBoundingClientRect(),p=document.querySelector('.gaga-article-pager')!.getBoundingClientRect();return {article:{left:a.left,right:a.right},pager:{left:p.left,right:p.right}};});expect(Math.abs(alignment.article.left-alignment.pager.left)).toBeLessThanOrEqual(4);expect(Math.abs(alignment.article.right-alignment.pager.right)).toBeLessThanOrEqual(4);
-  const outline=page.locator('[data-gaga-outline-opener]'); if(await outline.count()){
+  const outline=page.locator('[data-gaga-outline-opener]'); await expect(outline).toHaveCount(1);{
     await expect(outline).not.toContainText('Gaga Dynamic Outline Peek'); await outline.click(); await expect(page.locator('[data-gaga-outline-peek]')).toHaveAttribute('data-gaga-state','open'); await page.keyboard.press('Escape');
     await expect(page.locator('[data-gaga-outline-peek]')).toHaveAttribute('data-gaga-state','closed');
     await outline.click();const headingLink=page.locator('[data-gaga-outline-peek] [data-gaga-info-field="outline"] a').last(),headingText=await headingLink.innerText(),headingHash=await headingLink.getAttribute('href');
     await headingLink.click();await expect(page.locator('[data-gaga-outline-peek]')).toHaveAttribute('data-gaga-state','closed');
     await expect.poll(()=>page.evaluate(()=>location.hash)).toBe(headingHash);
     await expect(page.locator('[data-gaga-outline-current-label]')).toHaveText(headingText);
-    await page.locator('[data-gaga-article-scroll]').evaluate(el=>el.scrollTop=el.scrollHeight); await expect(page.locator('[data-gaga-outline-progress]')).toHaveText('100%');
+    await page.keyboard.press('Control+End'); await expect(page.locator('[data-gaga-outline-progress]')).toHaveText('100%');
   }
   for(const route of ['/','/search','/saved',article]){await ready(page,route);await expect(page.locator('[data-gaga-left-rail], [data-gaga-right-rail]')).toHaveCount(0);await geometry(page);}
   await ready(page,'/topics/teknologi');const topic=page.locator('[data-gaga-topic-screen="teknologi"]'),members=posts.filter((d:any)=>d.item.data.metadata.topicRefs?.includes('consumer.topic.teknologi'));

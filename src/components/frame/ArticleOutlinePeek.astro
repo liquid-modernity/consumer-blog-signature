@@ -12,11 +12,12 @@ const outlineTitleId = 'gaga-outline-peek-title';
 const outlineOpenLabelId = 'gaga-outline-peek-open-label';
 const outlineCurrentLabelId = 'gaga-outline-peek-current-label';
 const outlineCounterLabelId = 'gaga-outline-peek-counter-label';
-const hasOutlinePeek = outlineItems.length > 0;
-const initialOutlineLabel = outlineItems[0]?.text ?? rail.labels.outlineFallback;
+const pendingOutline = rail.kind === 'article' && outlineItems.length === 0;
+const hasOutlinePeek = outlineItems.length > 0 || pendingOutline;
+const initialOutlineLabel = outlineItems[0]?.text ?? '';
 ---
 {hasOutlinePeek ? (
-  <div class="gaga-outline-stack" data-gaga-outline-stack data-gaga-surface="dynamic-outline-peek" data-gaga-visibility="visible">
+  <div class="gaga-outline-stack" data-gaga-outline-stack data-gaga-surface="dynamic-outline-peek" data-gaga-visibility="visible" data-gaga-outline-pending={pendingOutline ? 'true' : undefined} hidden={pendingOutline}>
     <button
       type="button"
       class="gaga-outline-peek-preview"
@@ -59,7 +60,7 @@ const initialOutlineLabel = outlineItems[0]?.text ?? rail.labels.outlineFallback
         </p>
       </header>
       <div class="gaga-outline-peek__scroll" data-gaga-outline-peek-scroll>
-        <TocBlock items={outlineItems} showTitle={false} wrapper="nav" ariaLabelledby={outlineTitleId} />
+        <TocBlock emptyList={pendingOutline} items={outlineItems} showTitle={false} wrapper="nav" ariaLabelledby={outlineTitleId} />
       </div>
     </section>
   </div>

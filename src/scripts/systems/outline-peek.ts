@@ -1,3 +1,4 @@
+import { hydrateDomOutlineIfSparse } from './toc-spy';
 import { createOutlinePeekCapability } from '@gaga/engine-runtime/runtime/outline-peek';
 import { onRuntimeEvent, requestLeftRail, requestReaderPanel, type SurfaceCommandDetail } from '@gaga/engine-runtime/runtime/events';
 import { getOutlinePeekAttachment, outlinePeekRequiresTableOfContents, supportsOutlinePeek } from '../../config/systems';
@@ -19,6 +20,8 @@ export function initOutlinePeek() {
   const sheet = document.querySelector<HTMLElement>('[data-gaga-outline-peek]');
   if (!sheet) return;
   initialized = true;
+  const context = resolveReadingScrollContext();
+  if (context) hydrateDomOutlineIfSparse(context.readingElement);
 
   const stack = sheet.closest<HTMLElement>('[data-gaga-outline-stack]');
   const currentIndex = stack?.querySelector<HTMLElement>('[data-gaga-outline-current-index]') ?? null;

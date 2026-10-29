@@ -8,13 +8,14 @@ let initialized = false;
 let capability: TocSpyCapability | null = null;
 let lastActiveHeadingId = '';
 
-function hydrateDomOutlineIfSparse(readingRoot: HTMLElement) {
+export function hydrateDomOutlineIfSparse(readingRoot: HTMLElement) {
   const lists = Array.from(document.querySelectorAll<HTMLOListElement>('ol[data-gaga-info-field="outline"]'));
   if (!lists.length) return;
-  const headings = Array.from(readingRoot.querySelectorAll<HTMLElement>('h2[id], h3[id]')).filter(
+  const body = readingRoot.querySelector<HTMLElement>('[data-gaga-article-body]') ?? readingRoot;
+  const headings = Array.from(body.querySelectorAll<HTMLElement>('h2[id], h3[id]')).filter(
     (el) => Boolean(el.id && el.id !== 'gaga-page-metadata-title' && el.textContent?.trim())
   );
-  if (headings.length < 2) return;
+  if (headings.length === 0) return;
 
   for (const list of lists) {
     if (list.querySelectorAll('a[href^="#"]').length > 1) continue;
@@ -27,6 +28,13 @@ function hydrateDomOutlineIfSparse(readingRoot: HTMLElement) {
       return li;
     });
     list.replaceChildren(...items);
+    const stack = list.closest<HTMLElement>('[data-gaga-outline-pending="true"]');
+    if (stack) {
+      for (const label of stack.querySelectorAll('[data-gaga-outline-current-label], [data-gaga-outline-sheet-current-label]')) label.textContent = headings[0].textContent?.trim() ?? '';
+      for (const index of stack.querySelectorAll('[data-gaga-outline-current-index], [data-gaga-outline-sheet-current-index]')) index.textContent = '1';
+      const total = stack.querySelector('[data-gaga-outline-total]'); if (total) total.textContent = String(headings.length);
+      stack.removeAttribute('data-gaga-outline-pending'); stack.hidden = false;
+    }
   }
 }
 

@@ -131,7 +131,13 @@ const presentation = resolveNotchPresentation(experienceConfig.notch);
       if (readerOpen()) requestReaderPanel({ action: 'close', source: 'keyboard' });
       else setState(island.dataset.gagaState === 'expanded' ? 'peek' : 'collapsed', true);
     });
-    document.addEventListener('pointerdown', event => { if (event.target instanceof Node && !island.contains(event.target)) setState('collapsed'); }, { passive: true });
+    document.addEventListener('pointerdown', event => {
+      if (event.target instanceof Node && !island.contains(event.target)) {
+        const closedReader = readerOpen();
+        setState('collapsed');
+        if (closedReader) requestAnimationFrame(() => toggle.focus({ preventScroll: true }));
+      }
+    }, { passive: true });
     onRuntimeEvent('readerPanelCommand', detail => { if (detail.action === 'open' || detail.action === 'toggle' && !readerOpen()) setState('expanded'); });
     onRuntimeEvent('layoutChanged', () => { position(); bindScroll(); });
     window.addEventListener('resize', position, { passive: true });
