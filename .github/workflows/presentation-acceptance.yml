@@ -54,6 +54,8 @@ jobs:
           python3 tools/reference/html-semantics.py
           npm run test:consumer | tee "$GAGA_EVIDENCE_DIRECTORY/consumer.log"
       - run: npx --no-install playwright install --with-deps chromium
+      - name: Chromium stale-source reproduction and read-only rollback confirmation
+        run: node tools/gaga/browser-source-proof.mjs 81d6426e3e85fd726fa22dc03236023ae042c08bffcacd9ddb243df34bdb7d1d > "$GAGA_EVIDENCE_DIRECTORY/browser-source-proof.json"
       - name: Preserve all ten mandatory browser cases and security assertions
         run: |
           npm run test:ui | tee "$GAGA_EVIDENCE_DIRECTORY/mandatory-browser.log"

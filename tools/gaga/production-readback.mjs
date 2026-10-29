@@ -12,6 +12,10 @@ try{
   assert.ok(accepted,'Production differs from qualified bytes after bounded propagation checks: '+route);
  }
  const search=await get('/api/search?q=Akal%20Imitasi');assert.equal(search.status,200);const body=await search.json();assert.equal(body.status,'succeeded');assert.ok(body.output.results.some(x=>x.title.includes('Dignity')));receipt.search={status:body.status,matchedArtifactIds:body.output.matchedArtifactIds};
- assert.equal((await get('/api/search?q=')).status,400);assert.equal((await get('/api/search?q=Akal','POST')).status,405);receipt.malformedQueryStatus=400;receipt.unsupportedMethodStatus=405;receipt.status='PASS';
+ assert.equal((await get('/api/search?q=')).status,400);assert.equal((await get('/api/search?q=Akal','POST')).status,405);receipt.malformedQueryStatus=400;receipt.unsupportedMethodStatus=405;
+ receipt.browserChecks=[];
+ const {verifyBrowserSource}=await import('./browser-source-readback.mjs');
+ await verifyBrowserSource(await import('@playwright/test'),m.files.find(x=>x.path==='dist/index.html').sha256,receipt.browserChecks);
+ receipt.status='PASS';
 }catch(error){receipt.status='FAIL';receipt.failure=error.message;throw error;}
 finally{writeFileSync(resolve(out,'public-readback.json'),JSON.stringify(receipt,null,2)+'\n');console.log(JSON.stringify(receipt,null,2));}
