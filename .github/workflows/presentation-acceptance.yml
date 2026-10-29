@@ -47,6 +47,7 @@ jobs:
           JS
           npm ci --ignore-scripts --no-audit --no-fund
       - name: Build the exact admitted review source for isolated browser proof
+        id: build
         working-directory: application
         run: |
           export PUBLIC_GIT_SHA="$APPLICATION_REF"
@@ -68,8 +69,14 @@ jobs:
           cp -R .gaga/contextual-ux "$GAGA_EVIDENCE_DIRECTORY/contextual-ux"
           npm audit --audit-level=low --json > "$GAGA_EVIDENCE_DIRECTORY/audit.json"
       - name: Complete theme by viewport acceptance matrix
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         working-directory: application
         run: node node_modules/@playwright/test/cli.js test --config "$GITHUB_WORKSPACE/proof/tools/presentation/playwright.config.mjs" | tee "$GAGA_EVIDENCE_DIRECTORY/browser.log"
+      - name: Preserve diagnostics even when a regression rejects the candidate
+        if: always()
+        working-directory: application
+        run: |
+          if [ -d .gaga/contextual-ux ]; then cp -R .gaga/contextual-ux "$GAGA_EVIDENCE_DIRECTORY/"; fi
       - name: Source preservation and workflow lint
         if: always()
         working-directory: application

@@ -142,6 +142,9 @@ test('unique ordered publications, anchored previews, active metadata, rails, pa
     await outline.click();const headingLink=page.locator('[data-gaga-outline-peek] [data-gaga-info-field="outline"] a').last(),headingText=await headingLink.innerText(),headingHash=await headingLink.getAttribute('href');
     await headingLink.click();await expect(page.locator('[data-gaga-outline-peek]')).toHaveAttribute('data-gaga-state','closed');
     await expect.poll(()=>page.evaluate(()=>location.hash)).toBe(headingHash);
+    await settle(page);
+    writeFileSync(directory+'/'+info.project.name+'-outline-navigation.json',JSON.stringify(await page.evaluate(()=>({hash:location.hash,label:document.querySelector('[data-gaga-outline-current-label]')?.textContent,owners:Array.from(document.querySelectorAll('[data-gaga-main-region],[data-gaga-article-scroll]')).map(el=>({tag:el.tagName,scrollTop:el.scrollTop,scrollHeight:el.scrollHeight,clientHeight:el.clientHeight,top:el.getBoundingClientRect().top})),headings:Array.from(document.querySelectorAll('[data-gaga-article-body] h2[id],[data-gaga-article-body] h3[id]')).map(el=>({id:el.id,top:el.getBoundingClientRect().top}))})),null,2));
+    await page.screenshot({path:directory+'/'+info.project.name+'-outline-navigation.png'});
     await expect(page.locator('[data-gaga-outline-current-label]')).toHaveText(headingText);
     await page.keyboard.press('Control+End'); await expect(page.locator('[data-gaga-outline-progress]')).toHaveText('100%');
   }
