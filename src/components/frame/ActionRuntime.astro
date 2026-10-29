@@ -3,6 +3,7 @@ import Icon from '../ui/Icon.astro';
 import { i18nLabel } from '../../config/i18n';
 import { actionById } from '../../config/actions';
 import { experienceConfig, experienceSurfaceProfile, type ExperienceContext } from '../../config/experience';
+import { getEnabledRootSections } from '../../config/pakrpp-architecture';
 import { globalNavigationProjection } from '../../config/context-rails';
 import { contextualRails, resolveNotchPresentation } from '../../config/contextual-ux.mjs';
 interface Props { className?: string; context?: ExperienceContext; pageTitle?: string; workspaceId?: string; }
@@ -22,24 +23,26 @@ const presentation = resolveNotchPresentation(experienceConfig.notch);
   <nav class="gaga-action-runtime gaga-dynamic-island gaga-contextual-notch" data-gaga-action-runtime data-gaga-global-nav data-gaga-context={context} data-gaga-state="collapsed" data-gaga-level="0" aria-label={islandLabel.id} data-gaga-i18n-id={islandLabel.id} data-gaga-i18n-en={islandLabel.en} data-gaga-i18n-target="aria">
     <div class="gaga-action-runtime__shell">
       <div class="gaga-island-bar" data-gaga-island-bar>
-        <button type="button" class="gaga-notch-button" data-gaga-action="smart-back" aria-label="Kembali" disabled={path === '/'}><Icon name="arrow_back" /></button>
+        <button type="button" class="gaga-notch-button" data-gaga-action="smart-back" aria-label="Kembali" data-gaga-i18n-id="Kembali" data-gaga-i18n-en="Back" data-gaga-i18n-target="aria" disabled={path === '/'}><Icon name="arrow_back" /></button>
         <a href="/" class="gaga-island-brand" aria-label="PakRPP — Beranda"><span aria-hidden="true" class="gaga-island-brand__sensor"></span><span>PakRPP</span></a>
         <button type="button" class="gaga-action-runtime__toggle gaga-notch-button" data-gaga-action-island-toggle aria-label={toggleLabel.id} data-gaga-i18n-id={toggleLabel.id} data-gaga-i18n-en={toggleLabel.en} data-gaga-i18n-target="aria" aria-expanded="false" aria-controls="gaga-notch-context"><Icon name="menu" /></button>
       </div>
       <section id="gaga-notch-context" class="gaga-notch-context" data-gaga-notch-context hidden inert aria-label="Aksi kontekstual">
         <p class="gaga-notch-page-title" data-gaga-island-focus-title>{pageTitle}</p>
         <div class="gaga-notch-actions" data-gaga-action-runtime-actions>
-          {primary.map(action => <button type="button" class="gaga-notch-button" data-gaga-action={action.id === 'save' ? 'save-reading' : action.command} data-gaga-action-id={action.id} data-gaga-quick-action={action.id} aria-label={action.label.id} aria-pressed={action.kind === 'toggle' ? 'false' : undefined}><Icon name={action.icon ?? 'article'} /><span>{action.label.id}</span></button>)}
-          <button type="button" class="gaga-notch-button" data-gaga-notch-more aria-expanded="false" aria-controls="gaga-notch-system"><Icon name="tune" /><span>Pembaca &amp; navigasi</span></button>
+          {primary.map(action => <button type="button" class="gaga-notch-button" data-gaga-action={action.id === 'save' ? 'save-reading' : action.command} data-gaga-action-id={action.id} data-gaga-quick-action={action.id} aria-label={action.label.id} data-gaga-i18n-id={action.label.id} data-gaga-i18n-en={action.label.en} data-gaga-i18n-target="aria" aria-pressed={action.kind === 'toggle' ? 'false' : undefined}><Icon name={action.icon ?? 'article'} /><span data-gaga-i18n-id={action.label.id} data-gaga-i18n-en={action.label.en}>{action.label.id}</span></button>)}
+          <button type="button" class="gaga-notch-button" data-gaga-notch-more aria-expanded="false" aria-controls="gaga-notch-system"><Icon name="tune" /><span data-gaga-i18n-id="Pembaca &amp; navigasi" data-gaga-i18n-en="Reader &amp; navigation">Pembaca &amp; navigasi</span></button>
         </div>
         {context === 'article' && <span class="gaga-visually-hidden" role="progressbar" aria-label="Progres membaca" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-gaga-reading-progress><span data-gaga-reading-progress-value>0%</span></span>}
       </section>
       <section id="gaga-notch-system" class="gaga-notch-system" data-gaga-notch-system hidden inert aria-label="Pembaca dan navigasi">
         <div class="gaga-notch-actions">
-          {secondary.map(action => <button type="button" class="gaga-notch-button" data-gaga-action={action.command} data-gaga-action-id={action.id} data-gaga-quick-action={action.id} aria-label={action.label.id}><Icon name={action.icon ?? 'article'} /><span>{action.label.id}</span></button>)}
-          <button type="button" class="gaga-notch-button" data-gaga-action="toggle-reader-preferences" aria-controls="gaga-reader-panel" aria-expanded="false"><Icon name="settings" /><span>Preferensi pembaca</span></button>
+          {secondary.map(action => <button type="button" class="gaga-notch-button" data-gaga-action={action.command} data-gaga-action-id={action.id} data-gaga-quick-action={action.id} aria-label={action.label.id} data-gaga-i18n-id={action.label.id} data-gaga-i18n-en={action.label.en} data-gaga-i18n-target="aria"><Icon name={action.icon ?? 'article'} /><span data-gaga-i18n-id={action.label.id} data-gaga-i18n-en={action.label.en}>{action.label.id}</span></button>)}
+          <button type="button" class="gaga-notch-button" data-gaga-action="toggle-reader-preferences" aria-controls="gaga-reader-panel" aria-expanded="false"><Icon name="settings" /><span data-gaga-i18n-id="Preferensi pembaca" data-gaga-i18n-en="Reader preferences">Preferensi pembaca</span></button>
         </div>
-        <div class="gaga-notch-navigation" aria-label="Navigasi situs">{global.items.map(item => <a href={item.href} aria-current={path === item.href ? 'page' : undefined}><Icon name={item.icon} /><span>{item.label}</span></a>)}</div>
+        {railPolicy.left && <button type="button" class="gaga-notch-button" data-gaga-action="toggle-left-rail" aria-controls="gaga-left-rail"><Icon name="menu" /><span data-gaga-i18n-id="Navigasi bagian" data-gaga-i18n-en="Section navigation">Navigasi bagian</span></button>}
+        {path === '/' && <nav class="gaga-notch-navigation" aria-label="Bagian halaman">{getEnabledRootSections().map(section => <a href={'/#' + section.anchor}>{section.label}</a>)}</nav>}
+        <div class="gaga-notch-navigation" aria-label="Navigasi situs">{global.items.map(item => <a href={item.href} aria-current={path === item.href ? 'page' : undefined}><Icon name={item.icon} /><span data-gaga-i18n-id={item.label} data-gaga-i18n-en={item.labelEn ?? item.label}>{item.label}</span></a>)}</div>
         <details><summary>Direktori informasi</summary>{global.groups.map(group => <section><h2>{group.label}</h2><ul>{group.items.map(item => <li><a href={item.href}>{item.label}</a></li>)}</ul></section>)}</details>
       </section>
       <slot name="reader" />
@@ -79,6 +82,16 @@ const presentation = resolveNotchPresentation(experienceConfig.notch);
       if (state !== 'collapsed') requestOutline({ action: 'close', source: 'notch-open' });
       if (restore) (state === 'peek' ? more : toggle).focus({ preventScroll: true });
     }
+    // Existing speech/reader adapters also project the shared application state attribute.
+    const stateObserver = new MutationObserver(() => {
+      const state = island.dataset.gagaState;
+      context.hidden = state === 'collapsed' || state === 'micro'; context.inert = context.hidden;
+      system.hidden = state !== 'expanded'; system.inert = system.hidden;
+      const level = state === 'expanded' ? '2' : state === 'peek' ? '1' : '0';
+      if (island.dataset.gagaLevel !== level) island.dataset.gagaLevel = level;
+      toggle.setAttribute('aria-expanded', String(level !== '0')); more.setAttribute('aria-expanded', String(level === '2'));
+    });
+    stateObserver.observe(island, { attributes: true, attributeFilter: ['data-gaga-state'] });
     function position() {
       const preset = resolveNotchPresentation(JSON.parse(container.dataset.gagaNotchConfig!), innerWidth);
       container.dataset.gagaNotchPlacement = preset.placement; container.dataset.gagaNotchShape = preset.shape;
@@ -122,7 +135,7 @@ const presentation = resolveNotchPresentation(experienceConfig.notch);
     onRuntimeEvent('readerPanelCommand', detail => { if (detail.action === 'open' || detail.action === 'toggle' && !readerOpen()) setState('expanded'); });
     onRuntimeEvent('layoutChanged', () => { position(); bindScroll(); });
     window.addEventListener('resize', position, { passive: true });
-    window.addEventListener('pagehide', () => { unsubscribe?.(); clearTimeout(hoverTimer); clearTimeout(touchTimer); }, { once: true });
+    window.addEventListener('pagehide', () => { stateObserver.disconnect(); unsubscribe?.(); clearTimeout(hoverTimer); clearTimeout(touchTimer); }, { once: true });
     position(); bindScroll(); setState('collapsed');
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setupActionRuntime, { once: true }); else setupActionRuntime();

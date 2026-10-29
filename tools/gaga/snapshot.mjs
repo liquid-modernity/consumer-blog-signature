@@ -31,8 +31,11 @@ export function cmsFrontmatter(document) {
     application_id,
     ...fields
   } = document.item.data;
+  const legacy = metadata ?? integration?.legacyMetadata ?? {};
+  const publishedAt = editorial?.publicationDate ?? fields.publishedAt ?? legacy.publishedAt ?? fields.date ?? legacy.date ?? legacy.pubDate;
+  const updatedAt = editorial?.updatedDate ?? fields.updatedAt ?? legacy.updatedAt ?? fields.updatedDate ?? legacy.updatedDate ?? legacy.updated;
   return {
-    ...(metadata ?? integration?.legacyMetadata),
+    ...legacy,
     ...fields,
     ...(editorial
       ? {
@@ -48,6 +51,12 @@ export function cmsFrontmatter(document) {
           imageAlt: editorial.featuredImage?.alt,
         }
       : {}),
+    // Engine's public metadata input uses date aliases; native revision pins stay separate.
+    date: publishedAt,
+    pubDate: publishedAt,
+    publishedAt,
+    updatedDate: updatedAt,
+    updatedAt,
     title,
     summary,
     contentId: metadata?.contentId ?? integration?.applicationId,
