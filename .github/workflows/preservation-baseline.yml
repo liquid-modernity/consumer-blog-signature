@@ -1,0 +1,56 @@
+name: Qualified preservation baseline correction
+on:
+  push:
+    branches: [review/publication-preservation-baseline-v1]
+permissions:
+  contents: read
+jobs:
+  preservation:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.23.4'
+      - name: Exact runtime and external evidence
+        run: |
+          npm install --global npm@10.9.3 --ignore-scripts --no-audit --no-fund
+          echo "GAGA_EVIDENCE_DIRECTORY=$RUNNER_TEMP/preservation" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/preservation"
+          node --input-type=module - <<'JS'
+          import assert from 'node:assert/strict';import{execFileSync}from'node:child_process';import{writeFileSync}from'node:fs';
+          const r={node:process.version,npm:execFileSync('npm',['--version'],{encoding:'utf8'}).trim(),runner:process.env.RUNNER_OS,image:process.env.ImageOS,imageVersion:process.env.ImageVersion};
+          assert.equal(r.node,'v22.23.4');assert.equal(r.npm,'10.9.3');writeFileSync(process.env.RUNNER_TEMP+'/preservation/runtime.json',JSON.stringify(r,null,2)+'\n');
+          JS
+      - name: Focused preservation regressions and actual release gate
+        run: |
+          node --test tools/gaga/preservation.test.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/tests.log"
+          node tools/gaga/preservation.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/preservation.log"
+          git diff --exit-code
+          test -z "$(git ls-files --others --exclude-standard)"
+      - name: Workflow lint
+        run: go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.7 -shellcheck= .github/workflows/preservation-baseline.yml
+      - name: Record exact qualified source and reused unchanged application inputs
+        run: |
+          node --input-type=module - <<'JS'
+          import{sourceIdentity}from'./tools/gaga/source-identity.mjs';import{writeFileSync,readFileSync}from'node:fs';import{createHash}from'node:crypto';import{execFileSync}from'node:child_process';import assert from'node:assert/strict';
+          const source=sourceIdentity();assert.equal(source.commit,process.env.GITHUB_SHA);
+          const allowed=['.github/workflows/preservation-baseline.yml','tools/gaga/preservation.mjs','tools/gaga/preservation.test.mjs'];
+          const changed=execFileSync('git',['diff','--name-only','fe2fa7a47de0dc38799fe63a3e646e7fd7e1cd9a','HEAD'],{encoding:'utf8'}).trim().split('\n').sort();assert.deepEqual(changed,allowed);
+          const digest=p=>createHash('sha256').update(readFileSync(p)).digest('hex');
+          assert.equal(digest('docs/UI-PRESERVATION.json'),'0fc6f482051c2f35c08e943c0924fb60567316f3e094d10b917c937bca816d4b');
+          assert.equal(digest('src/components/gaga/PageFrame.astro'),'743156b9bf59f79dfae0648224bbe0ef50054fc18ac23f24ddbae21319dd12f8');
+          writeFileSync(process.env.GAGA_EVIDENCE_DIRECTORY+'/qualification-receipt.json',JSON.stringify({status:'QUALIFIED',source,runtime:JSON.parse(readFileSync(process.env.GAGA_EVIDENCE_DIRECTORY+'/runtime.json')),focusedTests:6,historicalInventorySha256:digest('docs/UI-PRESERVATION.json'),pageFrameSha256:digest('src/components/gaga/PageFrame.astro'),changedFiles:changed,reusedApplicationQualification:40752951927,productionWrites:0,run:process.env.GITHUB_RUN_ID},null,2)+'\n');
+          JS
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: preservation-baseline-evidence
+          path: ${{ runner.temp }}/preservation
+          if-no-files-found: error

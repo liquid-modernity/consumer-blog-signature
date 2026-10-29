@@ -1,0 +1,97 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { readFileSync, writeFileSync, mkdtempSync, mkdirSync, copyFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join, dirname, resolve } from "node:path";
+import { spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
+
+const inventoryBytes = readFileSync("docs/UI-PRESERVATION.json");
+const inventory = JSON.parse(inventoryBytes);
+const pageFrame = "src/components/gaga/PageFrame.astro";
+const gate = resolve("tools/gaga/preservation.mjs");
+const digest = value => createHash("sha256").update(value).digest("hex");
+
+function check(change = () => {}) {
+  const root = mkdtempSync(join(tmpdir(), "publication-preservation-"));
+  try {
+    mkdirSync(join(root, "docs"));
+    writeFileSync(join(root, "docs/UI-PRESERVATION.json"), inventoryBytes);
+    for (const file of inventory.files) {
+      mkdirSync(dirname(join(root, file.path)), { recursive: true });
+      copyFileSync(file.path, join(root, file.path));
+    }
+    change(root);
+    return spawnSync(process.execPath, [gate], { cwd: root, encoding: "utf8" });
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+}
+
+test("the exact qualified main correction and all 53 historical entries pass", () => {
+  assert.equal(digest(inventoryBytes), "0fc6f482051c2f35c08e943c0924fb60567316f3e094d10b917c937bca816d4b");
+  assert.equal(inventory.files.length, 54);
+  const result = check();
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /one exact qualified main-landmark correction/);
+  assert.match(result.stdout, /fe2fa7a47de0dc38799fe63a3e646e7fd7e1cd9a/);
+  assert.match(result.stdout, /40752951927/);
+});
+
+test("reverting to the historical div wrapper is not current admission", () => {
+  const result = check(root => {
+    const path = join(root, pageFrame);
+    const source = readFileSync(path, "utf8");
+    assert.equal(source.split("  contentClass={contentClass}\n").length, 2);
+    const previous = source.replace("  contentClass={contentClass}\n", "  contentClass={contentClass}\n  mainElement=\"div\"\n");
+    assert.equal(digest(previous), inventory.files.find(f => f.path === pageFrame).sha256AfterImportRename);
+    writeFileSync(path, previous);
+  });
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /Unintended application UI\/style\/routing change: src\/components\/gaga\/PageFrame.astro/);
+});
+
+test("any additional PageFrame bytes remain rejected", () => {
+  const result = check(root => {
+    const path = join(root, pageFrame);
+    writeFileSync(path, readFileSync(path, "utf8") + "\n<!-- unapproved -->\n");
+  });
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /Unintended application UI\/style\/routing change/);
+});
+
+test("an unrelated route/config change remains rejected", () => {
+  const result = check(root => {
+    const path = join(root, "src/config/routes.ts");
+    writeFileSync(path, readFileSync(path, "utf8") + "\n// unapproved\n");
+  });
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /Unintended application UI\/style\/routing change: src\/config\/routes.ts/);
+});
+
+test("broadly refreshing historical hashes cannot admit a change", () => {
+  const result = check(root => {
+    const replacement = structuredClone(inventory);
+    for (const file of replacement.files) {
+      const path = join(root, file.path);
+      writeFileSync(path, readFileSync(path, "utf8") + "\n<!-- unapproved refresh -->\n");
+      file.sha256AfterImportRename = digest(readFileSync(path));
+    }
+    writeFileSync(join(root, "docs/UI-PRESERVATION.json"), JSON.stringify(replacement));
+  });
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /Historical UI inventory changed without admission/);
+});
+
+test("the existing historical package-import normalization is preserved", () => {
+  const file = inventory.files.find(f => f.path !== pageFrame && /@gaga\/engine-(?:runtime|capabilities)/.test(readFileSync(f.path, "utf8")));
+  assert.ok(file);
+  const result = check(root => {
+    const path = join(root, file.path);
+    const current = readFileSync(path, "utf8");
+    const legacy = current.replaceAll("@gaga/engine-runtime", "@gaga/engine-web").replaceAll("@gaga/engine-capabilities/", "@gaga/engine/");
+    assert.notEqual(legacy, current);
+    writeFileSync(path, legacy);
+  });
+  assert.equal(result.status, 0, result.stderr);
+});
