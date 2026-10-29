@@ -541,7 +541,7 @@ button.gaga-search-card {
   background: var(--gaga-surface-subtle, var(--gaga-surface-2));
   margin-block-end: var(--gaga-space-4);
   display: grid;
-  width: max-content;
+  box-sizing: border-box;
   inline-size: 100%;
   max-inline-size: var(--gaga-article-measure, 40.5rem);
   margin-inline: auto;
