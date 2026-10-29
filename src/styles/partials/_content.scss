@@ -521,6 +521,7 @@ button.gaga-search-card {
 
 .gaga-article-header,
 .gaga-article-body {
+  box-sizing: border-box;
   inline-size: 100%;
   max-inline-size: var(--gaga-article-measure, 40.5rem);
   margin-inline: auto;
