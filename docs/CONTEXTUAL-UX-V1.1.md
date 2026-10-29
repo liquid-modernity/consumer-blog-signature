@@ -71,3 +71,10 @@ projection now supplies those aliases from existing published editorial dates.
 Search consequently gains the missing dates and chronological ordering. Hosted
 comparison against the exact sealed baseline rejects every non-date field change,
 checks dates against the admitted records, and preserves historical/new hashes.
+
+Visual review found that all five authored topic pages still called TopicScreen
+with `topic`, while the component expected only `group`. The application adapter
+now resolves the existing published group by the active route and supplied label.
+Missing groups fail the build rather than inventing an Unknown Topic/zero count.
+No authored topic file or CMS taxonomy is changed. Emitted-page proof binds all
+five topic memberships to the existing admitted topicRefs.

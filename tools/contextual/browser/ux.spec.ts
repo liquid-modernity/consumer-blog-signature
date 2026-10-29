@@ -142,6 +142,9 @@ test('unique ordered publications, anchored previews, active metadata, rails, pa
     await page.locator('[data-gaga-article-scroll]').evaluate(el=>el.scrollTop=el.scrollHeight); await expect(page.locator('[data-gaga-outline-progress]')).toHaveText('100%');
   }
   for(const route of ['/','/search','/saved',article]){await ready(page,route);await expect(page.locator('[data-gaga-left-rail], [data-gaga-right-rail]')).toHaveCount(0);await geometry(page);}
+  await ready(page,'/topics/teknologi');const topic=page.locator('[data-gaga-topic-screen="teknologi"]'),members=posts.filter((d:any)=>d.item.data.metadata.topicRefs?.includes('consumer.topic.teknologi'));
+  await expect(topic.locator('#topic-title')).toHaveText('Teknologi');await expect(topic).toHaveAttribute('data-gaga-topic-count',String(members.length));
+  expect(await topic.locator('.gaga-mission-link').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('href')).sort())).toEqual(members.map((d:any)=>'/'+d.item.slug).sort());
   writeFileSync(directory+'/'+info.project.name+'-mapping.json',JSON.stringify({status:'PASS',rootHrefs:hrefs,activePage:active,unchangedMetadata:true,alignment,articleCount:posts.length}));
 });
 

@@ -1,22 +1,22 @@
 ---
-import { toArticlePreview, type TopicGroup } from '../../lib/content';
+import { getTopicGroups, toArticlePreview, type TopicGroup } from '../../lib/content';
 import { contentDefaults } from '../../config/content';
 import { i18nCount } from '../../config/i18n';
+import { resolveContentDateLocale } from '@gaga/engine-capabilities/content';
 
 interface Props {
-  group: TopicGroup;
-  dateLocale: Intl.LocalesArgument;
+  group?: TopicGroup;
+  topic?: string;
+  dateLocale?: Intl.LocalesArgument;
 }
 
-const { group, dateLocale } = Astro.props;
-
-const safeGroup = group ?? {
-  topic: "Unknown Topic",
-  count: 0,
-  articles: []
-};
+const { group, topic, dateLocale = resolveContentDateLocale(contentDefaults.defaultLanguage, contentDefaults.dateLocale) } = Astro.props;
+// Existing MDX supplies a topic label; the active route selects its published group.
+const path = Astro.url.pathname.replace(/\/+$/, '');
+const safeGroup = group ?? (await getTopicGroups()).find(candidate => candidate.href === path && candidate.topic === topic);
+if (!safeGroup) throw new Error(`Published topic group is missing for ${path}`);
 ---
-<section class="gaga-index-screen gaga-topic-screen" aria-labelledby="topic-title">
+<section class="gaga-index-screen gaga-topic-screen" data-gaga-topic-screen={safeGroup.slug} data-gaga-topic-count={safeGroup.count} data-gaga-topic-id={safeGroup.contentId} aria-labelledby="topic-title">
   <div class="gaga-screen-section-head">
     <h2 id="topic-title">{safeGroup.topic}</h2>
     <p>{i18nCount('article', safeGroup.count)}</p>
