@@ -3,7 +3,14 @@ import { readFileSync } from 'node:fs';
 import { assertDocumentBytes } from '../source-readback.mjs';
 const productionManifest=process.env.GAGA_PRODUCTION_BROWSER_URL?JSON.parse(readFileSync('.gaga/deployment-manifest.json','utf8')):undefined;
 const cases=[['/knowledge/index','knowledge'],['/knowledge/graph','knowledge'],['/about','information'],['/legal/privacy','legal'],['/system/sitemap','system'],['/sections','section']] as const;
-async function ready(page:Page,path:string){const response=await page.goto(path);if(productionManifest){expect(response?.status()).toBe(200);const proof=assertDocumentBytes(productionManifest,path,await response!.body());await test.info().attach('production-document-source',{body:JSON.stringify(proof),contentType:'application/json'});}await expect(page.locator('html')).toHaveAttribute('data-gaga-runtime','ready');}
+async function ready(page:Page,path:string){
+ let response=await page.goto(path);const fragmentReload=response===null;
+ // A fragment navigation has no HTTP response; reload its document before verifying sealed bytes.
+ if(fragmentReload)response=await page.reload();
+ expect(response?.status()).toBe(200);
+ if(productionManifest){const proof={...assertDocumentBytes(productionManifest,path,await response!.body()),fragmentReload};await test.info().attach('production-document-source',{body:JSON.stringify(proof),contentType:'application/json'});}
+ await expect(page.locator('html')).toHaveAttribute('data-gaga-runtime','ready');return {fragmentReload};
+}
 async function notch(page:Page){const island=page.locator('[data-gaga-action-runtime]');if(await island.getAttribute('data-gaga-level')==='0')await page.locator('[data-gaga-action-island-toggle]').click();return island;}
 test('all five experience families retain main, H1, skip target, page identity and bounded layout',async({page})=>{
  for(const [path,profile] of cases){
@@ -25,7 +32,7 @@ test('knowledge hierarchy has exact current navigation and a real ordered alphab
 test('document outline uses live headings, deep links and native focus restoration',async({page},info)=>{
  await ready(page,'/about');await notch(page);const action=page.locator('[data-gaga-document-outline-action]');await expect(action).toBeVisible();await action.click();const sheet=page.locator('[data-gaga-outline-peek]');await expect(sheet).toHaveAttribute('data-gaga-state','open');await expect(sheet).toHaveCSS('opacity','1');await page.screenshot({path:'.gaga/documentation-'+info.project.name+'.png'});
  const link=sheet.locator('a[href="#direktori-tentang"]');await expect(link).toBeVisible();await link.click();await expect(page).toHaveURL(/#direktori-tentang$/);await expect(sheet).toHaveAttribute('data-gaga-state','closed');await expect(page.locator('#direktori-tentang')).toBeInViewport();
- await ready(page,'/about#prinsip-editorial');await expect(page.locator('#prinsip-editorial')).toBeInViewport();await expect(page.locator('#prinsip-editorial [data-gaga-heading-link]')).toHaveAttribute('href','#prinsip-editorial');
+ const deepLink=new URL(page.url());deepLink.hash='prinsip-editorial';expect((await ready(page,deepLink.href)).fragmentReload).toBe(true);await expect(page.locator('#prinsip-editorial')).toBeInViewport();await expect(page.locator('#prinsip-editorial [data-gaga-heading-link]')).toHaveAttribute('href','#prinsip-editorial');
  await page.locator('[data-gaga-outline-opener]').click();await expect(sheet).toHaveAttribute('data-gaga-state','open');await expect(sheet.locator('a[href^="#"]').first()).toBeFocused();await page.keyboard.press('Escape');await expect(page.locator('[data-gaga-outline-opener]')).toBeFocused();
 });
 test('short legal document retains real text, inline navigator and no invented TOC or sibling sequence',async({page})=>{
