@@ -27,25 +27,30 @@ def local_file(path):
     p=Path('dist')/path.lstrip('/')
     return p if p.is_file() else p/'index.html'
 
+violations=[]
+def check(condition, *context):
+    if not condition:violations.append(context)
+
 profiles={'knowledge':'knowledge','about':'information','legal':'legal','system':'system','sections':'section'}
 results=[]
 for family,profile in profiles.items():
     for file in sorted((Path('dist')/family).rglob('*.html')):
         page=Page(file);route='/'+str(file.parent.relative_to('dist'))
-        assert page.profile==profile,(route,page.profile)
-        assert page.main==page.h1==1,(route,page.main,page.h1)
-        assert page.ids['gaga-main']==1 and '#gaga-main' in page.links,route
-        assert all(page.headings),(route,'heading without stable ID')
-        for identity in page.headings:assert page.ids[identity]==1,(route,identity)
-        assert not [k for k,v in page.ids.items() if v>1],(route,'duplicate IDs')
+        check(page.profile==profile,route,'profile',page.profile)
+        check(page.main==page.h1==1,route,'main/H1',page.main,page.h1)
+        check(page.ids['gaga-main']==1 and '#gaga-main' in page.links,route,'skip link')
+        check(all(page.headings),route,'heading without stable ID')
+        for identity in page.headings:check(page.ids[identity]==1,route,'heading identity',identity)
+        check(not [k for k,v in page.ids.items() if v>1],route,'duplicate IDs')
         for href in page.links:
             u=urlsplit(href)
             if u.scheme or u.netloc or not href.startswith(('/','#')):continue
             target=local_file(u.path) if u.path else file
-            assert target.exists(),(route,href,'unbuilt public link')
+            check(target.exists(),route,href,'unbuilt public link')
+            if not target.exists():continue
             if u.fragment:
                 parsed=page if target==file else Page(target)
-                assert parsed.ids[unquote(u.fragment)]==1,(route,href,'missing/ambiguous fragment')
+                check(parsed.ids[unquote(u.fragment)]==1,route,href,'missing/ambiguous fragment')
         results.append({'route':route,'profile':profile,'headings':page.headings,'main':page.main,'h1':page.h1})
 assert all(any(r['profile']==p for r in results) for p in profiles.values())
 index=json.loads(Path('dist/search-index.json').read_text())
@@ -55,5 +60,6 @@ for file in (Path('dist')/'system').rglob('*.html'):
     text=file.read_text()
     for secret in ['CLOUDFLARE_API_TOKEN','EMDASH_ENCRYPTION_KEY','b26b0e8a-e193-4a7d-8e1d-c553de22fd27','a0ad6f282a314e17bbdfec6c4e0c9fa2']:assert secret not in text,file
 Path('.gaga').mkdir(exist_ok=True)
-Path('.gaga/documentation-html.json').write_text(json.dumps({'status':'PASS','routes':results,'articleItems':7,'documentRecords':sum(r['kind'] in ['knowledge','information','legal','system'] for r in index['records'])},indent=2)+'\n')
+Path('.gaga/documentation-html.json').write_text(json.dumps({'status':'BLOCKED' if violations else 'PASS','violations':violations,'routes':results,'articleItems':7,'documentRecords':sum(r['kind'] in ['knowledge','information','legal','system'] for r in index['records'])},indent=2)+'\n')
+assert not violations, violations
 print('Document HTML/links/anchors/profile/discovery proof PASS:',len(results),'routes')

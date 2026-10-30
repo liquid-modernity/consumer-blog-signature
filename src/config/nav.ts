@@ -86,6 +86,6 @@ export const navGroups: NavGroup[] = [
   group('system', 'navigation.system', 'settings_applications', [
     item('sitemap', 'navigation.sitemap', '/system/sitemap', 'lan'),
     item('rss', 'navigation.rss', '/system/rss', 'rss_feed'),
-    { id: 'status', label: 'Status', labelEn: 'Status', href: '/system/status', icon: 'terminal' }
+    { id: 'status', label: 'Panduan sistem', labelEn: 'System guide', href: '/system/status', icon: 'terminal' }
   ]),
 ];
