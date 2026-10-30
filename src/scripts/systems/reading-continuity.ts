@@ -67,7 +67,9 @@ function nowIso() {
 }
 
 function currentArticle() {
- const current=currentPersonalContent();if(!current)return null;
+ const frame=document.querySelector<HTMLElement>('[data-gaga-app-frame]');
+ const current=currentPersonalContent();if(!current||!frame)return null;
+ if(current.content.contentType==='article' && frame.dataset.gagaContinuityEligible !== 'true')return null;
  const c=current.content;return {id:c.contentIdentity,href:c.href,title:c.title,namespace:c.namespace,schemaVersion:c.schemaVersion,contentIdentity:c.contentIdentity,contentType:c.contentType};
 }
 const continuityStore = personalState.reading;

@@ -570,51 +570,9 @@ mark.gaga-highlight-mark,
   animation: gagaMenuFadeIn 0.15s ease-out;
 }
 
-.gaga-highlight-popup__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
-  padding-bottom: 0.4rem;
-  border-bottom: 1px solid var(--gaga-line, rgba(188, 215, 241, 0.15));
-}
 
-.gaga-highlight-popup__badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  font-family: var(--gaga-font-mono, monospace);
-  font-size: 0.7rem;
-  color: #eab308;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
 
-.gaga-highlight-popup__close {
-  background: transparent;
-  border: none;
-  color: var(--gaga-muted, #94a3b8);
-  cursor: pointer;
-  font-size: 0.85rem;
-  padding: 0.2rem;
-  line-height: 1;
 
-  &:hover {
-    color: var(--gaga-ink, #ffffff);
-  }
-}
-
-.gaga-highlight-popup__note {
-  margin-bottom: 0.6rem;
-  padding: 0.45rem;
-  background: var(--gaga-surface-subtle, #102033);
-  border-left: 2px solid #eab308;
-  border-radius: 0 4px 4px 0;
-  font-size: 0.8rem;
-  line-height: 1.4;
-  color: var(--gaga-ink, #f0f7ff);
-}
 
 .gaga-highlight-popup__actions {
   display: flex;
@@ -645,12 +603,6 @@ mark.gaga-highlight-mark,
   }
 }
 
-.gaga-highlight-popup__form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.35rem;
-  margin-top: 0.4rem;
-}
 
 .gaga-speech-dock {
   position: fixed;

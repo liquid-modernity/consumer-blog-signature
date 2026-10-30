@@ -18,7 +18,7 @@
       "src/runtime/gaga-preference-runtime.ts",
       "src/scripts/rail/rail-controller.ts",
       "src/scripts/rail/rail-events.ts",
-      "src/scripts/systems/reading-knowledge.ts",
+      "src/lib/personal-state.ts",
       "src/scripts/systems/theme.ts"
     ],
     "migrationGoal": "Route browser persistence through one GAGA storage authority without expanding the allowlist."
