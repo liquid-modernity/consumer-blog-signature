@@ -2,6 +2,16 @@ import { initInformationSurface as initEngineInformationSurface } from '@gaga/en
 import { getInformationPreviewRestoreDelayMs } from '../../config/systems';
 import { positionLinkPreview } from '../../config/contextual-ux.mjs';
 
+// Native composedPath is cleared after dispatch; preserve it across hover intent.
+export function snapshotPreviewEvent(event:Event):Event {
+  const path=event.composedPath();
+  return new Proxy(event,{get(target,key){
+    if(key==='composedPath')return ()=>path;
+    const value=Reflect.get(target,key,target);
+    return typeof value==='function'?value.bind(target):value;
+  }});
+}
+
 let initialized = false;
 export function initInformationSurface() {
   const card = document.querySelector<HTMLElement>('[data-gaga-hover-preview-card]');
@@ -41,8 +51,8 @@ export function initInformationSurface() {
         if(type==='pointerover'){
           if((event as PointerEvent).pointerType!=='mouse')return;
           if(related instanceof Node&&target.contains(related))return;
-          window.clearTimeout(intentTimer);intentTarget=target;const p=event as PointerEvent;
-          intentTimer=window.setTimeout(()=>{pointer={x:p.clientX,y:p.clientY};for(const field of card.querySelectorAll('[data-gaga-info-field]'))field.textContent='';invoke(listener,event);},120);return;
+          window.clearTimeout(intentTimer);intentTarget=target;const p=event as PointerEvent, delayedEvent=snapshotPreviewEvent(event);
+          intentTimer=window.setTimeout(()=>{pointer={x:p.clientX,y:p.clientY};for(const field of card.querySelectorAll('[data-gaga-info-field]'))field.textContent='';if(target.isConnected)invoke(listener,delayedEvent);},120);return;
         }
       }
       if(type==='focusin')for(const field of card.querySelectorAll('[data-gaga-info-field]'))field.textContent='';
