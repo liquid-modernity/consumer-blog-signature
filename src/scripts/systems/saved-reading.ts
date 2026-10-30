@@ -1,18 +1,13 @@
 import { createSavedReadingCapability } from '@gaga/engine-runtime/runtime/saved-reading';
-import { isSavedItem, type SavedItem } from '@gaga/engine-runtime/reader';
 import { requestQuickActionsSync } from '@gaga/engine-runtime/runtime/events';
-import { readArray } from '@gaga/engine-runtime/runtime/storage';
+import { currentPersonalContent } from './personal-context';
+import { personalState } from '../../lib/personal-state';
 import { storageKeys } from '../../config/systems';
 
-function currentItem(): SavedItem | null {
-  const frame = document.querySelector('[data-gaga-app-frame]') as HTMLElement | null;
-  if (!frame) return null;
-  return {
-    id: frame.dataset.gagaPageId ?? location.pathname,
-    title: frame.dataset.gagaPageTitle ?? document.title,
-    href: location.pathname,
-    savedAt: new Date().toISOString()
-  };
+function currentItem() {
+ const current=currentPersonalContent();if(!current||current.content.contentType!=='article')return null;
+ const c=current.content,now=new Date().toISOString();
+ return {...c,id:c.contentIdentity,title:c.title,href:location.pathname,savedAt:now,createdAt:now,updatedAt:now};
 }
 
 export function initSavedReading() {
@@ -25,7 +20,7 @@ export function initSavedReading() {
       queueMicrotask(() => capability.refresh());
     },
     getFeedback: ({ action, item }) => {
-      const stored = readArray(storageKeys.saved, isSavedItem).some(entry => entry.id === item.id);
+      const stored = personalState.saved().some(entry => entry.id === item.id);
       const persisted = stored === (action === 'saved');
       return { message: persisted ? (stored ? 'Bacaan disimpan di perangkat ini.' : 'Bacaan dihapus dari daftar tersimpan.') : 'Penyimpanan tidak tersedia. Bacaan belum tersimpan.', tone: persisted ? 'ok' : 'warn', source: 'saved-reading' };
     }

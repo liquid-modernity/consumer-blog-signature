@@ -99,14 +99,4 @@ export function isRailPreference(value: unknown): value is RailPreference {
 }
 
 // GAGA runtime contract vocabulary, located here transitionally for Gate 4.
-export const storageKeys = {
-  theme: 'gaga:theme:v2',
-  reader: 'gaga:reader:v2',
-  sfx: 'gaga:sfx:v1',
-  continuity: 'gaga:continuity:v1',
-  saved: 'gaga:saved:v1',
-  leftRail: 'gaga:left-rail:v3',
-  rightRail: 'gaga:right-rail:v3',
-  language: 'gaga:language:v1',
-  returnContext: 'gaga:return-context:v1'
-} as const;
+export { personalStorageKeys as storageKeys } from './personal-state.mjs';

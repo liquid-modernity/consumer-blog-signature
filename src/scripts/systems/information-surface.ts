@@ -25,12 +25,36 @@ export function initInformationSurface() {
     const point = positionLinkPreview({left:anchor.x, top:anchor.y, bottom:anchor.y}, card!.getBoundingClientRect(), { width: innerWidth, height: innerHeight });
     card!.style.left = point.left + 'px'; card!.style.top = point.top + 'px'; card!.style.width = point.width + 'px';
   }
+  let intentTimer:number|undefined;
+  const listeners=new Map<EventListenerOrEventListenerObject,EventListener>();
+  const invoke=(listener:EventListenerOrEventListenerObject,event:Event)=>typeof listener==='function'?listener.call(document,event):listener.handleEvent(event);
+  const addScopedListener:Document['addEventListener']=((type:string,listener:EventListenerOrEventListenerObject,options?:AddEventListenerOptions|boolean)=>{
+    const wrapped:EventListener=event=>{
+      const related=(event as PointerEvent|FocusEvent).relatedTarget;
+      if((type==='pointerout'||type==='focusout')&&related instanceof Node&&card.contains(related))return;
+      if(type==='pointerout')window.clearTimeout(intentTimer);
+      if(type==='pointerover'||type==='focusin'){
+        const target=(event.target instanceof Element?event.target:null)?.closest<HTMLElement>('[data-gaga-preview]');
+        if(!target)return;
+        let url:URL;try{url=new URL(target.dataset.gagaPreviewHref??target.getAttribute('href')??'',location.href);}catch{return;}
+        if(url.origin!==location.origin||!['http:','https:'].includes(url.protocol))return;
+        if(type==='pointerover'){
+          if((event as PointerEvent).pointerType!=='mouse')return;
+          if(related instanceof Node&&target.contains(related))return;
+          window.clearTimeout(intentTimer);const p=event as PointerEvent;
+          intentTimer=window.setTimeout(()=>{pointer={x:p.clientX,y:p.clientY};invoke(listener,event);},120);return;
+        }
+      }
+      invoke(listener,event);
+    };
+    listeners.set(listener,wrapped);document.addEventListener(type,wrapped,options);
+  }) as Document['addEventListener'];
   // The public document port scopes Engine preview projection to its own card, never page metadata.
   const projection = {
     querySelector: ((selector: string) => selector === '[data-gaga-right-rail]' ? card : card.querySelector(selector)) as Document['querySelector'],
     querySelectorAll: card.querySelectorAll.bind(card) as Document['querySelectorAll'],
-    addEventListener: document.addEventListener.bind(document),
-    removeEventListener: document.removeEventListener.bind(document),
+    addEventListener: addScopedListener,
+    removeEventListener: ((type:string,listener:EventListenerOrEventListenerObject,options?:EventListenerOptions|boolean)=>{const wrapped=listeners.get(listener);if(wrapped){document.removeEventListener(type,wrapped,options);listeners.delete(listener);}}) as Document['removeEventListener'],
     get activeElement() { return document.activeElement; }
   };
   const capability = initEngineInformationSurface({
@@ -62,5 +86,5 @@ export function initInformationSurface() {
   document.addEventListener('keydown', event => { if (event.key === 'Escape' && !card.hidden) { event.preventDefault(); event.stopPropagation(); suppressed = active; close(); } }, { capture: true });
   document.addEventListener('scroll', position, { capture: true, passive: true });
   window.addEventListener('resize', position, { passive: true });
-  window.addEventListener('pagehide', () => { capability.cleanup(); observer.disconnect(); }, { once: true });
+  window.addEventListener('pagehide', () => { window.clearTimeout(intentTimer);capability.cleanup(); observer.disconnect(); }, { once: true });
 }

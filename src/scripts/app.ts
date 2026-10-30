@@ -87,7 +87,7 @@ async function boot() {
     import('./systems/toast').catch(() => null),
     import('./systems/reader-preferences').catch(() => null),
     import('./systems/saved-reading').catch(() => null),
-    hasCapability('[data-gaga-continuity-eligible="true"], [data-gaga-saved-page]')
+    hasCapability('[data-gaga-personal-readable="true"], [data-gaga-saved-page]')
       ? import('./systems/reading-continuity').catch(() => null)
       : Promise.resolve(null),
     import('./systems/quick-actions-state').catch(() => null),
@@ -100,7 +100,7 @@ async function boot() {
     hasCapability('[data-gaga-entity-tabs]')
       ? import('./systems/entity-tabs').catch(() => null)
       : Promise.resolve(null),
-    hasCapability('[data-gaga-article-shell], .gaga-flagship-article, [data-gaga-reading-surface]')
+    hasCapability('[data-gaga-article-shell], .gaga-flagship-article, [data-gaga-personal-readable="true"]')
       ? import('./systems/reader-enhancements').catch(() => null)
       : Promise.resolve(null),
     import('./systems/reading-behaviour').catch(() => null),
@@ -117,7 +117,7 @@ async function boot() {
   i18n?.initI18n();
   focusMode?.initFocusMode();
   entityTabs?.initEntityTabs();
-  readerEnhancements?.initReaderEnhancements();
+  await readerEnhancements?.initReaderEnhancements();
   surfaceCoordinator?.initSurfaceCoordinator();
   keyboard?.initKeyboard();
   readingBehaviour?.initReadingBehavior();

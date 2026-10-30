@@ -10,8 +10,8 @@ import {
 import { readJson, writeJson } from '@gaga/engine-runtime/runtime/storage';
 import { requestToast } from '@gaga/engine-runtime/runtime/events';
 
-const IDENTITY_STORAGE_KEY = 'gaga:identity:v1';
-const DESIGN_LANGUAGE_KEY = 'gaga:design-language:v1';
+const IDENTITY_STORAGE_KEY = storageKeys.identity;
+const DESIGN_LANGUAGE_KEY = storageKeys.designLanguage;
 
 const VALID_IDENTITIES = new Set([
   'editorial',

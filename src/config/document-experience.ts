@@ -15,7 +15,8 @@ export function documentExperience(pathname: string) {
   if (!profile) return undefined;
   const knowledgeViews: Record<string, string> = { '/knowledge': 'explorer', '/knowledge/index': 'index', '/knowledge/graph': 'graph', '/knowledge/tags': 'tags', '/knowledge/references': 'references' };
   const explorer = path === profile.root || path in knowledgeViews;
-  return { ...profile, view: knowledgeViews[path] ?? (profile.id === 'section' ? 'editorial' : explorer ? 'explorer' : 'reader'), mode: profile.id === 'section' ? 'editorial' : explorer ? 'explorer' : 'reader', outline: profile.outline && path !== '/knowledge/graph' };
+  const readable=profile.id==='information'||(profile.id==='legal'&&path!==profile.root)||(profile.id==='system'&&path!==profile.root)||(profile.id==='knowledge'&&referenceRegistry.some(ref=>path==='/knowledge/references/'+ref.slug));
+  return { ...profile, readable, view: knowledgeViews[path] ?? (profile.id === 'section' ? 'editorial' : explorer ? 'explorer' : 'reader'), mode: profile.id === 'section' ? 'editorial' : explorer ? 'explorer' : 'reader', outline: profile.outline && path !== '/knowledge/graph' };
 }
 export function documentNavigation(profile: Pick<DocumentProfile, 'id' | 'root' | 'label'>) {
   const section = getEnabledRootSections().find(s => s.id === (profile.id === 'information' ? 'about' : profile.id));

@@ -2,6 +2,7 @@ import { createQuickActionsStateCapability, type QuickActionElement } from '@gag
 import { isSavedItem } from '@gaga/engine-runtime/reader';
 import { readArray } from '@gaga/engine-runtime/runtime/storage';
 import { actionById, actionForCommand, isGagaActionId, type GagaAction } from '../../config/actions';
+import { personalState } from '../../lib/personal-state';
 import { storageKeys, supportsGagaDock } from '../../config/systems';
 import { isSameSitePath, normalizeSitePath } from '../../lib/url-semantics';
 
@@ -12,7 +13,7 @@ function currentPageId() {
 
 function isSavedCurrentPage() {
   const id = currentPageId();
-  return readArray(storageKeys.saved, isSavedItem).some((item) => item.id === id);
+  return personalState.saved().some((item) => item.id === id);
 }
 
 function routeIsActive(action: GagaAction, href: string | null) {

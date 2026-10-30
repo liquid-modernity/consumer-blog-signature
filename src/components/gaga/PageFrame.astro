@@ -130,7 +130,7 @@ const showCoveragePromotion = !documentProfile && coveragePromotion
   {showCoveragePromotion && coveragePromotion
     ? <CoverageStrip promotion={coveragePromotion} />
     : null}
-  <slot />
+  {documentProfile?.readable ? <div data-gaga-personal-readable="true" data-gaga-personal-kind="document"><slot /></div> : <slot />}
   <Fragment slot="after-content">
     <RightInfoRail
       rail={rightRail}

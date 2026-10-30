@@ -1,684 +1,85 @@
-import {
-  readAllHighlights,
-  saveHighlight,
-  removeHighlight,
-  updateHighlightNote,
-  resolveContentLanguage,
-  type HighlightEntity,
-  type HighlightLocation
-} from './reading-knowledge';
+import { readAllHighlights, saveHighlight, removeHighlight, updateHighlightNote, resolveContentLanguage, type HighlightEntity, type HighlightLocation } from './reading-knowledge';
+import { personalState, resolvePersonalAnchor } from '../../lib/personal-state';
+import { currentPersonalContent, preparePersonalBlocks, personalBlock } from './personal-context';
+import { captureSelectionTarget } from '@gaga/engine-runtime/runtime/annotation';
 import { requestToast } from '@gaga/engine-runtime/runtime/events';
 import { registerSiteCommand } from './site-commands';
-
-type SpeechMode = 'article' | 'selection';
-type SpeechState = 'idle' | 'playing' | 'paused' | 'completed' | 'error';
-
-interface SpeakerController {
-  state: SpeechState;
-  mode: SpeechMode;
-  currentText: string;
-  rate: number;
-  progress: number;
-  voice: SpeechSynthesisVoice | null;
-  playSelection: (text: string, lang: string) => void;
-  playArticle: (elements: HTMLElement[], lang: string) => void;
-  pause: () => void;
-  resume: () => void;
-  stop: () => void;
-  setRate: (rate: number) => void;
-  setVoice: (voice: SpeechSynthesisVoice) => void;
+import { positionLinkPreview } from '../../config/contextual-ux.mjs';
+type SpeechMode = 'article'|'selection';
+type SpeechState = 'idle'|'playing'|'paused'|'completed'|'error';
+interface SpeakerController { state:SpeechState; mode:SpeechMode; currentText:string; rate:number; progress:number; voice:SpeechSynthesisVoice|null; playSelection:(text:string,lang:string)=>void; playArticle:(elements:HTMLElement[],lang:string)=>void; pause:()=>void; resume:()=>void; stop:()=>void; setRate:(rate:number)=>void; setVoice:(voice:SpeechSynthesisVoice)=>void; }
+let activeSpeaker:SpeakerController|null=null, speechDockEl:HTMLElement|null=null, speechDockEmbedded=false;
+let selectionMenuEl:HTMLElement|null=null, activeHighlightPopupEl:HTMLElement|null=null, popupAnchor:HTMLElement|null=null;
+let initialized=false;
+function getArticleMetadata(article:HTMLElement){const c=currentPersonalContent()?.content;return {route:c?.href??location.pathname,title:c?.title??document.querySelector('h1')?.textContent?.trim()??document.title,author:c?.author,topic:undefined,language:c?.language??resolveContentLanguage(article)};}
+function focusReading(target:HTMLElement|null){if(!target?.isConnected)return;const temporary=!target.hasAttribute('tabindex');if(temporary){target.tabIndex=-1;target.addEventListener('blur',()=>target.removeAttribute('tabindex'),{once:true});}target.focus({preventScroll:true});}
+function placeSurface(surface:HTMLElement,rect:DOMRect){surface.style.position='fixed';const p=positionLinkPreview(rect,surface.getBoundingClientRect(),{width:innerWidth,height:innerHeight});const island=document.querySelector<HTMLElement>('[data-gaga-action-runtime]')?.getBoundingClientRect();let top=p.top;if(island&&top<island.bottom&&top+surface.offsetHeight>island.top&&p.left<island.right&&p.left+p.width>island.left)top=island.bottom+surface.offsetHeight+8<innerHeight?island.bottom+8:Math.max(8,island.top-surface.offsetHeight-8);surface.style.left=p.left+'px';surface.style.top=top+'px';surface.style.width=p.width+'px';}
+function textRangeForHighlight(element:HTMLElement,highlight:HighlightEntity):Range|null{
+ const pos=resolvePersonalAnchor(element.textContent??'',highlight,element.dataset.gagaBlockHash??'');if(!pos)return null;
+ const nodes:Text[]=[];const walker=document.createTreeWalker(element,NodeFilter.SHOW_TEXT);while(walker.nextNode())nodes.push(walker.currentNode as Text);
+ let cursor=0,start:Text|undefined,end:Text|undefined,startOffset=0,endOffset=0;
+ for(const node of nodes){const next=cursor+node.length;if(!start&&pos.start>=cursor&&pos.start<next){start=node;startOffset=pos.start-cursor;}if(pos.end>cursor&&pos.end<=next){end=node;endOffset=pos.end-cursor;break;}cursor=next;}
+ if(!start||!end)return null;const range=document.createRange();range.setStart(start,startOffset);range.setEnd(end,endOffset);return range;
 }
-
-let activeSpeaker: SpeakerController | null = null;
-let speechDockEl: HTMLElement | null = null;
-let speechDockEmbedded = false;
-let selectionMenuEl: HTMLElement | null = null;
-let activeHighlightPopupEl: HTMLElement | null = null;
-
-function getArticleMetadata(article: HTMLElement) {
-  const route = article.dataset.gagaArticleRoute || location.pathname;
-
-  const title =
-    article.dataset.gagaArticleTitle ||
-    article.querySelector('h1')?.textContent?.trim() ||
-    document.title.replace(/•.*$/, '').trim();
-
-  const author =
-    article.dataset.gagaArticleAuthor ||
-    article.querySelector('[class*="author-name"]')?.textContent?.trim() ||
-    'Consumer Signature';
-
-  const topic =
-    article.dataset.gagaArticleTopic ||
-    article.querySelector('[class*="kicker"], [class*="breadcrumb"] a:last-of-type')?.textContent?.trim() ||
-    'Arsitektur Produk';
-
-  const language = resolveContentLanguage(article);
-
-  return { route, title, author, topic, language };
+function wireHighlightClick(mark:HTMLElement,highlight:HighlightEntity){mark.addEventListener('click',e=>{if((e.target as Element)?.closest('a'))return;e.preventDefault();e.stopPropagation();showHighlightPopup(mark,highlight);});mark.addEventListener('keydown',e=>{if(e.target===mark&&(e.key==='Enter'||e.key===' ')){e.preventDefault();showHighlightPopup(mark,highlight);}});}
+function applyHighlightToElement(block:HTMLElement,highlight:HighlightEntity){const range=textRangeForHighlight(block,highlight);if(!range||range.collapsed)return false;const mark=document.createElement('mark');mark.className='gaga-highlight-mark';mark.dataset.gagaHighlightId=highlight.id;mark.id='hl-'+highlight.id;mark.tabIndex=0;mark.setAttribute('aria-label',highlight.note?'Sorotan dengan catatan pribadi':'Sorotan pribadi');if(highlight.note)mark.dataset.gagaHasNote='true';try{mark.appendChild(range.extractContents());range.insertNode(mark);wireHighlightClick(mark,highlight);return true;}catch{return false;}}
+function restoreArticleHighlights(body:HTMLElement){const c=currentPersonalContent();if(!c)return;for(const h of readAllHighlights().filter(h=>h.contentIdentity===c.content.contentIdentity||h.articleId===c.content.href)){
+ if(body.querySelector('[data-gaga-highlight-id="'+CSS.escape(h.id)+'"]'))continue;
+ const block=personalBlock(body,h.location.blockId);const restored=!!block&&applyHighlightToElement(block,h);const resolution=restored?'resolved':'unresolved';if(h.resolution!==resolution)saveHighlight({...h,resolution,updatedAt:personalState.now()});
+ }
+ const id=location.hash.startsWith('#hl-')?decodeURIComponent(location.hash.slice(4)):'';if(id)body.querySelector<HTMLElement>('[data-gaga-highlight-id="'+CSS.escape(id)+'"]')?.scrollIntoView({block:'center'});
 }
-
-function ensureBlockIds(container: HTMLElement) {
-  const blocks = container.querySelectorAll<HTMLElement>(
-    'p, blockquote, li, h2, h3, h4, [data-gaga-content-block]'
-  );
-  blocks.forEach((el, index) => {
-    if (!el.dataset.gagaBlockId) {
-      el.dataset.gagaBlockId = el.id ? `block-${el.id}` : `p-${index}`;
-    }
-  });
+function closeHighlightPopup(restore=false){activeHighlightPopupEl?.remove();activeHighlightPopupEl=null;if(restore)focusReading(popupAnchor);popupAnchor=null;}
+function showHighlightPopup(mark:HTMLElement,highlight:HighlightEntity){closeHighlightPopup();closeSelectionMenu();popupAnchor=mark;const popup=document.createElement('div');popup.className='gaga-highlight-popup';popup.setAttribute('role','dialog');popup.setAttribute('aria-modal','false');popup.setAttribute('aria-label','Sorotan pribadi');popup.innerHTML=`<div class="gaga-highlight-popup__inner"><div class="gaga-highlight-popup__actions"><button type="button" data-action="listen">Dengarkan</button><button type="button" data-action="copy">Salin</button><button type="button" data-action="note">${highlight.note?'Ubah catatan':'Catatan'}</button><button type="button" data-action="delete">Hapus sorotan</button><button type="button" data-action="close" aria-label="Tutup sorotan">×</button></div><div class="gaga-highlight-popup__note-form" hidden><textarea rows="3" maxlength="4000" aria-label="Catatan pribadi"></textarea><button type="button" data-action="save-note">Simpan catatan</button></div></div>`;
+ const textarea=popup.querySelector('textarea')!;textarea.value=highlight.note??'';document.body.append(popup);activeHighlightPopupEl=popup;placeSurface(popup,mark.getBoundingClientRect());const listen=popup.querySelector<HTMLButtonElement>('[data-action="listen"]')!;listen.hidden=!('speechSynthesis'in window);
+ popup.querySelector('[data-action="close"]')?.addEventListener('click',()=>closeHighlightPopup(true));listen.addEventListener('click',()=>{listenToSelection(highlight.text,resolveContentLanguage(mark));closeHighlightPopup(true);});popup.querySelector('[data-action="copy"]')?.addEventListener('click',()=>{void copyTextToClipboard(highlight.text);closeHighlightPopup(true);});popup.querySelector('[data-action="note"]')?.addEventListener('click',()=>{(popup.querySelector('[data-gaga-note-editor],.gaga-highlight-popup__note-form') as HTMLElement).hidden=false;textarea.focus();placeSurface(popup,mark.getBoundingClientRect());});
+ popup.querySelector('[data-action="save-note"]')?.addEventListener('click',()=>{if(updateHighlightNote(highlight.id,textarea.value)){highlight.note=textarea.value.trim();mark.dataset.gagaHasNote=highlight.note?'true':'false';closeHighlightPopup(true);}else requestToast({message:'Catatan belum tersimpan. Penyimpanan tidak tersedia.',tone:'warn'});});
+ popup.querySelector('[data-action="delete"]')?.addEventListener('click',()=>{if(!removeHighlight(highlight.id)){requestToast({message:'Sorotan belum terhapus.',tone:'warn'});return;}const parent=mark.parentElement;mark.replaceWith(...mark.childNodes);closeHighlightPopup();focusReading(parent);});
+ popup.querySelector<HTMLElement>('button:not([hidden])')?.focus({preventScroll:true});
 }
-
-function findSelectionLocation(range: Range): HighlightLocation | null {
-  const startBlock = range.startContainer.nodeType === Node.ELEMENT_NODE
-    ? (range.startContainer as HTMLElement).closest<HTMLElement>('[data-gaga-block-id]')
-    : range.startContainer.parentElement?.closest<HTMLElement>('[data-gaga-block-id]');
-
-  const endBlock = range.endContainer.nodeType === Node.ELEMENT_NODE
-    ? (range.endContainer as HTMLElement).closest<HTMLElement>('[data-gaga-block-id]')
-    : range.endContainer.parentElement?.closest<HTMLElement>('[data-gaga-block-id]');
-
-  if (!startBlock || !endBlock || startBlock !== endBlock) return null;
-
-  const targetBlock = startBlock;
-  if (!targetBlock) return null;
-
-  const blockId = targetBlock.dataset.gagaBlockId || 'block-0';
-  const blockText = targetBlock.textContent || '';
-  const exactText = range.toString();
-
-  const preRange = range.cloneRange();
-  preRange.selectNodeContents(targetBlock);
-  try {
-    preRange.setEnd(range.startContainer, range.startOffset);
-  } catch {
-    // Offset boundary safe fallback
-  }
-  const startOffset = preRange.toString().length;
-  const endOffset = startOffset + exactText.length;
-
-  const contextLen = 32;
-  const prefix = blockText.slice(Math.max(0, startOffset - contextLen), startOffset);
-  const suffix = blockText.slice(endOffset, endOffset + contextLen);
-
-  return {
-    blockId,
-    startOffset,
-    endOffset,
-    prefix,
-    suffix,
-    selector: `[data-gaga-block-id="${blockId}"]`
-  };
+interface SelectionCapture { range:Range; text:string; location:HighlightLocation; block:HTMLElement; blockText:string; content:NonNullable<ReturnType<typeof currentPersonalContent>>['content']; }
+function captureSelection(body:HTMLElement,range:Range,selection:Selection):SelectionCapture|null{
+ const current=currentPersonalContent();if(!current||current.body!==body||!body.contains(range.startContainer)||!body.contains(range.endContainer))return null;
+ const target=captureSelectionTarget({contentId:current.content.contentIdentity,selection});if(!target||target.exactText.trim().length<2)return null;const block=personalBlock(body,target.blockId);if(!block?.dataset.gagaBlockHash)return null;
+ return {range:range.cloneRange(),text:target.exactText,location:{blockId:target.blockId,startOffset:target.startOffset,endOffset:target.endOffset,prefix:target.prefix??'',suffix:target.suffix??'',blockHash:block.dataset.gagaBlockHash},block,blockText:block.textContent??'',content:current.content};
 }
-
-/* =========================================================================
-   HIGHLIGHT CONTINUITY & RESTORATION
-   ========================================================================= */
-
-function restoreArticleHighlights(article: HTMLElement) {
-  const { route } = getArticleMetadata(article);
-  const allHighlights = readAllHighlights();
-  const articleHighlights = allHighlights.filter((h) => {
-    return h.articleId === route || h.articleId === location.pathname || route.startsWith(h.articleId);
-  });
-
-  if (!articleHighlights.length) return;
-
-  for (const h of articleHighlights) {
-    if (article.querySelector(`[data-gaga-highlight-id="${h.id}"]`)) continue;
-
-    let targetBlock: HTMLElement | null = null;
-    if (h.location?.blockId) {
-      targetBlock = article.querySelector<HTMLElement>(`[data-gaga-block-id="${h.location.blockId}"]`);
-    }
-
-    if (!targetBlock) {
-      const allBlocks = article.querySelectorAll<HTMLElement>('[data-gaga-block-id], p, blockquote, li');
-      for (const b of allBlocks) {
-        if (b.textContent && b.textContent.includes(h.text)) {
-          targetBlock = b;
-          break;
-        }
-      }
-    }
-
-    if (!targetBlock) continue;
-
-    applyHighlightToElement(targetBlock, h);
-  }
-
-  // Handle jump back from Library: #hl-{id}
-  if (location.hash.startsWith('#hl-')) {
-    const targetId = location.hash.replace('#hl-', '');
-    setTimeout(() => {
-      const mark = article.querySelector<HTMLElement>(`[data-gaga-highlight-id="${targetId}"]`);
-      if (mark) {
-        mark.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        mark.classList.add('gaga-highlight-mark--active');
-        mark.focus?.();
-        requestToast({
-          message: 'Sorotan dipulihkan dari Pustaka',
-          tone: 'ok',
-          x: window.innerWidth / 2,
-          y: 60
-        });
-        setTimeout(() => {
-          mark.classList.remove('gaga-highlight-mark--active');
-        }, 3200);
-      }
-    }, 200);
-  }
+function captureIsCurrent(c:SelectionCapture){return currentPersonalContent()?.content.contentIdentity===c.content.contentIdentity&&c.block.isConnected&&c.block.textContent===c.blockText&&c.range.toString()===c.text;}
+function persistCapture(c:SelectionCapture,note?:string,quoted=false){if(!captureIsCurrent(c)){requestToast({message:'Seleksi berubah. Pilih kembali teksnya.',tone:'warn'});return false;}const old=readAllHighlights().find(h=>h.contentIdentity===c.content.contentIdentity&&h.location.blockId===c.location.blockId&&h.location.startOffset===c.location.startOffset&&h.location.endOffset===c.location.endOffset&&h.text===c.text);const now=personalState.now();const entity:HighlightEntity={...(old??{}),id:old?.id??crypto.randomUUID(),namespace:c.content.namespace,schemaVersion:1,contentIdentity:c.content.contentIdentity,contentType:c.content.contentType,articleId:c.content.href,canonicalUrl:c.content.canonicalUrl,articleTitle:c.content.title,author:c.content.author,language:c.content.language,text:c.text,location:c.location,createdAt:old?.createdAt??now,updatedAt:now,note:note??old?.note,quoted:quoted||old?.quoted,resolution:'resolved'};
+ if(!saveHighlight(entity)){requestToast({message:'Fragmen belum tersimpan. Penyimpanan tidak tersedia.',tone:'warn'});return false;}
+ const body=currentPersonalContent()?.body;if(body&&!body.querySelector('[data-gaga-highlight-id="'+CSS.escape(entity.id)+'"]'))applyHighlightToElement(c.block,entity);window.getSelection()?.removeAllRanges();requestToast({message:quoted?'Kutipan tersimpan di perangkat ini.':note?'Catatan tersimpan di perangkat ini.':'Sorotan tersimpan di perangkat ini.',tone:'ok'});return true;
 }
-
-function textRangeForHighlight(element: HTMLElement, highlight: HighlightEntity): Range | null {
-  const nodes: Text[] = [];
-  const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, {
-    acceptNode(node) {
-      const parent = node.parentElement;
-      if (!node.nodeValue || !parent || parent.closest('.gaga-highlight-mark')) return NodeFilter.FILTER_REJECT;
-      return NodeFilter.FILTER_ACCEPT;
-    }
-  });
-
-  let node: Text | null;
-  while ((node = walker.nextNode() as Text | null)) nodes.push(node);
-  if (!nodes.length) return null;
-
-  const fullText = nodes.map((item) => item.nodeValue || '').join('');
-  const exact = highlight.text.trim();
-  if (!exact) return null;
-
-  let start = highlight.location?.startOffset ?? -1;
-  let end = highlight.location?.endOffset ?? -1;
-  const storedSlice = start >= 0 && end > start ? fullText.slice(start, end) : '';
-
-  if (storedSlice !== exact) {
-    const contextualNeedle = `${highlight.location?.prefix || ''}${exact}${highlight.location?.suffix || ''}`;
-    const contextualIndex = contextualNeedle.length > exact.length ? fullText.indexOf(contextualNeedle) : -1;
-    if (contextualIndex >= 0) {
-      start = contextualIndex + (highlight.location?.prefix?.length || 0);
-      end = start + exact.length;
-    } else {
-      start = fullText.indexOf(exact);
-      end = start >= 0 ? start + exact.length : -1;
-    }
-  }
-
-  if (start < 0 || end <= start) return null;
-
-  let cursor = 0;
-  let startNode: Text | null = null;
-  let endNode: Text | null = null;
-  let startOffset = 0;
-  let endOffset = 0;
-
-  for (const textNode of nodes) {
-    const length = textNode.nodeValue?.length || 0;
-    const nextCursor = cursor + length;
-    if (!startNode && start >= cursor && start <= nextCursor) {
-      startNode = textNode;
-      startOffset = Math.min(length, Math.max(0, start - cursor));
-    }
-    if (endNode === null && end >= cursor && end <= nextCursor) {
-      endNode = textNode;
-      endOffset = Math.min(length, Math.max(0, end - cursor));
-      break;
-    }
-    cursor = nextCursor;
-  }
-
-  if (!startNode || !endNode) return null;
-  const range = document.createRange();
-  range.setStart(startNode, startOffset);
-  range.setEnd(endNode, endOffset);
-  return range;
+let selectionEpoch=0, dismissedSelection='', selectionReturn:HTMLElement|null=null;
+function closeSelectionMenu(restore=false){selectionEpoch++;selectionMenuEl?.remove();selectionMenuEl=null;if(restore)focusReading(selectionReturn);selectionReturn=null;}
+function initSelectionIntelligence(body:HTMLElement){let timer:number|undefined,entered=false;
+ const handle=()=>{window.clearTimeout(timer);const epoch=++selectionEpoch;timer=window.setTimeout(()=>{void(async()=>{
+  if(document.activeElement?.matches('.gaga-selection-menu textarea'))return;
+  const selection=window.getSelection();if(!selection||selection.isCollapsed||selection.rangeCount!==1||selection.toString().trim().length<2){closeSelectionMenu();return;}
+  const range=selection.getRangeAt(0);const parent=range.startContainer.parentElement;if(parent?.closest('nav,button,input,textarea,[contenteditable],.gaga-selection-menu,.gaga-highlight-popup'))return;
+  await preparePersonalBlocks(body);if(epoch!==selectionEpoch)return;const captured=captureSelection(body,range,selection);if(!captured){closeSelectionMenu();return;}
+  const signature=captured.location.blockId+':'+captured.location.startOffset+':'+captured.location.endOffset+':'+captured.text;if(signature===dismissedSelection)return;renderSelectionMenu(captured);entered=false;
+ })();},120);};
+ document.addEventListener('selectionchange',handle);body.addEventListener('mouseup',handle);body.addEventListener('touchend',handle);
+ document.addEventListener('keydown',event=>{if(event.key==='Escape'){const s=window.getSelection();if(s?.rangeCount){const r=s.getRangeAt(0),block=r.startContainer.parentElement?.closest<HTMLElement>('[data-gaga-block-id]');if(block){const before=r.cloneRange();before.selectNodeContents(block);before.setEnd(r.startContainer,r.startOffset);dismissedSelection=block.dataset.gagaBlockId+':'+before.toString().length+':'+(before.toString().length+r.toString().length)+':'+r.toString();}}closeSelectionMenu(true);closeHighlightPopup(true);}
+  else if(event.key==='Tab'&&selectionMenuEl&&!entered&&!selectionMenuEl.contains(document.activeElement)){event.preventDefault();entered=true;selectionMenuEl.querySelector<HTMLElement>('button:not([hidden])')?.focus();}
+ });
+ document.addEventListener('pointerdown',e=>{const target=e.target as Element;if(!target.closest('.gaga-selection-menu,.gaga-highlight-popup,.gaga-highlight-mark')){closeSelectionMenu();closeHighlightPopup();}});
+ window.addEventListener('resize',()=>{closeSelectionMenu();closeHighlightPopup();});
 }
-
-function applyHighlightToElement(element: HTMLElement, highlight: HighlightEntity) {
-  const matchRange = textRangeForHighlight(element, highlight);
-  if (!matchRange || matchRange.collapsed) return;
-
-  const mark = document.createElement('mark');
-  mark.className = 'gaga-highlight-mark';
-  mark.dataset.gagaHighlightId = highlight.id;
-  mark.id = `hl-${highlight.id}`;
-  mark.tabIndex = 0;
-  mark.setAttribute('role', 'mark');
-  mark.setAttribute(
-    'aria-label',
-    highlight.note ? `Sorotan dengan catatan: ${highlight.note}` : 'Teks yang disorot'
-  );
-  if (highlight.note) mark.dataset.gagaHasNote = 'true';
-
-  try {
-    const contents = matchRange.extractContents();
-    mark.appendChild(contents);
-    matchRange.insertNode(mark);
-    wireHighlightClick(mark, highlight);
-  } catch {
-    // Keep the article readable if a stale annotation cannot be reconstructed.
-  }
+function renderSelectionMenu(c:SelectionCapture){closeSelectionMenu();const menu=document.createElement('div');menu.className='gaga-selection-menu';menu.setAttribute('role','toolbar');menu.setAttribute('aria-label','Aksi seleksi');
+ menu.innerHTML="\n    <div class=\"gaga-selection-menu__bar\">\n      <button type=\"button\" class=\"gaga-selection-menu__btn\" data-gaga-action=\"selection-highlight\" title=\"Sorot Teks (H)\" aria-label=\"Sorot teks\">\n        <svg class=\"gaga-icon\" viewBox=\"0 0 24 24\" width=\"15\" height=\"15\" fill=\"currentColor\"><path d=\"M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z\"/></svg>\n        <span>Sorot</span>\n        <kbd>H</kbd>\n      </button>\n\n      <span class=\"gaga-selection-menu__sep\" aria-hidden=\"true\"></span>\n\n      <button type=\"button\" class=\"gaga-selection-menu__btn\" data-gaga-action=\"selection-listen\" title=\"Dengarkan Seleksi (S)\" aria-label=\"Dengarkan seleksi\">\n        <svg class=\"gaga-icon\" viewBox=\"0 0 24 24\" width=\"15\" height=\"15\" fill=\"currentColor\"><path d=\"M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z\"/></svg>\n        <span>Dengarkan</span>\n        <kbd>S</kbd>\n      </button>\n\n      <span class=\"gaga-selection-menu__sep\" aria-hidden=\"true\"></span>\n\n      <button type=\"button\" class=\"gaga-selection-menu__btn\" data-gaga-action=\"selection-copy\" title=\"Salin teks\" aria-label=\"Salin teks\">\n        <svg class=\"gaga-icon\" viewBox=\"0 0 24 24\" width=\"15\" height=\"15\" fill=\"currentColor\"><path d=\"M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z\"/></svg>\n        <span>Salin</span>\n      </button>\n\n      <span class=\"gaga-selection-menu__sep\" aria-hidden=\"true\"></span>\n\n      <button type=\"button\" class=\"gaga-selection-menu__btn\" data-gaga-action=\"selection-note\" title=\"Tambah Catatan\" aria-label=\"Tambah catatan\">\n        <svg class=\"gaga-icon\" viewBox=\"0 0 24 24\" width=\"15\" height=\"15\" fill=\"currentColor\"><path d=\"M19 3H4.99C3.89 3 3 3.9 3 5v14c0 1.1.89 2 1.99 2H19c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10H7v-2h10v2zm0-4H7V7h10v2z\"/></svg>\n        <span>Catatan</span>\n      </button>\n      <details class=\"gaga-selection-menu__more\"><summary aria-label=\"Aksi seleksi lainnya\">···</summary><button type=\"button\" data-gaga-action=\"selection-quote\">Simpan kutipan</button></details>\n    </div>\n\n    <div class=\"gaga-selection-menu__note-input\" hidden>\n      <textarea class=\"gaga-selection-menu__field\" aria-label=\"Catatan pribadi\" placeholder=\"Catatan pribadi\" rows=\"3\" maxlength=\"4000\"></textarea>\n      <button type=\"button\" class=\"gaga-btn gaga-btn--sm gaga-btn--primary\" data-gaga-action=\"save-selection-note\">Simpan</button>\n    </div>\n";
+ document.body.append(menu);selectionMenuEl=menu;selectionReturn=c.block;placeSurface(menu,c.range.getBoundingClientRect());menu.querySelector<HTMLButtonElement>('[data-gaga-action="selection-listen"]')!.hidden=!('speechSynthesis'in window);
+ menu.addEventListener('pointerdown',e=>{if((e.target as Element).closest('button,summary'))e.preventDefault();});
+ menu.querySelector('[data-gaga-action="selection-highlight"]')?.addEventListener('click',()=>{if(persistCapture(c))closeSelectionMenu(true);});
+ menu.querySelector('[data-gaga-action="selection-listen"]')?.addEventListener('click',()=>{if(captureIsCurrent(c))listenToSelection(c.text,c.content.language??'id');closeSelectionMenu(true);});
+ menu.querySelector('[data-gaga-action="selection-copy"]')?.addEventListener('click',()=>{if(captureIsCurrent(c))void copyTextToClipboard(c.text);closeSelectionMenu(true);});
+ const form=menu.querySelector<HTMLElement>('.gaga-selection-menu__note-input')!,field=menu.querySelector<HTMLTextAreaElement>('textarea')!,bar=menu.querySelector<HTMLElement>('.gaga-selection-menu__bar')!;
+ menu.querySelector('[data-gaga-action="selection-note"]')?.addEventListener('click',()=>{form.hidden=false;bar.hidden=true;field.focus();placeSurface(menu,c.range.getBoundingClientRect());});
+ menu.querySelector('[data-gaga-action="save-selection-note"]')?.addEventListener('click',()=>{if(field.value.trim()&&persistCapture(c,field.value.trim()))closeSelectionMenu(true);});
+ menu.querySelector('[data-gaga-action="selection-quote"]')?.addEventListener('click',()=>{if(persistCapture(c,undefined,true))closeSelectionMenu(true);});
 }
-
-function wireHighlightClick(mark: HTMLElement, highlight: HighlightEntity) {
-  mark.addEventListener('click', (e) => {
-    e.stopPropagation();
-    showHighlightPopup(mark, highlight);
-  });
-  mark.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      showHighlightPopup(mark, highlight);
-    }
-  });
-}
-
-function showHighlightPopup(mark: HTMLElement, highlight: HighlightEntity) {
-  closeHighlightPopup();
-  closeSelectionMenu();
-
-  const popup = document.createElement('div');
-  popup.className = 'gaga-highlight-popup';
-  popup.setAttribute('role', 'dialog');
-  popup.setAttribute('aria-label', 'Kelola Sorotan');
-
-  const rect = mark.getBoundingClientRect();
-  const top = rect.bottom + window.scrollY + 8;
-  const left = Math.max(16, Math.min(window.innerWidth - 300, rect.left + window.scrollX));
-
-  popup.style.top = `${top}px`;
-  popup.style.left = `${left}px`;
-
-  popup.innerHTML = `
-    <div class="gaga-highlight-popup__inner">
-      <div class="gaga-highlight-popup__header">
-        <span class="gaga-highlight-popup__badge">
-          <svg class="gaga-icon" viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-          Sorotan Pustaka
-        </span>
-        <button type="button" class="gaga-highlight-popup__close" aria-label="Tutup" data-action="close">✕</button>
-      </div>
-      ${
-        highlight.note
-          ? `<div class="gaga-highlight-popup__note"><strong>Catatan:</strong> ${escapeHtml(highlight.note)}</div>`
-          : ''
-      }
-      <div class="gaga-highlight-popup__actions">
-        <button type="button" class="gaga-btn gaga-btn--sm" data-action="listen">
-          <svg class="gaga-icon" viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
-          Dengarkan
-        </button>
-        <button type="button" class="gaga-btn gaga-btn--sm" data-action="copy">
-          <svg class="gaga-icon" viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
-          Salin
-        </button>
-        <button type="button" class="gaga-btn gaga-btn--sm" data-action="note">
-          <svg class="gaga-icon" viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z"/></svg>
-          ${highlight.note ? 'Ubah Catatan' : 'Tambah Catatan'}
-        </button>
-        <button type="button" class="gaga-btn gaga-btn--sm gaga-btn--danger" data-action="delete">
-          <svg class="gaga-icon" viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
-          Hapus
-        </button>
-      </div>
-      <div class="gaga-highlight-popup__note-form" hidden>
-        <textarea class="gaga-highlight-popup__textarea" placeholder="Tuliskan catatan refleksi...">${highlight.note || ''}</textarea>
-        <div class="gaga-highlight-popup__form-actions">
-          <button type="button" class="gaga-btn gaga-btn--sm" data-action="save-note">Simpan</button>
-          <button type="button" class="gaga-btn gaga-btn--sm gaga-btn--ghost" data-action="cancel-note">Batal</button>
-        </div>
-      </div>
-    </div>
-  `;
-
-  document.body.appendChild(popup);
-  activeHighlightPopupEl = popup;
-
-  popup.querySelector('[data-action="close"]')?.addEventListener('click', closeHighlightPopup);
-  popup.querySelector('[data-action="listen"]')?.addEventListener('click', () => {
-    closeHighlightPopup();
-    if (activeSpeaker) {
-      activeSpeaker.playSelection(highlight.text, resolveContentLanguage(mark));
-    }
-  });
-  popup.querySelector('[data-action="copy"]')?.addEventListener('click', () => {
-    copyTextToClipboard(highlight.text, mark);
-    closeHighlightPopup();
-  });
-  popup.querySelector('[data-action="delete"]')?.addEventListener('click', () => {
-    removeHighlight(highlight.id);
-    const parent = mark.parentNode;
-    if (parent) {
-      while (mark.firstChild) parent.insertBefore(mark.firstChild, mark);
-      parent.removeChild(mark);
-    }
-    requestToast({
-      message: 'Sorotan dihapus dari Pustaka',
-      tone: 'info',
-      x: window.innerWidth / 2,
-      y: 60
-    });
-    closeHighlightPopup();
-  });
-
-  const noteForm = popup.querySelector<HTMLElement>('.gaga-highlight-popup__note-form');
-  const actionsBar = popup.querySelector<HTMLElement>('.gaga-highlight-popup__actions');
-  const textarea = popup.querySelector<HTMLTextAreaElement>('textarea');
-
-  popup.querySelector('[data-action="note"]')?.addEventListener('click', () => {
-    if (noteForm && actionsBar) {
-      noteForm.hidden = false;
-      actionsBar.hidden = true;
-      textarea?.focus();
-    }
-  });
-  popup.querySelector('[data-action="cancel-note"]')?.addEventListener('click', () => {
-    if (noteForm && actionsBar) {
-      noteForm.hidden = true;
-      actionsBar.hidden = false;
-    }
-  });
-  popup.querySelector('[data-action="save-note"]')?.addEventListener('click', () => {
-    const val = textarea?.value || '';
-    updateHighlightNote(highlight.id, val);
-    highlight.note = val;
-    mark.dataset.gagaHasNote = val.trim() ? 'true' : 'false';
-    requestToast({
-      message: 'Catatan sorotan diperbarui',
-      tone: 'ok',
-      x: window.innerWidth / 2,
-      y: 60
-    });
-    closeHighlightPopup();
-  });
-}
-
-function closeHighlightPopup() {
-  if (activeHighlightPopupEl) {
-    activeHighlightPopupEl.remove();
-    activeHighlightPopupEl = null;
-  }
-}
-
-/* =========================================================================
-   SELECTION INTELLIGENCE (FLOATING CONTEXTUAL ACTION MENU)
-   ========================================================================= */
-
-function initSelectionIntelligence(article: HTMLElement) {
-  let debounceTimer: number | undefined;
-
-  const handleSelection = () => {
-    window.clearTimeout(debounceTimer);
-    debounceTimer = window.setTimeout(() => {
-      const selection = window.getSelection();
-      if (!selection || selection.isCollapsed || !selection.rangeCount) {
-        closeSelectionMenu();
-        return;
-      }
-
-      const text = selection.toString().trim();
-      if (text.length < 2) {
-        closeSelectionMenu();
-        return;
-      }
-
-      const range = selection.getRangeAt(0);
-      const commonContainer = range.commonAncestorContainer;
-      const element = commonContainer.nodeType === Node.ELEMENT_NODE
-        ? (commonContainer as HTMLElement)
-        : commonContainer.parentElement;
-
-      // Ensure selection is inside readable content and not inside buttons/inputs
-      const readingSurface = element?.closest(
-        '[data-gaga-article-shell], .gaga-flagship-article__prose, .gaga-markdown-content, [data-gaga-reading-surface]'
-      );
-      if (!readingSurface) {
-        closeSelectionMenu();
-        return;
-      }
-
-      if (element?.closest('.gaga-selection-menu, .gaga-highlight-popup, .gaga-speech-dock, button, input, textarea')) {
-        return;
-      }
-
-      renderSelectionMenu(range, selection, article);
-    }, 120);
-  };
-
-  document.addEventListener('selectionchange', handleSelection);
-  article.addEventListener('mouseup', handleSelection);
-  article.addEventListener('touchend', handleSelection);
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      closeSelectionMenu();
-      closeHighlightPopup();
-    }
-  });
-
-  document.addEventListener('mousedown', (e) => {
-    const target = e.target as HTMLElement | null;
-    if (
-      !target?.closest('.gaga-selection-menu') &&
-      !target?.closest('.gaga-highlight-popup') &&
-      !target?.closest('.gaga-highlight-mark')
-    ) {
-      closeSelectionMenu();
-      closeHighlightPopup();
-    }
-  });
-}
-
-function renderSelectionMenu(range: Range, selection: Selection, article: HTMLElement) {
-  closeSelectionMenu();
-  closeHighlightPopup();
-
-  const rect = range.getBoundingClientRect();
-  if (rect.width === 0 && rect.height === 0) return;
-
-  const menu = document.createElement('div');
-  menu.className = 'gaga-selection-menu';
-  menu.setAttribute('role', 'toolbar');
-  menu.setAttribute('aria-label', 'Aksi Seleksi Teks');
-
-  menu.innerHTML = `
-    <div class="gaga-selection-menu__bar">
-      <button type="button" class="gaga-selection-menu__btn" data-gaga-action="selection-highlight" title="Sorot Teks (H)" aria-label="Sorot teks">
-        <svg class="gaga-icon" viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-        <span>Sorot</span>
-        <kbd>H</kbd>
-      </button>
-
-      <span class="gaga-selection-menu__sep" aria-hidden="true"></span>
-
-      <button type="button" class="gaga-selection-menu__btn" data-gaga-action="selection-listen" title="Dengarkan Seleksi (S)" aria-label="Dengarkan seleksi">
-        <svg class="gaga-icon" viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
-        <span>Dengarkan</span>
-        <kbd>S</kbd>
-      </button>
-
-      <span class="gaga-selection-menu__sep" aria-hidden="true"></span>
-
-      <button type="button" class="gaga-selection-menu__btn" data-gaga-action="selection-copy" title="Salin Kutipan" aria-label="Salin kutipan">
-        <svg class="gaga-icon" viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
-        <span>Salin</span>
-      </button>
-
-      <span class="gaga-selection-menu__sep" aria-hidden="true"></span>
-
-      <button type="button" class="gaga-selection-menu__btn" data-gaga-action="selection-note" title="Tambah Catatan" aria-label="Tambah catatan">
-        <svg class="gaga-icon" viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M19 3H4.99C3.89 3 3 3.9 3 5v14c0 1.1.89 2 1.99 2H19c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
-        <span>Catatan</span>
-      </button>
-    </div>
-
-    <div class="gaga-selection-menu__note-input" hidden>
-      <input type="text" class="gaga-selection-menu__field" placeholder="Ketik catatan refleksi..." maxlength="200" />
-      <button type="button" class="gaga-btn gaga-btn--sm gaga-btn--primary" data-gaga-action="save-selection-note">Simpan</button>
-    </div>
-  `;
-
-  document.body.appendChild(menu);
-  selectionMenuEl = menu;
-
-  // Position with viewport clamping
-  const menuWidth = 320;
-  const menuHeight = 44;
-  let top = rect.top + window.scrollY - menuHeight - 10;
-  if (top < window.scrollY + 10) {
-    top = rect.bottom + window.scrollY + 10;
-  }
-  let left = rect.left + window.scrollX + rect.width / 2 - menuWidth / 2;
-  left = Math.max(12, Math.min(window.innerWidth - menuWidth - 12, left));
-
-  menu.style.top = `${top}px`;
-  menu.style.left = `${left}px`;
-
-  // Wire buttons
-  menu.querySelector('[data-gaga-action="selection-highlight"]')?.addEventListener('click', (e) => {
-    e.preventDefault();
-    createHighlightFromSelection(range, selection, article);
-    closeSelectionMenu();
-  });
-
-  menu.querySelector('[data-gaga-action="selection-listen"]')?.addEventListener('click', (e) => {
-    e.preventDefault();
-    const text = selection.toString().trim();
-    if (text && activeSpeaker) {
-      activeSpeaker.playSelection(text, resolveContentLanguage(article));
-    }
-    closeSelectionMenu();
-  });
-
-  menu.querySelector('[data-gaga-action="selection-copy"]')?.addEventListener('click', (e) => {
-    e.preventDefault();
-    const text = selection.toString().trim();
-    copyTextToClipboard(text, article);
-    closeSelectionMenu();
-  });
-
-  const noteInput = menu.querySelector<HTMLElement>('.gaga-selection-menu__note-input');
-  const bar = menu.querySelector<HTMLElement>('.gaga-selection-menu__bar');
-  const field = menu.querySelector<HTMLInputElement>('.gaga-selection-menu__field');
-
-  menu.querySelector('[data-gaga-action="selection-note"]')?.addEventListener('click', (e) => {
-    e.preventDefault();
-    if (noteInput && bar) {
-      noteInput.hidden = false;
-      bar.hidden = true;
-      field?.focus();
-    }
-  });
-
-  menu.querySelector('[data-gaga-action="save-selection-note"]')?.addEventListener('click', (e) => {
-    e.preventDefault();
-    const noteText = field?.value.trim() || '';
-    createHighlightFromSelection(range, selection, article, noteText);
-    closeSelectionMenu();
-  });
-
-  field?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      const noteText = field.value.trim();
-      createHighlightFromSelection(range, selection, article, noteText);
-      closeSelectionMenu();
-    }
-  });
-}
-
-function closeSelectionMenu() {
-  if (selectionMenuEl) {
-    selectionMenuEl.remove();
-    selectionMenuEl = null;
-  }
-}
-
-function createHighlightFromSelection(
-  range: Range,
-  selection: Selection,
-  article: HTMLElement,
-  note?: string
-) {
-  const text = selection.toString().trim();
-  if (!text) return;
-
-  const loc = findSelectionLocation(range);
-  if (!loc) {
-    requestToast({
-      message: 'Pilih teks di dalam paragraf artikel',
-      tone: 'warn',
-      x: window.innerWidth / 2,
-      y: 60
-    });
-    return;
-  }
-
-  const meta = getArticleMetadata(article);
-  const id = `hl-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-
-  const entity: HighlightEntity = {
-    id,
-    articleId: meta.route,
-    articleTitle: meta.title,
-    author: meta.author,
-    topic: meta.topic,
-    text,
-    location: loc,
-    createdAt: new Date().toISOString(),
-    language: meta.language,
-    tags: ['reading', meta.topic.toLowerCase()],
-    ...(note ? { note } : {})
-  };
-
-  saveHighlight(entity);
-
-  // Wrap visually in DOM
-  const mark = document.createElement('mark');
-  mark.className = 'gaga-highlight-mark';
-  mark.dataset.gagaHighlightId = id;
-  mark.id = `hl-${id}`;
-  mark.tabIndex = 0;
-  mark.setAttribute('role', 'mark');
-  mark.setAttribute('aria-label', note ? `Sorotan dengan catatan: ${note}` : 'Teks yang disorot');
-  if (note) mark.dataset.gagaHasNote = 'true';
-
-  try {
-    range.surroundContents(mark);
-    wireHighlightClick(mark, entity);
-  } catch {
-    // If range crosses tags, re-run full restoration to safely decorate
-    restoreArticleHighlights(article);
-  }
-
-  selection.removeAllRanges();
-
-  requestToast({
-    message: note ? 'Sorotan dan catatan disimpan ke Pustaka' : 'Sorotan disimpan ke Pustaka',
-    tone: 'ok',
-    x: window.innerWidth / 2,
-    y: 60
-  });
-}
-
-function copyTextToClipboard(text: string, contextElement: HTMLElement) {
-  const meta = getArticleMetadata(contextElement.closest('[data-gaga-article-shell]') || contextElement);
-  const formatted = `"${text}"\n— ${meta.title} (${meta.author})`;
-  if (navigator.clipboard?.writeText) {
-    navigator.clipboard.writeText(formatted).then(() => {
-      requestToast({
-        message: 'Kutipan disalin ke papan klip',
-        tone: 'ok',
-        x: window.innerWidth / 2,
-        y: 60
-      });
-    });
-  }
-}
-
-/* =========================================================================
-   SMART SPEAKER RUNTIME (ARTICLE & SELECTION SPEECH WITH DOCK)
-   ========================================================================= */
+async function createHighlightFromSelection(range:Range,selection:Selection,_article:HTMLElement,note?:string){const current=currentPersonalContent();if(!current)return;await preparePersonalBlocks(current.body);const captured=captureSelection(current.body,range,selection);if(captured)persistCapture(captured,note);}
+async function copyTextToClipboard(text:string){try{if(!navigator.clipboard?.writeText)throw Error('Unavailable');await navigator.clipboard.writeText(text);requestToast({message:'Teks disalin.',tone:'ok'});}catch{requestToast({message:'Papan klip tidak tersedia. Gunakan salin bawaan browser.',tone:'warn'});}}
+export function listenToSelection(text:string,language='id'){if(!('speechSynthesis'in window)||!text.trim())return false;activeSpeaker??=initSmartSpeaker();activeSpeaker.playSelection(text,language);return true;}
 
 function getSpeakableBlocks(article: HTMLElement): HTMLElement[] {
   const prose = article.querySelector<HTMLElement>(
@@ -745,6 +146,7 @@ function initSmartSpeaker(): SpeakerController {
 
       utt.onboundary = event => { if (currentUtterance !== utt) return; this.progress = Math.min(1,event.charIndex / Math.max(1,text.length)); const bar = speechDockEl?.querySelector<HTMLProgressElement>('progress'); if (bar) bar.value = this.progress; };
       utt.onstart = () => {
+        if(currentUtterance!==utt)return;
         this.state = 'playing';
         renderSpeechDock(this);
       };
@@ -758,6 +160,7 @@ function initSmartSpeaker(): SpeakerController {
         }, 2400);
       };
       utt.onerror = () => {
+        if(currentUtterance!==utt)return;
         this.state = 'error';
         renderSpeechDock(this);
         requestToast({ message: 'Narasi suara tidak dapat diputar', tone: 'warn' });
@@ -831,7 +234,7 @@ function initSmartSpeaker(): SpeakerController {
 
         utt.onerror = (err) => {
           if (currentUtterance !== utt) return;
-          console.warn('[Gaga Speech] Block error:', err);
+          // Host error objects can contain utterance text; keep it browser-local.
           currentIndex++;
           speakNextBlock();
         };
@@ -1031,17 +434,18 @@ function escapeHtml(str: string): string {
    PUBLIC INITIALIZER
    ========================================================================= */
 
-export function initReaderEnhancements() {
-  activeSpeaker = initSmartSpeaker();
+export async function initReaderEnhancements() {
+  if(initialized)return; initialized=true;
+  activeSpeaker ??= initSmartSpeaker();
+  window.addEventListener('pagehide',()=>activeSpeaker?.stop(),{once:true});
 
-  const article = document.querySelector<HTMLElement>(
+  const article = currentPersonalContent()?.body ?? document.querySelector<HTMLElement>(
     '[data-gaga-article-shell], .gaga-flagship-article, [data-gaga-reading-surface]'
   );
 
   if (article) {
-    ensureBlockIds(article);
-    restoreArticleHighlights(article);
-    initSelectionIntelligence(article);
+    const personal=currentPersonalContent();
+    if(personal){await preparePersonalBlocks(personal.body);restoreArticleHighlights(personal.body);initSelectionIntelligence(personal.body);}
 
     // Wire existing article speak button
     const speakButton = article.querySelector<HTMLButtonElement>('[data-gaga-speak-article]');
@@ -1078,7 +482,7 @@ export function initReaderEnhancements() {
       requestToast({ message: 'Pilih teks di dalam artikel terlebih dahulu (H)', tone: 'warn' });
       return false;
     }
-    const currentArticle = document.querySelector<HTMLElement>(
+    const currentArticle = currentPersonalContent()?.body ?? document.querySelector<HTMLElement>(
       '[data-gaga-article-shell], .gaga-flagship-article, [data-gaga-reading-surface]'
     );
     if (!currentArticle) return false;
@@ -1088,7 +492,7 @@ export function initReaderEnhancements() {
 
   registerSiteCommand('speak', () => {
     const sel = window.getSelection();
-    const currentArticle = document.querySelector<HTMLElement>(
+    const currentArticle = currentPersonalContent()?.body ?? document.querySelector<HTMLElement>(
       '[data-gaga-article-shell], .gaga-flagship-article, [data-gaga-reading-surface]'
     );
     if (!currentArticle) return false;

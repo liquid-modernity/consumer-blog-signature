@@ -4,6 +4,7 @@ export type ContinuityStatus = typeof continuityStatuses[number];
 
 export type ContinuityItem = {
   id: string;
+  namespace?: string; schemaVersion?: number; contentIdentity?: string; contentType?: 'article'|'document'; createdAt?: string;
   href: string;
   title: string;
   lastHeadingId?: string;

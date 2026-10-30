@@ -47,6 +47,7 @@ const documentProfile = documentExperience(cleanPath);
 let breadcrumbs: BreadcrumbItem[] = [];
 let rightRail = null;
 let readingMetaItems: string[] = [];
+let personalPublication = false;
 let prevPub: { title: string; canonicalHref: string; summary?: string; metaText?: string } | null = null;
 let nextPub: { title: string; canonicalHref: string; summary?: string; metaText?: string } | null = null;
 
@@ -77,6 +78,7 @@ if (!isRootPage) {
     const currentIdx = canonicalPubs.findIndex((p) => p.slug === slugSegment || p.canonicalHref === cleanPath);
     const currentPub = currentIdx >= 0 ? canonicalPubs[currentIdx] : null;
     if (currentPub) {
+      personalPublication = true;
       const pubTypeLabel = resolvePublicationType(currentPub.type).label;
       const topicLabels = (rightRail?.topics?.length ? rightRail.topics : currentPub.topics.map((t) => resolveCanonicalTopic(t)?.label ?? t)).join(', ');
       readingMetaItems = [
@@ -135,7 +137,7 @@ const entityNavigationLabel = i18nLabel(isAuthor ? 'entity.authorNavigation' : '
     coverage={coverage}
     readingMetaItems={readingMetaItems}
   >
-    <div class="gaga-article-body gaga-markdown-content" data-gaga-article-body><slot /></div>
+    <div class="gaga-article-body gaga-markdown-content" data-gaga-article-body data-gaga-personal-readable={personalPublication ? 'true' : undefined} data-gaga-personal-kind="article" data-gaga-personal-author={rightRail?.author}><slot /></div>
     {(prevPub || nextPub) && (
       <nav class="gaga-article-pager" aria-label="Navigasi antar publikasi" data-gaga-preview-scope>
         <div class="gaga-article-pager__col">
@@ -241,7 +243,7 @@ const entityNavigationLabel = i18nLabel(isAuthor ? 'entity.authorNavigation' : '
       {documentProfile ? (
         <DocumentWorkspace title={metadata.title ?? ''}>
           <PageTitle entryData={entryData} routeId={routeIdentity} />
-          <div class="gaga-markdown-content" data-gaga-document-body={documentProfile.id !== 'section' ? '' : undefined}><slot /></div>
+          <div class="gaga-markdown-content" data-gaga-personal-readable={documentProfile.readable ? 'true' : undefined} data-gaga-personal-kind="document" data-gaga-document-body={documentProfile.id !== 'section' ? '' : undefined}><slot /></div>
         </DocumentWorkspace>
       ) : (
         <><PageTitle entryData={entryData} routeId={routeIdentity} /><div class="gaga-markdown-content"><slot /></div></>

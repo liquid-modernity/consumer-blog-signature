@@ -1259,3 +1259,31 @@ mark.gaga-highlight-mark,
   flex-wrap: wrap;
   gap: 0.35rem;
 }
+
+// Personal actions remain latent and bounded to the viewport.
+.gaga-selection-menu, .gaga-highlight-popup {
+  box-sizing: border-box;
+  max-height: calc(100dvh - 24px);
+  overflow: auto;
+  color: var(--gaga-ink);
+  [hidden] { display: none !important; }
+  button, summary { min-height: 44px; cursor: pointer; }
+  button:focus-visible, summary:focus-visible, textarea:focus-visible { outline: 2px solid var(--gaga-color-focus, currentColor); outline-offset: 2px; }
+  textarea { box-sizing: border-box; width: 100%; min-width: 0; resize: vertical; color: inherit; }
+}
+.gaga-selection-menu__bar { flex-wrap: wrap; }
+.gaga-selection-menu__more { position: relative; }
+.gaga-selection-menu__more summary { display: grid; place-items: center; min-width: 44px; }
+.gaga-selection-menu__more button { white-space: normal; }
+.gaga-selection-menu__note-input { flex-direction: column; align-items: stretch; }
+.gaga-highlight-popup__actions button { background: transparent; color: inherit; border: 0; }
+.gaga-highlight-mark { cursor: pointer; }
+.gaga-highlight-mark:focus-visible { outline: 2px solid var(--gaga-color-focus, currentColor); outline-offset: 2px; }
+[data-gaga-highlight-note], [data-gaga-highlight-text], [data-gaga-note-text] { overflow-wrap: anywhere; }
+@media (max-width: 420px) {
+  .gaga-selection-menu__btn { padding-inline: .35rem; }
+  .gaga-selection-menu kbd, .gaga-selection-menu__sep { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gaga-selection-menu, .gaga-highlight-popup { animation: none; }
+}

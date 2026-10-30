@@ -1,7 +1,10 @@
 import { isSavedItem, type SavedItem } from '@gaga/engine-runtime/reader';
 import { onRuntimeEvent, requestQuickActionsSync, requestToast } from '@gaga/engine-runtime/runtime/events';
 import { readArray, readJson, writeJson } from '@gaga/engine-runtime/runtime/storage';
-import { createReadingCollectionStore } from '@gaga/engine-runtime/runtime/reading-collection';
+import { personalState, continueReading, personalStateChanged } from '../../lib/personal-state';
+import { currentPersonalContent } from './personal-context';
+import { listenToSelection } from './reader-enhancements';
+import { resolveReadingScrollContext, getUnifiedScrollMetrics } from './reading-scroll';
 import {
   continuityStoragePolicy,
   isContinuityStatus,
@@ -17,6 +20,7 @@ import {
   readAllHighlights,
   removeHighlight,
   updateHighlightNote,
+  removePersonalQuote,
   formatDateLocale,
   normalizeSpeechLang,
   type HighlightEntity
@@ -66,23 +70,10 @@ function nowIso() {
 }
 
 function currentArticle() {
-  const frame = document.querySelector<HTMLElement>('[data-gaga-app-frame]');
-  if (!frame || frame.dataset.gagaContentKind !== 'article') return null;
-  if (frame.dataset.gagaContinuityEligible !== 'true') return null;
-  return {
-    id: frame.dataset.gagaPageId ?? location.pathname,
-    href: location.pathname,
-    title: frame.dataset.gagaPageTitle ?? document.title
-  };
+ const current=currentPersonalContent();if(!current)return null;
+ const c=current.content;return {id:c.contentIdentity,href:c.href,title:c.title,namespace:c.namespace,schemaVersion:c.schemaVersion,contentIdentity:c.contentIdentity,contentType:c.contentType};
 }
-
-const continuityStore = createReadingCollectionStore<ContinuityStatus>({
-  storageKey: storageKeys.continuity,
-  isStatus: isContinuityStatus,
-  validateHref: isLocalContinuityHref,
-  maxItems: continuityStoragePolicy.maxItems,
-  retentionMs: continuityStoragePolicy.retentionDays * 24 * 60 * 60 * 1000
-});
+const continuityStore = personalState.reading;
 
 function readContinuityState(): ContinuityState {
   return continuityStore.read();
@@ -128,6 +119,8 @@ function upsertCurrent(values: Partial<ContinuityItem>) {
     progress,
     status,
     updatedAt,
+    createdAt: existing?.createdAt ?? existing?.updatedAt ?? updatedAt,
+    namespace: article.namespace, schemaVersion: 1, contentIdentity: article.id, contentType: article.contentType,
     ...(existing?.lastHeadingId ? { lastHeadingId: existing.lastHeadingId } : {}),
     ...(existing?.lastHeadingText ? { lastHeadingText: existing.lastHeadingText } : {}),
     ...values,
@@ -139,8 +132,7 @@ function upsertCurrent(values: Partial<ContinuityItem>) {
 }
 
 function removeSavedBookmark(id: string) {
-  const saved = readArray(storageKeys.saved, isSavedItem);
-  writeJson(storageKeys.saved, saved.filter((item) => item.id !== id));
+  if(!personalState.removeSaved(id)){requestToast({message:'Bacaan belum terhapus. Penyimpanan tidak tersedia.',tone:'warn'});return;}
   requestQuickActionsSync({ source: 'reading-continuity' });
   renderSavedScreen();
   requestToast({ message: 'Artikel dihapus dari tersimpan', tone: 'info' });
@@ -230,7 +222,8 @@ function cloneHighlightItem(highlight: HighlightEntity) {
   if (!card) return null;
 
   card.dataset.gagaHighlightId = highlight.id;
-  const targetHref = `${highlight.articleId}#hl-${highlight.id}`;
+  if(highlight.resolution==='unresolved'){const status=document.createElement('small');status.dataset.gagaAnchorStatus='unresolved';status.textContent='Anchor belum tersambung; fragmen tetap tersimpan.';card.append(status);}
+  const targetHref = `${highlight.articleId}#hl-${encodeURIComponent(highlight.id)}`;
 
   const quoteEl = card.querySelector<HTMLElement>('[data-gaga-highlight-text]');
   if (quoteEl) quoteEl.textContent = highlight.text;
@@ -262,7 +255,7 @@ function cloneHighlightItem(highlight: HighlightEntity) {
   const copyBtn = card.querySelector<HTMLButtonElement>('[data-gaga-highlight-copy]');
   if (copyBtn) {
     copyBtn.addEventListener('click', () => {
-      const formatted = `"${highlight.text}"\n— ${highlight.articleTitle || 'Artikel'} (${highlight.author || 'Gaga'})`;
+      const formatted = `"${highlight.text}"\n— ${highlight.articleTitle || 'Artikel'} (${highlight.author || ''})`;
       navigator.clipboard?.writeText(formatted).then(() => {
         requestToast({ message: 'Kutipan disalin ke papan klip', tone: 'ok' });
       });
@@ -272,13 +265,7 @@ function cloneHighlightItem(highlight: HighlightEntity) {
   const listenBtn = card.querySelector<HTMLButtonElement>('[data-gaga-highlight-listen]');
   if (listenBtn) {
     listenBtn.addEventListener('click', () => {
-      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        const utt = new SpeechSynthesisUtterance(highlight.text);
-        utt.lang = normalizeSpeechLang(highlight.language || document.documentElement.lang || 'id');
-        window.speechSynthesis.speak(utt);
-        requestToast({ message: 'Mendengarkan kutipan sorotan', tone: 'ok' });
-      }
+      listenToSelection(highlight.text, highlight.language || document.documentElement.lang || 'id');
     });
   }
 
@@ -302,7 +289,8 @@ function cloneNoteItem(highlight: HighlightEntity) {
   if (!card) return null;
 
   card.dataset.gagaHighlightId = highlight.id;
-  const targetHref = `${highlight.articleId}#hl-${highlight.id}`;
+  if(highlight.resolution==='unresolved'){const status=document.createElement('small');status.dataset.gagaAnchorStatus='unresolved';status.textContent='Anchor belum tersambung; fragmen tetap tersimpan.';card.append(status);}
+  const targetHref = `${highlight.articleId}#hl-${encodeURIComponent(highlight.id)}`;
 
   const noteBody = card.querySelector<HTMLElement>('[data-gaga-note-text]');
   if (noteBody) noteBody.textContent = highlight.note;
@@ -341,13 +329,14 @@ function cloneQuoteItem(highlight: HighlightEntity) {
   if (!card) return null;
 
   card.dataset.gagaHighlightId = highlight.id;
-  const targetHref = `${highlight.articleId}#hl-${highlight.id}`;
+  if(highlight.resolution==='unresolved'){const status=document.createElement('small');status.dataset.gagaAnchorStatus='unresolved';status.textContent='Anchor belum tersambung; fragmen tetap tersimpan.';card.append(status);}
+  const targetHref = `${highlight.articleId}#hl-${encodeURIComponent(highlight.id)}`;
 
   const quoteText = card.querySelector<HTMLElement>('[data-gaga-quote-text]');
   if (quoteText) quoteText.textContent = highlight.text;
 
   const authorEl = card.querySelector<HTMLElement>('[data-gaga-quote-author]');
-  if (authorEl) authorEl.textContent = highlight.author || 'Editorial';
+  if (authorEl) authorEl.textContent = highlight.author || '';
 
   const titleEl = card.querySelector<HTMLElement>('[data-gaga-quote-title]');
   if (titleEl) titleEl.textContent = highlight.articleTitle || 'Artikel';
@@ -361,13 +350,14 @@ function cloneQuoteItem(highlight: HighlightEntity) {
   const copyBtn = card.querySelector<HTMLButtonElement>('[data-gaga-quote-copy]');
   if (copyBtn) {
     copyBtn.addEventListener('click', () => {
-      const formatted = `"${highlight.text}"\n— ${highlight.author || 'Gaga'}, ${highlight.articleTitle || ''}`;
+      const formatted = `"${highlight.text}"\n— ${highlight.author || ''}, ${highlight.articleTitle || ''}`;
       navigator.clipboard?.writeText(formatted).then(() => {
         requestToast({ message: 'Kutipan disalin ke papan klip', tone: 'ok' });
       });
     });
   }
 
+  const remove=document.createElement('button');remove.type='button';remove.textContent='Hapus kutipan';remove.dataset.gagaQuoteRemove='';remove.addEventListener('click',()=>{if(removePersonalQuote(highlight.id))renderSavedScreen();});card.append(remove);
   return fragment;
 }
 
@@ -376,8 +366,7 @@ function renderContinue(state: ContinuityState) {
   const link = section?.querySelector<HTMLAnchorElement>('[data-gaga-continuity-continue-link]');
   const label = section?.querySelector<HTMLElement>('[data-gaga-continuity-continue-label]');
   if (!section || !link || !label) return;
-  const next = state.items.find((item) => item.status === 'in-progress') ??
-    state.items.find((item) => item.status === 'read-next');
+  const next = continueReading(state.items)[0] as ContinuityItem | undefined;
   section.hidden = !next;
   if (!next) return;
   link.href = destinationFor(next);
@@ -416,10 +405,12 @@ function renderSavedScreen() {
   const savedScreen = document.querySelector<HTMLElement>('[data-gaga-saved-page]');
   if (!savedScreen) return;
 
-  const saved = readArray(storageKeys.saved, isSavedItem);
-  const state = readContinuityState();
-  const allHighlights = readAllHighlights();
-  const notes = allHighlights.filter((h) => h.note && h.note.trim());
+  const snapshot = personalState.snapshot();
+  const saved = snapshot.saved;
+  const state = snapshot.reading;
+  const allHighlights = snapshot.highlights;
+  const notes = snapshot.notes;
+  const quotes = snapshot.quotes;
 
   // Update quick stats counters
   const statSaved = savedScreen.querySelector('[data-gaga-stat-saved]');
@@ -429,7 +420,7 @@ function renderSavedScreen() {
   const statNotes = savedScreen.querySelector('[data-gaga-stat-notes]');
   if (statNotes) statNotes.textContent = String(notes.length);
   const statQuotes = savedScreen.querySelector('[data-gaga-stat-quotes]');
-  if (statQuotes) statQuotes.textContent = String(allHighlights.length);
+  if (statQuotes) statQuotes.textContent = String(quotes.length);
 
   // Update tab badges
   const badgeSaved = savedScreen.querySelector('[data-gaga-badge-saved]');
@@ -439,7 +430,7 @@ function renderSavedScreen() {
   const badgeNotes = savedScreen.querySelector('[data-gaga-badge-notes]');
   if (badgeNotes) badgeNotes.textContent = String(notes.length);
   const badgeQuotes = savedScreen.querySelector('[data-gaga-badge-quotes]');
-  if (badgeQuotes) badgeQuotes.textContent = String(allHighlights.length);
+  if (badgeQuotes) badgeQuotes.textContent = String(quotes.length);
   const badgeHistory = savedScreen.querySelector('[data-gaga-badge-history]');
   if (badgeHistory) badgeHistory.textContent = String(state.items.length);
 
@@ -500,7 +491,7 @@ function renderSavedScreen() {
   // Section 4: Quotes
   const quotesList = savedScreen.querySelector<HTMLElement>('[data-gaga-quotes-list]');
   if (quotesList) {
-    const quoteFragments = allHighlights
+    const quoteFragments = quotes
       .map(cloneQuoteItem)
       .filter((item): item is DocumentFragment => item instanceof DocumentFragment);
     if (quoteFragments.length) {
@@ -510,7 +501,7 @@ function renderSavedScreen() {
         <div class="gaga-empty-inventory" data-gaga-motion>
           <svg class="gaga-icon" viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/></svg>
           <p>Belum ada kutipan pilihan.</p>
-          <small>Semua teks yang Anda sorot dapat disalin sebagai kutipan berformat rapi.</small>
+          <small>Simpan fragmen sebagai kutipan melalui aksi seleksi lainnya.</small>
         </div>
       `;
     }
@@ -520,8 +511,7 @@ function renderSavedScreen() {
   const progressList = savedScreen.querySelector<HTMLElement>('[data-gaga-continuity-status-inventory]');
   const progressEmptyTemplate = savedScreen.querySelector<HTMLTemplateElement>('[data-gaga-continuity-status-empty-template]');
   if (progressList) {
-    const savedIds = new Set(saved.map((item) => item.id));
-    const progressItems = state.items.filter((item) => !savedIds.has(item.id));
+    const progressItems = state.items;
     const progressFragments = progressItems
       .map((item) => cloneSavedItem(item, item, false))
       .filter((item): item is DocumentFragment => item instanceof DocumentFragment);
@@ -533,6 +523,8 @@ function renderSavedScreen() {
     );
   }
 
+  for(const tab of savedScreen.querySelectorAll<HTMLElement>('[data-gaga-library-tab]')){const domain=tab.dataset.gagaLibraryTab;tab.hidden=domain==='highlights'?!allHighlights.length:domain==='notes'?!notes.length:domain==='quotes'?!quotes.length:domain==='history'?!state.items.length:false;}
+  if(savedScreen.querySelector<HTMLElement>('[data-gaga-library-tab].is-active')?.hidden)switchLibraryTab('saved');
   renderContinue(state);
 }
 
@@ -548,7 +540,7 @@ function wireLibraryTabs() {
   });
 
   nav.addEventListener('keydown', (event) => {
-    const tabs = [...nav.querySelectorAll<HTMLElement>('[data-gaga-library-tab]')];
+    const tabs = [...nav.querySelectorAll<HTMLElement>('[data-gaga-library-tab]')].filter(tab=>!tab.hidden);
     const index = tabs.findIndex(tab => tab === event.target);
     if (index < 0 || !['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
     event.preventDefault();
@@ -593,7 +585,7 @@ function wireClicks() {
     }
   });
 
-  window.addEventListener('gaga:highlights:changed', () => {
+  window.addEventListener(personalStateChanged, () => {
     renderSavedScreen();
   });
 }
@@ -610,21 +602,18 @@ function wireLanguageChanges() {
 }
 
 function wireProgress() {
-  onRuntimeEvent('tocActiveChanged', (detail) => {
-    latestHeading = {
-      lastHeadingId: detail.id,
-      lastHeadingText: detail.label,
-      progress: Math.max(0, Math.min(100, detail.progress))
-    };
-    const shouldWrite = performance.now() - lastProgressWrite >= continuityStoragePolicy.progressWriteIntervalMs ||
-      latestHeading.progress >= continuityStoragePolicy.completionProgress;
-    if (!shouldWrite) return;
-    lastProgressWrite = performance.now();
-    upsertCurrent(latestHeading);
-  });
-  window.addEventListener('pagehide', () => {
-    if (latestHeading) upsertCurrent(latestHeading);
-  });
+ const current=currentArticle();if(!current)return;
+ const existing=readContinuityState().items.find(item=>item.id===current.id);
+ // A visit updates history, retaining the meaningful continuation position and completion.
+ upsertCurrent(existing ? {progress:existing.progress,lastHeadingId:existing.lastHeadingId,lastHeadingText:existing.lastHeadingText} : {progress:0,status:'in-progress'});
+ let interacted=false;
+ const update=()=>{if(!interacted)return;const metrics=getUnifiedScrollMetrics();latestHeading={...latestHeading,progress:Math.max(0,Math.min(100,metrics.percentage))};if(performance.now()-lastProgressWrite>=continuityStoragePolicy.progressWriteIntervalMs||latestHeading.progress>=continuityStoragePolicy.completionProgress){lastProgressWrite=performance.now();upsertCurrent(latestHeading);}};
+ const bind=()=>resolveReadingScrollContext()?.scrollContext.addChangeListener(update);
+ let unbind=bind();
+ onRuntimeEvent('layoutChanged',()=>{unbind?.();unbind=bind();});
+ document.addEventListener('wheel',()=>{interacted=true;},{passive:true});document.addEventListener('touchmove',()=>{interacted=true;},{passive:true});document.addEventListener('keydown',e=>{if(['PageDown','PageUp','ArrowDown','ArrowUp','End','Home',' '].includes(e.key))interacted=true;});
+ onRuntimeEvent('tocActiveChanged',detail=>{latestHeading={lastHeadingId:detail.id,lastHeadingText:detail.label,progress:Math.max(0,Math.min(100,detail.progress))};update();});
+ window.addEventListener('pagehide',()=>{if(interacted&&latestHeading)upsertCurrent(latestHeading);unbind?.();},{once:true});
 }
 
 export function initReadingContinuity() {
@@ -636,4 +625,5 @@ export function initReadingContinuity() {
   wireClicks();
   wireLanguageChanges();
   wireProgress();
+  window.addEventListener('storage',()=>{renderArticleControls();renderSavedScreen();});
 }
