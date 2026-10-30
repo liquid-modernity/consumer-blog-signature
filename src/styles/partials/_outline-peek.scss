@@ -82,13 +82,18 @@
 .gaga-outline-peek__handle{display:block;inline-size:2.4rem;block-size:.2rem;margin:.52rem auto .28rem;border-radius:999px;background:rgba(247, 246, 242, 0.24);}
 
 .gaga-outline-peek__header {
+  position: relative;
+  min-block-size: 2.75rem;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: .75rem;
-  padding: .25rem .95rem .5rem;
+  padding: .25rem 3rem .5rem;
   border-block-end: 1px solid rgba(247, 246, 242, 0.12);
 }
+
+.gaga-outline-peek__close { position:absolute; inset-inline-end:.25rem; inset-block-start:50%; transform:translateY(-50%); inline-size:2.75rem; block-size:2.75rem; display:grid; place-items:center; border:0; border-radius:.5rem; color:inherit; background:transparent; cursor:pointer; }
+.gaga-outline-peek__close:focus-visible { outline:2px solid var(--gaga-focus-ring); outline-offset:-3px; }
 
 .gaga-outline-peek__heading {
   display: inline-flex;
