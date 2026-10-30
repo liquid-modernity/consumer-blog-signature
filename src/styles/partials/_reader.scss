@@ -1231,7 +1231,8 @@ mark.gaga-highlight-mark,
 .gaga-highlight-popup__actions button { background: transparent; color: inherit; border: 0; }
 .gaga-highlight-mark { cursor: pointer; }
 .gaga-highlight-mark:focus-visible { outline: 2px solid var(--gaga-color-focus, currentColor); outline-offset: 2px; }
-[data-gaga-highlight-note], [data-gaga-highlight-text], [data-gaga-note-text] { overflow-wrap: anywhere; }
+[data-gaga-knowledge-item] { min-width: 0; overflow-wrap: anywhere; }
+.gaga-library-nav__item[hidden] { display: none; }
 @media (max-width: 420px) {
   .gaga-selection-menu__btn { padding-inline: .35rem; }
   .gaga-selection-menu kbd, .gaga-selection-menu__sep { display: none; }
