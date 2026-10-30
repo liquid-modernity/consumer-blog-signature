@@ -1,4 +1,5 @@
 ---
+import { canonicalPublicationHref } from '../../lib/pakrpp-content';
 import { contentDefaults } from '../../config/content';
 import { toArticlePreview } from '../../lib/content';
 import type { EditorialFrontProjection, EditorialSectionSummary } from '../../lib/editorial';
@@ -32,7 +33,7 @@ const lead = projection.lead
         {projection.lead.live && <span>Live</span>}
         {projection.lead.kicker && <span>{projection.lead.kicker}</span>}
       </div>
-      <h2><a href={lead.href}>{lead.title}</a></h2>
+      <h2><a href={canonicalPublicationHref(projection.lead.article)}>{lead.title}</a></h2>
       {lead.snippet && <p>{lead.snippet}</p>}
       <div class="gaga-section-lead__meta">
         {[lead.author, lead.date, lead.readTime].filter(Boolean).join(' · ')}
@@ -56,7 +57,7 @@ const lead = projection.lead
                 {story.live && <span>Live</span>}
                 {story.kicker && <span>{story.kicker}</span>}
               </div>
-              <h3><a href={preview.href}>{preview.title}</a></h3>
+              <h3><a href={canonicalPublicationHref(story.article)}>{preview.title}</a></h3>
               {preview.snippet && <p>{preview.snippet}</p>}
             </article>
           );
@@ -81,7 +82,7 @@ const lead = projection.lead
                 <div class="gaga-editorial-story__labels">
                   {story.kicker && <span>{story.kicker}</span>}
                 </div>
-                <a href={preview.href}>{preview.title}</a>
+                <a href={canonicalPublicationHref(story.article)}>{preview.title}</a>
               </div>
             </li>
           );

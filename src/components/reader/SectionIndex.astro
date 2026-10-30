@@ -1,4 +1,5 @@
 ---
+import { canonicalPublicationHref } from '../../lib/pakrpp-content';
 import { getEditorialSections } from '../../lib/editorial';
 import { toArticlePreview } from '../../lib/content';
 import { contentDefaults } from '../../config/content';
@@ -21,7 +22,7 @@ const surfaceLocale = resolveContentDateLocale(
   <div class="gaga-section-index__grid">
     {sections.map((section) => {
       const lead = section.lead
-        ? toArticlePreview(section.lead.article, surfaceLocale, contentDefaults.preview)
+        ? { ...toArticlePreview(section.lead.article, surfaceLocale, contentDefaults.preview), href: canonicalPublicationHref(section.lead.article) }
         : undefined;
 
       return (

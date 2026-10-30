@@ -45,3 +45,14 @@ test('CMS, metadata contracts, storage authority and package identities remain p
  const before=execFileSync('git',['show',base+':src/pages/legal/[slug].astro'],{encoding:'utf8'}),after=readFileSync('src/pages/legal/[slug].astro','utf8');
  assert.equal(after.slice(after.indexOf('const legalDocs:'),after.indexOf('const doc =')),before.slice(before.indexOf('const legalDocs:'),before.indexOf('const doc =')),'Legal source text must not change');
 });
+
+// Production UI assertions must never accept stale HTML merely because its controls work.
+test('production document byte readback rejects stale or unadmitted HTML before smoke assertions',async()=>{
+ const {assertDocumentBytes}=await import('./source-readback.mjs');
+ const {createHash}=await import('node:crypto');
+ const bytes=Buffer.from('<main>qualified document</main>');
+ const manifest={sourceCommit:'qualified',files:[{path:'dist/about/index.html',sha256:createHash('sha256').update(bytes).digest('hex')}]};
+ assert.equal(assertDocumentBytes(manifest,'/about/#heading',bytes).sourceCommit,'qualified');
+ assert.throws(()=>assertDocumentBytes(manifest,'/about',Buffer.from('old document')),/differs from sealed source/);
+ assert.throws(()=>assertDocumentBytes(manifest,'/legal/privacy',bytes),/Qualified document missing/);
+});

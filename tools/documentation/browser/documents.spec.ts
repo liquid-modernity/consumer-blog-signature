@@ -1,7 +1,9 @@
 import { test, expect, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
+import { assertDocumentBytes } from '../source-readback.mjs';
+const productionManifest=process.env.GAGA_PRODUCTION_BROWSER_URL?JSON.parse(readFileSync('.gaga/deployment-manifest.json','utf8')):undefined;
 const cases=[['/knowledge/index','knowledge'],['/knowledge/graph','knowledge'],['/about','information'],['/legal/privacy','legal'],['/system/sitemap','system'],['/sections','section']] as const;
-async function ready(page:Page,path:string){await page.goto(path);await expect(page.locator('html')).toHaveAttribute('data-gaga-runtime','ready');}
+async function ready(page:Page,path:string){const response=await page.goto(path);if(productionManifest){expect(response?.status()).toBe(200);const proof=assertDocumentBytes(productionManifest,path,await response!.body());await test.info().attach('production-document-source',{body:JSON.stringify(proof),contentType:'application/json'});}await expect(page.locator('html')).toHaveAttribute('data-gaga-runtime','ready');}
 async function notch(page:Page){const island=page.locator('[data-gaga-action-runtime]');if(await island.getAttribute('data-gaga-level')==='0')await page.locator('[data-gaga-action-island-toggle]').click();return island;}
 test('all five experience families retain main, H1, skip target, page identity and bounded layout',async({page})=>{
  for(const [path,profile] of cases){
@@ -11,11 +13,13 @@ test('all five experience families retain main, H1, skip target, page identity a
   const title=await page.locator('h1').innerText();await expect(page.locator('.gaga-island-brand span')).toHaveText(title);
  }
 });
-test('knowledge hierarchy has exact current navigation and a real ordered alphabet pager',async({page})=>{
- await ready(page,'/knowledge/index');await notch(page);await page.locator('[data-gaga-notch-more]').click();await page.locator('[data-gaga-action="toggle-left-rail"]').last().click();await expect(page.locator('[data-gaga-left-rail]')).toHaveAttribute('data-gaga-state','expanded');
+test('knowledge hierarchy has exact current navigation and a real ordered alphabet pager',async({page},info)=>{
+ await ready(page,'/knowledge/index');await notch(page);await page.locator('[data-gaga-notch-more]').click();await page.locator('[data-gaga-action="toggle-left-rail"]').last().click();await expect(page.locator('[data-gaga-left-rail]')).toHaveAttribute('data-gaga-state',info.project.name==='touch'?'drawer':'expanded');
+ if(info.project.name==='touch'){await expect(page.locator('[data-gaga-left-rail]')).toHaveAttribute('role','dialog');await expect(page.locator('[data-gaga-left-rail]')).toHaveAttribute('aria-modal','true');}
  await expect(page.locator('.gaga-left-rail__context-groups > [data-gaga-nav-group] > details a[href="/knowledge/index"]')).toHaveAttribute('aria-current','page');
  await expect(page.locator('.gaga-left-rail__context-groups > [data-gaga-nav-group] > details a[href="/knowledge"]')).not.toHaveAttribute('aria-current','page');
  await page.keyboard.press('Escape');
+ if(info.project.name==='touch')await expect(page.locator('[data-gaga-left-rail]')).toBeHidden();
  const next=page.locator('.gaga-knowledge-letter-pager a[rel="next"]').first();const target=await next.getAttribute('href');await next.click();await expect(page).toHaveURL(new RegExp(target!.replace('#','\\#')+'$'));await expect(page.locator(target!)).toBeInViewport();
 });
 test('document outline uses live headings, deep links and native focus restoration',async({page},info)=>{
@@ -36,8 +40,13 @@ test('system documentation is explanatory, supports actual anchors, and exposes 
 test('Sections use explicit editorial membership while Topics retain subject taxonomy',async({page})=>{
  const snapshot=JSON.parse(readFileSync('content/emdash/published.json','utf8'));
  const docs=snapshot.documents.filter((d:any)=>d.pin.collection==='posts');const sections=new Set(docs.map((d:any)=>d.item.data.section??d.item.data.metadata?.section).filter(Boolean));expect(sections.size).toBeGreaterThan(0);
- await ready(page,'/sections');const detail=page.locator('.gaga-section-tile h2 a').first();const href=await detail.getAttribute('href');await detail.click();await expect(page.locator('[data-gaga-app-frame]')).toHaveAttribute('data-gaga-experience','section');await expect(page.locator('[data-gaga-document-workspace]')).toHaveCount(0);await expect(page.locator('[data-gaga-outline-stack]')).toHaveCount(0);
- const links=await page.locator('.gaga-section-front a[href^="/publications/"]').evaluateAll(es=>es.map(e=>e.getAttribute('href')));expect(links.length).toBeGreaterThan(0);expect(new Set(links).size).toBe(links.length);
+ await ready(page,'/sections');const sectionRoutes=await page.locator('.gaga-section-tile h2 a').evaluateAll(es=>es.map(e=>e.getAttribute('href')!));expect(sectionRoutes.length).toBe(sections.size);
+ for(const href of sectionRoutes){
+  await ready(page,href);await expect(page.locator('[data-gaga-app-frame]')).toHaveAttribute('data-gaga-experience','section');await expect(page.locator('[data-gaga-document-workspace]')).toHaveCount(0);await expect(page.locator('[data-gaga-outline-stack]')).toHaveCount(0);
+  const name=await page.locator('h1').innerText();
+  const expected=docs.filter((d:any)=>(d.item.data.section??d.item.data.metadata?.section)===name).map((d:any)=>'/publications/'+d.item.slug).sort();
+  const links=await page.locator('.gaga-section-front a[href^="/publications/"]').evaluateAll(es=>es.map(e=>e.getAttribute('href')!));expect(links.length).toBeGreaterThan(0);expect(new Set(links).size).toBe(links.length);expect([...links].sort()).toEqual(expected);
+ }
  await ready(page,'/topics/teknologi');await expect(page.locator('[data-gaga-entity-kind="topic"]')).toHaveCount(1);await expect(page.locator('[data-gaga-document-workspace]')).toHaveCount(0);
 });
 test('Search uses public Engine document classifications and tag publication links remain canonical',async({page})=>{

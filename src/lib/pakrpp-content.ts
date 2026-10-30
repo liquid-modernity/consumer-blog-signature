@@ -74,6 +74,10 @@ function cleanSlug(hrefOrId: string): string {
     .replace(/^publications\//i, '');
 }
 
+export function canonicalPublicationHref(article: Pick<ConsumerArticleRecord, 'href' | 'id'>): string {
+  return routes.publications.detail(cleanSlug(article.href || article.id));
+}
+
 function extractYearMonth(isoOrDate?: string): { year: string; month: string } {
   if (!isoOrDate) return { year: '2026', month: '10' };
   const match = String(isoOrDate).match(/^(\d{4})-(\d{2})/);
@@ -246,7 +250,7 @@ export async function toCanonicalPublications(): Promise<CanonicalPublication[]>
       summary: preview.snippet,
       readTime: preview.readTime,
       href: preview.href,
-      canonicalHref: routes.publications.detail(slug),
+      canonicalHref: canonicalPublicationHref(article),
       year,
       month
     };
