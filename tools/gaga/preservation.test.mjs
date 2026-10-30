@@ -152,3 +152,19 @@ test("extra document PageFrame bytes fail closed",()=>{
 test("documentation admission cannot permit unrelated route configuration changes",()=>{
  const r=check(root=>{documented(root);const p=join(root,'src/config/routes.ts');writeFileSync(p,readFileSync(p,'utf8')+'\n// unqualified\n');});assert.notEqual(r.status,0);assert.match(r.stderr,/Unintended application UI/);
 });
+
+function personalized(root) {
+ for (const file of inventory.files) writeFileSync(join(root,file.path),execFileSync('git',['show','8e643d4f49e8f02690d3258816fbf29ad46af8c2:'+file.path]));
+}
+test("the whole exact Personal State profile passes with qualified hosted provenance",()=>{
+ const r=check(personalized);assert.equal(r.status,0,r.stderr);assert.match(r.stdout,/whole qualified personal profile 8e643d4f49e8f02690d3258816fbf29ad46af8c2/);assert.match(r.stdout,/41146809645/);
+});
+test("Personal State and documentation profiles cannot form an unqualified hybrid",()=>{
+ const r=check(root=>{personalized(root);const p='src/styles/partials/_reader.scss';writeFileSync(join(root,p),execFileSync('git',['show','0aa28ec8cbcef46a5c117b26cc2cfbb7dbb3bf88:'+p]));});assert.notEqual(r.status,0);assert.match(r.stderr,/Unintended application UI/);
+});
+test("extra Personal State frame bytes remain rejected",()=>{
+ const r=check(root=>{personalized(root);const p=join(root,pageFrame);writeFileSync(p,readFileSync(p,'utf8')+'\n<!-- not qualified -->\n');});assert.notEqual(r.status,0);assert.match(r.stderr,/Unintended application UI/);
+});
+test("Personal State profile cannot admit unrelated routing changes",()=>{
+ const r=check(root=>{personalized(root);const p=join(root,'src/config/routes.ts');writeFileSync(p,readFileSync(p,'utf8')+'\n// not qualified\n');});assert.notEqual(r.status,0);assert.match(r.stderr,/Unintended application UI/);
+});
