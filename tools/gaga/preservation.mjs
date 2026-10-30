@@ -51,6 +51,29 @@ const approvedPolish = Object.freeze({
     "src/styles/partials/_outline-peek.scss": "42878bdeb3a5ec8548b52977cb1ae683ab27c97de3e75ebe30ab01b98635bff2"
   }
 });
+// Additive whole documentation profile; no per-file alternatives or historical inventory refresh.
+const approvedDocumentation = Object.freeze({
+  "sourceCommit": "f0a52db9b941a237455f386941bb5689cd80f63b",
+  "sourceTree": "13ff69494c719bd543025ae142182dad18a8e8e4",
+  "qualification": "https://github.com/liquid-modernity/consumer-blog-signature/actions/runs/41106193649",
+  "acceptanceReceiptSha256": "3de929b3c6f5c4309b4934085d7309395411454e034ad69929c9559f02ec4e84",
+  "files": {
+    "src/components/frame/ActionRuntime.astro": "444a5cf111876a2e8f80699d5d9e197934268e5f0333c3d21eaf3aba703f9c71",
+    "src/components/frame/AppFrameBase.astro": "989f98c4c72414400d428cd9b0c25f172fde4f88185219d702c174691d9d77c0",
+    "src/components/frame/ArticleOutlinePeek.astro": "8164f472ab8994df418f5cb2ee873f7c2074b7b565192ad534c5ce9ebfa720ba",
+    "src/components/frame/LeftRail.astro": "2d9d068f4b58e3f33a08f0ee08adb44a89ce3bf7985b5aaf78dd4805bd3087fe",
+    "src/components/frame/RightInfoRail.astro": "8b13376ca332d19632b409ad935420e5d36f333f210e04bb48134bb4e704c636",
+    "src/components/frame/StandaloneAppFrame.astro": "496c125172fc95085975dea545b5b51a85d059ccb6dc9fbea16fbb46261012b8",
+    "src/components/gaga/ArticleShell.astro": "5ba40e4820a75779485622ef256f854cdaa639f3ac7d00c5b734895ffb705317",
+    "src/components/gaga/MarkdownContent.astro": "320518f05b3409a376cf80c3c080f0bf1bff067309deaa2727329e01c5e32a30",
+    "src/components/gaga/PageFrame.astro": "607f813b1f7ddc1e9464bbd4004cd0e2bfa2f2d17b5d27ce1f58f2167cebfe2e",
+    "src/config/nav.ts": "cae2b243b44e71cc94cd1a1ec67bad232f605ea9fad598597cfacae408e10930",
+    "src/styles/partials/_action-island.scss": "be77c541bed174d2c6267892633318c57eb7540f59b46ad471af30d8cd6e8d0b",
+    "src/styles/partials/_content.scss": "361e793ecb93cd1b4fe1fca9d601a31fe6a3fce8fc20f9413fa3633bfc280787",
+    "src/styles/partials/_frame.scss": "16c72655342178657aae90b3d2902a07df163a847f5e37582d8d591bb346e39c",
+    "src/styles/partials/_outline-peek.scss": "42878bdeb3a5ec8548b52977cb1ae683ab27c97de3e75ebe30ab01b98635bff2"
+  }
+});
 const historical = readFileSync("docs/UI-PRESERVATION.json");
 assert.equal(
   createHash("sha256").update(historical).digest("hex"),
@@ -67,14 +90,16 @@ for (const [path, digest] of Object.entries(approvedUx.files)) {
   assert.notEqual(digest, historicalHashes.get(path));
 }
 for (const [path, digest] of Object.entries(approvedPolish.files)) assert.ok(historicalHashes.has(path) && /^[a-f0-9]{64}$/.test(digest));
+for (const [path, digest] of Object.entries(approvedDocumentation.files)) assert.ok(historicalHashes.has(path) && /^[a-f0-9]{64}$/.test(digest));
 const actual = new Map(inventory.files.map(f => [f.path, createHash("sha256").update(
   readFileSync(f.path, "utf8").replaceAll("@gaga/engine-web", "@gaga/engine-runtime")
     .replaceAll("@gaga/engine/", "@gaga/engine-capabilities/"),
 ).digest("hex")]));
+const documentationProfile = Object.entries(approvedDocumentation.files).every(([path, digest]) => actual.get(path) === digest);
 const polishProfile = Object.entries(approvedPolish.files).every(([path, digest]) => actual.get(path) === digest);
 const historicalProfile = Object.keys(approvedUx.files).every(path => actual.get(path) === historicalHashes.get(path));
 for (const f of inventory.files) {
-  const expected = polishProfile ? approvedPolish.files[f.path] ?? historicalHashes.get(f.path) : historicalProfile ? historicalHashes.get(f.path) : approvedUx.files[f.path] ?? historicalHashes.get(f.path);
+  const expected = documentationProfile ? approvedDocumentation.files[f.path] ?? historicalHashes.get(f.path) : polishProfile ? approvedPolish.files[f.path] ?? historicalHashes.get(f.path) : historicalProfile ? historicalHashes.get(f.path) : approvedUx.files[f.path] ?? historicalHashes.get(f.path);
   assert.equal(actual.get(f.path), expected, "Unintended application UI/style/routing change: " + f.path);
 }
 console.log(
@@ -83,5 +108,5 @@ console.log(
   "entries; one exact qualified main-landmark correction from",
   approvedMain.sourceCommit,
   approvedMain.qualification,
-  polishProfile ? "whole qualified polish profile " + approvedPolish.sourceCommit + " " + approvedPolish.qualification : historicalProfile ? "historical profile" : "whole accepted UX profile " + approvedUx.sourceCommit + " " + approvedUx.qualification,
+  documentationProfile ? "whole qualified documentation profile " + approvedDocumentation.sourceCommit + " " + approvedDocumentation.qualification : polishProfile ? "whole qualified polish profile " + approvedPolish.sourceCommit + " " + approvedPolish.qualification : historicalProfile ? "historical profile" : "whole accepted UX profile " + approvedUx.sourceCommit + " " + approvedUx.qualification,
 );

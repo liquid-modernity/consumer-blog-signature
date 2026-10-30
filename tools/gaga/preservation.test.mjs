@@ -136,3 +136,19 @@ test("V2 cannot admit unrelated route configuration changes", () => {
  const result=check(root=>{polished(root);const path=join(root,'src/config/routes.ts');writeFileSync(path,readFileSync(path,'utf8')+'\n// unqualified\n');});
  assert.notEqual(result.status,0);assert.match(result.stderr,/Unintended application UI\/style\/routing change/);
 });
+
+function documented(root) {
+ for (const file of inventory.files) writeFileSync(join(root,file.path),execFileSync('git',['show','f0a52db9b941a237455f386941bb5689cd80f63b:'+file.path]));
+}
+test("the whole qualified documentation profile passes with exact hosted provenance",()=>{
+ const r=check(documented);assert.equal(r.status,0,r.stderr);assert.match(r.stdout,/whole qualified documentation profile f0a52db9b941a237455f386941bb5689cd80f63b/);assert.match(r.stdout,/41106193649/);
+});
+test("documentation and earlier profiles cannot form an unqualified hybrid",()=>{
+ const r=check(root=>{documented(root);const f='src/components/frame/ActionRuntime.astro';writeFileSync(join(root,f),execFileSync('git',['show','c462ab8074f2d17187f1fde5791457bde2ec15f3:'+f]));});assert.notEqual(r.status,0);assert.match(r.stderr,/Unintended application UI/);
+});
+test("extra document PageFrame bytes fail closed",()=>{
+ const r=check(root=>{documented(root);const p=join(root,pageFrame);writeFileSync(p,readFileSync(p,'utf8')+'\n<!-- unqualified -->\n');});assert.notEqual(r.status,0);assert.match(r.stderr,/Unintended application UI/);
+});
+test("documentation admission cannot permit unrelated route configuration changes",()=>{
+ const r=check(root=>{documented(root);const p=join(root,'src/config/routes.ts');writeFileSync(p,readFileSync(p,'utf8')+'\n// unqualified\n');});assert.notEqual(r.status,0);assert.match(r.stderr,/Unintended application UI/);
+});
