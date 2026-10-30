@@ -349,8 +349,7 @@ const socialSection = sectionById.get('social');
 </div>
 
 <script>
-  import { readArray } from '@gaga/engine-runtime/runtime/storage';
-  import { isSavedItem, type SavedItem } from '@gaga/engine-runtime/reader';
+  import { personalState } from '../../lib/personal-state';
   import { onRuntimeEvent } from '@gaga/engine-runtime/runtime/events';
   import { storageKeys } from '../../config/systems';
 
@@ -358,7 +357,7 @@ const socialSection = sectionById.get('social');
     const listEl = document.querySelector<HTMLUListElement>('[data-pakrpp-saved-root-list]');
     if (!listEl) return;
 
-    const saved = readArray<SavedItem>(storageKeys.saved, isSavedItem).slice(0, 5);
+    const saved = personalState.saved().slice(0, 5);
     if (saved.length === 0) {
       const empty = document.createElement('li');
       empty.className = 'pakrpp-tree-list__empty';

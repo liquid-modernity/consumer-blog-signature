@@ -22,12 +22,12 @@ function textRangeForHighlight(element:HTMLElement,highlight:HighlightEntity):Ra
  if(!start||!end)return null;const range=document.createRange();range.setStart(start,startOffset);range.setEnd(end,endOffset);return range;
 }
 function wireHighlightClick(mark:HTMLElement,highlight:HighlightEntity){mark.addEventListener('click',e=>{if((e.target as Element)?.closest('a'))return;e.preventDefault();e.stopPropagation();showHighlightPopup(mark,highlight);});mark.addEventListener('keydown',e=>{if(e.target===mark&&(e.key==='Enter'||e.key===' ')){e.preventDefault();showHighlightPopup(mark,highlight);}});}
-function applyHighlightToElement(block:HTMLElement,highlight:HighlightEntity){const range=textRangeForHighlight(block,highlight);if(!range||range.collapsed)return false;const mark=document.createElement('mark');mark.className='gaga-highlight-mark';mark.dataset.gagaHighlightId=highlight.id;mark.id='hl-'+highlight.id;mark.tabIndex=0;mark.setAttribute('aria-label',highlight.note?'Sorotan dengan catatan pribadi':'Sorotan pribadi');if(highlight.note)mark.dataset.gagaHasNote='true';try{mark.appendChild(range.extractContents());range.insertNode(mark);wireHighlightClick(mark,highlight);return true;}catch{return false;}}
-function restoreArticleHighlights(body:HTMLElement){const c=currentPersonalContent();if(!c)return;for(const h of readAllHighlights().filter(h=>h.contentIdentity===c.content.contentIdentity||h.articleId===c.content.href)){
+function applyHighlightToElement(block:HTMLElement,highlight:HighlightEntity){const range=textRangeForHighlight(block,highlight);if(!range||range.collapsed||Array.from(block.querySelectorAll('mark[data-gaga-highlight-id]')).some(mark=>range.intersectsNode(mark)))return false;const mark=document.createElement('mark');mark.className='gaga-highlight-mark';mark.dataset.gagaHighlightId=highlight.id;mark.id='hl-'+highlight.id;mark.tabIndex=0;mark.setAttribute('aria-label',highlight.note?'Sorotan dengan catatan pribadi':'Sorotan pribadi');if(highlight.note)mark.dataset.gagaHasNote='true';try{mark.appendChild(range.extractContents());range.insertNode(mark);wireHighlightClick(mark,highlight);return true;}catch{return false;}}
+function restoreArticleHighlights(body:HTMLElement){const c=currentPersonalContent();if(!c)return;for(const h of readAllHighlights().filter(h=>h.contentIdentity===c.content.contentIdentity)){
  if(body.querySelector('[data-gaga-highlight-id="'+CSS.escape(h.id)+'"]'))continue;
  const block=personalBlock(body,h.location.blockId);const restored=!!block&&applyHighlightToElement(block,h);const resolution=restored?'resolved':'unresolved';if(h.resolution!==resolution)saveHighlight({...h,resolution,updatedAt:personalState.now()});
  }
- const id=location.hash.startsWith('#hl-')?decodeURIComponent(location.hash.slice(4)):'';if(id)body.querySelector<HTMLElement>('[data-gaga-highlight-id="'+CSS.escape(id)+'"]')?.scrollIntoView({block:'center'});
+ let id='';try{id=location.hash.startsWith('#hl-')?decodeURIComponent(location.hash.slice(4)):'';}catch{}if(id)body.querySelector<HTMLElement>('[data-gaga-highlight-id="'+CSS.escape(id)+'"]')?.scrollIntoView({block:'center'});
 }
 function closeHighlightPopup(restore=false){activeHighlightPopupEl?.remove();activeHighlightPopupEl=null;if(restore)focusReading(popupAnchor);popupAnchor=null;}
 function showHighlightPopup(mark:HTMLElement,highlight:HighlightEntity){closeHighlightPopup();closeSelectionMenu();popupAnchor=mark;const popup=document.createElement('div');popup.className='gaga-highlight-popup';popup.setAttribute('role','dialog');popup.setAttribute('aria-modal','false');popup.setAttribute('aria-label','Sorotan pribadi');popup.innerHTML=`<div class="gaga-highlight-popup__inner"><div class="gaga-highlight-popup__actions"><button type="button" data-action="listen">Dengarkan</button><button type="button" data-action="copy">Salin</button><button type="button" data-action="note">${highlight.note?'Ubah catatan':'Catatan'}</button><button type="button" data-action="delete">Hapus sorotan</button><button type="button" data-action="close" aria-label="Tutup sorotan">×</button></div><div class="gaga-highlight-popup__note-form" hidden><textarea rows="3" maxlength="4000" aria-label="Catatan pribadi"></textarea><button type="button" data-action="save-note">Simpan catatan</button></div></div>`;
@@ -44,15 +44,15 @@ function captureSelection(body:HTMLElement,range:Range,selection:Selection):Sele
  return {range:range.cloneRange(),text:target.exactText,location:{blockId:target.blockId,startOffset:target.startOffset,endOffset:target.endOffset,prefix:target.prefix??'',suffix:target.suffix??'',blockHash:block.dataset.gagaBlockHash},block,blockText:block.textContent??'',content:current.content};
 }
 function captureIsCurrent(c:SelectionCapture){return currentPersonalContent()?.content.contentIdentity===c.content.contentIdentity&&c.block.isConnected&&c.block.textContent===c.blockText&&c.range.toString()===c.text;}
-function persistCapture(c:SelectionCapture,note?:string,quoted=false){if(!captureIsCurrent(c)){requestToast({message:'Seleksi berubah. Pilih kembali teksnya.',tone:'warn'});return false;}const old=readAllHighlights().find(h=>h.contentIdentity===c.content.contentIdentity&&h.location.blockId===c.location.blockId&&h.location.startOffset===c.location.startOffset&&h.location.endOffset===c.location.endOffset&&h.text===c.text);const now=personalState.now();const entity:HighlightEntity={...(old??{}),id:old?.id??crypto.randomUUID(),namespace:c.content.namespace,schemaVersion:1,contentIdentity:c.content.contentIdentity,contentType:c.content.contentType,articleId:c.content.href,canonicalUrl:c.content.canonicalUrl,articleTitle:c.content.title,author:c.content.author,language:c.content.language,text:c.text,location:c.location,createdAt:old?.createdAt??now,updatedAt:now,note:note??old?.note,quoted:quoted||old?.quoted,resolution:'resolved'};
+function persistCapture(c:SelectionCapture,note?:string,quoted=false){if(!captureIsCurrent(c)){requestToast({message:'Seleksi berubah. Pilih kembali teksnya.',tone:'warn'});return false;}const old=readAllHighlights().find(h=>h.contentIdentity===c.content.contentIdentity&&h.location.blockId===c.location.blockId&&h.location.startOffset===c.location.startOffset&&h.location.endOffset===c.location.endOffset&&h.text===c.text);if(Array.from(c.block.querySelectorAll<HTMLElement>('mark[data-gaga-highlight-id]')).some(mark=>mark.dataset.gagaHighlightId!==old?.id&&c.range.intersectsNode(mark))){requestToast({message:'Seleksi bertumpang tindih dengan sorotan. Buka sorotan yang ada untuk mengubahnya.',tone:'info'});return false;}const now=personalState.now();const entity:HighlightEntity={...(old??{}),id:old?.id??crypto.randomUUID(),namespace:c.content.namespace,schemaVersion:1,contentIdentity:c.content.contentIdentity,contentType:c.content.contentType,articleId:c.content.href,canonicalUrl:c.content.canonicalUrl,articleTitle:c.content.title,author:c.content.author,language:c.content.language,text:c.text,location:c.location,createdAt:old?.createdAt??now,updatedAt:now,note:note??old?.note,quoted:quoted||old?.quoted,resolution:'resolved'};
  if(!saveHighlight(entity)){requestToast({message:'Fragmen belum tersimpan. Penyimpanan tidak tersedia.',tone:'warn'});return false;}
  const body=currentPersonalContent()?.body;if(body&&!body.querySelector('[data-gaga-highlight-id="'+CSS.escape(entity.id)+'"]'))applyHighlightToElement(c.block,entity);window.getSelection()?.removeAllRanges();requestToast({message:quoted?'Kutipan tersimpan di perangkat ini.':note?'Catatan tersimpan di perangkat ini.':'Sorotan tersimpan di perangkat ini.',tone:'ok'});return true;
 }
 let selectionEpoch=0, dismissedSelection='', selectionReturn:HTMLElement|null=null;
 function closeSelectionMenu(restore=false){selectionEpoch++;selectionMenuEl?.remove();selectionMenuEl=null;if(restore)focusReading(selectionReturn);selectionReturn=null;}
 function initSelectionIntelligence(body:HTMLElement){let timer:number|undefined,entered=false;
- const handle=()=>{window.clearTimeout(timer);const epoch=++selectionEpoch;timer=window.setTimeout(()=>{void(async()=>{
-  if(document.activeElement?.matches('.gaga-selection-menu textarea'))return;
+ const handle=()=>{if(window.getSelection()?.isCollapsed&&!document.activeElement?.matches('.gaga-selection-menu textarea'))dismissedSelection='';window.clearTimeout(timer);const epoch=++selectionEpoch;timer=window.setTimeout(()=>{void(async()=>{
+  if(selectionMenuEl?.contains(document.activeElement)&&(!window.getSelection()?.isCollapsed||document.activeElement?.matches('textarea')))return;
   const selection=window.getSelection();if(!selection||selection.isCollapsed||selection.rangeCount!==1||selection.toString().trim().length<2){closeSelectionMenu();return;}
   const range=selection.getRangeAt(0);const parent=range.startContainer.parentElement;if(parent?.closest('nav,button,input,textarea,[contenteditable],.gaga-selection-menu,.gaga-highlight-popup'))return;
   await preparePersonalBlocks(body);if(epoch!==selectionEpoch)return;const captured=captureSelection(body,range,selection);if(!captured){closeSelectionMenu();return;}
@@ -156,7 +156,7 @@ function initSmartSpeaker(): SpeakerController {
         this.state = 'completed';
         renderSpeechDock(this);
         setTimeout(() => {
-          if (this.state === 'completed') this.stop();
+          if (this.state === 'completed' && currentUtterance === utt) this.stop();
         }, 2400);
       };
       utt.onerror = () => {
@@ -165,7 +165,7 @@ function initSmartSpeaker(): SpeakerController {
         renderSpeechDock(this);
         requestToast({ message: 'Narasi suara tidak dapat diputar', tone: 'warn' });
         setTimeout(() => {
-          if (this.state === 'error') this.stop();
+          if (this.state === 'error' && currentUtterance === utt) this.stop();
         }, 1800);
       };
 
@@ -204,8 +204,9 @@ function initSmartSpeaker(): SpeakerController {
             this.progress = 1;
             this.state = 'completed';
             renderSpeechDock(this);
+            const finishedUtterance=currentUtterance;
             setTimeout(() => {
-              if (this.state === 'completed') this.stop();
+              if (this.state === 'completed' && currentUtterance===finishedUtterance) this.stop();
             }, 2400);
           }
           return;
@@ -445,7 +446,7 @@ export async function initReaderEnhancements() {
 
   if (article) {
     const personal=currentPersonalContent();
-    if(personal){await preparePersonalBlocks(personal.body);restoreArticleHighlights(personal.body);initSelectionIntelligence(personal.body);}
+    if(personal){await preparePersonalBlocks(personal.body);restoreArticleHighlights(personal.body);initSelectionIntelligence(personal.body);window.addEventListener('storage',event=>{if(event.key!==personalState.keys.annotations&&event.key!==null)return;const records=readAllHighlights();for(const mark of personal.body.querySelectorAll<HTMLElement>('mark[data-gaga-highlight-id]'))if(!records.some(h=>h.id===mark.dataset.gagaHighlightId)){mark.replaceWith(...mark.childNodes);}closeSelectionMenu();closeHighlightPopup();void preparePersonalBlocks(personal.body).then(()=>restoreArticleHighlights(personal.body));});}
 
     // Wire existing article speak button
     const speakButton = article.querySelector<HTMLButtonElement>('[data-gaga-speak-article]');

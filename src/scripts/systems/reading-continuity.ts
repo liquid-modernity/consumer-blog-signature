@@ -554,7 +554,8 @@ function wireLibraryTabs() {
   // Check initial hash
   const initialHash = location.hash.replace('#', '');
   if (['saved', 'highlights', 'notes', 'quotes', 'history'].includes(initialHash)) {
-    switchLibraryTab(initialHash);
+    const tab=nav.querySelector<HTMLElement>('[data-gaga-library-tab="'+initialHash+'"]');
+    if(tab&&!tab.hidden)switchLibraryTab(initialHash);
   }
 }
 
@@ -611,7 +612,7 @@ function wireProgress() {
  const bind=()=>resolveReadingScrollContext()?.scrollContext.addChangeListener(update);
  let unbind=bind();
  onRuntimeEvent('layoutChanged',()=>{unbind?.();unbind=bind();});
- document.addEventListener('wheel',()=>{interacted=true;},{passive:true});document.addEventListener('touchmove',()=>{interacted=true;},{passive:true});document.addEventListener('keydown',e=>{if(['PageDown','PageUp','ArrowDown','ArrowUp','End','Home',' '].includes(e.key))interacted=true;});
+ document.addEventListener('wheel',()=>{interacted=true;},{passive:true});document.addEventListener('touchmove',()=>{interacted=true;},{passive:true});document.addEventListener('keydown',e=>{if((e.target as Element)?.closest('input,textarea,select,button,[contenteditable]'))return;if(['PageDown','PageUp','ArrowDown','ArrowUp','End','Home',' '].includes(e.key))interacted=true;});
  onRuntimeEvent('tocActiveChanged',detail=>{latestHeading={lastHeadingId:detail.id,lastHeadingText:detail.label,progress:Math.max(0,Math.min(100,detail.progress))};update();});
  window.addEventListener('pagehide',()=>{if(interacted&&latestHeading)upsertCurrent(latestHeading);unbind?.();},{once:true});
 }

@@ -1,6 +1,8 @@
+import declaration from '../../gaga.app.json' with { type: 'json' };
 // One application contract over Engine domain stores; admitted keys remain stable.
 export const personalStateNamespace = 'consumer-blog-signature';
 export const personalStateVersion = 1;
+export const personalCanonicalOrigin = new URL(declaration.host.site).origin;
 export const personalStorageKeys = Object.freeze({
  theme:'gaga:theme:v2', reader:'gaga:reader:v2', sfx:'gaga:sfx:v1',
  continuity:'gaga:continuity:v1', saved:'gaga:saved:v1',

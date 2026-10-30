@@ -42,9 +42,10 @@ export function initInformationSurface() {
           if((event as PointerEvent).pointerType!=='mouse')return;
           if(related instanceof Node&&target.contains(related))return;
           window.clearTimeout(intentTimer);const p=event as PointerEvent;
-          intentTimer=window.setTimeout(()=>{pointer={x:p.clientX,y:p.clientY};invoke(listener,event);},120);return;
+          intentTimer=window.setTimeout(()=>{pointer={x:p.clientX,y:p.clientY};for(const field of card.querySelectorAll('[data-gaga-info-field]'))field.textContent='';invoke(listener,event);},120);return;
         }
       }
+      if(type==='focusin')for(const field of card.querySelectorAll('[data-gaga-info-field]'))field.textContent='';
       invoke(listener,event);
     };
     listeners.set(listener,wrapped);document.addEventListener(type,wrapped,options);
