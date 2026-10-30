@@ -15,6 +15,7 @@ import { isContinuityEligibleContent, resolveFreshnessAuthority } from '../../co
 import { resolveCoverageAuthority } from '../../config/coverage';
 import { selectCoveragePromotion } from '../../lib/coverage';
 import CoverageStrip from '../coverage/CoverageStrip.astro';
+import { documentExperience } from '../../config/document-experience';
 import { projectContextRail } from '../../config/context-rails';
 import { getEditorialSections } from '../../lib/editorial';
 
@@ -65,6 +66,7 @@ const screenInfo = getScreenInfo({
 });
 const rightRail = createRightRailInput(screenInfo);
 const currentPath = normalizeCurrentPath(Astro.url.pathname);
+const documentProfile = documentExperience(currentPath);
 const leftRailProjection = projectContextRail({
   currentPath,
   workspace,
@@ -90,7 +92,7 @@ const resolvedOutlineItems = currentPath === '/'
 const outlineRail = { ...rightRail, outlineItems: resolvedOutlineItems };
 const articleOutline = resolvedOutlineItems.length > 0;
 const coveragePromotion = selectCoveragePromotion(articles);
-const showCoveragePromotion = coveragePromotion
+const showCoveragePromotion = !documentProfile && coveragePromotion
   && normalizeCurrentPath(coveragePromotion.article.href) !== currentPath;
 ---
 <AppFrameBase
@@ -138,6 +140,6 @@ const showCoveragePromotion = coveragePromotion
     />
   </Fragment>
   <Fragment slot="after-main">
-    {articleOutline ? <ArticleOutlinePeek rail={outlineRail} /> : null}
+    {articleOutline ? <ArticleOutlinePeek rail={outlineRail} documentOutline={documentProfile?.outline ?? false} /> : null}
   </Fragment>
 </AppFrameBase>

@@ -1,4 +1,5 @@
 import { actionById } from './actions';
+import { documentExperience, documentNavigation } from './document-experience';
 import type { GagaWorkspaceDefinition } from './workspaces';
 import type { NavGroup, NavItem } from './nav';
 import { navGroups, primaryNav } from './nav';
@@ -162,7 +163,10 @@ export function projectContextRail(input: ContextRailProjectionInput): ContextRa
   const groups: NavGroup[] = [];
   const add = (candidate?: NavGroup) => { if (candidate) groups.push(candidate); };
 
-  if (workspace.id === 'article') {
+  const document = documentExperience(currentPath);
+  if (document && document.navigation === 'rail') {
+    add(group('document-context', document.label, 'article', documentNavigation(document).map((entry, index) => ({ ...item('document-' + index, entry.title, entry.href, 'article'), exact: true }))));
+  } else if (workspace.id === 'article') {
     add(group('article-path', 'Article context', 'article', [
       ...breadcrumbItems(info),
       ...valuesFromFacts(info, ['topic'], 'grid_view'),
@@ -215,7 +219,7 @@ export function projectContextRail(input: ContextRailProjectionInput): ContextRa
   const global = globalNavigationProjection();
 
   return {
-    title: workspace.label,
+    title: document?.label ?? workspace.label,
     subtitle: workspace.mode === 'reading'
       ? 'Reading context'
       : workspace.mode === 'discovery'

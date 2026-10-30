@@ -55,6 +55,7 @@ const tabs = [
   <script is:inline type="application/json" data-gaga-search-command-providers set:html={JSON.stringify(commandProviders)}></script>
 </section>
 <script>
+  import type { GagaDiscoveryRecord } from '../../lib/discovery';
   import {defineQuery,executeSearchReference,type SearchableArtifactDescriptor} from '@gaga/engine-capabilities/search';
   import { runSiteCommand } from '../../scripts/systems/site-commands';
   import type { GagaActionCommand } from '../../config/actions';
@@ -91,6 +92,7 @@ const tabs = [
   const commandsScript = root?.querySelector<HTMLScriptElement>('[data-gaga-search-command-providers]');
   const emptyMessage = 'Ketik minimal dua karakter untuk mencari di sistem publikasi ini.';
   let index: SearchItem[] = [];
+  let discovery: GagaDiscoveryRecord[] = [];
   let artifacts: readonly SearchableArtifactDescriptor[] = [];
   let artifactLinks: Record<string,string> = {};
   let loading: Promise<void> | null = null;
@@ -100,8 +102,9 @@ const tabs = [
   function loadIndex() {
     loading ??= fetch('/search-index.json')
       .then((response) => response.json())
-      .then((data: { items?: SearchItem[]; artifacts?: SearchableArtifactDescriptor[]; links?:Record<string,string> }) => {
+      .then((data: { items?: SearchItem[]; records?: GagaDiscoveryRecord[]; artifacts?: SearchableArtifactDescriptor[]; links?:Record<string,string> }) => {
         index = data.items ?? [];
+        discovery = data.records ?? [];
         artifacts = data.artifacts ?? [];
         artifactLinks = data.links ?? {};
       })
@@ -234,6 +237,20 @@ const tabs = [
     for (const item of matches) {
       list.append(createLinkCard(item.href, item.title, item.description ?? '', 'Publikasi'));
     }
+    node.append(list);
+    return node;
+  }
+
+  function renderDocumentResults(query: string) {
+    const kinds: Partial<Record<GagaDiscoveryRecord['kind'], string>> = { knowledge: 'Pengetahuan', information: 'Informasi', legal: 'Legal', system: 'Sistem', section: 'Ruang editorial' };
+    const result = executeSearchReference({ id:'document-ui-search', query:defineQuery({id:'document-query',text:query,filters:[],facets:[],scope:[],constraints:[],diagnostics:[]}),artifacts,limitations:[],diagnostics:[] });
+    const hrefs = new Set(result.output.matchedArtifactIds.map(id => artifactLinks[id]));
+    const matches = discovery.filter(record => kinds[record.kind] && hrefs.has(record.href));
+    if (!matches.length) return null;
+    const node = section('Dokumen & informasi', 'DOCUMENT_PROVIDER', '');
+    node.dataset.gagaDocumentSearch = '';
+    const list = resultList();
+    for (const record of matches) list.append(createLinkCard(record.href, record.title, record.description ?? '', kinds[record.kind]!));
     node.append(list);
     return node;
   }
@@ -389,6 +406,7 @@ const tabs = [
     const tags = matchingTags(matches, q);
     const sections = [
       type === 'all' || type === 'articles' ? renderSearchSection(matches) : null,
+      type === 'all' ? renderDocumentResults(q) : null,
       type === 'all' || type === 'topics' ? renderTopicSection(topics) : null,
       type === 'all' || type === 'tags' ? renderTagSection(tags) : null,
       type === 'all' ? renderSavedSection(q) : null,

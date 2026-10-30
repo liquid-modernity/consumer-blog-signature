@@ -2,7 +2,7 @@
 import Icon from '../ui/Icon.astro';
 import NavItem from './NavItem.astro';
 import type { I18nMessageKey } from '../../config/i18n';
-interface Item { id?: string; label: string; labelEn?: string; labelKey?: I18nMessageKey; href: string; icon: string; external?: boolean; }
+interface Item { id?: string; label: string; labelEn?: string; labelKey?: I18nMessageKey; href: string; icon: string; external?: boolean; exact?: boolean; }
 interface Props {
   id: string;
   label: string;

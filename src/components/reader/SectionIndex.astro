@@ -11,15 +11,13 @@ const surfaceLocale = resolveContentDateLocale(
 );
 ---
 
-<section class="gaga-section-index" aria-labelledby="gaga-section-index-title">
+<section class="gaga-section-index" aria-label="Ruang editorial tersedia">
   <header class="gaga-section-index__head">
-    <div>
-      <p class="gaga-section-index__eyebrow">Publication Structure</p>
-      <h2 id="gaga-section-index-title">Sections</h2>
-    </div>
-    <p>{sections.length} sections</p>
+
+    <p>{sections.length} ruang editorial</p>
   </header>
 
+  {sections.length === 0 && <p>Belum ada ruang editorial yang ditetapkan.</p>}
   <div class="gaga-section-index__grid">
     {sections.map((section) => {
       const lead = section.lead
@@ -32,7 +30,7 @@ const surfaceLocale = resolveContentDateLocale(
             <span>{section.count} stories</span>
             {section.lead?.role && <span>{section.lead.role}</span>}
           </div>
-          <h3><a href={section.href}>{section.name}</a></h3>
+          <h2><a href={section.href}>{section.name}</a></h2>
           {lead && (
             <p>
               <span>Lead:</span>{' '}

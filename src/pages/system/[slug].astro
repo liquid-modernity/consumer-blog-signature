@@ -1,14 +1,12 @@
 ---
 import GagaSiteLayout from '../../components/gaga/GagaSiteLayout.astro';
 import {
-  featureFlags,
   getEnabledPublicationTypes,
   getEnabledRootSections
 } from '../../config/pakrpp-architecture';
 import {
   getArchiveYears,
   getCanonicalTopicsWithCounts,
-  localContentAdapter,
   toCanonicalPublications
 } from '../../lib/pakrpp-content';
 import { routes } from '../../config/routes';
@@ -44,9 +42,9 @@ const metaMap: Record<string, { title: string; subtitle: string; summary: string
     summary: '/system/rss adalah antarmuka manusia untuk informasi sindikasi, sedangkan umpan XML aktual berada di /rss.xml.'
   },
   status: {
-    title: 'Status Sistem & Kontrak Arsitektur',
-    subtitle: 'Verifikasi invarian inti, feature flags, registry softcoded, dan adapter CMS.',
-    summary: 'Laporan kesehatan kontrak arsitektur PAKRPP Knowledge Publication System.'
+    title: 'Panduan Sistem Publik',
+    subtitle: 'Publikasi yang diadmit dan antarmuka publik pada build ini.',
+    summary: 'Ringkasan build publik, bukan pemantauan operasional langsung.'
   }
 };
 
@@ -67,19 +65,11 @@ const entryData = {
 ---
 
 <GagaSiteLayout entryData={entryData}>
-  <nav class="pakrpp-sys-nav" aria-label="Navigasi Sistem">
-    <a href={routes.system.sitemap}>Peta Situs</a>
-    <span aria-hidden="true">·</span>
-    <a href={routes.system.rss}>RSS</a>
-    <span aria-hidden="true">·</span>
-    <a href={routes.system.status}>Status</a>
-    <span aria-hidden="true">·</span>
-    <a href={routes.machine.sitemap}>XML Sitemap</a>
-  </nav>
+
 
   {slug === 'sitemap' && (
     <section class="pakrpp-sys-section" aria-label="Hierarki Peta Situs Manusia">
-      <h2>1. Bagian Beranda</h2>
+      <h2 id="bagian-beranda">Bagian Beranda</h2>
       <ul>
         {rootSections.map((sec) => (
           <li>
@@ -88,7 +78,7 @@ const entryData = {
         ))}
       </ul>
 
-      <h2>2. Publikasi ({publications.length})</h2>
+      <h2 id="publikasi">Publikasi ({publications.length})</h2>
       <ul>
         <li><a href={routes.publications.index}><strong>Indeks Objek Publikasi</strong></a></li>
         <li><a href={routes.discovery.latest}><strong>Semua Publikasi Terbaru</strong></a></li>
@@ -99,7 +89,7 @@ const entryData = {
         ))}
       </ul>
 
-      <h2>3. Topik ({topics.length}) &amp; Arsip ({archiveYears.length})</h2>
+      <h2 id="topik-dan-arsip">Topik ({topics.length}) &amp; Arsip ({archiveYears.length})</h2>
       <ul>
         {topics.map((t) => (
           <li>
@@ -113,7 +103,7 @@ const entryData = {
         ))}
       </ul>
 
-      <h2>4. Pengetahuan, Tentang, Sistem &amp; Legal</h2>
+      <h2 id="direktori-informasi">Pengetahuan, Tentang, Sistem &amp; Legal</h2>
       <ul>
         <li><a href={routes.knowledge.graph}>Graf Pengetahuan</a></li>
         <li><a href={routes.knowledge.index}>Indeks Pengetahuan</a></li>
@@ -133,19 +123,18 @@ const entryData = {
       <p>
         <a href={routes.machine.rss}><strong>Buka Feed XML Aktual →</strong></a>
       </p>
-      <h2>Cara Berlangganan</h2>
+      <h2 id="cara-berlangganan">Cara Berlangganan</h2>
       <ol>
         <li>Salin tautan umpan RSS di atas ke pembaca RSS pilihan Anda (NetNewsWire, Feedbin, Inoreader, atau Miniflux).</li>
-        <li>Setiap publikasi baru secara otomatis tersedia di dalam umpan sindikasi terbuka.</li>
+        <li>Publikasi tersedia dalam umpan setelah masuk ke build publik yang diadmit.</li>
       </ol>
     </section>
   )}
 
   {slug === 'status' && (
     <section class="pakrpp-sys-section" aria-label="Status Kontrak Sistem">
-      <h2>Ringkasan Sistem</h2>
+      <h2 id="ringkasan-build">Ringkasan Build Publik</h2>
       <ul>
-        <li><strong>Penyedia Konten</strong>: {localContentAdapter.providerName}</li>
         <li><strong>Publikasi Aktif</strong>: {publications.length} publikasi</li>
         <li><strong>Tipe Publikasi</strong>: {pubTypes.map((t) => t.label).join(', ')}</li>
         <li><strong>Topik Kanonik</strong>: {topics.map((t) => t.label).join(', ')}</li>
@@ -155,15 +144,7 @@ const entryData = {
 </GagaSiteLayout>
 
 <style>
-  .pakrpp-sys-nav {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    font-size: 0.82rem;
-    padding-bottom: 0.85rem;
-    margin-bottom: 1.25rem;
-    border-bottom: 1px solid var(--gaga-border-subtle, rgba(128, 128, 128, 0.22));
-  }
+
   .pakrpp-sys-section {
     display: flex;
     flex-direction: column;

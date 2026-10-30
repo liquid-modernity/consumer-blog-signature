@@ -1,4 +1,6 @@
 ---
+import DocumentWorkspace from '../reader/DocumentWorkspace.astro';
+import { documentExperience } from '../../config/document-experience';
 import type { ScreenInfo } from '../../lib/screen-info';
 import { getArticles, getAuthors, getTagGroups, getTopicGroups } from '../../lib/content';
 import { getEditorialSections } from '../../lib/editorial';
@@ -80,7 +82,7 @@ const articleOutline = resolvedOutlineItems.length > 0;
 
   <div class="main-pane">
     <div class="content-panel">
-      <slot />
+      {documentExperience(currentPath) ? <DocumentWorkspace title={pageTitle}><slot /></DocumentWorkspace> : <slot />}
       {currentPath !== '/' ? <PageMetadataTable rail={rightRail} /> : null}
     </div>
   </div>

@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import GagaSiteLayout from '../components/gaga/GagaSiteLayout.astro';
+import { normalizeGagaRouteContext } from '../gaga/content/runtime-route';
 
 export const prerender = true;
 
@@ -39,10 +40,10 @@ if (!entry) {
   return Astro.redirect('/404');
 }
 
-const { Content } = await render(entry);
+const { Content, headings } = await render(entry);
 const entryData = entry.data as Record<string, unknown>;
 ---
 
-<GagaSiteLayout entryData={entryData} routeContext={Astro.locals.gagaRoute}>
+<GagaSiteLayout entryData={entryData} routeContext={normalizeGagaRouteContext({ ...Astro.locals.gagaRoute, toc: { items: headings.map(h => ({ depth: h.depth, text: h.text, slug: h.slug })) } })}>
   <Content />
 </GagaSiteLayout>

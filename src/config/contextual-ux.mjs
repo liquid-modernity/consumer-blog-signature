@@ -9,7 +9,7 @@ export function resolveNotchPresentation(input = notchPresentation, width = 1440
 export function contextualRails(path) {
   const route = path.replace(/\/+$/, '') || '/';
   return {
-    left: /^\/(topics|sections|knowledge|tags|authors)(\/|$)/.test(route),
+    left: /^\/(topics|sections|knowledge|tags|authors|system)(\/|$)/.test(route),
     right: /^\/(topics|sections)\/[^/]+$/.test(route)
   };
 }
@@ -21,7 +21,8 @@ export function positionLinkPreview(anchor, box, viewport) {
   return { left, top, width };
 }
 
-export function outlineForRoute(items, path, kind) {
-  if (kind !== 'article') return [];
-  return items.filter(item => item.slug !== '_top');
+export function outlineForRoute(items, path, kind, document = false) {
+  if (kind !== 'article' && !document) return [];
+  const meaningful = items.filter(item => item.slug !== '_top');
+  return document && meaningful.length < 2 ? [] : meaningful;
 }

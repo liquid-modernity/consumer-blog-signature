@@ -5,6 +5,7 @@ import ActionRuntime from './ActionRuntime.astro';
 import SkipLink from '../ui/SkipLink.astro';
 import type { AppShellInput } from './component-inputs';
 import { designContract } from '../../config/design';
+import { documentExperience } from '../../config/document-experience';
 import { experienceSurfaceProfile, resolveExperienceContext } from '../../config/experience';
 
 interface Props {
@@ -72,6 +73,7 @@ const showGagaDock = false;
 <div
   class="gaga-app-frame"
   data-gaga-app-frame
+  data-gaga-experience={documentExperience(Astro.url.pathname)?.id}
   data-gaga-page-id={pageId}
   data-gaga-page-title={pageTitle}
   data-gaga-content-kind={contentKind}

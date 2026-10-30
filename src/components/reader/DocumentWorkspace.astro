@@ -1,0 +1,62 @@
+---
+import { documentExperience, documentBreadcrumbs, documentNavigation } from '../../config/document-experience';
+interface Props { title: string; }
+const { title } = Astro.props;
+const profile = documentExperience(Astro.url.pathname);
+const trail = documentBreadcrumbs(Astro.url.pathname, title);
+const navigation = profile ? documentNavigation(profile) : [];
+const Container = profile?.id === 'section' ? 'section' : 'article';
+---
+<Container class="gaga-document-workspace" data-gaga-document-workspace={profile?.id !== 'section' ? '' : undefined} data-gaga-editorial-workspace={profile?.id === 'section' ? '' : undefined} data-gaga-experience={profile?.id} data-gaga-document-mode={profile?.mode} data-gaga-document-view={profile?.view}>
+  <nav class="gaga-document-breadcrumbs" aria-label="Jejak halaman" data-gaga-document-breadcrumbs>
+    <ol>{trail.map((crumb, index) => <li>{index === trail.length - 1 ? <span aria-current="page">{crumb.title}</span> : <a href={crumb.href}>{crumb.title}</a>}</li>)}</ol>
+  </nav>
+  {profile?.navigation === 'inline' && navigation.length > 1 && <details class="gaga-document-navigation" data-gaga-document-navigation>
+    <summary>Navigasi {profile.label}</summary>
+    <nav aria-label={`Navigasi ${profile.label}`}><ul>{navigation.map(item => <li><a href={item.href} aria-current={item.href === Astro.url.pathname.replace(/\/$/, '') ? 'page' : undefined}>{item.title}</a></li>)}</ul></nav>
+  </details>}
+  <slot />
+</Container>
+<script>
+  function enhanceDocuments() {
+    const body = document.querySelector<HTMLElement>('[data-gaga-document-body]');
+    if (!body) return;
+    const headings = Array.from(body.querySelectorAll<HTMLElement>('h2[id], h3[id]'));
+    for (const heading of headings) {
+      heading.tabIndex = -1;
+      if (heading.querySelector('[data-gaga-heading-link]')) continue;
+      const anchor = document.createElement('a');
+      anchor.href = '#' + encodeURIComponent(heading.id);
+      anchor.className = 'gaga-document-anchor';
+      anchor.dataset.gagaHeadingLink = '';
+      anchor.setAttribute('aria-label', `Tautan ke ${heading.textContent?.trim()}`);
+      heading.append(anchor);
+    }
+    const opener = document.querySelector<HTMLElement>('[data-gaga-document-outline-action]');
+    if (opener) opener.hidden = headings.length < 2;
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', enhanceDocuments, { once: true });
+  else enhanceDocuments();
+</script>
+<style is:global>
+  .gaga-document-workspace { min-inline-size: 0; max-inline-size: var(--gaga-article-measure, 72ch); margin-inline: auto; overflow-wrap: anywhere; }
+  .gaga-app-frame[data-gaga-experience]:not([data-gaga-experience='section']) .gaga-content-container { max-inline-size: var(--gaga-article-measure, 72ch); }
+  .gaga-document-workspace[data-gaga-document-view='graph'] { max-inline-size: none; }
+  .gaga-document-workspace[data-gaga-editorial-workspace] { max-inline-size: none; }
+  .gaga-document-breadcrumbs { margin-block-end: 1.2rem; color: var(--gaga-muted); font-size: .8rem; }
+  .gaga-document-breadcrumbs ol { display: flex; flex-wrap: wrap; gap: .4rem; list-style: none; padding: 0; margin: 0; }
+  .gaga-document-breadcrumbs li + li::before { content: '/'; padding-inline-end: .4rem; }
+  .gaga-document-navigation { margin-block-end: 1.4rem; }
+  .gaga-document-metadata summary { cursor: pointer; min-block-size: 44px; align-content: center; font-size: .85rem; }
+  .gaga-document-navigation summary { cursor: pointer; min-block-size: 44px; display: list-item; align-content: center; font-size: .85rem; }
+  .gaga-document-navigation ul { list-style: none; padding: .3rem 0; display: flex; flex-wrap: wrap; gap: .35rem 1.2rem; }
+  .gaga-document-navigation a { display: inline-flex; min-block-size: 44px; align-items: center; }
+  .gaga-document-workspace [aria-current='page'] { font-weight: 600; color: var(--gaga-ink); }
+  .gaga-document-workspace .gaga-markdown-content :where(h2, h3) { scroll-margin-block-start: 6rem; }
+  .gaga-document-anchor { padding-inline: .4em; font-size: .75em; color: var(--gaga-muted); }
+  .gaga-document-anchor::before { content: '#'; }
+  .gaga-document-anchor:not(:focus-visible):not(:hover) { opacity: .45; }
+  .gaga-document-workspace :where(a, summary):focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
+  .gaga-outline-stack[data-gaga-document-outline='true'] [data-gaga-toc-depth='3'] { padding-inline-start: 1rem; }
+  @media print { .gaga-document-navigation, .gaga-document-anchor, [data-gaga-action-runtime-container], .gaga-outline-stack, [data-gaga-left-rail] { display: none !important; } }
+</style>

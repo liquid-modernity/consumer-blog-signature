@@ -1,3 +1,4 @@
+import { documentDiscoveryEntries } from '../config/document-experience';
 import { absoluteUrl } from '@gaga/engine-capabilities/seo';
 import { contentDefaults } from '../config/content';
 import { discoveryConfig } from '../config/discovery';
@@ -8,7 +9,7 @@ import { getEditorialSections } from './editorial';
 import { resolveFreshnessAuthority } from '../config/freshness';
 import { getArticles, getAuthors, getTagGroups, getTopicGroups } from './content';
 
-export type GagaDiscoveryKind = 'article' | 'author' | 'topic' | 'tag' | 'section' | 'workspace';
+export type GagaDiscoveryKind = 'article' | 'author' | 'topic' | 'tag' | 'section' | 'workspace' | 'knowledge' | 'information' | 'legal' | 'system';
 
 export interface GagaDiscoveryRecord {
   id: string;
@@ -239,6 +240,10 @@ export async function buildPublicDiscoveryRecords(): Promise<GagaDiscoveryRecord
       language: contentDefaults.defaultLanguage,
       searchText: searchable(workspace.label, workspace.shortLabel, workspace.id, workspace.mode, workspace.href)
     });
+  }
+
+  for (const entry of documentDiscoveryEntries()) {
+    records.push({ id: 'document:' + entry.href, kind: entry.kind, title: entry.title, description: entry.summary, href: absoluteUrl(entry.href, seoConfig.canonical), language: contentDefaults.defaultLanguage, searchText: searchable(entry.title, entry.summary, entry.href) });
   }
 
   const unique = new Map<string, GagaDiscoveryRecord>();

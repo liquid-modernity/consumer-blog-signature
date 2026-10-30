@@ -1,5 +1,7 @@
 ---
 import ArticleShell from './ArticleShell.astro';
+import DocumentWorkspace from '../reader/DocumentWorkspace.astro';
+import { documentExperience } from '../../config/document-experience';
 import PageTitle from './PageTitle.astro';
 import AuthorArticleIndex from '../reader/AuthorArticleIndex.astro';
 import TopicArticleIndex from '../reader/TopicArticleIndex.astro';
@@ -41,6 +43,7 @@ const articleActions = createArticleWorkspaceActionsInput();
 const coverage = resolveCoverageAuthority(entryData);
 const cleanPath = Astro.url.pathname.replace(/\/$/, '') || '/';
 const isRootPage = cleanPath === '/';
+const documentProfile = documentExperience(cleanPath);
 let breadcrumbs: BreadcrumbItem[] = [];
 let rightRail = null;
 let readingMetaItems: string[] = [];
@@ -235,11 +238,15 @@ const entityNavigationLabel = i18nLabel(isAuthor ? 'entity.authorNavigation' : '
     </section>
   ) : (
     <>
-      <PageTitle entryData={entryData} routeId={routeIdentity} />
-      <div class="gaga-markdown-content">
-        <slot />
-      </div>
-      {rightRail ? <PageMetadataTable rail={rightRail} /> : null}
+      {documentProfile ? (
+        <DocumentWorkspace title={metadata.title ?? ''}>
+          <PageTitle entryData={entryData} routeId={routeIdentity} />
+          <div class="gaga-markdown-content" data-gaga-document-body={documentProfile.id !== 'section' ? '' : undefined}><slot /></div>
+        </DocumentWorkspace>
+      ) : (
+        <><PageTitle entryData={entryData} routeId={routeIdentity} /><div class="gaga-markdown-content"><slot /></div></>
+      )}
+      {rightRail ? documentProfile ? <details class="gaga-document-metadata"><summary>Informasi {documentProfile.id === 'section' ? 'ruang editorial' : 'dokumen'}</summary><PageMetadataTable rail={rightRail} /></details> : <PageMetadataTable rail={rightRail} /> : null}
     </>
   )
 )}

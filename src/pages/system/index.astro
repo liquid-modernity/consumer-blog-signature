@@ -10,7 +10,7 @@ const systemSection = navigationConfig.sections.find((s) => s.id === 'system');
 const entryData = {
   title: 'Sistem & Antarmuka Mesin',
   subtitle: 'Pemisahan tegas antara antarmuka manusia (/system/*) dan antarmuka mesin (/sitemap.xml, /rss.xml, /robots.txt).',
-  description: 'Indeks halaman sistem PAKRPP: Peta Situs manusia, langganan RSS, dan status sistem.',
+  description: 'Indeks halaman sistem PAKRPP: Peta Situs manusia, langganan RSS, dan panduan build publik.',
   summary: '/system/sitemap untuk manusia vs /sitemap.xml untuk crawler; /system/rss untuk langganan vs /rss.xml untuk feed XML.',
   contentKind: 'system',
   contentClass: 'system',
@@ -23,7 +23,7 @@ const entryData = {
 
 <GagaSiteLayout entryData={entryData}>
   <section class="pakrpp-sys-hub" aria-label="Antarmuka Sistem">
-    <h2>Antarmuka Pembaca</h2>
+    <h2 id="antarmuka-pembaca">Antarmuka Pembaca</h2>
     <ul>
       {(systemSection?.items ?? []).map((item) => (
         <li>
@@ -32,7 +32,7 @@ const entryData = {
       ))}
     </ul>
 
-    <h2>Antarmuka Mesin</h2>
+    <h2 id="antarmuka-mesin">Antarmuka Mesin</h2>
     <ul>
       <li><a href={routes.machine.sitemap}><strong>XML Sitemap</strong></a></li>
       <li><a href={routes.machine.rss}><strong>RSS XML Feed</strong></a></li>

@@ -16,6 +16,8 @@ export function hydrateDomOutlineIfSparse(readingRoot: HTMLElement) {
     (el) => Boolean(el.id && el.id !== 'gaga-page-metadata-title' && el.textContent?.trim())
   );
   if (headings.length === 0) return;
+  const documentStack = document.querySelector<HTMLElement>('[data-gaga-document-outline="true"]');
+  if (documentStack && headings.length < 2) return;
 
   for (const list of lists) {
     if (list.querySelectorAll('a[href^="#"]').length > 1) continue;
@@ -24,6 +26,7 @@ export function hydrateDomOutlineIfSparse(readingRoot: HTMLElement) {
       const a = document.createElement('a');
       a.href = `#${heading.id}`;
       a.textContent = heading.textContent?.trim() ?? '';
+      li.dataset.gagaTocDepth = heading.tagName === 'H3' ? '3' : '2';
       li.appendChild(a);
       return li;
     });

@@ -42,7 +42,7 @@ const entryData = {
     </nav>
 
     <div class="pakrpp-kindex__groups">
-      {groups.map((group) => (
+      {groups.map((group, index) => (
         <section id={`letter-${group.letter}`} class="pakrpp-kindex__group" aria-labelledby={`heading-${group.letter}`}>
           <div class="pakrpp-kindex__group-head">
             <h2 id={`heading-${group.letter}`}>{group.letter}</h2>
@@ -59,6 +59,10 @@ const entryData = {
               </li>
             ))}
           </ul>
+          <nav class="gaga-knowledge-letter-pager" aria-label={`Navigasi huruf ${group.letter}`}>
+            {groups[index - 1] && <a rel="prev" href={`#heading-${groups[index - 1].letter}`}>← {groups[index - 1].letter}</a>}
+            {groups[index + 1] && <a rel="next" href={`#heading-${groups[index + 1].letter}`}>{groups[index + 1].letter} →</a>}
+          </nav>
         </section>
       ))}
     </div>
@@ -140,3 +144,5 @@ const entryData = {
     opacity: 0.65;
   }
 </style>
+
+<style>.gaga-knowledge-letter-pager { display:flex; justify-content:space-between; gap:1rem; } .gaga-knowledge-letter-pager a { min-block-size:44px; display:inline-flex; align-items:center; }</style>

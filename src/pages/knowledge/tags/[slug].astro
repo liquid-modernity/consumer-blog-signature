@@ -46,12 +46,12 @@ const entryData = {
     <ol class="pakrpp-tag-detail__list">
       {group.articles.map((article, idx) => {
         const preview = toArticlePreview(article, locale, contentDefaults.preview);
-        const slug = preview.href.replace(/^\/+|\/+$/g, '');
+
         return (
           <li class="pakrpp-tag-detail__item">
             <span class="pakrpp-tag-detail__idx">{String(idx + 1).padStart(2, '0')}</span>
             <div>
-              <a href={routes.publications.detail(slug)} class="pakrpp-tag-detail__title">{preview.title}</a>
+              <a href={preview.href} class="pakrpp-tag-detail__title">{preview.title}</a>
               <p class="pakrpp-tag-detail__meta">
                 {[preview.author, preview.date, preview.readTime].filter(Boolean).join(' · ')}
               </p>

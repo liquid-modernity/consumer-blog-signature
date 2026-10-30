@@ -56,19 +56,11 @@ const entryData = {
 ---
 
 <GagaSiteLayout entryData={entryData}>
-  <nav class="pakrpp-subnav" aria-label="Navigasi Tentang">
-    <a href={routes.about.root}>Tentang</a>
-    <span aria-hidden="true">·</span>
-    <a href={routes.about.author}>Penulis</a>
-    <span aria-hidden="true">·</span>
-    <a href={routes.about.support}>Dukungan</a>
-    <span aria-hidden="true">·</span>
-    <a href={routes.about.contact}>Kontak</a>
-  </nav>
+
 
   {slug === 'author' && (
     <section class="pakrpp-about-section">
-      <h2>Profil Penulis</h2>
+      <h2 id="profil-penulis">Profil Penulis</h2>
       <p>
         <strong>PakRPP &amp; Tim Editorial</strong> mengelola publikasi pengetahuan lintas topik Pelaporan, Teknologi, dan Anomali dengan penekanan pada ketertelusuran argumen dan struktur sistem yang jernih.
       </p>
@@ -79,7 +71,7 @@ const entryData = {
           </li>
         ))}
       </ul>
-      <h3>Publikasi Terkait ({publications.length})</h3>
+      <h3 id="publikasi-terkait">Publikasi Terkait ({publications.length})</h3>
       <ol>
         {publications.map((pub) => (
           <li>
@@ -92,7 +84,7 @@ const entryData = {
 
   {slug === 'support' && (
     <section class="pakrpp-about-section">
-      <h2>Keberlanjutan Sistem Pengetahuan</h2>
+      <h2 id="keberlanjutan">Keberlanjutan Sistem Pengetahuan</h2>
       <p>
         PAKRPP dibangun sebagai sistem publikasi independen tanpa iklan intrusif dan tanpa kompromi terhadap integritas bukti. Anda dapat mendukung ekosistem ini melalui:
       </p>
@@ -112,15 +104,7 @@ const entryData = {
 </GagaSiteLayout>
 
 <style>
-  .pakrpp-subnav {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    font-size: 0.82rem;
-    padding-bottom: 0.85rem;
-    margin-bottom: 1.25rem;
-    border-bottom: 1px solid var(--gaga-border-subtle, rgba(128, 128, 128, 0.22));
-  }
+
   .pakrpp-about-section {
     display: flex;
     flex-direction: column;

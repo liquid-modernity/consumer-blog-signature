@@ -651,7 +651,7 @@ export const navigationConfig = Object.freeze({
       items: [
         { id: 'system-sitemap', label: 'Peta Situs', labelEn: 'Sitemap', href: '/system/sitemap', meta: 'Hierarki lengkap untuk manusia' },
         { id: 'system-rss', label: 'RSS', labelEn: 'RSS', href: '/system/rss', featureFlag: 'rss', meta: 'Langganan sindikasi terbuka' },
-        { id: 'system-status', label: 'Status', labelEn: 'Status', href: '/system/status', featureFlag: 'status', meta: 'Kesehatan kontrak & sistem' }
+        { id: 'system-status', label: 'Panduan sistem', labelEn: 'System guide', href: '/system/status', featureFlag: 'status', meta: 'Penjelasan build dan antarmuka publik' }
       ]
     },
     {

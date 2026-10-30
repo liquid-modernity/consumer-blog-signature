@@ -41,7 +41,7 @@ const entryData = {
         <article class="pakrpp-knowledge-card">
           <div class="pakrpp-knowledge-card__head">
             <span class="pakrpp-knowledge-card__num">{String(idx + 1).padStart(2, '0')}</span>
-            <h2><a href={item.href}>{item.label}</a></h2>
+            <h2 id={item.id}><a href={item.href}>{item.label}</a></h2>
           </div>
           {item.meta && <p class="pakrpp-knowledge-card__desc">{item.meta}</p>}
         </article>
@@ -50,7 +50,7 @@ const entryData = {
 
     <div class="pakrpp-knowledge-hub__sub">
       <div>
-        <h3>Seri Editorial ({seriesRegistry.length})</h3>
+        <h3 id="seri-editorial">Seri Editorial ({seriesRegistry.length})</h3>
         <ul>
           {seriesRegistry.map((s) => (
             <li>
@@ -60,7 +60,7 @@ const entryData = {
         </ul>
       </div>
       <div>
-        <h3>Koleksi / Curations ({curationRegistry.length})</h3>
+        <h3 id="koleksi">Koleksi / Curations ({curationRegistry.length})</h3>
         <ul>
           {curationRegistry.map((c) => (
             <li>
@@ -70,7 +70,7 @@ const entryData = {
         </ul>
       </div>
       <div>
-        <h3>Tag Granular ({tags.length})</h3>
+        <h3 id="tag">Tag Granular ({tags.length})</h3>
         <p>
           {tags.map((t, i) => (
             <>

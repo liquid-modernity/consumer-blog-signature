@@ -4,20 +4,20 @@ import Icon from '../ui/Icon.astro';
 import { outlineForRoute } from '../../config/contextual-ux.mjs';
 import type { RightRailInput } from './component-inputs';
 
-interface Props { rail: RightRailInput; }
-const { rail } = Astro.props;
-const outlineItems = outlineForRoute(rail.outlineItems, Astro.url.pathname, rail.kind);
+interface Props { rail: RightRailInput; documentOutline?: boolean; }
+const { rail, documentOutline = false } = Astro.props;
+const outlineItems = outlineForRoute(rail.outlineItems, Astro.url.pathname, rail.kind, documentOutline);
 const outlinePeekId = 'gaga-outline-peek';
 const outlineTitleId = 'gaga-outline-peek-title';
 const outlineOpenLabelId = 'gaga-outline-peek-open-label';
 const outlineCurrentLabelId = 'gaga-outline-peek-current-label';
 const outlineCounterLabelId = 'gaga-outline-peek-counter-label';
-const pendingOutline = rail.kind === 'article' && outlineItems.length === 0;
+const pendingOutline = (rail.kind === 'article' || documentOutline) && outlineItems.length === 0;
 const hasOutlinePeek = outlineItems.length > 0 || pendingOutline;
 const initialOutlineLabel = outlineItems[0]?.text ?? '';
 ---
 {hasOutlinePeek ? (
-  <div class="gaga-outline-stack" data-gaga-outline-stack data-gaga-surface="dynamic-outline-peek" data-gaga-visibility="visible" data-gaga-outline-pending={pendingOutline ? 'true' : undefined} hidden={pendingOutline}>
+  <div class="gaga-outline-stack" data-gaga-outline-stack data-gaga-surface="dynamic-outline-peek" data-gaga-visibility="visible" data-gaga-document-outline={documentOutline ? 'true' : undefined} data-gaga-outline-pending={pendingOutline ? 'true' : undefined} hidden={pendingOutline}>
     <button
       type="button"
       class="gaga-outline-peek-preview"

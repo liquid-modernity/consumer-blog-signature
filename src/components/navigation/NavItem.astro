@@ -14,12 +14,13 @@ interface Props {
   external?: boolean;
   externalDescriptionScope?: string;
   currentPath?: string;
+  exact?: boolean;
 }
 
-const { id, label, labelEn, labelKey, href, icon, external = false, externalDescriptionScope, currentPath = '/' } = Astro.props;
+const { id, label, labelEn, labelKey, href, icon, external = false, externalDescriptionScope, currentPath = '/', exact = false } = Astro.props;
 const url = classifySiteUrl(href, siteConfig.url);
 const opensExternal = shouldOpenExternalNavigation(url, external);
-const isCurrent = isCurrentSiteSection(currentPath, href, siteConfig.url);
+const isCurrent = exact ? currentPath.replace(/\/$/, '') === href.replace(/\/$/, '') : isCurrentSiteSection(currentPath, href, siteConfig.url);
 const externalLabel = i18nLabel('navigation.externalLink');
 const externalDescriptionId = opensExternal && id
   ? `gaga-nav-${id}${externalDescriptionScope ? `-${externalDescriptionScope}` : ''}-external`

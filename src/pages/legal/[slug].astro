@@ -67,15 +67,7 @@ const entryData = {
 ---
 
 <GagaSiteLayout entryData={entryData}>
-  <nav class="pakrpp-legal-nav" aria-label="Navigasi Legal">
-    <a href={routes.legal.privacy}>Kebijakan Privasi</a>
-    <span aria-hidden="true">·</span>
-    <a href={routes.legal.terms}>Ketentuan Penggunaan</a>
-    <span aria-hidden="true">·</span>
-    <a href={routes.legal.disclaimer}>Penafian</a>
-    <span aria-hidden="true">·</span>
-    <a href={routes.legal.license}>Lisensi</a>
-  </nav>
+
 
   <section class="pakrpp-legal-body">
     {doc.paragraphs.map((p) => (
@@ -85,15 +77,7 @@ const entryData = {
 </GagaSiteLayout>
 
 <style>
-  .pakrpp-legal-nav {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    font-size: 0.82rem;
-    padding-bottom: 0.85rem;
-    margin-bottom: 1.25rem;
-    border-bottom: 1px solid var(--gaga-border-subtle, rgba(128, 128, 128, 0.22));
-  }
+
   .pakrpp-legal-body {
     display: flex;
     flex-direction: column;

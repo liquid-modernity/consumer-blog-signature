@@ -4,9 +4,10 @@ import type { KnowledgeGraphData, KnowledgeGraphNodeKind } from '../../lib/knowl
 
 interface Props {
   graph: KnowledgeGraphData;
+  title?: string;
 }
 
-const { graph } = Astro.props;
+const { graph, title = 'Knowledge Graph' } = Astro.props;
 const graphJson = JSON.stringify(graph).replace(/</g, '\\u003c');
 const counts = graph.nodes.reduce<Record<KnowledgeGraphNodeKind, number>>((accumulator, node) => {
   accumulator[node.kind] += 1;
@@ -22,7 +23,7 @@ for (const edge of graph.edges) {
   <header class="gaga-knowledge-graph__toolbar">
     <div class="gaga-knowledge-graph__identity">
       <p class="gaga-system-kicker">PAKRPP / GRAPH</p>
-      <h1 id="gaga-graph-title">Knowledge Graph</h1>
+      <h1 id="gaga-graph-title">{title}</h1>
       <p class="gaga-knowledge-graph__summary">
         {graph.nodes.length} node · {graph.edges.length} relationship · public knowledge only
       </p>

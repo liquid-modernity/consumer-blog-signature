@@ -1,7 +1,8 @@
 import { notchPresentation } from './contextual-ux.mjs';
+import { documentExperience } from './document-experience';
 import type { GagaActionId } from './actions';
 
-export type ExperienceContext = 'article' | 'archive' | 'graph' | 'topic' | 'library' | 'default';
+export type ExperienceContext = 'article' | 'archive' | 'graph' | 'topic' | 'library' | 'document' | 'default';
 export type DockMode = 'hidden' | 'workspace';
 
 export type ExperienceSurfaceProfile = {
@@ -37,7 +38,7 @@ export const experienceConfig = {
       dockMode: 'workspace'
     },
     graph: {
-      notchActionIds: ['smart-back', 'graph-reset', 'context-info', 'settings'],
+      notchActionIds: ['smart-back', 'search', 'graph-reset', 'context-info', 'settings'],
       dockActionIds: ['search', 'library', 'settings', 'menu'],
       dockMode: 'workspace'
     },
@@ -51,6 +52,11 @@ export const experienceConfig = {
       dockActionIds: ['search', 'settings', 'menu'],
       dockMode: 'workspace'
     },
+    document: {
+      notchActionIds: ['smart-back', 'search', 'outline', 'copy-link', 'share', 'focusmode', 'settings'],
+      dockActionIds: [],
+      dockMode: 'hidden'
+    },
     default: {
       notchActionIds: ['smart-back', 'search', 'context-info', 'settings'],
       dockActionIds: ['search', 'library', 'settings', 'menu'],
@@ -61,6 +67,9 @@ export const experienceConfig = {
 
 export function resolveExperienceContext({ pathname, pageId = '', contentKind = '', contentClass = '' }: ExperienceContextInput): ExperienceContext {
   if (contentKind === 'article' || contentClass === 'article-flagship' || pathname === '/article' || pathname.startsWith('/article/') || /^\/publications\/[^/]+$/.test(pathname.replace(/\/+$/, ''))) return 'article';
+  const document = documentExperience(pathname);
+  if (document?.view === 'graph') return 'graph';
+  if (document?.outline) return 'document';
   if (pageId === 'archive' || pathname === '/archive' || pathname.startsWith('/archive/')) return 'archive';
   if (pageId === 'graph' || pathname === '/graphs' || pathname.startsWith('/graphs/')) return 'graph';
   if (contentKind === 'topic' || pageId.includes('topic') || pathname === '/topics' || pathname.startsWith('/topics/')) return 'topic';

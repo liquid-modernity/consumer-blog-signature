@@ -1,6 +1,7 @@
 ---
 import GagaSiteLayout from '../../components/gaga/GagaSiteLayout.astro';
 import SectionFront from '../../components/reader/SectionFront.astro';
+import { getTopicGroups } from '../../lib/content';
 import { getEditorialSectionFront, getEditorialSections } from '../../lib/editorial';
 
 export const prerender = true;
@@ -20,6 +21,7 @@ if (!resolved) {
   return Astro.redirect('/404');
 }
 
+const relatedTopics = (await getTopicGroups()).filter(topic => topic.articles.some(article => article.section?.trim() === resolved.section.name));
 const entryData = {
   title: resolved.section.name,
   description: `Latest editorial coverage in ${resolved.section.name}.`,
@@ -36,4 +38,5 @@ const entryData = {
 
 <GagaSiteLayout entryData={entryData}>
   <SectionFront section={resolved.section} projection={resolved.projection} />
+  {relatedTopics.length > 0 && <nav aria-label="Topik dalam ruang editorial"><h2 id="topik-terkait">Topik terkait</h2><ul>{relatedTopics.map(topic => <li><a href={topic.href}>{topic.topic}</a></li>)}</ul></nav>}
 </GagaSiteLayout>

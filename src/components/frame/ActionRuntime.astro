@@ -8,10 +8,12 @@ import { experienceConfig, experienceSurfaceProfile, type ExperienceContext } fr
 import { getEnabledRootSections } from '../../config/pakrpp-architecture';
 import { globalNavigationProjection } from '../../config/context-rails';
 import { contextualRails, resolveNotchPresentation } from '../../config/contextual-ux.mjs';
+import { documentExperience } from '../../config/document-experience';
 interface Props { className?: string; context?: ExperienceContext; pageTitle?: string; workspaceId?: string; }
 const { className = '', context = 'default', pageTitle = 'PakRPP' } = Astro.props;
 const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
 const profile = experienceSurfaceProfile(context);
+const documentProfile = documentExperience(path);
 const railPolicy = contextualRails(path);
 const actions = profile.notchActionIds.filter(id => !['smart-back', 'settings'].includes(id) && (id !== 'context-info' || railPolicy.right)).map(actionById);
 const primary = actions.filter(action => action.id !== 'context-info');
@@ -26,20 +28,20 @@ const presentation = resolveNotchPresentation(experienceConfig.notch);
     <div class="gaga-action-runtime__shell">
       <div class="gaga-island-bar" data-gaga-island-bar>
         <button type="button" class="gaga-notch-button" data-gaga-action="smart-back" aria-label="Kembali" data-gaga-i18n-id="Kembali" data-gaga-i18n-en="Back" data-gaga-i18n-target="aria" disabled={path === '/'}><Icon name="arrow_back" /></button>
-        <a href="/" class="gaga-island-brand" aria-label={`${siteConfig.name} — Beranda`}><img src={identityConfig.faviconSvg} width="20" height="20" alt="" /><span>{siteConfig.name}</span></a>
+        <a href="/" class="gaga-island-brand" aria-label={`${documentProfile ? pageTitle + ' — ' : ''}${siteConfig.name} — Beranda`}><img src={identityConfig.faviconSvg} width="20" height="20" alt="" /><span>{documentProfile ? pageTitle : siteConfig.name}</span></a>
         <button type="button" class="gaga-action-runtime__toggle gaga-notch-button" data-gaga-action-island-toggle aria-label={toggleLabel.id} data-gaga-i18n-id={toggleLabel.id} data-gaga-i18n-en={toggleLabel.en} data-gaga-i18n-target="aria" aria-expanded="false" aria-controls="gaga-notch-context"><Icon name="menu" /></button>
       </div>
       <section id="gaga-notch-context" class="gaga-notch-context" data-gaga-notch-context hidden inert aria-label="Aksi kontekstual">
-        {path !== '/' && <p class="gaga-notch-page-title" data-gaga-island-focus-title>{pageTitle}</p>}
+        {path !== '/' && !documentProfile && <p class="gaga-notch-page-title" data-gaga-island-focus-title>{pageTitle}</p>}
         <div class="gaga-notch-actions" data-gaga-action-runtime-actions>
-          {primary.map(action => <button type="button" class="gaga-notch-button" data-gaga-action={action.id === 'search' ? undefined : action.id === 'save' ? 'save-reading' : action.command} data-gaga-notch-search-toggle={action.id === 'search' ? '' : undefined} aria-controls={action.id === 'search' ? 'gaga-notch-search' : undefined} aria-expanded={action.id === 'search' ? 'false' : undefined} title={action.label.id} data-gaga-action-id={action.id} data-gaga-quick-action={action.id} aria-label={action.label.id} data-gaga-i18n-id={action.label.id} data-gaga-i18n-en={action.label.en} data-gaga-i18n-target="aria" aria-pressed={action.kind === 'toggle' ? 'false' : undefined}><Icon name={action.icon ?? 'article'} /><span class="gaga-visually-hidden" data-gaga-i18n-id={action.label.id} data-gaga-i18n-en={action.label.en}>{action.label.id}</span></button>)}
+          {primary.map(action => <button type="button" class="gaga-notch-button" data-gaga-action={action.id === 'search' ? undefined : action.id === 'save' ? 'save-reading' : action.command} data-gaga-notch-search-toggle={action.id === 'search' ? '' : undefined} data-gaga-document-outline-action={action.id === 'outline' ? '' : undefined} hidden={action.id === 'outline'} aria-controls={action.id === 'search' ? 'gaga-notch-search' : action.id === 'outline' ? 'gaga-outline-peek' : undefined} aria-expanded={action.id === 'search' ? 'false' : undefined} title={action.label.id} data-gaga-action-id={action.id} data-gaga-quick-action={action.id} aria-label={action.label.id} data-gaga-i18n-id={action.label.id} data-gaga-i18n-en={action.label.en} data-gaga-i18n-target="aria" aria-pressed={action.kind === 'toggle' ? 'false' : undefined}><Icon name={action.icon ?? 'article'} /><span class="gaga-visually-hidden" data-gaga-i18n-id={action.label.id} data-gaga-i18n-en={action.label.en}>{action.label.id}</span></button>)}
           <button type="button" class="gaga-notch-button" data-gaga-action="toggle-reader-preferences" aria-controls="gaga-reader-panel" aria-expanded="false" aria-label="Preferensi pembaca" title="Preferensi pembaca"><Icon name="settings" /><span class="gaga-visually-hidden" data-gaga-i18n-id="Preferensi pembaca" data-gaga-i18n-en="Reader preferences">Preferensi pembaca</span></button>
           <button type="button" class="gaga-notch-button" data-gaga-notch-more aria-label="Navigasi situs" title="Navigasi situs" aria-expanded="false" aria-controls="gaga-notch-system"><Icon name="menu" /><span class="gaga-visually-hidden">Navigasi situs</span></button>
         </div>
         <form id="gaga-notch-search" action="/search" role="search" class="gaga-notch-search" data-gaga-notch-search hidden inert>
-          <label for="notch-query" class="gaga-visually-hidden">Cari publikasi</label><input id="notch-query" type="search" name="q" placeholder="Cari publikasi…" required /><button class="gaga-notch-button" type="submit" aria-label="Cari"><Icon name="search" /></button>
+          <label for="notch-query" class="gaga-visually-hidden">Cari publikasi dan dokumen</label><input id="notch-query" type="search" name="q" placeholder="Cari publikasi dan dokumen…" required /><button class="gaga-notch-button" type="submit" aria-label="Cari"><Icon name="search" /></button>
         </form>
-        {context === 'article' && <span class="gaga-visually-hidden" role="progressbar" aria-label="Progres membaca" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-gaga-reading-progress><span class="gaga-visually-hidden" data-gaga-reading-progress-value>0%</span></span>}
+        {['article', 'document'].includes(context) && <span class="gaga-visually-hidden" role="progressbar" aria-label="Progres membaca" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-gaga-reading-progress><span class="gaga-visually-hidden" data-gaga-reading-progress-value>0%</span></span>}
       </section>
       <section id="gaga-notch-system" class="gaga-notch-system" data-gaga-notch-system hidden inert aria-label="Pembaca dan navigasi">
         <div class="gaga-notch-actions">
@@ -129,6 +131,11 @@ const presentation = resolveNotchPresentation(experienceConfig.notch);
       if (button && action?.command) {
         event.preventDefault(); event.stopPropagation();
         if (action.command === 'toggle-reader-preferences') setState('expanded');
+        if (action.command === 'toggle-outline') {
+          setState('collapsed');
+          runSiteCommand(action.command, { source: 'click', target: document.querySelector<HTMLElement>('[data-gaga-outline-opener]') });
+          return;
+        }
         runSiteCommand(action.command, { source: 'click', target: button, pointer: { x: event.clientX, y: event.clientY } });
         return;
       }
@@ -213,3 +220,5 @@ const presentation = resolveNotchPresentation(experienceConfig.notch);
   @keyframes gaga-island-reveal { from { opacity:.5; transform:translateY(-3px); } to { opacity:1; transform:translateY(0); } }
   @media(prefers-reduced-motion:reduce) { .gaga-contextual-notch *, .gaga-contextual-notch-container { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
 </style>
+
+<style is:global>.gaga-notch-button[hidden] { display: none; } .gaga-island-brand span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-inline-size: 11rem; }</style>
