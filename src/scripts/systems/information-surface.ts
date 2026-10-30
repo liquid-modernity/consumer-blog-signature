@@ -48,6 +48,7 @@ export function initInformationSurface() {
         if(!target)return;
         let url:URL;try{url=new URL(target.dataset.gagaPreviewHref??target.getAttribute('href')??'',location.href);}catch{return;}
         if(url.origin!==location.origin||!['http:','https:'].includes(url.protocol))return;
+        if(type==='focusin'){suppressed=null;pointer=null;}
         if(type==='pointerover'){
           if((event as PointerEvent).pointerType!=='mouse')return;
           if(related instanceof Node&&target.contains(related))return;
@@ -79,16 +80,18 @@ export function initInformationSurface() {
       unbind(); active = target;
       const label = card.querySelector<HTMLElement>('[data-gaga-hover-preview-title]'); if (label) label.textContent = title;
       const meta = card.querySelector<HTMLElement>('[data-gaga-hover-preview-meta]'); if (meta) meta.textContent = target.dataset.gagaPreviewMeta ?? '';
-      card.hidden = matchMedia('(hover: none)').matches && !target.matches(':focus-visible');
-      if (!card.hidden) {
-        target.setAttribute('aria-describedby', [...new Set((target.getAttribute('aria-describedby') ?? '').split(/\s+/).filter(Boolean).concat(id))].join(' '));
-        position();
-      }
+      const reveal=()=>{
+        if(active!==target||suppressed===target||!target.isConnected)return;
+        card.hidden = matchMedia('(hover: none)').matches && !target.matches(':focus-visible');
+        if(!card.hidden){target.setAttribute('aria-describedby', [...new Set((target.getAttribute('aria-describedby') ?? '').split(/\s+/).filter(Boolean).concat(id))].join(' '));position();}
+      };
+      // Focus fires before the browser scrolls its target into view.
+      if(target===document.activeElement){card.hidden=true;requestAnimationFrame(reveal);}else reveal();
       return undefined;
     }
   });
   document.addEventListener('pointermove', event => { if (event.pointerType !== 'mouse' || !active?.contains(event.target as Node)) return; pointer = {x:event.clientX,y:event.clientY}; position(); }, {passive:true});
-  document.addEventListener('focusin', () => { pointer = null; position(); });
+  document.addEventListener('focusin', () => { pointer = null; requestAnimationFrame(position); });
   card.dataset.gagaPreviewReady = 'true';
   const observer = new MutationObserver(() => {
     if (!card.hasAttribute('data-gaga-preview-state')) { close(); active = null; suppressed = null; }

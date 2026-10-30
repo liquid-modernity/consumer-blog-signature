@@ -56,6 +56,10 @@ jobs:
           python3 tools/reference/html-semantics.py
           npm run test:consumer | tee "$GAGA_EVIDENCE_DIRECTORY/consumer.log"
       - run: npx --no-install playwright install --with-deps chromium
+      - name: Focused preview regression before broad browser qualification
+        run: |
+          npx --no-install playwright test --config tools/personal/playwright.config.mjs --project desktop --grep 'preview grace' | tee "$GAGA_EVIDENCE_DIRECTORY/focused-preview.log"
+          cp .gaga/personal-results.json "$GAGA_EVIDENCE_DIRECTORY/focused-preview-results.json"
       - name: Preserve all ten existing release browser cases
         run: |
           npm run test:ui | tee "$GAGA_EVIDENCE_DIRECTORY/mandatory-browser.log"
