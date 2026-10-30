@@ -95,7 +95,9 @@ test('Reading Intelligence uses one runtime path without legacy component-local 
 
   const knowledge = fs.readFileSync('src/scripts/systems/reading-knowledge.ts', 'utf8');
   assert.ok(knowledge.includes('LEGACY_HIGHLIGHT_STORAGE_KEY'), 'Legacy highlights must migrate into the unified knowledge store');
-  assert.ok(knowledge.includes('language?: string'), 'Highlight schema must carry content language metadata');
+  assert.ok(knowledge.includes('type HighlightEntity = PersonalAnnotation'), 'Legacy adapter must use the canonical annotation contract');
+  const annotationContract = fs.readFileSync('src/lib/personal-state.ts', 'utf8');
+  assert.ok(annotationContract.includes('language?: string'), 'Highlight schema must carry content language metadata');
 });
 
 

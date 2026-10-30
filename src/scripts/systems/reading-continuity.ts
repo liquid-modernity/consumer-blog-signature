@@ -1,14 +1,12 @@
-import { isSavedItem, type SavedItem } from '@gaga/engine-runtime/reader';
+import { type SavedItem } from '@gaga/engine-runtime/reader';
 import { onRuntimeEvent, requestQuickActionsSync, requestToast } from '@gaga/engine-runtime/runtime/events';
-import { readArray, readJson, writeJson } from '@gaga/engine-runtime/runtime/storage';
+import { readJson } from '@gaga/engine-runtime/runtime/storage';
 import { personalState, continueReading, personalStateChanged } from '../../lib/personal-state';
 import { currentPersonalContent } from './personal-context';
 import { listenToSelection } from './reader-enhancements';
 import { resolveReadingScrollContext, getUnifiedScrollMetrics } from './reading-scroll';
 import {
   continuityStoragePolicy,
-  isContinuityStatus,
-  isLocalContinuityHref,
   type ContinuityItem,
   type ContinuityState,
   type ContinuityStatus
@@ -17,7 +15,6 @@ import { i18nText, isI18nMessageKey, type I18nMessageKey } from '../../config/i1
 import { defaultReaderLanguage, isReaderLanguage, type ReaderLanguage } from '../../config/reader';
 import { storageKeys } from '../../config/systems';
 import {
-  readAllHighlights,
   removeHighlight,
   updateHighlightNote,
   removePersonalQuote,
@@ -265,7 +262,7 @@ function cloneHighlightItem(highlight: HighlightEntity) {
   const listenBtn = card.querySelector<HTMLButtonElement>('[data-gaga-highlight-listen]');
   if (listenBtn) {
     listenBtn.addEventListener('click', () => {
-      listenToSelection(highlight.text, highlight.language || document.documentElement.lang || 'id');
+      listenToSelection(highlight.text, normalizeSpeechLang(highlight.language || document.documentElement.lang || 'id'));
     });
   }
 

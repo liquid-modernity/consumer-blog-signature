@@ -1,7 +1,9 @@
-import { personalState, type PersonalAnnotation, type HighlightLocation } from '../../lib/personal-state';
+import { personalState, type PersonalAnnotation } from '../../lib/personal-state';
 export { type HighlightLocation } from '../../lib/personal-state';
 export type HighlightEntity = PersonalAnnotation;
-export const ANNOTATION_STORAGE_KEY = 'gaga:annotations:v1';
+import { legacyAnnotationKeys } from '../../config/personal-state.mjs';
+export const ANNOTATION_STORAGE_KEY = legacyAnnotationKeys[0];
+export const LEGACY_HIGHLIGHT_STORAGE_KEY = legacyAnnotationKeys[1];
 export const KNOWLEDGE_STORAGE_KEY = personalState.keys.annotations;
 export function normalizeSpeechLang(code?: string): string {
   if (!code) return 'id-ID';
