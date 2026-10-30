@@ -41,6 +41,10 @@ export function initOutlinePeek() {
       requestLeftRail({ action: 'collapse', source: 'outline-open' });
       sheet.dataset.gagaDepth = 'expanded';
       if (stack) stack.dataset.gagaVisibility = 'visible';
+      // This composition has no close button; focus its first link after native open removes inert.
+      queueMicrotask(() => {
+        if (sheet.dataset.gagaState === 'open') sheet.querySelector<HTMLAnchorElement>('[data-gaga-info-field="outline"] a[href^="#"]')?.focus({ preventScroll: true });
+      });
     }
   });
 
