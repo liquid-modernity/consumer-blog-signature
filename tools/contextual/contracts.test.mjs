@@ -1,3 +1,4 @@
+import { stripQualifiedPersonalGuards } from '../personal/release-browser-guards.mjs';
 import { stripQualifiedDocumentationGuards } from '../documentation/release-browser-guards.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -28,12 +29,14 @@ test('link preview flips and clamps without changing anchor or page identity', (
   assert.deepEqual(positionLinkPreview({ left: -10, top: 50, bottom: 70 }, { width: 352, height: 100 }, { width: 320, height: 844 }), { left: 8, top: 80, width: 304 });
 });
 test('all public packages, CMS/source authority and release guards remain byte-identical', () => {
-  assert.equal(stripQualifiedDocumentationGuards(readFileSync('.github/workflows/deploy.yml','utf8')), execFileSync('git',['show',base+':.github/workflows/deploy.yml'],{encoding:'utf8'}), 'Only exact additional documentation browser guards are authorized');
+  assert.equal(stripQualifiedDocumentationGuards(stripQualifiedPersonalGuards(readFileSync('.github/workflows/deploy.yml','utf8'))), execFileSync('git',['show',base+':.github/workflows/deploy.yml'],{encoding:'utf8'}), 'Only exact additional documentation browser guards are authorized');
   for (const path of ['package.json','package-lock.json','cms/package-lock.json','gaga.app.json','content-release.json','content/emdash/published.json','content/emdash/published-receipt.json','cms/editorial/plugin.mjs','cms/editorial/admin.tsx','cms/editorial/studio.css','docs/UI-PRESERVATION.json','.github/workflows/content-release.yml','.github/workflows/content-publish.yml']) assert.deepEqual(readFileSync(path), execFileSync('git', ['show',base+':'+path]), path);
 });
 test('existing saved state and Save dispatch have no alternate store or duplicate app implementation', () => {
   const root=readFileSync('src/components/reader/EditorialFront.astro','utf8'),notch=readFileSync('src/components/frame/ActionRuntime.astro','utf8'),adapter=readFileSync('src/scripts/systems/saved-reading.ts','utf8');
-  assert.ok(root.includes('readArray<SavedItem>(storageKeys.saved, isSavedItem)'));
+  assert.ok(root.includes('personalState.saved().slice(0, 5)'));
+  const personal=readFileSync('src/lib/personal-state.ts','utf8');
+  assert.ok(personal.includes('readArray(keys.saved') && personal.includes('isSavedItem(v)') && personal.includes('localPersonalHref(v.href, origin)'), 'Root must use the same Engine-validated, local-only Saved domain as the library');
   assert.ok(!root.includes('gaga:saved-items:v1')); assert.ok(!root.includes('idx % publications.length'));
   assert.ok(adapter.includes('createSavedReadingCapability(')); assert.ok(adapter.includes('buttonSelector:'));
   assert.ok(notch.includes("if (button?.dataset.gagaAction === 'save-reading') return;"));

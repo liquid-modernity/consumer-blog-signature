@@ -25,14 +25,14 @@ export function initInformationSurface() {
     const point = positionLinkPreview({left:anchor.x, top:anchor.y, bottom:anchor.y}, card!.getBoundingClientRect(), { width: innerWidth, height: innerHeight });
     card!.style.left = point.left + 'px'; card!.style.top = point.top + 'px'; card!.style.width = point.width + 'px';
   }
-  let intentTimer:number|undefined;
+  let intentTimer:number|undefined, intentTarget:HTMLElement|null=null;
   const listeners=new Map<EventListenerOrEventListenerObject,EventListener>();
   const invoke=(listener:EventListenerOrEventListenerObject,event:Event)=>typeof listener==='function'?listener.call(document,event):listener.handleEvent(event);
   const addScopedListener:Document['addEventListener']=((type:string,listener:EventListenerOrEventListenerObject,options?:AddEventListenerOptions|boolean)=>{
     const wrapped:EventListener=event=>{
       const related=(event as PointerEvent|FocusEvent).relatedTarget;
       if((type==='pointerout'||type==='focusout')&&related instanceof Node&&card.contains(related))return;
-      if(type==='pointerout')window.clearTimeout(intentTimer);
+      if(type==='pointerout'){if(intentTarget&&related instanceof Node&&intentTarget.contains(related))return;window.clearTimeout(intentTimer);intentTarget=null;}
       if(type==='pointerover'||type==='focusin'){
         const target=(event.target instanceof Element?event.target:null)?.closest<HTMLElement>('[data-gaga-preview]');
         if(!target)return;
@@ -41,7 +41,7 @@ export function initInformationSurface() {
         if(type==='pointerover'){
           if((event as PointerEvent).pointerType!=='mouse')return;
           if(related instanceof Node&&target.contains(related))return;
-          window.clearTimeout(intentTimer);const p=event as PointerEvent;
+          window.clearTimeout(intentTimer);intentTarget=target;const p=event as PointerEvent;
           intentTimer=window.setTimeout(()=>{pointer={x:p.clientX,y:p.clientY};for(const field of card.querySelectorAll('[data-gaga-info-field]'))field.textContent='';invoke(listener,event);},120);return;
         }
       }

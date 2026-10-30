@@ -36,9 +36,8 @@ jobs:
           writeFileSync(process.env.RUNNER_TEMP+'/personal/runtime.json',JSON.stringify({node:process.version,npm:execFileSync('npm',['--version'],{encoding:'utf8'}).trim(),image:process.env.ImageOS,imageVersion:process.env.ImageVersion,source:process.env.GITHUB_SHA}));
           JS
           npm ci --ignore-scripts --no-audit --no-fund
-      - name: Historical application contracts
+      - name: Pinned application, CMS and release contracts
         id: historical
-        continue-on-error: true
         run: |
           node tools/gaga/prepare.mjs
           node --test tools/documentation/*.test.mjs tools/contextual/*.test.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/document-contracts.log"

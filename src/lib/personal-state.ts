@@ -140,6 +140,7 @@ export function createPersonalStateStore(options: {
             return undefined;
         } });
         // Preserve future records verbatim; an older client must not downgrade their schema.
+        if(object(values[0]) && ((values[0].schemaVersion!==undefined&&values[0].schemaVersion!==1)||(values[0].version!==undefined&&values[0].version!==1)||(values[0].storageVersion!==undefined&&values[0].storageVersion!==1)||(values[0].namespace!==undefined&&values[0].namespace!==namespace))){writable=false;return annotations.read();}
         if (Array.isArray(values[0]) && values[0].some(v => object(v) && ((v.schemaVersion !== undefined && v.schemaVersion !== 1) || (v.storageVersion !== undefined && v.storageVersion !== 1) || (v.namespace !== undefined && v.namespace !== namespace)))) {
             writable = false;
             return annotations.read();
@@ -227,7 +228,7 @@ export function createPersonalStateStore(options: {
         remove(id: string) { migrate(); if (!writable)
             return false; annotations.remove(id); const ok = !annotations.read().some(v => v.id === id); if (ok)
             changed('remove', id); return ok; },
-        snapshot() { const marks = migrate(), continuity = reading.read(); return { namespace, schemaVersion, reading: continuity, saved: this.saved(), preferences: Object.fromEntries(['reader', 'theme', 'language', 'identity', 'designLanguage', 'sfx'].map(k => [k, preference(keys[k as keyof typeof keys])])), highlights: marks, notes: marks.filter(r => r.note?.trim()), quotes: marks.filter(r => r.quoted), history: continuity.items, context: readJson(keys.returnContext, null, (_v): _v is unknown => true, storage) }; },
+        snapshot() { const marks = migrate().filter(v=>localPersonalHref(v.canonicalUrl,origin)===v.articleId), continuity = reading.read(); return { namespace, schemaVersion, reading: continuity, saved: this.saved(), preferences: Object.fromEntries(['reader', 'theme', 'language', 'identity', 'designLanguage', 'sfx'].map(k => [k, preference(keys[k as keyof typeof keys])])), highlights: marks, notes: marks.filter(r => r.note?.trim()), quotes: marks.filter(r => r.quoted), history: continuity.items, context: readJson(keys.returnContext, null, (_v): _v is unknown => true, storage) }; },
         now: () => now().toISOString(), origin
     };
 }
