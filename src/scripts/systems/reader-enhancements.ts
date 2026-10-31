@@ -1,4 +1,4 @@
-import { openSuperShare } from './super-share';
+import { openSuperShare, shareSelectionIsCurrent } from './super-share';
 import { contextualSurfaceRoles } from '../../config/contextual-surfaces.mjs';
 import { renderIconSvg } from '../../lib/icons';
 import { readAllHighlights, saveHighlight, removeHighlight, updateHighlightNote, resolveContentLanguage, type HighlightEntity, type HighlightLocation } from './reading-knowledge';
@@ -115,7 +115,8 @@ function renderSelectionMenu(c:SelectionCapture){closeSelectionMenu();const menu
  menu.querySelector('[data-gaga-action="selection-note"]')?.addEventListener('click',()=>{form.hidden=false;bar.hidden=true;field.focus();placeSurface(menu,c.range.getBoundingClientRect());});
  menu.querySelector('[data-gaga-action="save-selection-note"]')?.addEventListener('click',()=>{if(field.value.trim()&&persistCapture(c,field.value.trim()))closeSelectionMenu(true);});
  menu.querySelector('[data-gaga-action="selection-quote"]')?.addEventListener('click',()=>{if(persistCapture(c,undefined,true))closeSelectionMenu(true);});
- menu.querySelector('[data-gaga-action="selection-super-share"]')?.addEventListener('click',event=>{event.stopPropagation();if(captureIsCurrent(c)){closeSelectionMenu();openSuperShare({selection:c.text,anchor:c.block.id||undefined,target:c.block});}});
+ menu.querySelector('[data-gaga-action="selection-super-share"]')?.addEventListener('click',event=>{event.stopPropagation();if(shareSelectionIsCurrent(c)){closeSelectionMenu();openSuperShare({selection:c.text,anchor:c.block.id||undefined,target:c.block});}});
+ menu.querySelector('details')?.addEventListener('toggle',()=>{if(menu.isConnected)placeSurface(menu,c.range.getBoundingClientRect());});
 }
 async function createHighlightFromSelection(range:Range,selection:Selection,_article:HTMLElement,note?:string){const current=currentPersonalContent();if(!current)return;await preparePersonalBlocks(current.body);const captured=captureSelection(current.body,range,selection);if(captured)persistCapture(captured,note);}
 async function copyTextToClipboard(text:string){try{if(!navigator.clipboard?.writeText)throw Error('Unavailable');await navigator.clipboard.writeText(text);requestToast({message:'Teks disalin.',tone:'ok'});}catch{requestToast({message:'Papan klip tidak tersedia. Gunakan salin bawaan browser.',tone:'warn'});}}

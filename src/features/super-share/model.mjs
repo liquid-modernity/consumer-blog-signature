@@ -1,4 +1,4 @@
-import { personalCanonicalOrigin } from '../config/personal-state.mjs';
+import { personalCanonicalOrigin } from '../../config/personal-state.mjs';
 // Public source identity only; personal annotations and browser preview origins never enter payloads.
 export function resolveShareContext(input) {
  if(typeof input?.contentIdentity!=='string' || !input.contentIdentity.trim() || typeof input.title!=='string' || !input.title.trim())return null;

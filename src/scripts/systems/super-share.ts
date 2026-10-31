@@ -1,12 +1,16 @@
 import { createShareCapability } from '@gaga/engine-runtime/runtime/share';
 import { requestReaderPanel } from '@gaga/engine-runtime/runtime/events';
 import { currentPersonalContent } from './personal-context';
-import { resolveShareContext,shareActions,shareCopy,sharePayload,textCard,posterInput,wrapPosterText,shareOutcomeMessage } from '../../lib/super-share.mjs';
+import { resolveShareContext,shareActions,shareCopy,sharePayload,textCard,posterInput,wrapPosterText,shareOutcomeMessage } from '../../features/super-share/model.mjs';
 import { siteConfig } from '../../config/site';
 type Context=NonNullable<ReturnType<typeof resolveShareContext>>;
 let active:Context|null=null,returnTo:HTMLElement|null=null,previousState='collapsed';
 function elements(){const island=document.querySelector<HTMLElement>('[data-gaga-action-runtime]');return {island,panel:island?.querySelector<HTMLElement>('[data-gaga-super-share-panel]')};}
 export function currentShareContext(selection?:string,anchor?:string){const current=currentPersonalContent();if(!current)return null;return resolveShareContext({...current.content,selection,anchor,date:document.querySelector('meta[property="article:published_time"]')?.getAttribute('content')});}
+export function shareSelectionIsCurrent(c:{range:Range;text:string;block:HTMLElement;blockText:string;content:{contentIdentity:string}}){
+ const selection=window.getSelection();if(currentPersonalContent()?.content.contentIdentity!==c.content.contentIdentity||!c.block.isConnected||c.block.textContent!==c.blockText||!selection||selection.rangeCount!==1||selection.toString()!==c.text)return false;
+ try{const range=selection.getRangeAt(0);return range.compareBoundaryPoints(Range.START_TO_START,c.range)===0&&range.compareBoundaryPoints(Range.END_TO_END,c.range)===0;}catch{return false;}
+}
 function feedback(message:string){const status=elements().panel?.querySelector<HTMLElement>('[data-gaga-share-feedback]');if(status)status.textContent=message;}
 export function closeSuperShare(restore=false){if(!active)return false;active=null;const {island,panel}=elements();if(panel){panel.hidden=true;panel.inert=true;}if(island){delete island.dataset.gagaShareOpen;if(restore)island.dataset.gagaState=returnTo?.closest('[data-gaga-action-runtime]')?'peek':previousState;}
  const target=returnTo;returnTo=null;if(restore&&target?.isConnected){if(!target.hasAttribute('tabindex')&&!target.matches('button,a,input,summary')){target.tabIndex=-1;target.addEventListener('blur',()=>target.removeAttribute('tabindex'),{once:true});}requestAnimationFrame(()=>target.focus({preventScroll:true}));}return true;}

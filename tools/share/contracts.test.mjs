@@ -1,5 +1,5 @@
 import test from'node:test';import assert from'node:assert/strict';import{readFileSync}from'node:fs';import{execFileSync}from'node:child_process';
-import{resolveShareContext,shareCopy,sharePayload,shareActions,textCard,posterInput,wrapPosterText,shareOutcomeMessage}from'../../src/lib/super-share.mjs';
+import{resolveShareContext,shareCopy,sharePayload,shareActions,textCard,posterInput,wrapPosterText,shareOutcomeMessage}from'../../src/features/super-share/model.mjs';
 import{createShareCapability}from'@gaga/engine-runtime/runtime/share';import{whole,selected}from'./fixtures.mjs';
 const context=resolveShareContext(whole),quote=resolveShareContext(selected);
 test('canonical public identity rejects preview origins malformed metadata and credentials',()=>{assert.equal(context.canonicalUrl,whole.canonicalUrl);for(const canonicalUrl of ['http://localhost:4173/a','https://evil.example/a','https://user:password@consumer-blog-signature.ratriatra.workers.dev/a','javascript:alert(1)'])assert.equal(resolveShareContext({...whole,canonicalUrl}),null);for(const input of [null,{}, {...whole,title:''},{...whole,contentIdentity:{}}])assert.equal(resolveShareContext(input),null);});
