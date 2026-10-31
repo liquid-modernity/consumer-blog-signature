@@ -30,3 +30,5 @@ test('narrow overflow retains bounded primary commands and viewport safe geometr
 test('OS and existing Reader reduced motion are additive, functionality unaffected',()=>{
  assert.equal(signatureReducedMotion(true,'system'),true);assert.equal(signatureReducedMotion(false,'reduced'),true);assert.equal(signatureReducedMotion(false,'system'),false);assert.equal(signatureVisibility('visible','retract',false),'retracted');
 });
+
+test('first post-pin travel is retained even when focusout and scroll share a frame',()=>{const released={...initialScrollIntent(900),signal:'hold'};const next=move(released,1100);assert.equal(signatureVisibility('pinned',next.signal,false),'retracted');assert.equal(signatureVisibility('pinned',move(released,900).signal,false),'visible');});

@@ -21,8 +21,8 @@ export function resolveScrollIntent(previous, { position, viewport, contentEnd, 
 }
 export function signatureVisibility(previous, signal, pinned) {
   if (pinned) return 'pinned';
-  if (previous === 'pinned' || signal === 'reveal') return 'visible';
-  return signal === 'retract' ? 'retracted' : previous;
+  if (signal === 'retract') return 'retracted';
+  return previous === 'pinned' || signal === 'reveal' ? 'visible' : previous;
 }
 export function notchGeometry({ state = 'collapsed', search = false, audio = false, panel = false, viewport = 1440, actions = 0 }, policy = signatureMotion) {
   const geometry = audio ? 'audio' : panel || state === 'expanded' ? 'panel' : search ? 'search' : state === 'peek' ? 'context' : 'compact';

@@ -70,8 +70,8 @@ export function initSignatureMotion() {
       outline: pointerOutline || !!outline?.contains(document.activeElement) || sheet?.dataset.gagaState === 'open'
     };
     const released = notchState === 'pinned' && !pins.notch || outlineState === 'pinned' && !pins.outline;
-    if (released) intent = { ...initialScrollIntent(m.scrollTop), signal: 'hold' };
-    else intent = resolveScrollIntent(intent, { position: m.scrollTop, viewport: m.viewportHeight, contentEnd, active });
+    if (released) intent = { ...initialScrollIntent(intent.position), signal: 'hold' };
+    intent = resolveScrollIntent(intent, { position: m.scrollTop, viewport: m.viewportHeight, contentEnd, active });
     notchState = signatureVisibility(notchState, intent.signal, pins.notch);
     outlineState = signatureVisibility(outlineState, intent.signal, pins.outline);
     project();
