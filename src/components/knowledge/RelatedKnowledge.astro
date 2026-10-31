@@ -1,4 +1,5 @@
 ---
+import { presence } from '../../lib/presence';
 import Icon from '../ui/Icon.astro';
 
 interface RelatedArticle {
@@ -40,7 +41,7 @@ const {
   },
   sources = [
     { name: 'GAGA Publishing Architecture Specification', type: 'Framework Spec', href: '/library' },
-    { name: 'Gaga Engine Runtime Contract', type: 'Kernel Contract', href: '/about' }
+    ...(presence.route('profile')?[{ name: 'Gaga Engine Runtime Contract', type: 'Kernel Contract', href: presence.route('profile') }]:[])
   ],
   relatedArticles = [
     {

@@ -1,3 +1,4 @@
+import { presence } from './presence';
 import { inferPublicationType, inferCanonicalTopics } from './pakrpp-content';
 import {
   formatContentDate,
@@ -264,7 +265,7 @@ function buildArticleRelationsValues(
   for (const author of authors) {
     values.push({
       text: `writtenBy: ${author}`,
-      href: routes.about.author
+      href: presence.route('author')
     });
   }
 

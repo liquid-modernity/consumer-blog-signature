@@ -1,5 +1,6 @@
 ---
 import { getCollection, render } from 'astro:content';
+import { siteConfig } from '../config/site';
 import { presence } from '../lib/presence';
 import { projectPresenceRoutes } from '../features/personal-presence/model.mjs';
 import { resolvePresenceContent } from '../lib/presence-content';
@@ -35,8 +36,8 @@ const { entry, capability } = Astro.props;
 if (!entry && !capability) throw Error('Missing public route source');
 const rendered = entry ? await render(entry) : null;
 const Content = rendered?.Content;
-const presenceData = capability ? await resolvePresenceContent(capability) : {id:'',title:'',summary:'',sections:[]};
-const entryData = capability ? {...(entry?.data??{}),title:entry?.data.title??presenceData.title,summary:entry?.data.summary??presenceData.summary,description:entry?.data.description??presenceData.summary,contentKind:'page',contentId:presenceData.id,canonical:capability.canonicalUrl,status:'published',visibility:'public',language:'id'} : entry.data;
+const presenceData = capability ? await resolvePresenceContent(capability) : {id:'',title:'',summary:'',language:siteConfig.defaultLanguage,sections:[]};
+const entryData = capability ? {...(entry?.data??{}),title:entry?.data.title??presenceData.title,summary:entry?.data.summary??presenceData.summary,description:entry?.data.description??presenceData.summary,contentKind:'page',contentId:presenceData.id,canonical:capability.canonicalUrl,status:'published',visibility:'public',language:entry?.data.language??presenceData.language??siteConfig.defaultLanguage} : entry.data;
 const headings=rendered?.headings??presenceData?.sections.map((section:any)=>({depth:2,text:section.label.id,slug:section.id}))??[];
 ---
 <GagaSiteLayout entryData={entryData} routeContext={normalizeGagaRouteContext({ ...Astro.locals.gagaRoute, toc: { items: headings.map((h:any)=>({depth:h.depth,text:h.text,slug:h.slug})) } })}>

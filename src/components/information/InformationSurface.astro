@@ -1,8 +1,7 @@
 ---
+import { presenceNavigation } from '../../lib/presence';
 const links = [
-  ['About','/about'],
-  ['Support','/support'],
-  ['Authors','/authors'],
+  ...presenceNavigation().map(item=>[item.title,item.href]),
   ['Legal','/legal'],
   ['Privacy','/privacy'],
   ['Terms','/terms'],

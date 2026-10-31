@@ -9,6 +9,7 @@ import {
   getCanonicalTopicsWithCounts,
   toCanonicalPublications
 } from '../../lib/pakrpp-content';
+import { presenceNavigation } from '../../lib/presence';
 import { routes } from '../../config/routes';
 
 export const prerender = true;
@@ -109,7 +110,7 @@ const entryData = {
         <li><a href={routes.knowledge.index}>Indeks Pengetahuan</a></li>
         <li><a href={routes.knowledge.tags}>Tag Pengetahuan</a></li>
         <li><a href={routes.knowledge.references}>Objek Referensi</a></li>
-        <li><a href={routes.about.root}>Tentang</a> · <a href={routes.about.author}>Penulis</a> · <a href={routes.about.support}>Dukungan</a> · <a href={routes.about.contact}>Kontak</a></li>
+        {presenceNavigation().map(item=><li><a href={item.href} data-gaga-i18n-id={item.title} data-gaga-i18n-en={item.labelEn}>{item.title}</a></li>)}
         <li><a href={routes.legal.privacy}>Kebijakan Privasi</a> · <a href={routes.legal.terms}>Ketentuan Penggunaan</a> · <a href={routes.legal.disclaimer}>Penafian</a> · <a href={routes.legal.license}>Lisensi</a></li>
       </ul>
     </section>

@@ -1,3 +1,4 @@
+import { presence } from './presence';
 import {
   getArticles,
   getAuthors,
@@ -170,7 +171,7 @@ function buildRelationsForPublication(
       targetId: author,
       targetKind: 'author',
       label: author,
-      href: routes.about.author
+      href: presence.route('author')
     });
   }
 
@@ -426,7 +427,7 @@ export async function getSystematicKnowledgeIndex(): Promise<KnowledgeIndexLette
       id: author.contentId,
       title: author.title,
       kindLabel: 'Penulis',
-      href: routes.about.author,
+      href: author.href,
       meta: author.summary ?? 'Kontributor Editorial'
     });
   }
