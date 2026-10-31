@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync,writeFileSync } from 'node:fs';
 const r=JSON.parse(readFileSync('.gaga/share-results.json'));
 assert.equal(r.stats.expected,16);assert.equal(r.stats.skipped,0);assert.equal(r.stats.unexpected,0);assert.equal(r.stats.flaky,0);assert.deepEqual(r.errors,[]);
-const cases=new Set();const byteProofs=[];const actions={clipboardAttempts:0,clipboardSuccess:0,nativeAttempts:0,nativeSuccess:0,downloads:0,selection:0};
+const cases=new Set();const byteProofs=[];const actions={clipboardAttempts:0,clipboardSuccess:0,nativeAttempts:0,nativeSuccess:0,downloads:0,selection:0,platformClipboard:0};
 const attachment=a=>JSON.parse(a.body?Buffer.from(a.body,'base64').toString():readFileSync(a.path,'utf8'));
 const titles=[...readFileSync('tools/share/browser/share.spec.ts','utf8').matchAll(/\btest\('([^']+)'/g)].map(m=>m[1]);
 assert.equal(titles.length,8);const required=new Set(titles.flatMap(title=>['desktop','touch'].map(project=>JSON.stringify([title,project]))));
