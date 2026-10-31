@@ -168,3 +168,19 @@ test("extra Personal State frame bytes remain rejected",()=>{
 test("Personal State profile cannot admit unrelated routing changes",()=>{
  const r=check(root=>{personalized(root);const p=join(root,'src/config/routes.ts');writeFileSync(p,readFileSync(p,'utf8')+'\n// not qualified\n');});assert.notEqual(r.status,0);assert.match(r.stderr,/Unintended application UI/);
 });
+
+function motionProfile(root) {
+ for (const file of inventory.files) writeFileSync(join(root,file.path),execFileSync('git',['show','e276f57b063bd2f8f8b5968f6388607eca1a495a:'+file.path]));
+}
+test("the whole exact motion profile passes with qualified hosted provenance",()=>{
+ const r=check(motionProfile);assert.equal(r.status,0,r.stderr);assert.match(r.stdout,/whole qualified motion profile e276f57b063bd2f8f8b5968f6388607eca1a495a/);assert.match(r.stdout,/41178960284/);
+});
+test("motion and earlier profiles cannot form an unqualified hybrid",()=>{
+ const r=check(root=>{motionProfile(root);const p='src/styles/partials/_action-island.scss';writeFileSync(join(root,p),execFileSync('git',['show','307118dd9776630bc0dd2ccc605285d8d52ef452:'+p]));});assert.notEqual(r.status,0);assert.match(r.stderr,/Unintended application UI/);
+});
+test("extra motion component bytes remain rejected",()=>{
+ const r=check(root=>{motionProfile(root);const p=join(root,'src/components/frame/ActionRuntime.astro');writeFileSync(p,readFileSync(p,'utf8')+'\n<!-- not qualified -->\n');});assert.notEqual(r.status,0);assert.match(r.stderr,/Unintended application UI/);
+});
+test("motion admission cannot permit unrelated routing changes",()=>{
+ const r=check(root=>{motionProfile(root);const p=join(root,'src/config/routes.ts');writeFileSync(p,readFileSync(p,'utf8')+'\n// not qualified\n');});assert.notEqual(r.status,0);assert.match(r.stderr,/Unintended application UI/);
+});
