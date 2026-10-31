@@ -1,4 +1,6 @@
+import { personalPresenceConfig } from './personal-presence.mjs';
 export const routes = {
+  presence: personalPresenceConfig.routes,
   root: '/',
   anchors: {
     latest: '/#latest',
@@ -39,10 +41,10 @@ export const routes = {
     referenceDetail: (slug: string) => `/knowledge/references/${String(slug).replace(/^\/+|\/+$/g, '')}`
   },
   about: {
-    root: '/about',
-    author: '/about/author',
-    support: '/about/support',
-    contact: '/about/contact'
+    root: personalPresenceConfig.routes.profile,
+    author: personalPresenceConfig.routes.author,
+    support: personalPresenceConfig.routes.support,
+    contact: personalPresenceConfig.routes.contact
   },
   system: {
     root: '/system',

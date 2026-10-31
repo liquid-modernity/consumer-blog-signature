@@ -1,8 +1,6 @@
 ---
-import { siteConfig } from '../../config/site';
+import { presence } from '../../lib/presence';
+import PresenceContent from './PresenceContent.astro';
+const capability=presence.capabilities.find(c=>c.id==='contact');
 ---
-<section class="gaga-contact-card">
-  <h2 id="kontak">Contact</h2>
-  <p><a href={`mailto:${siteConfig.contact.email}`}>{siteConfig.contact.email}</a></p>
-  {siteConfig.contact.whatsapp ? <p><a href={`https://wa.me/${siteConfig.contact.whatsapp}`}>WhatsApp</a></p> : null}
-</section>
+{capability&&<PresenceContent capability={capability} content={capability.data} />}

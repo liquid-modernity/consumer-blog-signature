@@ -85,6 +85,12 @@ jobs:
           node --test tools/family/*.test.mjs
           npx --no-install playwright test --config tools/family/playwright.config.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/family-browser.log"
           node tools/family/browser-report.mjs
+      - name: Personal Presence qualification
+        run: |
+          node --test tools/presence/*.test.mjs
+          node tools/presence/fixture-build.mjs
+          npx --no-install playwright test --config tools/presence/playwright.config.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/presence-browser.log"
+          node tools/presence/browser-report.mjs
       - name: Super Share qualification
         run: |
           node --test tools/share/*.test.mjs
@@ -217,6 +223,12 @@ jobs:
         run: |
           npx --no-install playwright test --config tools/family/playwright.config.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/family-browser.log"
           node tools/family/browser-report.mjs
+      - name: Personal Presence production smoke
+        env:
+          GAGA_PRODUCTION_BROWSER_URL: https://consumer-blog-signature.ratriatra.workers.dev
+        run: |
+          npx --no-install playwright test --config tools/presence/playwright.config.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/presence-browser.log"
+          node tools/presence/browser-report.mjs
       - name: Super Share production smoke
         env:
           GAGA_PRODUCTION_BROWSER_URL: https://consumer-blog-signature.ratriatra.workers.dev

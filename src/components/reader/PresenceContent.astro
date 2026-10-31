@@ -1,0 +1,21 @@
+---
+import { presenceLabel } from '../../features/personal-presence/model.mjs';
+interface Props { content: { sections:any[]; links?:any[]; }; capability: {id:string; presentationProfile:string;}; }
+const {content,capability}=Astro.props;
+---
+<div class="gaga-presence-content" data-gaga-presence={capability.id} data-gaga-presence-presentation={capability.presentationProfile}>
+ <slot />
+ {content.sections.map(section=><section data-gaga-presence-section={section.id}>
+  <h2 id={section.id} data-gaga-i18n-id={presenceLabel(section.label)} data-gaga-i18n-en={presenceLabel(section.label,'en')}>{presenceLabel(section.label)}</h2>
+  {section.text&&<p>{section.text}</p>}
+  {section.items.length>0&&<ul>{section.items.map((item:any)=><li>{item.href?<a href={item.href}>{item.title}</a>:<strong>{item.title}</strong>}{item.summary&&<> — {item.summary}</>}</li>)}</ul>}
+ </section>)}
+ {content.links&&content.links.length>0&&<ul>{content.links.map(link=><li><a href={link.href} data-gaga-i18n-id={presenceLabel(link.label)} data-gaga-i18n-en={presenceLabel(link.label,'en')}>{presenceLabel(link.label)}</a></li>)}</ul>}
+</div>
+<style>
+ .gaga-presence-content { min-inline-size:0; overflow-wrap:anywhere; }
+ .gaga-presence-content section + section { margin-block-start:var(--gaga-space-6,2rem); }
+ .gaga-presence-content li { margin-block:.5rem; }
+ .gaga-presence-content a { text-underline-offset:.18em; }
+ .gaga-presence-content a:focus-visible { outline:2px solid currentColor; outline-offset:4px; }
+</style>

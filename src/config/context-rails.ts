@@ -1,3 +1,4 @@
+import { presenceNavigation } from '../lib/presence';
 import { actionById } from './actions';
 import { documentExperience, documentNavigation } from './document-experience';
 import type { GagaWorkspaceDefinition } from './workspaces';
@@ -135,12 +136,7 @@ function referenceItems(currentPath: string): NavItem[] {
     ];
   }
 
-  return [
-    item('about', 'About', '/about', 'article'),
-    item('authors', 'Authors', '/authors', 'person'),
-    item('contact', 'Contact', '/contact', 'mail'),
-    item('support', 'Support', '/support', 'help')
-  ];
+  return presenceNavigation().map(p=>({...p,label:p.title}));
 }
 
 export function globalNavigationProjection() {

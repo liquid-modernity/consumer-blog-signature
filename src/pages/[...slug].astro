@@ -1,5 +1,9 @@
 ---
 import { getCollection, render } from 'astro:content';
+import { presence } from '../lib/presence';
+import { projectPresenceRoutes } from '../features/personal-presence/model.mjs';
+import { resolvePresenceContent } from '../lib/presence-content';
+import PresenceContent from '../components/reader/PresenceContent.astro';
 import GagaSiteLayout from '../components/gaga/GagaSiteLayout.astro';
 import { normalizeGagaRouteContext } from '../gaga/content/runtime-route';
 
@@ -18,14 +22,7 @@ export async function getStaticPaths() {
   };
 
   const entries = await getCollection('docs');
-  const paths = entries.map((entry) => ({
-    params: {
-      slug: toRouteSlug(entry.id)
-    },
-    props: {
-      entry
-    }
-  }));
+  const paths=projectPresenceRoutes(presence,entries,toRouteSlug);
 
   if (!paths.some((path) => path.params.slug === undefined)) {
     throw new Error('[GAGA] Root content route is missing. Expected src/content/docs/index.md or index.mdx.');
@@ -34,16 +31,14 @@ export async function getStaticPaths() {
   return paths;
 }
 
-const { entry } = Astro.props;
-
-if (!entry) {
-  return Astro.redirect('/404');
-}
-
-const { Content, headings } = await render(entry);
-const entryData = entry.data as Record<string, unknown>;
+const { entry, capability } = Astro.props;
+if (!entry && !capability) throw Error('Missing public route source');
+const rendered = entry ? await render(entry) : null;
+const Content = rendered?.Content;
+const presenceData = capability ? await resolvePresenceContent(capability) : {id:'',title:'',summary:'',sections:[]};
+const entryData = capability ? {...(entry?.data??{}),title:entry?.data.title??presenceData.title,summary:entry?.data.summary??presenceData.summary,description:entry?.data.description??presenceData.summary,contentKind:'page',contentId:presenceData.id,canonical:capability.canonicalUrl,status:'published',visibility:'public',language:'id'} : entry.data;
+const headings=rendered?.headings??presenceData?.sections.map((section:any)=>({depth:2,text:section.label.id,slug:section.id}))??[];
 ---
-
-<GagaSiteLayout entryData={entryData} routeContext={normalizeGagaRouteContext({ ...Astro.locals.gagaRoute, toc: { items: headings.map(h => ({ depth: h.depth, text: h.text, slug: h.slug })) } })}>
-  <Content />
+<GagaSiteLayout entryData={entryData} routeContext={normalizeGagaRouteContext({ ...Astro.locals.gagaRoute, toc: { items: headings.map((h:any)=>({depth:h.depth,text:h.text,slug:h.slug})) } })}>
+ {capability ? <PresenceContent capability={capability} content={presenceData}>{Content&&<Content />}</PresenceContent> : Content&&<Content />}
 </GagaSiteLayout>

@@ -3,6 +3,7 @@ const projection=JSON.parse(readFileSync(new URL('./.gaga/host-projection.json',
 import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import { rehypeTaskListAccessibility } from '@gaga/engine-capabilities/content/task-list-accessibility';
+import { remarkPresenceLinks } from './src/lib/remark-presence.mjs';
 import { remarkObsidianBridge } from './src/lib/remark-obsidian.mjs';
 
 export default defineConfig({
@@ -17,7 +18,7 @@ export default defineConfig({
   outDir: './'+projection.outputs.find(output=>output.target==='pages').directory,
   trailingSlash: 'never',
   markdown: {
-    remarkPlugins: [remarkObsidianBridge],
+    remarkPlugins: [remarkObsidianBridge, remarkPresenceLinks],
     rehypePlugins: [rehypeTaskListAccessibility]
   },
   integrations: [mdx()],

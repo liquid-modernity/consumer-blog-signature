@@ -1,3 +1,4 @@
+import { presenceNavigation } from '../lib/presence';
 import { i18nLabel, type I18nMessageKey } from './i18n';
 
 export type NavItem = {
@@ -71,12 +72,7 @@ export const navGroups: NavGroup[] = [
       { id: 'knowledge-references', label: 'Referensi', labelEn: 'References', href: '/knowledge/references', icon: 'article' }
     ]
   },
-  group('pages', 'navigation.pages', 'folder_open', [
-    item('about', 'navigation.about', '/about', 'article'),
-    item('authors', 'navigation.authors', '/about/author', 'person'),
-    item('support', 'navigation.support', '/about/support', 'help'),
-    item('contact', 'navigation.contact', '/about/contact', 'mail')
-  ]),
+  group('pages', 'navigation.pages', 'folder_open', presenceNavigation().map(p=>({...p,label:p.title}))),
   group('legal', 'navigation.legal', 'policy', [
     item('privacy-policy', 'navigation.privacyPolicy', '/legal/privacy', 'shield'),
     item('terms-of-use', 'navigation.termsOfUse', '/legal/terms', 'contract'),

@@ -1,3 +1,4 @@
+import { presence } from '../lib/presence';
 import type { APIRoute } from 'astro';
 import { getAuthors, getTagGroups, getTopicGroups } from '../lib/content';
 import { getArchiveYears, toCanonicalPublications } from '../lib/pakrpp-content';
@@ -33,10 +34,7 @@ export const GET: APIRoute = async ({ site }) => {
     routes.knowledge.index,
     routes.knowledge.tags,
     routes.knowledge.references,
-    routes.about.root,
-    routes.about.author,
-    routes.about.support,
-    routes.about.contact,
+    ...presence.capabilities.map(c=>c.path),
     routes.system.root,
     routes.system.sitemap,
     routes.system.rss,

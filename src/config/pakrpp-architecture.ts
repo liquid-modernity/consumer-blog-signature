@@ -1,3 +1,4 @@
+import { presenceNavigation } from '../lib/presence.ts';
 /**
  * PAKRPP Scalable Knowledge Publication System — Canonical Architecture & Registries
  *
@@ -632,12 +633,7 @@ export const navigationConfig = Object.freeze({
       labelEn: 'About',
       enabled: true,
       order: 6,
-      items: [
-        { id: 'about-root', label: 'Tentang', labelEn: 'About', href: '/about', meta: 'Prinsip dan mandat editorial' },
-        { id: 'about-author', label: 'Penulis', labelEn: 'Author', href: '/about/author', meta: 'Profil penulis & kontributor' },
-        { id: 'about-support', label: 'Dukungan', labelEn: 'Support', href: '/about/support', meta: 'Keberlanjutan publikasi independen' },
-        { id: 'about-contact', label: 'Kontak', labelEn: 'Contact', href: '/about/contact', meta: 'Korespondensi & diskusi' }
-      ]
+      items: presenceNavigation(true).map(p=>({id:'about-'+p.id,label:p.title,labelEn:p.labelEn,href:p.href,meta:p.summary}))
     },
     {
       id: 'system',

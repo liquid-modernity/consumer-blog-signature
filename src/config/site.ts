@@ -1,4 +1,4 @@
-import declaration from '../../gaga.app.json';
+import declaration from '../../gaga.app.json' with {type:'json'};
 
 export const siteConfig = {
   name: 'PAKRPP',
