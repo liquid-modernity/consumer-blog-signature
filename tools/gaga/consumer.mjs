@@ -1,3 +1,4 @@
+import { readRegistryMetadata } from './registry-read.mjs';
 import {verifyStaticAssetRoutes} from './asset-routes.mjs';
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
@@ -36,12 +37,11 @@ const lock = JSON.parse(readFileSync("package-lock.json")),
 for (const [name, p] of Object.entries(lock.packages))
   if (name.startsWith("node_modules/@gaga/")) {
     const packageName = name.slice("node_modules/".length);
-    const response = await fetch(
+    const response = await readRegistryMetadata(
       "https://npm.cloudsmith.io/gaga/gaga/" +
         encodeURIComponent(packageName) +
         "/" +
         p.version,
-      { signal: AbortSignal.timeout(20000) },
     );
     assert.equal(response.status, 200);
     const metadata = await response.json();
