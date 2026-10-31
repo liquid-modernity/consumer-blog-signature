@@ -458,32 +458,20 @@ mark.gaga-highlight-mark,
   z-index: 100;
   display: flex;
   flex-direction: column;
-  background: var(--gaga-surface-elevated, #14283f);
-  border: 1px solid var(--gaga-line-strong, rgba(188, 215, 241, 0.35));
-  border-radius: var(--gaga-radius-md, 6px);
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.48), 0 2px 8px rgba(0, 0, 0, 0.24);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  animation: gagaMenuFadeIn 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  background: var(--gaga-context-surface);
+  border: 0;
+  border-radius: var(--gaga-context-radius);
+  box-shadow: var(--gaga-context-shadow);
+  animation: gaga-context-emerge var(--gaga-context-motion-duration) var(--gaga-context-motion-easing);
   max-width: calc(100vw - 24px);
 }
 
-@keyframes gagaMenuFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(4px) scale(0.97);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
 
 .gaga-selection-menu__bar {
   display: flex;
   align-items: center;
-  padding: 0.25rem 0.35rem;
-  gap: 0.2rem;
+  padding: var(--gaga-context-space);
+  gap: var(--gaga-context-space);
 }
 
 .gaga-selection-menu__btn {
@@ -492,23 +480,23 @@ mark.gaga-highlight-mark,
   gap: 0.35rem;
   padding: 0.4rem 0.6rem;
   background: transparent;
-  color: var(--gaga-ink, #f0f7ff);
+  color: var(--gaga-context-text);
   border: none;
   border-radius: var(--gaga-radius-sm, 4px);
   font-family: var(--gaga-font-ui, sans-serif);
-  font-size: 0.78rem;
+  font-size: var(--gaga-context-control-size);
   font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
   transition: background-color 0.12s ease, color 0.12s ease;
 
   &:hover {
-    background: var(--gaga-color-interactive-active, rgba(114, 169, 220, 0.2));
-    color: var(--gaga-color-interactive-hover, #ffffff);
+    background: var(--gaga-context-hover);
+    color: var(--gaga-context-text);
   }
 
   &:focus-visible {
-    outline: 2px solid var(--gaga-color-focus, #ffffff);
+    outline: 2px solid var(--gaga-context-focus);
     outline-offset: 1px;
   }
 
@@ -520,14 +508,14 @@ mark.gaga-highlight-mark,
     line-height: 1;
     background: rgba(255, 255, 255, 0.1);
     border-radius: 3px;
-    color: var(--gaga-muted, #b6c8d9);
+    color: var(--gaga-context-muted);
   }
 }
 
 .gaga-selection-menu__sep {
   width: 1px;
   height: 1.1rem;
-  background: var(--gaga-line, rgba(188, 215, 241, 0.18));
+  background: var(--gaga-context-divider);
   margin-inline: 0.1rem;
 }
 
@@ -536,15 +524,15 @@ mark.gaga-highlight-mark,
   align-items: center;
   gap: 0.4rem;
   padding: 0.35rem;
-  background: var(--gaga-surface, #0b1726);
+  background: var(--gaga-context-surface);
   border-radius: inherit;
 }
 
 .gaga-selection-menu__field {
   flex: 1;
-  background: var(--gaga-bg, #07101d);
-  color: var(--gaga-ink, #f0f7ff);
-  border: 1px solid var(--gaga-line, rgba(188, 215, 241, 0.2));
+  background: var(--gaga-context-elevated);
+  color: var(--gaga-context-text);
+  border: 1px solid var(--gaga-context-divider);
   border-radius: var(--gaga-radius-sm, 4px);
   padding: 0.35rem 0.5rem;
   font-size: 0.8rem;
@@ -552,7 +540,7 @@ mark.gaga-highlight-mark,
 
   &:focus {
     outline: none;
-    border-color: var(--gaga-blue, #2563eb);
+    border-color: var(--gaga-context-focus);
   }
 }
 
@@ -561,13 +549,13 @@ mark.gaga-highlight-mark,
   z-index: 100;
   width: 290px;
   max-width: calc(100vw - 32px);
-  background: var(--gaga-surface-elevated, #14283f);
-  border: 1px solid var(--gaga-line-strong, rgba(188, 215, 241, 0.35));
-  border-radius: var(--gaga-radius-md, 6px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
-  padding: 0.65rem;
+  background: var(--gaga-context-surface);
+  border: 0;
+  border-radius: var(--gaga-context-radius);
+  box-shadow: var(--gaga-context-shadow);
+  padding: var(--gaga-context-space);
   font-size: 0.82rem;
-  animation: gagaMenuFadeIn 0.15s ease-out;
+  animation: gaga-context-emerge var(--gaga-context-motion-duration) var(--gaga-context-motion-easing);
 }
 
 
@@ -587,9 +575,9 @@ mark.gaga-highlight-mark,
 .gaga-highlight-popup__textarea {
   width: 100%;
   box-sizing: border-box;
-  background: var(--gaga-bg, #07101d);
-  color: var(--gaga-ink, #f0f7ff);
-  border: 1px solid var(--gaga-line, rgba(188, 215, 241, 0.2));
+  background: var(--gaga-context-elevated);
+  color: var(--gaga-context-text);
+  border: 1px solid var(--gaga-context-divider);
   border-radius: 4px;
   padding: 0.4rem;
   font-size: 0.8rem;
@@ -599,7 +587,7 @@ mark.gaga-highlight-mark,
 
   &:focus {
     outline: none;
-    border-color: var(--gaga-blue, #2563eb);
+    border-color: var(--gaga-context-focus);
   }
 }
 
@@ -1217,10 +1205,10 @@ mark.gaga-highlight-mark,
   box-sizing: border-box;
   max-height: calc(100dvh - 24px);
   overflow: auto;
-  color: var(--gaga-ink);
+  color: var(--gaga-context-text);
   [hidden] { display: none !important; }
   button, summary { min-height: 44px; cursor: pointer; }
-  button:focus-visible, summary:focus-visible, textarea:focus-visible { outline: 2px solid var(--gaga-color-focus, currentColor); outline-offset: 2px; }
+  button:focus-visible, summary:focus-visible, textarea:focus-visible { outline: 2px solid var(--gaga-context-focus); outline-offset: -3px; }
   textarea { box-sizing: border-box; width: 100%; min-width: 0; resize: vertical; color: inherit; }
 }
 .gaga-selection-menu__bar { flex-wrap: wrap; }
@@ -1240,3 +1228,9 @@ mark.gaga-highlight-mark,
 @media (prefers-reduced-motion: reduce) {
   .gaga-selection-menu, .gaga-highlight-popup { animation: none; }
 }
+
+.gaga-selection-menu__more button, .gaga-selection-menu .gaga-btn {
+  border:0; background:var(--gaga-context-hover); color:var(--gaga-context-text);
+  padding:var(--gaga-context-space); font:inherit; border-radius:calc(var(--gaga-context-radius) / 2);
+}
+@media(max-width:420px) { .gaga-selection-menu__btn > span { display:none; } }

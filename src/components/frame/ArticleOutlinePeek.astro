@@ -1,4 +1,5 @@
 ---
+import { contextualSurfaceRoles } from '../../config/contextual-surfaces.mjs';
 import TocBlock from '../information/TocBlock.astro';
 import Icon from '../ui/Icon.astro';
 import { outlineForRoute } from '../../config/contextual-ux.mjs';
@@ -22,6 +23,7 @@ const initialOutlineLabel = outlineItems[0]?.text ?? '';
       type="button"
       class="gaga-outline-peek-preview"
       data-gaga-outline-peek-preview
+      data-gaga-context-surface={contextualSurfaceRoles.orientation}
       data-gaga-outline-opener
       data-gaga-action="toggle-outline"
       aria-controls={outlinePeekId}
@@ -39,6 +41,7 @@ const initialOutlineLabel = outlineItems[0]?.text ?? '';
       id={outlinePeekId}
       class="gaga-outline-peek"
       data-gaga-outline-peek
+      data-gaga-context-surface={contextualSurfaceRoles.orientation}
       data-gaga-outline-toc="true"
       data-gaga-state="closed"
       data-gaga-depth="expanded"

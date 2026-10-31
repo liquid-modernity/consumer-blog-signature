@@ -1,3 +1,5 @@
+import { contextualSurfaceRoles } from '../../config/contextual-surfaces.mjs';
+import { renderIconSvg } from '../../lib/icons';
 import { readAllHighlights, saveHighlight, removeHighlight, updateHighlightNote, resolveContentLanguage, type HighlightEntity, type HighlightLocation } from './reading-knowledge';
 import { personalState, resolvePersonalAnchor } from '../../lib/personal-state';
 import { currentPersonalContent, preparePersonalBlocks, personalBlock } from './personal-context';
@@ -30,7 +32,7 @@ function restoreArticleHighlights(body:HTMLElement){const c=currentPersonalConte
  let id='';try{id=location.hash.startsWith('#hl-')?decodeURIComponent(location.hash.slice(4)):'';}catch{}if(id)body.querySelector<HTMLElement>('[data-gaga-highlight-id="'+CSS.escape(id)+'"]')?.scrollIntoView({block:'center'});
 }
 function closeHighlightPopup(restore=false){activeHighlightPopupEl?.remove();activeHighlightPopupEl=null;if(restore)focusReading(popupAnchor);popupAnchor=null;}
-function showHighlightPopup(mark:HTMLElement,highlight:HighlightEntity){closeHighlightPopup();closeSelectionMenu();popupAnchor=mark;const popup=document.createElement('div');popup.className='gaga-highlight-popup';popup.setAttribute('role','dialog');popup.setAttribute('aria-modal','false');popup.setAttribute('aria-label','Sorotan pribadi');popup.innerHTML=`<div class="gaga-highlight-popup__inner"><div class="gaga-highlight-popup__actions"><button type="button" data-action="listen">Dengarkan</button><button type="button" data-action="copy">Salin</button><button type="button" data-action="note">${highlight.note?'Ubah catatan':'Catatan'}</button><button type="button" data-action="delete">Hapus sorotan</button><button type="button" data-action="close" aria-label="Tutup sorotan">×</button></div><div class="gaga-highlight-popup__note-form" hidden><textarea class="gaga-highlight-popup__textarea" rows="3" maxlength="4000" aria-label="Catatan pribadi"></textarea><button type="button" data-action="save-note">Simpan catatan</button></div></div>`;
+function showHighlightPopup(mark:HTMLElement,highlight:HighlightEntity){closeHighlightPopup();closeSelectionMenu();popupAnchor=mark;const popup=document.createElement('div');popup.className='gaga-highlight-popup';popup.dataset.gagaContextSurface=contextualSurfaceRoles.selection;popup.setAttribute('role','dialog');popup.setAttribute('aria-modal','false');popup.setAttribute('aria-label','Sorotan pribadi');popup.innerHTML=`<div class="gaga-highlight-popup__inner"><div class="gaga-highlight-popup__actions"><button type="button" data-action="listen">Dengarkan</button><button type="button" data-action="copy">Salin</button><button type="button" data-action="note">${highlight.note?'Ubah catatan':'Catatan'}</button><button type="button" data-action="delete">Hapus sorotan</button><button type="button" data-action="close" aria-label="Tutup sorotan">×</button></div><div class="gaga-highlight-popup__note-form" hidden><textarea class="gaga-highlight-popup__textarea" rows="3" maxlength="4000" aria-label="Catatan pribadi"></textarea><button type="button" data-action="save-note">Simpan catatan</button></div></div>`;
  const textarea=popup.querySelector('textarea')!;textarea.value=highlight.note??'';document.body.append(popup);activeHighlightPopupEl=popup;placeSurface(popup,mark.getBoundingClientRect());const listen=popup.querySelector<HTMLButtonElement>('[data-action="listen"]')!;listen.hidden=!('speechSynthesis'in window);
  popup.querySelector('[data-action="close"]')?.addEventListener('click',()=>closeHighlightPopup(true));listen.addEventListener('click',()=>{listenToSelection(highlight.text,resolveContentLanguage(mark));closeHighlightPopup(true);});popup.querySelector('[data-action="copy"]')?.addEventListener('click',()=>{void copyTextToClipboard(highlight.text);closeHighlightPopup(true);});popup.querySelector('[data-action="note"]')?.addEventListener('click',()=>{(popup.querySelector('[data-gaga-note-editor],.gaga-highlight-popup__note-form') as HTMLElement).hidden=false;textarea.focus();placeSurface(popup,mark.getBoundingClientRect());});
  popup.querySelector('[data-action="save-note"]')?.addEventListener('click',()=>{if(updateHighlightNote(highlight.id,textarea.value)){highlight.note=textarea.value.trim();mark.dataset.gagaHasNote=highlight.note?'true':'false';closeHighlightPopup(true);}else requestToast({message:'Catatan belum tersimpan. Penyimpanan tidak tersedia.',tone:'warn'});});
@@ -65,8 +67,44 @@ function initSelectionIntelligence(body:HTMLElement){let timer:number|undefined,
  document.addEventListener('pointerdown',e=>{const target=e.target as Element;if(!target.closest('.gaga-selection-menu,.gaga-highlight-popup,.gaga-highlight-mark')){closeSelectionMenu();closeHighlightPopup();}});
  window.addEventListener('resize',()=>{closeSelectionMenu();closeHighlightPopup();});
 }
-function renderSelectionMenu(c:SelectionCapture){closeSelectionMenu();const menu=document.createElement('div');menu.className='gaga-selection-menu';menu.setAttribute('role','toolbar');menu.setAttribute('aria-label','Aksi seleksi');
- menu.innerHTML="\n    <div class=\"gaga-selection-menu__bar\">\n      <button type=\"button\" class=\"gaga-selection-menu__btn\" data-gaga-action=\"selection-highlight\" title=\"Sorot Teks (H)\" aria-label=\"Sorot teks\">\n        <svg class=\"gaga-icon\" viewBox=\"0 0 24 24\" width=\"15\" height=\"15\" fill=\"currentColor\"><path d=\"M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z\"/></svg>\n        <span>Sorot</span>\n        <kbd>H</kbd>\n      </button>\n\n      <span class=\"gaga-selection-menu__sep\" aria-hidden=\"true\"></span>\n\n      <button type=\"button\" class=\"gaga-selection-menu__btn\" data-gaga-action=\"selection-listen\" title=\"Dengarkan Seleksi (S)\" aria-label=\"Dengarkan seleksi\">\n        <svg class=\"gaga-icon\" viewBox=\"0 0 24 24\" width=\"15\" height=\"15\" fill=\"currentColor\"><path d=\"M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z\"/></svg>\n        <span>Dengarkan</span>\n        <kbd>S</kbd>\n      </button>\n\n      <span class=\"gaga-selection-menu__sep\" aria-hidden=\"true\"></span>\n\n      <button type=\"button\" class=\"gaga-selection-menu__btn\" data-gaga-action=\"selection-copy\" title=\"Salin teks\" aria-label=\"Salin teks\">\n        <svg class=\"gaga-icon\" viewBox=\"0 0 24 24\" width=\"15\" height=\"15\" fill=\"currentColor\"><path d=\"M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z\"/></svg>\n        <span>Salin</span>\n      </button>\n\n      <span class=\"gaga-selection-menu__sep\" aria-hidden=\"true\"></span>\n\n      <button type=\"button\" class=\"gaga-selection-menu__btn\" data-gaga-action=\"selection-note\" title=\"Tambah Catatan\" aria-label=\"Tambah catatan\">\n        <svg class=\"gaga-icon\" viewBox=\"0 0 24 24\" width=\"15\" height=\"15\" fill=\"currentColor\"><path d=\"M19 3H4.99C3.89 3 3 3.9 3 5v14c0 1.1.89 2 1.99 2H19c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10H7v-2h10v2zm0-4H7V7h10v2z\"/></svg>\n        <span>Catatan</span>\n      </button>\n      <details class=\"gaga-selection-menu__more\"><summary aria-label=\"Aksi seleksi lainnya\">···</summary><button type=\"button\" data-gaga-action=\"selection-quote\">Simpan kutipan</button></details>\n    </div>\n\n    <div class=\"gaga-selection-menu__note-input\" hidden>\n      <textarea class=\"gaga-selection-menu__field\" aria-label=\"Catatan pribadi\" placeholder=\"Catatan pribadi\" rows=\"3\" maxlength=\"4000\"></textarea>\n      <button type=\"button\" class=\"gaga-btn gaga-btn--sm gaga-btn--primary\" data-gaga-action=\"save-selection-note\">Simpan</button>\n    </div>\n";
+function renderSelectionMenu(c:SelectionCapture){closeSelectionMenu();const menu=document.createElement('div');menu.className='gaga-selection-menu';menu.dataset.gagaContextSurface=contextualSurfaceRoles.selection;menu.setAttribute('role','toolbar');menu.setAttribute('aria-label','Aksi seleksi');
+ menu.innerHTML=`
+    <div class="gaga-selection-menu__bar">
+      <button type="button" class="gaga-selection-menu__btn" data-gaga-action="selection-highlight" title="Sorot Teks (H)" aria-label="Sorot teks">
+        ${renderIconSvg('edit')}
+        <span>Sorot</span>
+        <kbd>H</kbd>
+      </button>
+
+      <span class="gaga-selection-menu__sep" aria-hidden="true"></span>
+
+      <button type="button" class="gaga-selection-menu__btn" data-gaga-action="selection-listen" title="Dengarkan Seleksi (S)" aria-label="Dengarkan seleksi">
+        ${renderIconSvg('volume_up')}
+        <span>Dengarkan</span>
+        <kbd>S</kbd>
+      </button>
+
+      <span class="gaga-selection-menu__sep" aria-hidden="true"></span>
+
+      <button type="button" class="gaga-selection-menu__btn" data-gaga-action="selection-copy" title="Salin teks" aria-label="Salin teks">
+        ${renderIconSvg('copy')}
+        <span>Salin</span>
+      </button>
+
+      <span class="gaga-selection-menu__sep" aria-hidden="true"></span>
+
+      <button type="button" class="gaga-selection-menu__btn" data-gaga-action="selection-note" title="Tambah Catatan" aria-label="Tambah catatan">
+        ${renderIconSvg('text_snippet')}
+        <span>Catatan</span>
+      </button>
+      <details class="gaga-selection-menu__more"><summary aria-label="Aksi seleksi lainnya">···</summary><button type="button" data-gaga-action="selection-quote">Simpan kutipan</button></details>
+    </div>
+
+    <div class="gaga-selection-menu__note-input" hidden>
+      <textarea class="gaga-selection-menu__field" aria-label="Catatan pribadi" placeholder="Catatan pribadi" rows="3" maxlength="4000"></textarea>
+      <button type="button" class="gaga-btn gaga-btn--sm gaga-btn--primary" data-gaga-action="save-selection-note">Simpan</button>
+    </div>
+`;
  document.body.append(menu);selectionMenuEl=menu;selectionReturn=c.block;placeSurface(menu,c.range.getBoundingClientRect());menu.querySelector<HTMLButtonElement>('[data-gaga-action="selection-listen"]')!.hidden=!('speechSynthesis'in window);
  menu.addEventListener('pointerdown',e=>{if((e.target as Element).closest('button,summary'))e.preventDefault();});
  menu.querySelector('[data-gaga-action="selection-highlight"]')?.addEventListener('click',()=>{if(persistCapture(c))closeSelectionMenu(true);});

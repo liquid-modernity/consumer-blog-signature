@@ -1,4 +1,5 @@
 ---
+import { contextualSurfaceRoles } from '../../config/contextual-surfaces.mjs';
 import Icon from '../ui/Icon.astro';
 import { siteConfig } from '../../config/site';
 import { identityConfig } from '../../config/identity';
@@ -25,7 +26,7 @@ const presentation = resolveNotchPresentation(experienceConfig.notch);
 ---
 <div class={`gaga-action-runtime-container gaga-contextual-notch-container ${className}`} data-gaga-action-runtime-container data-gaga-notch-placement={presentation.placement} data-gaga-notch-shape={presentation.shape} data-gaga-notch-config={JSON.stringify(experienceConfig.notch)}>
   <nav class="gaga-action-runtime gaga-dynamic-island gaga-contextual-notch" data-gaga-action-runtime data-gaga-global-nav data-gaga-context={context} data-gaga-state="collapsed" data-gaga-level="0" aria-label={islandLabel.id} data-gaga-i18n-id={islandLabel.id} data-gaga-i18n-en={islandLabel.en} data-gaga-i18n-target="aria">
-    <div class="gaga-action-runtime__shell">
+    <div class="gaga-action-runtime__shell" data-gaga-context-surface={contextualSurfaceRoles.command}>
       <div class="gaga-island-bar" data-gaga-island-bar>
         <button type="button" class="gaga-notch-button" data-gaga-action="smart-back" aria-label="Kembali" data-gaga-i18n-id="Kembali" data-gaga-i18n-en="Back" data-gaga-i18n-target="aria" disabled={path === '/'}><Icon name="arrow_back" /></button>
         <a href="/" class="gaga-island-brand" aria-label={`${documentProfile ? pageTitle + ' — ' : ''}${siteConfig.name} — Beranda`}><img src={identityConfig.faviconSvg} width="20" height="20" alt="" /><span>{documentProfile ? pageTitle : siteConfig.name}</span></a>
@@ -158,26 +159,25 @@ const presentation = resolveNotchPresentation(experienceConfig.notch);
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setupActionRuntime, { once: true }); else setupActionRuntime();
 </script>
 <style is:global>
-  :root { --gaga-island-ink:#f7f6f2; --gaga-island-bg:#151513; --gaga-island-hover:#363632; --gaga-island-muted:#c5c5ba; }
   .gaga-app-frame .gaga-contextual-notch-container { inset: auto; top: var(--gaga-safe-area-top, 0px); left: 50%; transform: translateX(-50%); inline-size: max-content; max-inline-size: calc(100vw - 1rem); padding: 0; }
   .gaga-app-frame .gaga-contextual-notch-container[data-gaga-notch-placement='bottom'] { top: auto; bottom: calc(var(--gaga-safe-area-bottom, 0px) + .5rem); }
   .gaga-app-frame .gaga-contextual-notch-container[data-gaga-notch-placement='left'] { top: 50%; left: .5rem; transform: translateY(-50%); }
   .gaga-app-frame .gaga-contextual-notch-container[data-gaga-notch-placement='right'] { top: 50%; left: auto; right: .5rem; transform: translateY(-50%); }
   .gaga-contextual-notch { max-inline-size: min(var(--gaga-notch-max,352px),calc(100vw - var(--gaga-safe-area-left) - var(--gaga-safe-area-right) - 2rem)); color: var(--gaga-island-ink); }
-  .gaga-contextual-notch .gaga-action-runtime__shell { display: block; max-block-size: calc(100dvh - 1rem - var(--gaga-safe-area-top, 0px)); overflow: auto; padding: .125rem .25rem; border: 0; border-radius: 0 0 1.1rem 1.1rem; background: var(--gaga-island-bg); color: var(--gaga-island-ink); animation: none !important; transform: none; box-shadow: 0 .35rem 1.25rem #0003; }
-  .gaga-contextual-notch-container[data-gaga-notch-shape='island'] .gaga-action-runtime__shell { border-radius: 1rem; margin-block-start: .5rem; }
-  .gaga-contextual-notch-container[data-gaga-notch-shape='pill'] .gaga-action-runtime__shell { border-radius: 1.5rem; }
+  .gaga-contextual-notch .gaga-action-runtime__shell { display: block; max-block-size: calc(100dvh - 1rem - var(--gaga-safe-area-top, 0px)); overflow: auto; padding: calc(var(--gaga-context-space) / 3) calc(var(--gaga-context-space) * .66); border: 0; border-radius: 0 0 var(--gaga-context-radius) var(--gaga-context-radius); background: var(--gaga-island-bg); color: var(--gaga-island-ink); animation: none !important; transform: none; box-shadow: var(--gaga-context-shadow); }
+  .gaga-contextual-notch-container[data-gaga-notch-shape='island'] .gaga-action-runtime__shell { border-radius: var(--gaga-context-radius); margin-block-start: .5rem; }
+  .gaga-contextual-notch-container[data-gaga-notch-shape='pill'] .gaga-action-runtime__shell { border-radius: calc(var(--gaga-context-radius) * 1.5); }
   .gaga-contextual-notch .gaga-island-bar { display: grid; grid-template-columns: 2.75rem minmax(0, 1fr) 2.75rem; gap: .25rem; min-block-size: 2.75rem; }
   .gaga-contextual-notch .gaga-island-brand { display: inline-flex; gap: .5rem; justify-content: center; align-items: center; min-block-size: 2.75rem; padding-inline: .4rem; color: inherit; text-decoration: none; font: 600 .9rem var(--gaga-font-ui); }
   .gaga-contextual-notch .gaga-island-brand img { flex: none; object-fit: contain; }
   .gaga-contextual-notch .gaga-notch-button { display: inline-flex; align-items: center; justify-content: center; gap: .4rem; min-block-size: 2.75rem; min-inline-size: 2.75rem; max-inline-size: 100%; padding: .45rem .65rem; border: 0; border-radius: .6rem; background: transparent; color: inherit; font: inherit; font-size: .85rem; cursor: pointer; opacity: 1; visibility: visible; pointer-events: auto; }
   .gaga-contextual-notch .gaga-notch-button:disabled { opacity: .4; cursor: default; }
-  .gaga-contextual-notch :is(button,a,summary):focus-visible { outline: 2px solid #fff; outline-offset: -3px; }
+  .gaga-contextual-notch :is(button,a,summary):focus-visible { outline: 2px solid var(--gaga-context-focus); outline-offset: -3px; }
   .gaga-contextual-notch .gaga-notch-button:is(:hover,[aria-pressed='true']) { background: var(--gaga-island-hover); }
-  .gaga-contextual-notch .gaga-notch-context, .gaga-contextual-notch .gaga-notch-system { inline-size: 100%; padding: .5rem .25rem; }
+  .gaga-contextual-notch .gaga-notch-context, .gaga-contextual-notch .gaga-notch-system { inline-size: 100%; padding: var(--gaga-context-space) calc(var(--gaga-context-space) / 2); }
   .gaga-contextual-notch [hidden] { display: none !important; }
   .gaga-contextual-notch .gaga-notch-page-title { margin: 0 0 .6rem; font-size: .9rem; line-height: 1.45; overflow-wrap: anywhere; }
-  .gaga-contextual-notch .gaga-notch-actions { display: flex; flex-wrap: wrap; gap: .4rem; }
+  .gaga-contextual-notch .gaga-notch-actions { display: flex; flex-wrap: wrap; gap: var(--gaga-context-space); }
   .gaga-contextual-notch [role='progressbar'] { display: block; margin-block-start: .6rem; font: .75rem var(--gaga-font-mono); }
   .gaga-contextual-notch .gaga-notch-navigation { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .4rem; margin-block: .75rem; }
   .gaga-contextual-notch a { color: inherit; }
@@ -187,14 +187,14 @@ const presentation = resolveNotchPresentation(experienceConfig.notch);
   .gaga-contextual-notch details h2 { font-size: .9rem; }
   .gaga-contextual-notch details ul { padding-inline-start: 1.25rem; }
   .gaga-contextual-notch details a { display: inline-block; padding-block: .5rem; }
-  .gaga-contextual-notch .gaga-reader-panel { --gaga-surface: #242421; --gaga-surface-2: #242421; --gaga-surface-subtle: #1b1b18; --gaga-blue: var(--gaga-island-ink); --gaga-muted: var(--gaga-island-muted); --gaga-line: #56564e; position: static; inset: auto; display: none; inline-size: 100%; width: auto; max-block-size: none; max-height: none; overflow: visible; transform: none; opacity: 1; border: 0; border-radius: 0; box-shadow: none; background: var(--gaga-island-bg); color: var(--gaga-island-ink); transition: none; }
+  .gaga-contextual-notch .gaga-reader-panel { --gaga-surface: var(--gaga-context-elevated); --gaga-surface-2: var(--gaga-context-elevated); --gaga-surface-subtle: var(--gaga-context-surface); --gaga-blue: var(--gaga-island-ink); --gaga-muted: var(--gaga-island-muted); --gaga-line: var(--gaga-context-divider); position: static; inset: auto; display: none; inline-size: 100%; width: auto; max-block-size: none; max-height: none; overflow: visible; transform: none; opacity: 1; border: 0; border-radius: 0; box-shadow: none; background: var(--gaga-island-bg); color: var(--gaga-island-ink); transition: none; }
   .gaga-contextual-notch .gaga-reader-panel[data-gaga-state='open'] { display: block; transform: none; }
   .gaga-contextual-notch:not([data-gaga-reader-closing]):has([data-gaga-reader-panel][data-gaga-state='open']) .gaga-notch-context,
   .gaga-contextual-notch:not([data-gaga-reader-closing]):has([data-gaga-reader-panel][data-gaga-state='open']) .gaga-notch-system > :not(.gaga-notch-actions),
   .gaga-contextual-notch:not([data-gaga-reader-closing]):has([data-gaga-reader-panel][data-gaga-state='open']) .gaga-notch-system .gaga-notch-actions > :not([data-gaga-action='toggle-reader-preferences']) { display: none; }
   .gaga-contextual-notch:not([data-gaga-reader-closing]):has([data-gaga-reader-panel][data-gaga-state='open']) .gaga-island-bar { display:none; }
   .gaga-contextual-notch .gaga-reader-panel :is(h2,legend,label,summary,button,span) { color: inherit; }
-  .gaga-contextual-notch .gaga-reader-panel button { min-block-size: 2.75rem; min-inline-size: 2.75rem; border-color: #77776c; background: #242421; }
+  .gaga-contextual-notch .gaga-reader-panel button { min-block-size: 2.75rem; min-inline-size: 2.75rem; border-color: var(--gaga-context-divider); background: var(--gaga-context-elevated); }
   .gaga-contextual-notch .gaga-reader-panel button[data-gaga-active='true'] { background: var(--gaga-island-ink); color: var(--gaga-island-bg); }
   .gaga-contextual-notch .gaga-reader-panel button[data-gaga-active='true']:focus-visible { outline-color: var(--gaga-island-ink); }
   .gaga-contextual-notch .gaga-notch-search { display:flex; gap:.25rem; margin-block:.5rem; }
@@ -202,7 +202,7 @@ const presentation = resolveNotchPresentation(experienceConfig.notch);
   .gaga-contextual-notch .gaga-notch-search input::placeholder { color:var(--gaga-island-muted); opacity:1; }
   .gaga-contextual-notch .gaga-notch-search input { min-inline-size:0; inline-size:100%; border:0; border-radius:.5rem; padding:.7rem; color:var(--gaga-island-ink); background:var(--gaga-island-hover); font:inherit; }
   .gaga-contextual-notch[data-gaga-live-state='speaking'] :is(.gaga-island-bar,.gaga-notch-context,.gaga-notch-system) { display:none; }
-  .gaga-contextual-notch :is(.gaga-notch-context,.gaga-notch-system,.gaga-reader-panel) { animation:gaga-island-reveal var(--gaga-signature-context,140ms) ease-out; }
+  .gaga-contextual-notch :is(.gaga-notch-context,.gaga-notch-system,.gaga-reader-panel) { animation:gaga-context-emerge var(--gaga-context-motion-duration) var(--gaga-context-motion-easing); }
   .gaga-contextual-notch .gaga-action-runtime__live { inline-size:100%; }
   .gaga-contextual-notch .gaga-speech-dock__inner { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:.5rem; align-items:center; }
   .gaga-contextual-notch .gaga-speech-dock__info { min-inline-size:0; }
@@ -211,7 +211,6 @@ const presentation = resolveNotchPresentation(experienceConfig.notch);
   .gaga-contextual-notch .gaga-action-runtime__live .gaga-speech-dock__btn { min-block-size:44px; min-inline-size:44px; color:var(--gaga-island-ink); background:transparent; }
   .gaga-contextual-notch .gaga-action-runtime__live .gaga-speech-dock__btn:focus-visible { outline:2px solid var(--gaga-island-ink); outline-offset:-3px; }
   .gaga-contextual-notch .gaga-speech-dock__inner progress { grid-column:1/-1; grid-row:2; inline-size:100%; block-size:3px; accent-color:var(--gaga-island-ink); }
-  @keyframes gaga-island-reveal { from { opacity:.5; transform:translateY(-3px); } to { opacity:1; transform:translateY(0); } }
   @media(prefers-reduced-motion:reduce) { .gaga-contextual-notch *, .gaga-contextual-notch-container { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
 </style>
 

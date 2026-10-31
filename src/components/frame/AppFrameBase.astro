@@ -1,4 +1,5 @@
 ---
+import { contextualSurfaceRoles } from '../../config/contextual-surfaces.mjs';
 import GagaDock from './GagaDock.astro';
 import ReaderPreferences from '../reader/ReaderPreferences.astro';
 import ActionRuntime from './ActionRuntime.astro';
@@ -115,6 +116,7 @@ const showGagaDock = false;
   <aside
     class="gaga-hover-preview-card"
     data-gaga-hover-preview-card
+      data-gaga-context-surface={contextualSurfaceRoles.preview}
     aria-label="Pratinjau Publikasi"
     hidden
   >
@@ -136,15 +138,13 @@ const showGagaDock = false;
     overflow: auto;
     z-index: 45;
     inline-size: min(22rem, calc(100vw - 2rem));
-    padding: 0.9rem 1.05rem;
-    border: 1px solid var(--gaga-line-strong, rgba(128, 128, 128, 0.28));
-    background: color-mix(in srgb, var(--gaga-surface-elevated, var(--gaga-bg)) 96%, transparent);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    color: var(--gaga-ink);
+    padding: calc(var(--gaga-context-space) * 1.5);
+    border: 0;
+    background: var(--gaga-context-surface);
+    color: var(--gaga-context-text);
     pointer-events: auto;
-    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.14);
-    transition: opacity 0.16s ease, transform 0.16s ease;
+    box-shadow: var(--gaga-context-shadow);
+    animation: gaga-context-emerge var(--gaga-context-motion-duration) var(--gaga-context-motion-easing);
   }
 
   .gaga-hover-preview-card[hidden] {
@@ -153,26 +153,26 @@ const showGagaDock = false;
 
   .gaga-hover-preview-card__meta {
     margin: 0 0 0.3rem;
-    font-family: var(--gaga-font-mono, monospace);
+    font-family: var(--gaga-font-ui);
     font-size: 0.7rem;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--gaga-muted);
+    letter-spacing: normal;
+    color: var(--gaga-context-muted);
   }
 
   .gaga-hover-preview-card__title {
     margin: 0 0 0.35rem;
-    font-size: 0.92rem;
+    font-family: var(--gaga-font-display);
+    font-size: 1rem;
     font-weight: 600;
     line-height: 1.35;
-    color: var(--gaga-ink);
+    color: var(--gaga-context-text);
   }
 
   .gaga-hover-preview-card__snippet {
     margin: 0;
     font-size: 0.8rem;
     line-height: 1.48;
-    color: var(--gaga-muted);
+    color: var(--gaga-context-muted);
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;

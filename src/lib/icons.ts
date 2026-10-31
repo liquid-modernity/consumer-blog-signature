@@ -80,6 +80,7 @@ const aliases: Record<string, string> = {
   tag: 'sell',
   sell: 'sell',
   edit: 'edit',
+  copy: 'content_copy',
   chevron: 'chevron_right',
   chevron_right: 'chevron_right',
   text: 'text_fields',
@@ -95,6 +96,7 @@ const aliases: Record<string, string> = {
 };
 
 const icons: Record<string, IconDefinition> = {
+  content_copy: { viewBox: '0 0 24 24', body: '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V4H4v12h4"/>' },
   home: {
     viewBox: '0 0 24 24',
     body: '<path d="M4 10.5 12 4l8 6.5"/><path d="M6.5 9.5V20h4.75v-5h1.5v5h4.75V9.5"/>'
