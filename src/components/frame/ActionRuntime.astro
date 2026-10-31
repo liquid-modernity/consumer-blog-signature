@@ -141,7 +141,8 @@ const presentation = resolveNotchPresentation(experienceConfig.notch);
       if (readerOpen()) requestReaderPanel({ action: 'close', source: 'keyboard' });
       else setState(island.dataset.gagaState === 'expanded' ? 'peek' : 'collapsed', true);
     });
-    document.addEventListener('pointerdown', event => {
+    // Native click distinguishes an outside tap from a touch pan.
+    document.addEventListener('click', event => {
       if (event.target instanceof Node && !island.contains(event.target)) {
         const closedReader = readerOpen();
         setState('collapsed');

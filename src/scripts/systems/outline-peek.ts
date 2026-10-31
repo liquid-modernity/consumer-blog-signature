@@ -95,10 +95,10 @@ export function initOutlinePeek() {
     if (isOpen() && target.closest('[data-gaga-info-field="outline"] a[href^="#"]')) close('outline-link');
   });
 
-  document.addEventListener('pointerdown', (event) => {
+  document.addEventListener('click', (event) => {
     if (!isOpen()) return;
     const target = event.target;
-    if (!(target instanceof Node) || sheet.contains(target)) return;
+    if (!(target instanceof Element) || sheet.contains(target) || target.closest('[data-gaga-action="toggle-outline"]')) return;
     close('outside-pointer');
   }, { passive: true });
 
