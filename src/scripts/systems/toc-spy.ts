@@ -33,6 +33,7 @@ export function hydrateDomOutlineIfSparse(readingRoot: HTMLElement) {
       return li;
     });
     list.replaceChildren(...items);
+    list.closest<HTMLElement>('[data-gaga-document-outline-content]')?.removeAttribute('hidden');
     const stack = list.closest<HTMLElement>('[data-gaga-outline-pending="true"]');
     if (stack) {
       for (const label of stack.querySelectorAll('[data-gaga-outline-current-label], [data-gaga-outline-sheet-current-label]')) label.textContent = headings[0].textContent?.trim() ?? '';

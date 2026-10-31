@@ -75,7 +75,7 @@ const allLocal = (localContext?.localNavigation ?? []).flatMap(i => [i,...(i.chi
             {item.children?.length && <ul>{item.children.map(child => <li><a href={child.href} aria-current={active(child.href)}>{child.label}</a></li>)}</ul>}
           </li>)}</ul>
         </nav>}
-        {tocEligible && <TocBlock emptyList={pendingOutline} items={outlineItems} showTitle={local} title={rail.labels.outlineTitle.id} titleEn={rail.labels.outlineTitle.en} wrapper="nav" ariaLabelledby={local ? undefined : outlineTitleId} />}
+        {tocEligible && <div data-gaga-document-outline-content hidden={pendingOutline}><TocBlock emptyList={pendingOutline} items={outlineItems} showTitle={local} title={rail.labels.outlineTitle.id} titleEn={rail.labels.outlineTitle.en} wrapper="nav" ariaLabelledby={local ? undefined : outlineTitleId} /></div>}
         {(localContext?.headingSequence || sequence?.previous || sequence?.next) && <nav class="gaga-outline-sequence" data-gaga-local-sequence data-gaga-heading-sequence={localContext?.headingSequence ? 'true' : undefined} aria-label="Urutan">
           {(['previous','next'] as const).map(direction => <a data-gaga-sequence-direction={direction} rel={direction === 'previous' ? 'prev' : 'next'} href={sequence?.[direction]?.href} hidden={!sequence?.[direction]}>
             <span data-gaga-i18n-id={localNavigationLabels[direction].id} data-gaga-i18n-en={localNavigationLabels[direction].en}>{localNavigationLabels[direction].id}</span>

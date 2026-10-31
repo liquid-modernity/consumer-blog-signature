@@ -34,7 +34,7 @@ test('document outline uses live headings, deep links and native focus restorati
 });
 test('short legal document retains real text, family navigator and no invented TOC or sibling sequence',async({page})=>{
  await ready(page,'/legal/privacy');await expect(page.locator('[data-gaga-document-navigation]')).toHaveCount(0);await page.locator('[data-gaga-outline-opener]').focus();await page.keyboard.press('Enter');const sheet=page.locator('[data-gaga-outline-peek]');await expect(sheet.locator('[data-gaga-local-navigation] a[href="/legal/privacy"]')).toHaveAttribute('aria-current','page');
- await expect(page.locator('[data-gaga-left-rail]')).toHaveCount(0);await expect(sheet.locator('[data-gaga-info-field="outline"] a')).toHaveCount(0);await expect(page.locator('[data-gaga-action-id="save"]')).toHaveCount(0);
+ await expect(page.locator('[data-gaga-left-rail]')).toHaveCount(0);await expect(sheet.locator('[data-gaga-info-field="outline"] a')).toHaveCount(0);await expect(sheet.locator('[data-gaga-toc-block]')).toBeHidden();await expect(page.locator('[data-gaga-action-id="save"]')).toHaveCount(0);
  await sheet.locator('[data-gaga-local-navigation] a[href="/legal/terms"]').click();await expect(page.locator('h1')).toHaveText('Ketentuan Penggunaan');await expect(page.locator('[data-gaga-document-body]')).toContainText('Seluruh publikasi');await expect(page.locator('a[rel="prev"],a[rel="next"]')).toHaveCount(0);
 });
 test('system documentation is explanatory, supports actual anchors, and exposes only public discovery links',async({page})=>{
