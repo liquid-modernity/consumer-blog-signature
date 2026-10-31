@@ -97,6 +97,12 @@ jobs:
           node --test tools/share/*.test.mjs
           npx --no-install playwright test --config tools/share/playwright.config.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/share-browser.log"
           node tools/share/browser-report.mjs
+      - name: Local navigation and Outline convergence qualification
+        run: |
+          trap 'if [ -d .gaga/navigation-traces ]; then cp -R .gaga/navigation-traces "$GAGA_EVIDENCE_DIRECTORY/"; fi' EXIT
+          node --test tools/navigation/*.test.mjs
+          npx --no-install playwright test --config tools/navigation/playwright.config.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/navigation-browser.log"
+          node tools/navigation/browser-report.mjs
       - name: Zero-vulnerability audit
         run: npm audit --audit-level=low --json > "$GAGA_EVIDENCE_DIRECTORY/audit.json"
       - name: Exact Worker dry run without rebuild or provider access
@@ -237,6 +243,13 @@ jobs:
         run: |
           npx --no-install playwright test --config tools/share/playwright.config.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/share-browser.log"
           node tools/share/browser-report.mjs
+      - name: Local navigation and Outline convergence production smoke
+        env:
+          GAGA_PRODUCTION_BROWSER_URL: https://consumer-blog-signature.ratriatra.workers.dev
+        run: |
+          trap 'if [ -d .gaga/navigation-traces ]; then cp -R .gaga/navigation-traces "$GAGA_EVIDENCE_DIRECTORY/"; fi' EXIT
+          npx --no-install playwright test --config tools/navigation/playwright.config.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/navigation-browser.log"
+          node tools/navigation/browser-report.mjs
       - name: Restore the pinned previous version after failed production verification
         if: failure() && steps.preflight.outcome == 'success'
         env:

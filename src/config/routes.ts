@@ -25,6 +25,7 @@ export const routes = {
     index: '/topics',
     detail: (slug: string) => `/topics/${String(slug).replace(/^\/+|\/+$/g, '')}`
   },
+  sections: { index: '/sections', detail: (slug: string) => `/sections/${String(slug).replace(/^\/+|\/+$/g, '')}` },
   archive: {
     index: '/archive',
     year: (year: string | number) => `/archive/${year}`,
@@ -74,6 +75,7 @@ export const routeRegistry = {
   latest: { enabled: true, path: routes.discovery.latest },
   saved: { enabled: true, path: routes.discovery.saved },
   landing: { enabled: true, path: '/landing' },
+  sections: { enabled: true, index: routes.sections.index, detail: '/sections/:slug' },
   topics: { enabled: true, index: routes.topics.index, detail: '/topics/:slug' },
   tags: { enabled: true, index: '/tags', detail: '/tags/:slug', knowledgeIndex: routes.knowledge.tags },
   authors: { enabled: true, index: '/authors', detail: '/authors/:slug', aboutAuthor: routes.about.author },

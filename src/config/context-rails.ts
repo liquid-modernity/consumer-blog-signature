@@ -1,3 +1,5 @@
+import { localDestinations } from '../lib/local-navigation';
+import type { localContext } from '../lib/local-navigation';
 import { presenceNavigation } from '../lib/presence';
 import { actionById } from './actions';
 import { documentExperience, documentNavigation } from './document-experience';
@@ -25,6 +27,7 @@ export interface ContextRailProjection {
 
 export interface ContextRailProjectionInput {
   currentPath: string;
+  localContext?: Awaited<ReturnType<typeof localContext>>;
   workspace: GagaWorkspaceDefinition;
   info: ScreenInfo;
   articles: ConsumerArticleRecord[];
@@ -208,10 +211,16 @@ export function projectContextRail(input: ContextRailProjectionInput): ContextRa
     add(group('page-context', 'Related pages', 'folder_open', referenceItems(currentPath)));
   }
 
-  if (!groups.length) {
+  if (!groups.length && !input.localContext?.family) {
     add(group('fallback-context', 'Context', workspace.icon, referenceItems(currentPath)));
   }
 
+  // Outline owns family destinations; rails retain only distinct related context.
+  if (input.localContext?.localNavigation.length) {
+    const destinations = localDestinations(input.localContext);
+    const familyGroups = new Set(['document-context', 'sections', 'topics', 'archive-periods']);
+    for (const entry of groups) entry.items = familyGroups.has(entry.id) ? [] : entry.items.filter(i => !destinations.has(i.href));
+  }
   const global = globalNavigationProjection();
 
   return {
@@ -224,7 +233,7 @@ export function projectContextRail(input: ContextRailProjectionInput): ContextRa
           ? 'System context'
           : 'Reference context',
     icon: workspace.icon,
-    groups,
+    groups: groups.filter(g => g.items.length),
     globalItems: global.items,
     globalGroups: global.groups
   };

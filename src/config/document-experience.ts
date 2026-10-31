@@ -1,14 +1,15 @@
+import { routes } from './routes.ts';
 import { presence, presenceNavigation } from '../lib/presence.ts';
 import { presenceLabel } from '../features/personal-presence/model.mjs';
 import { personalPresenceConfig } from './personal-presence.mjs';
 import { getEnabledRootSections, referenceRegistry } from './pakrpp-architecture.ts';
 
 export const documentProfiles = [
-  { id: 'knowledge', root: '/knowledge', label: 'Pengetahuan', navigation: 'rail', outline: true },
+  { id: 'knowledge', root: routes.knowledge.root, label: 'Pengetahuan', navigation: 'rail', outline: true },
   { id: 'information', root: personalPresenceConfig.routes.profile, label: presenceLabel(personalPresenceConfig.capabilities.find(c=>c.id==='profile')!.label), navigation: 'inline', outline: true },
-  { id: 'legal', root: '/legal', label: 'Legal', navigation: 'inline', outline: true },
-  { id: 'system', root: '/system', label: 'Sistem', navigation: 'rail', outline: true },
-  { id: 'section', root: '/sections', label: 'Sections', navigation: 'editorial', outline: false }
+  { id: 'legal', root: routes.legal.root, label: 'Legal', navigation: 'inline', outline: true },
+  { id: 'system', root: routes.system.root, label: 'Sistem', navigation: 'rail', outline: true },
+  { id: 'section', root: routes.sections.index, label: 'Sections', navigation: 'editorial', outline: false }
 ] as const;
 export type DocumentProfile = typeof documentProfiles[number];
 export const cleanDocumentPath = (path: string) => path.replace(/\/+$/, '') || '/';

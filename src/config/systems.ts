@@ -22,7 +22,6 @@ export const responsiveShellConfig = {
     },
     outlinePeek: {
       enabledModes: ['mobile', 'tablet-mini', 'tablet-large', 'desktop'],
-      requiresTableOfContents: true,
       attachTo: 'bottom-dock'
     },
     leftRail: {
@@ -72,10 +71,6 @@ export function supportsGagaDock(mode: string | undefined) {
 
 export function supportsOutlinePeek(mode: string | undefined) {
   return modeEnabled(responsiveShellConfig.surfaces.outlinePeek.enabledModes, mode);
-}
-
-export function outlinePeekRequiresTableOfContents() {
-  return responsiveShellConfig.surfaces.outlinePeek.requiresTableOfContents;
 }
 
 export function getOutlinePeekAttachment() {

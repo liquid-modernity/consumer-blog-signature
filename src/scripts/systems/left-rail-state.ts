@@ -25,7 +25,10 @@ function closeConflictingSurfaces() {
 export function initLeftRailState() {
   if (initialized) return;
   const rail = document.querySelector('[data-gaga-left-rail]') as HTMLElement | null;
-  if (!rail) return;
+  if (!rail) {
+    for (const control of document.querySelectorAll<HTMLElement>('[data-gaga-action="toggle-left-rail"]')) control.hidden = true;
+    return;
+  }
   initialized = true;
 
   const hasContent = rail.dataset.gagaHasContent === 'true';

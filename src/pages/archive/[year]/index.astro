@@ -5,7 +5,6 @@ import {
   resolvePublicationType
 } from '../../../config/pakrpp-architecture';
 import { getArchiveYears } from '../../../lib/pakrpp-content';
-import { routes } from '../../../config/routes';
 
 export const prerender = true;
 
@@ -38,23 +37,7 @@ const entryData = {
 
 <GagaSiteLayout entryData={entryData}>
   <section class="pakrpp-archive-year" aria-label={`Arsip Tahun ${group.year}`}>
-    <div class="pakrpp-archive-year__nav">
-      <a href={routes.archive.index}>← Semua Arsip</a>
-      <span aria-hidden="true">·</span>
-      <span>{group.count} publikasi pada tahun {group.year}</span>
-    </div>
-
-    {group.months.length > 0 && (
-      <div class="pakrpp-archive-year__months">
-        <span>Bulan tersedia:</span>
-        {group.months.map((m, idx) => (
-          <>
-            {idx > 0 && <span aria-hidden="true">·</span>}
-            <a href={m.href}>{m.label} ({m.count})</a>
-          </>
-        ))}
-      </div>
-    )}
+    <p>{group.count} publikasi pada tahun {group.year}</p>
 
     <ol class="pakrpp-archive-year__list" data-gaga-preview-scope>
       {group.publications.map((pub, idx) => {
@@ -98,18 +81,8 @@ const entryData = {
     gap: 1.25rem;
     font-variant-numeric: tabular-nums;
   }
-  .pakrpp-archive-year__nav,
-  .pakrpp-archive-year__months {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    font-size: 0.82rem;
-    opacity: 0.8;
-  }
-  .pakrpp-archive-year__months {
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid var(--gaga-border-subtle, rgba(128, 128, 128, 0.2));
-  }
+
+
   .pakrpp-archive-year__list {
     list-style: none;
     margin: 0;

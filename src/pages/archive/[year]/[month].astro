@@ -5,7 +5,6 @@ import {
   resolvePublicationType
 } from '../../../config/pakrpp-architecture';
 import { getArchiveYears } from '../../../lib/pakrpp-content';
-import { routes } from '../../../config/routes';
 
 export const prerender = true;
 
@@ -40,13 +39,7 @@ const entryData = {
 
 <GagaSiteLayout entryData={entryData}>
   <section class="pakrpp-archive-month" aria-label={`Arsip ${monthGroup.label}`}>
-    <div class="pakrpp-archive-month__nav">
-      <a href={routes.archive.year(monthGroup.year)}>← Arsip {monthGroup.year}</a>
-      <span aria-hidden="true">·</span>
-      <a href={routes.archive.index}>Semua Arsip</a>
-      <span aria-hidden="true">·</span>
-      <span>{monthGroup.count} publikasi</span>
-    </div>
+    <p>{monthGroup.count} publikasi</p>
 
     <ol class="pakrpp-archive-month__list" data-gaga-preview-scope>
       {monthGroup.publications.map((pub, idx) => {

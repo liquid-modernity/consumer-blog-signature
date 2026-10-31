@@ -8,11 +8,11 @@ export const gagaSignatureSurfaceContract = {
     mustNotOwn: ['global-destination-registry', 'article-outline-tree']
   },
   dynamicOutlinePeek: {
-    owns: ['article-outline', 'current-heading', 'compact-outline-navigation'],
+    owns: ['route-local-navigation', 'article-outline', 'current-heading', 'sequence', 'position', 'compact-outline-navigation'],
     mustNotOwn: ['article-metadata', 'related-content']
   },
   leftContextRail: {
-    owns: ['route-local-navigation', 'workspace-neighborhood'],
+    owns: ['workspace-neighborhood'],
     mustNotOwn: ['global-search', 'global-brand', 'reader-settings']
   },
   rightContextRail: {

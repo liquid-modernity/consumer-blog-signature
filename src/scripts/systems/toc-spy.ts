@@ -9,6 +9,8 @@ let capability: TocSpyCapability | null = null;
 let lastActiveHeadingId = '';
 
 export function hydrateDomOutlineIfSparse(readingRoot: HTMLElement) {
+  const stack = document.querySelector<HTMLElement>('[data-gaga-outline-toc-eligible="true"]');
+  if (!stack) return;
   const lists = Array.from(document.querySelectorAll<HTMLOListElement>('ol[data-gaga-info-field="outline"]'));
   if (!lists.length) return;
   const body = readingRoot.querySelector<HTMLElement>('[data-gaga-article-body]') ?? readingRoot;

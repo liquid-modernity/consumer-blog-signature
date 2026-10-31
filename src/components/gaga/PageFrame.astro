@@ -17,6 +17,9 @@ import { selectCoveragePromotion } from '../../lib/coverage';
 import CoverageStrip from '../coverage/CoverageStrip.astro';
 import { documentExperience } from '../../config/document-experience';
 import { projectContextRail } from '../../config/context-rails';
+import { getArchiveYears } from '../../lib/pakrpp-content';
+import { routes } from '../../config/routes';
+import { localContext } from '../../lib/local-navigation';
 import { getEditorialSections } from '../../lib/editorial';
 
 interface Props {
@@ -67,8 +70,10 @@ const screenInfo = getScreenInfo({
 const rightRail = createRightRailInput(screenInfo);
 const currentPath = normalizeCurrentPath(Astro.url.pathname);
 const documentProfile = documentExperience(currentPath);
+const local = localContext(currentPath, pageTitle, topicGroups, editorialSections, currentPath === routes.archive.index || currentPath.startsWith(routes.archive.index + '/') ? await getArchiveYears() : [], tagGroups);
 const leftRailProjection = projectContextRail({
   currentPath,
+  localContext: local,
   workspace,
   info: screenInfo,
   articles,
@@ -140,6 +145,6 @@ const showCoveragePromotion = !documentProfile && coveragePromotion
     />
   </Fragment>
   <Fragment slot="after-main">
-    {articleOutline ? <ArticleOutlinePeek rail={outlineRail} documentOutline={documentProfile?.outline ?? false} /> : null}
+    {articleOutline ? <ArticleOutlinePeek rail={outlineRail} documentOutline={documentProfile?.outline ?? false} localContext={local} /> : null}
   </Fragment>
 </AppFrameBase>

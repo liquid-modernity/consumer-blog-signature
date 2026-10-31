@@ -3,6 +3,9 @@ import DocumentWorkspace from '../reader/DocumentWorkspace.astro';
 import { documentExperience } from '../../config/document-experience';
 import type { ScreenInfo } from '../../lib/screen-info';
 import { getArticles, getAuthors, getTagGroups, getTopicGroups } from '../../lib/content';
+import { getArchiveYears } from '../../lib/pakrpp-content';
+import { routes } from '../../config/routes';
+import { localContext } from '../../lib/local-navigation';
 import { getEditorialSections } from '../../lib/editorial';
 import { resolveGagaWorkspace } from '../../config/workspaces';
 import { resolveGagaShellContext } from '../../config/shell-context';
@@ -45,8 +48,10 @@ const [articles, authors, topicGroups, tagGroups, editorialSections] = await Pro
   getTagGroups(),
   getEditorialSections()
 ]);
+const local = localContext(currentPath, pageTitle, topicGroups, editorialSections, currentPath === routes.archive.index || currentPath.startsWith(routes.archive.index + '/') ? await getArchiveYears() : [], tagGroups);
 const rail = createLeftRailInput(currentPath, projectContextRail({
   currentPath,
+  localContext: local,
   workspace,
   info,
   articles,
@@ -94,6 +99,6 @@ const articleOutline = resolvedOutlineItems.length > 0;
       contextRole={shellContext.right}
       contextPriority={shellContext.rightPriority}
     />
-    {articleOutline ? <ArticleOutlinePeek rail={outlineRail} /> : null}
+    {articleOutline ? <ArticleOutlinePeek rail={outlineRail} documentOutline={documentExperience(currentPath)?.outline ?? false} localContext={local} /> : null}
   </Fragment>
 </AppFrameBase>

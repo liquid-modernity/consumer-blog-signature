@@ -20,14 +20,11 @@ test('all five experience families retain main, H1, skip target, page identity a
   const title=await page.locator('h1').innerText();await expect(page.locator('.gaga-island-brand span')).toHaveText(title);
  }
 });
-test('knowledge hierarchy has exact current navigation and a real ordered alphabet pager',async({page},info)=>{
- await ready(page,'/knowledge/index');await notch(page);await page.locator('[data-gaga-notch-more]').click();await page.locator('[data-gaga-action="toggle-left-rail"]').last().click();await expect(page.locator('[data-gaga-left-rail]')).toHaveAttribute('data-gaga-state',info.project.name==='touch'?'drawer':'expanded');
- if(info.project.name==='touch'){await expect(page.locator('[data-gaga-left-rail]')).toHaveAttribute('role','dialog');await expect(page.locator('[data-gaga-left-rail]')).toHaveAttribute('aria-modal','true');}
- await expect(page.locator('.gaga-left-rail__context-groups > [data-gaga-nav-group] > details a[href="/knowledge/index"]')).toHaveAttribute('aria-current','page');
- await expect(page.locator('.gaga-left-rail__context-groups > [data-gaga-nav-group] > details a[href="/knowledge"]')).not.toHaveAttribute('aria-current','page');
- await page.keyboard.press('Escape');
- if(info.project.name==='touch')await expect(page.locator('[data-gaga-left-rail]')).toBeHidden();
- const next=page.locator('.gaga-knowledge-letter-pager a[rel="next"]').first();const target=await next.getAttribute('href');await next.click();await expect(page).toHaveURL(new RegExp(target!.replace('#','\\#')+'$'));await expect(page.locator(target!)).toBeInViewport();
+test('knowledge hierarchy has exact current local navigation and a real ordered alphabet pager',async({page})=>{
+ await ready(page,'/knowledge/index');await page.locator('[data-gaga-outline-opener]').click();const sheet=page.locator('[data-gaga-outline-peek]');await expect(sheet).toHaveAttribute('data-gaga-state','open');
+ await expect(sheet.locator('[data-gaga-local-navigation] a[href="/knowledge/index"]')).toHaveAttribute('aria-current','page');
+ await expect(sheet.locator('[data-gaga-local-navigation] a[href="/knowledge"]')).not.toHaveAttribute('aria-current','page');
+ const next=sheet.locator('[data-gaga-local-sequence] a[rel="next"]');const target=await next.getAttribute('href');expect(target).toMatch(/^#heading-/);await next.click();await expect(page).toHaveURL(new RegExp(target!.replace('#','\\#')+'$'));await expect(page.locator(target!)).toBeInViewport();await expect(page.locator(target!)).toBeFocused();
 });
 test('document outline uses live headings, deep links and native focus restoration',async({page},info)=>{
  await ready(page,'/about');await notch(page);const action=page.locator('[data-gaga-document-outline-action]');await expect(action).toBeVisible();await action.click();const sheet=page.locator('[data-gaga-outline-peek]');await expect(sheet).toHaveAttribute('data-gaga-state','open');await expect(sheet).toHaveCSS('opacity','1');await page.screenshot({path:'.gaga/documentation-'+info.project.name+'.png'});
@@ -35,10 +32,10 @@ test('document outline uses live headings, deep links and native focus restorati
  const deepLink=new URL(page.url());deepLink.hash='prinsip-editorial';expect((await ready(page,deepLink.href)).fragmentReload).toBe(true);await expect(page.locator('#prinsip-editorial')).toBeInViewport();await expect(page.locator('#prinsip-editorial [data-gaga-heading-link]')).toHaveAttribute('href','#prinsip-editorial');
  await page.locator('[data-gaga-outline-opener]').click();await expect(sheet).toHaveAttribute('data-gaga-state','open');await expect(sheet.locator('a[href^="#"]').first()).toBeFocused();await page.keyboard.press('Escape');await expect(page.locator('[data-gaga-outline-opener]')).toBeFocused();
 });
-test('short legal document retains real text, inline navigator and no invented TOC or sibling sequence',async({page})=>{
- await ready(page,'/legal/privacy');await expect(page.locator('[data-gaga-document-navigation]')).not.toHaveAttribute('open');await page.locator('[data-gaga-document-navigation] summary').focus();await page.keyboard.press('Enter');await expect(page.locator('[data-gaga-document-navigation] a[href="/legal/privacy"]')).toHaveAttribute('aria-current','page');
- await expect(page.locator('[data-gaga-left-rail]')).toHaveCount(0);await expect(page.locator('[data-gaga-outline-stack]')).toBeHidden();await notch(page);await expect(page.locator('[data-gaga-document-outline-action]')).toBeHidden();await expect(page.locator('[data-gaga-action-id="save"]')).toHaveCount(0);
- await page.locator('[data-gaga-document-navigation] a[href="/legal/terms"]').click();await expect(page.locator('h1')).toHaveText('Ketentuan Penggunaan');await expect(page.locator('[data-gaga-document-body]')).toContainText('Seluruh publikasi');await expect(page.locator('a[rel="prev"],a[rel="next"]')).toHaveCount(0);
+test('short legal document retains real text, family navigator and no invented TOC or sibling sequence',async({page})=>{
+ await ready(page,'/legal/privacy');await expect(page.locator('[data-gaga-document-navigation]')).toHaveCount(0);await page.locator('[data-gaga-outline-opener]').focus();await page.keyboard.press('Enter');const sheet=page.locator('[data-gaga-outline-peek]');await expect(sheet.locator('[data-gaga-local-navigation] a[href="/legal/privacy"]')).toHaveAttribute('aria-current','page');
+ await expect(page.locator('[data-gaga-left-rail]')).toHaveCount(0);await expect(sheet.locator('[data-gaga-info-field="outline"] a')).toHaveCount(0);await expect(page.locator('[data-gaga-action-id="save"]')).toHaveCount(0);
+ await sheet.locator('[data-gaga-local-navigation] a[href="/legal/terms"]').click();await expect(page.locator('h1')).toHaveText('Ketentuan Penggunaan');await expect(page.locator('[data-gaga-document-body]')).toContainText('Seluruh publikasi');await expect(page.locator('a[rel="prev"],a[rel="next"]')).toHaveCount(0);
 });
 test('system documentation is explanatory, supports actual anchors, and exposes only public discovery links',async({page})=>{
  await ready(page,'/system/sitemap');await notch(page);await page.locator('[data-gaga-document-outline-action]').click();await page.locator('[data-gaga-outline-peek] a[href="#publikasi"]').click();await expect(page).toHaveURL(/#publikasi$/);
@@ -49,7 +46,7 @@ test('Sections use explicit editorial membership while Topics retain subject tax
  const docs=snapshot.documents.filter((d:any)=>d.pin.collection==='posts');const sections=new Set(docs.map((d:any)=>d.item.data.section??d.item.data.metadata?.section).filter(Boolean));expect(sections.size).toBeGreaterThan(0);
  await ready(page,'/sections');const sectionRoutes=await page.locator('.gaga-section-tile h2 a').evaluateAll(es=>es.map(e=>e.getAttribute('href')!));expect(sectionRoutes.length).toBe(sections.size);
  for(const href of sectionRoutes){
-  await ready(page,href);await expect(page.locator('[data-gaga-app-frame]')).toHaveAttribute('data-gaga-experience','section');await expect(page.locator('[data-gaga-document-workspace]')).toHaveCount(0);await expect(page.locator('[data-gaga-outline-stack]')).toHaveCount(0);
+  await ready(page,href);await expect(page.locator('[data-gaga-app-frame]')).toHaveAttribute('data-gaga-experience','section');await expect(page.locator('[data-gaga-document-workspace]')).toHaveCount(0);await expect(page.locator('[data-gaga-outline-stack]')).toBeVisible();await expect(page.locator('[data-gaga-outline-peek] [data-gaga-toc-block]')).toHaveCount(0);await expect(page.locator('[data-gaga-personal-readable]')).toHaveCount(0);
   const name=await page.locator('h1').innerText();
   const expected=docs.filter((d:any)=>(d.item.data.section??d.item.data.metadata?.section)===name).map((d:any)=>'/publications/'+d.item.slug).sort();
   const links=await page.locator('.gaga-section-front a[href^="/publications/"]').evaluateAll(es=>es.map(e=>e.getAttribute('href')!));expect(links.length).toBeGreaterThan(0);expect(new Set(links).size).toBe(links.length);expect([...links].sort()).toEqual(expected);

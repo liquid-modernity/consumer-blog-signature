@@ -1,7 +1,6 @@
 ---
 import GagaSiteLayout from '../../../components/gaga/GagaSiteLayout.astro';
 import { getSystematicKnowledgeIndex } from '../../../lib/pakrpp-content';
-import { routes } from '../../../config/routes';
 
 export const prerender = true;
 
@@ -26,23 +25,10 @@ const entryData = {
   <section class="pakrpp-kindex" aria-label="Indeks Pengetahuan Alfabetis">
     <div class="pakrpp-kindex__bar">
       <span>{totalEntries} objek pengetahuan terindeks</span>
-      <span aria-hidden="true">·</span>
-      <a href={routes.knowledge.root}>← Pengetahuan</a>
-      <span aria-hidden="true">·</span>
-      <a href={routes.system.sitemap}>Peta Situs →</a>
     </div>
 
-    <nav class="pakrpp-kindex__letters" aria-label="Lompat ke huruf">
-      {groups.map((g, idx) => (
-        <>
-          {idx > 0 && <span aria-hidden="true">·</span>}
-          <a href={`#letter-${g.letter}`}>{g.letter}</a>
-        </>
-      ))}
-    </nav>
-
     <div class="pakrpp-kindex__groups">
-      {groups.map((group, index) => (
+      {groups.map((group) => (
         <section id={`letter-${group.letter}`} class="pakrpp-kindex__group" aria-labelledby={`heading-${group.letter}`}>
           <div class="pakrpp-kindex__group-head">
             <h2 id={`heading-${group.letter}`}>{group.letter}</h2>
@@ -59,10 +45,6 @@ const entryData = {
               </li>
             ))}
           </ul>
-          <nav class="gaga-knowledge-letter-pager" aria-label={`Navigasi huruf ${group.letter}`}>
-            {groups[index - 1] && <a rel="prev" href={`#heading-${groups[index - 1].letter}`}>← {groups[index - 1].letter}</a>}
-            {groups[index + 1] && <a rel="next" href={`#heading-${groups[index + 1].letter}`}>{groups[index + 1].letter} →</a>}
-          </nav>
         </section>
       ))}
     </div>
@@ -76,19 +58,14 @@ const entryData = {
     gap: 1.5rem;
     font-variant-numeric: tabular-nums;
   }
-  .pakrpp-kindex__bar,
-  .pakrpp-kindex__letters {
+  .pakrpp-kindex__bar {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
     font-size: 0.82rem;
     opacity: 0.82;
   }
-  .pakrpp-kindex__letters {
-    padding-bottom: 0.85rem;
-    border-bottom: 1px solid var(--gaga-border-subtle, rgba(128, 128, 128, 0.22));
-    font-family: var(--gaga-font-mono, monospace);
-  }
+
   .pakrpp-kindex__group {
     padding: 0.75rem 0;
   }
@@ -144,5 +121,3 @@ const entryData = {
     opacity: 0.65;
   }
 </style>
-
-<style>.gaga-knowledge-letter-pager { display:flex; justify-content:space-between; gap:1rem; } .gaga-knowledge-letter-pager a { min-block-size:44px; display:inline-flex; align-items:center; }</style>

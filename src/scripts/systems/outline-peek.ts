@@ -1,7 +1,8 @@
+import { headingSequence } from '../../features/local-navigation/model.mjs';
 import { hydrateDomOutlineIfSparse } from './toc-spy';
 import { createOutlinePeekCapability } from '@gaga/engine-runtime/runtime/outline-peek';
 import { onRuntimeEvent, requestLeftRail, requestReaderPanel, type SurfaceCommandDetail } from '@gaga/engine-runtime/runtime/events';
-import { getOutlinePeekAttachment, outlinePeekRequiresTableOfContents, supportsOutlinePeek } from '../../config/systems';
+import { getOutlinePeekAttachment, supportsOutlinePeek } from '../../config/systems';
 import { resolveReadingScrollContext } from './reading-scroll';
 
 let initialized = false;
@@ -9,7 +10,9 @@ let initialized = false;
 function hasUsableTableOfContents(sheet: HTMLElement) {
   return sheet.dataset.gagaOutlineToc === 'true' && !!sheet.querySelector('[data-gaga-info-field="outline"] a[href^="#"]');
 }
-function tableOfContentsAllowed(sheet: HTMLElement) { return !outlinePeekRequiresTableOfContents() || hasUsableTableOfContents(sheet); }
+function hasLocalContext(sheet: HTMLElement) {
+  return !!sheet.querySelector('[data-gaga-local-navigation] a:not([aria-current="page"])') || hasUsableTableOfContents(sheet);
+}
 function decodeHash(hash: string) { const value = hash.replace(/^#/, ''); try { return decodeURIComponent(value); } catch { return value; } }
 function currentHashTarget() { const id = decodeHash(window.location.hash); return id ? document.getElementById(id) : null; }
 function readingFocusTarget() { return currentHashTarget() ?? document.querySelector<HTMLElement>('.gaga-markdown-content') ?? document.querySelector<HTMLElement>('[data-gaga-main-region]') ?? document.querySelector<HTMLElement>('main'); }
@@ -32,8 +35,10 @@ export function initOutlinePeek() {
 
   const capability = createOutlinePeekCapability({
     sheet,
+    scrollLinkSelector: '[data-gaga-info-field="outline"] a[href^="#"], [data-gaga-heading-sequence] a[href^="#"]',
+    openerSelector: '[data-gaga-outline-opener], [data-gaga-document-outline-action]',
     getLayoutMode: () => document.documentElement.dataset.gagaLayout,
-    isAvailable: ({ mode, sheet }) => supportsOutlinePeek(mode) && tableOfContentsAllowed(sheet),
+    isAvailable: ({ mode, sheet }) => supportsOutlinePeek(mode) && hasLocalContext(sheet),
     getAttachment: getOutlinePeekAttachment,
     getReadingFocusTarget: readingFocusTarget,
     beforeOpen: () => {
@@ -43,7 +48,7 @@ export function initOutlinePeek() {
       if (stack) stack.dataset.gagaVisibility = 'visible';
       // This composition has no close button; focus its first link after native open removes inert.
       queueMicrotask(() => {
-        if (sheet.dataset.gagaState === 'open') sheet.querySelector<HTMLAnchorElement>('[data-gaga-info-field="outline"] a[href^="#"]')?.focus({ preventScroll: true });
+        if (sheet.dataset.gagaState === 'open') (sheet.querySelector<HTMLAnchorElement>('[data-gaga-info-field="outline"] a[href^="#"]') ?? sheet.querySelector<HTMLAnchorElement>('[data-gaga-local-navigation] a[aria-current]') ?? sheet.querySelector<HTMLAnchorElement>('[data-gaga-local-navigation] a'))?.focus({ preventScroll: true });
       });
     }
   });
@@ -63,6 +68,7 @@ export function initOutlinePeek() {
     frameId = undefined;
     const available = capability.applyAvailability();
     stack?.toggleAttribute('hidden', !available);
+    document.querySelector<HTMLElement>('[data-gaga-document-outline-action]')?.toggleAttribute('hidden', !available);
   }
 
   function scheduleAvailability() {
@@ -78,8 +84,20 @@ export function initOutlinePeek() {
     if (sheetCurrentIndex) sheetCurrentIndex.textContent = String(resolvedIndex);
     if (currentLabel && label) currentLabel.textContent = label;
     if (sheetCurrentLabel && label) sheetCurrentLabel.textContent = label;
+    const sequence = sheet?.querySelector('[data-gaga-heading-sequence="true"]');
+    if (sequence) {
+      const neighbors = headingSequence(links.map(a=>({id:normalizeHash(a.hash),label:a.textContent?.trim() ?? '',href:a.hash})),id);
+      for (const direction of ['previous','next'] as const) {
+        const anchor = sequence.querySelector<HTMLAnchorElement>(`[data-gaga-sequence-direction="${direction}"]`);
+        if (!anchor) continue;
+        const neighbor = neighbors[direction]; anchor.hidden = !neighbor;
+        if (neighbor) { anchor.href=neighbor.href; anchor.querySelector('[data-gaga-sequence-label]')!.textContent=neighbor.label; }
+        else anchor.removeAttribute('href');
+      }
+    }
   }
 
+  if (links[0]) updateSemanticPosition(normalizeHash(links[0].hash), links[0].textContent?.trim() ?? '');
   scheduleAvailability();
   onRuntimeEvent('layoutChanged', scheduleAvailability);
   onRuntimeEvent('tocActiveChanged', (detail) => updateSemanticPosition(detail.id, detail.label));
@@ -92,7 +110,7 @@ export function initOutlinePeek() {
       capability.runCommand({ action: 'toggle', x: event.clientX, y: event.clientY, target: control, source: 'click' } satisfies SurfaceCommandDetail);
       return;
     }
-    if (isOpen() && target.closest('[data-gaga-info-field="outline"] a[href^="#"]')) close('outline-link');
+    if (isOpen() && target.closest('[data-gaga-info-field="outline"] a[href^="#"], [data-gaga-local-navigation] a, [data-gaga-local-sequence] a')) close('outline-link');
   });
 
   document.addEventListener('click', (event) => {

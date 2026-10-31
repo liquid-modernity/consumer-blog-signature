@@ -1,24 +1,34 @@
 ---
 import { contextualSurfaceRoles } from '../../config/contextual-surfaces.mjs';
+import { hasLocalNavigation } from '../../features/local-navigation/model.mjs';
+import { localNavigationLabels } from '../../config/local-navigation';
+import type { localContext as resolveLocalContext } from '../../lib/local-navigation';
 import TocBlock from '../information/TocBlock.astro';
 import Icon from '../ui/Icon.astro';
 import { outlineForRoute } from '../../config/contextual-ux.mjs';
 import type { RightRailInput } from './component-inputs';
 
-interface Props { rail: RightRailInput; documentOutline?: boolean; }
-const { rail, documentOutline = false } = Astro.props;
-const outlineItems = outlineForRoute(rail.outlineItems, Astro.url.pathname, rail.kind, documentOutline);
+interface Props { rail: RightRailInput; documentOutline?: boolean; localContext?: Awaited<ReturnType<typeof resolveLocalContext>>; }
+const { rail, documentOutline = false, localContext } = Astro.props;
+const context = { ...localContext, documentOutline: outlineForRoute(rail.outlineItems, Astro.url.pathname, rail.kind, documentOutline) };
+const outlineItems = context.documentOutline;
 const outlinePeekId = 'gaga-outline-peek';
 const outlineTitleId = 'gaga-outline-peek-title';
 const outlineOpenLabelId = 'gaga-outline-peek-open-label';
 const outlineCurrentLabelId = 'gaga-outline-peek-current-label';
 const outlineCounterLabelId = 'gaga-outline-peek-counter-label';
 const pendingOutline = (rail.kind === 'article' || documentOutline) && outlineItems.length === 0;
-const hasOutlinePeek = outlineItems.length > 0 || pendingOutline;
-const initialOutlineLabel = outlineItems[0]?.text ?? '';
+const local = hasLocalNavigation(localContext);
+const hasOutlinePeek = outlineItems.length > 0 || pendingOutline || local;
+const title = local ? localNavigationLabels.title : rail.labels.outlineTitle;
+const sequence = localContext?.sequence;
+const tocEligible = rail.kind === 'article' || documentOutline;
+const initialOutlineLabel = outlineItems[0]?.text ?? localContext?.position.label ?? '';
+const active = (href: string) => href === localContext?.position.path ? 'page' : localContext?.position.currentId === allLocal.find(i=>i.href===href)?.id ? 'location' : undefined;
+const allLocal = (localContext?.localNavigation ?? []).flatMap(i => [i,...(i.children ?? [])]);
 ---
 {hasOutlinePeek ? (
-  <div class="gaga-outline-stack" data-gaga-outline-stack data-gaga-surface="dynamic-outline-peek" data-gaga-visibility="visible" data-gaga-document-outline={documentOutline ? 'true' : undefined} data-gaga-outline-pending={pendingOutline ? 'true' : undefined} hidden={pendingOutline}>
+  <div class="gaga-outline-stack" data-gaga-outline-stack data-gaga-surface="dynamic-outline-peek" data-gaga-visibility="visible" data-gaga-outline-local={localContext?.family} data-gaga-outline-toc-eligible={tocEligible ? "true" : undefined} data-gaga-document-outline={documentOutline ? 'true' : undefined} data-gaga-outline-pending={pendingOutline ? 'true' : undefined} hidden={pendingOutline && !local}>
     <button
       type="button"
       class="gaga-outline-peek-preview"
@@ -42,7 +52,7 @@ const initialOutlineLabel = outlineItems[0]?.text ?? '';
       class="gaga-outline-peek"
       data-gaga-outline-peek
       data-gaga-context-surface={contextualSurfaceRoles.orientation}
-      data-gaga-outline-toc="true"
+      data-gaga-outline-toc={tocEligible ? "true" : undefined}
       data-gaga-state="closed"
       data-gaga-depth="expanded"
       aria-labelledby={outlineTitleId}
@@ -52,15 +62,38 @@ const initialOutlineLabel = outlineItems[0]?.text ?? '';
     >
       <span class="gaga-outline-peek__handle" aria-hidden="true"></span>
       <header class="gaga-outline-peek__header">
-        <h2 id={outlineTitleId} class="gaga-outline-peek__heading" data-gaga-i18n-key={rail.labels.outlineTitle.key} data-gaga-i18n-id={rail.labels.outlineTitle.id} data-gaga-i18n-en={rail.labels.outlineTitle.en}>
+        <h2 id={outlineTitleId} class="gaga-outline-peek__heading" data-gaga-i18n-id={title.id} data-gaga-i18n-en={title.en}>
           <Icon name="outline" />
-          <span>{rail.labels.outlineTitle.id}</span>
+          <span>{title.id}</span>
         </h2>
         <span class="gaga-visually-hidden" data-gaga-outline-sheet-current-label aria-live="polite">{initialOutlineLabel}</span>
       </header>
       <div class="gaga-outline-peek__scroll" data-gaga-outline-peek-scroll>
-        <TocBlock emptyList={pendingOutline} items={outlineItems} showTitle={false} wrapper="nav" ariaLabelledby={outlineTitleId} />
+        {local && <nav data-gaga-local-navigation aria-label={localNavigationLabels.title.id}>
+          <ul class="gaga-outline-local-list">{localContext!.localNavigation.map(item => <li>
+            <a href={item.href} aria-current={active(item.href)} data-gaga-i18n-id={item.label} data-gaga-i18n-en={item.labelEn ?? item.label}>{item.label}</a>
+            {item.children?.length && <ul>{item.children.map(child => <li><a href={child.href} aria-current={active(child.href)}>{child.label}</a></li>)}</ul>}
+          </li>)}</ul>
+        </nav>}
+        {tocEligible && <TocBlock emptyList={pendingOutline} items={outlineItems} showTitle={local} title={rail.labels.outlineTitle.id} titleEn={rail.labels.outlineTitle.en} wrapper="nav" ariaLabelledby={local ? undefined : outlineTitleId} />}
+        {(localContext?.headingSequence || sequence?.previous || sequence?.next) && <nav class="gaga-outline-sequence" data-gaga-local-sequence data-gaga-heading-sequence={localContext?.headingSequence ? 'true' : undefined} aria-label="Urutan">
+          {(['previous','next'] as const).map(direction => <a data-gaga-sequence-direction={direction} rel={direction === 'previous' ? 'prev' : 'next'} href={sequence?.[direction]?.href} hidden={!sequence?.[direction]}>
+            <span data-gaga-i18n-id={localNavigationLabels[direction].id} data-gaga-i18n-en={localNavigationLabels[direction].en}>{localNavigationLabels[direction].id}</span>
+            <span data-gaga-sequence-label>{sequence?.[direction]?.label}</span>
+          </a>)}
+        </nav>}
       </div>
     </section>
   </div>
 ) : null}
+
+<style>
+  .gaga-outline-local-list, .gaga-outline-local-list ul { list-style: none; margin: 0; padding: 0; }
+  .gaga-outline-local-list ul { padding-inline-start: 1rem; }
+  .gaga-outline-local-list a, .gaga-outline-sequence a { display: flex; align-items: center; min-block-size: 44px; padding-inline: .5rem; color: inherit; text-decoration: none; overflow-wrap: anywhere; }
+  .gaga-outline-local-list a[aria-current] { font-weight: 700; text-decoration: underline; text-underline-offset: .25em; }
+  .gaga-outline-local-list a:focus-visible, .gaga-outline-sequence a:focus-visible { outline: 2px solid var(--gaga-context-focus); outline-offset: -2px; }
+  .gaga-outline-sequence { display: flex; flex-wrap: wrap; gap: .5rem; justify-content: space-between; margin-block-start: .75rem; }
+  .gaga-outline-sequence a { gap: .5rem; font-size: .8rem; }
+  .gaga-outline-sequence a[hidden] { display: none; }
+</style>
