@@ -1,3 +1,4 @@
+import { stripQualifiedMotionGuards } from '../signature/release-browser-guards.mjs';
 import { stripQualifiedPersonalGuards } from '../personal/release-browser-guards.mjs';
 import { stripQualifiedDocumentationGuards } from '../documentation/release-browser-guards.mjs';
 import test from 'node:test';
@@ -66,5 +67,5 @@ test('the production workflow retains the historical release path except its qua
  const before="import assert from'node:assert/strict';import{readFileSync,writeFileSync}from'node:fs';\n          const stats=JSON.parse(readFileSync('.gaga/browser-results.json')).stats;assert.equal(stats.expected,4);assert.equal(stats.unexpected,0);assert.equal(stats.skipped,0);assert.equal(stats.flaky,0);";
  const after="import{assertBrowserReport}from'./tools/gaga/browser-contract.mjs';import{readFileSync,writeFileSync}from'node:fs';\n          const stats=assertBrowserReport(JSON.parse(readFileSync('.gaga/browser-results.json')));";
  assert.equal(current.split(after).length,2,'Missing or duplicate shared browser gate');
- assert.equal(stripQualifiedDocumentationGuards(stripQualifiedPersonalGuards(current)).replace(after,before),previous,'An unrelated production workflow change was introduced');
+ assert.equal(stripQualifiedDocumentationGuards(stripQualifiedPersonalGuards(stripQualifiedMotionGuards(current))).replace(after,before),previous,'An unrelated production workflow change was introduced');
 });

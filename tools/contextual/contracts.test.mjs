@@ -1,3 +1,4 @@
+import { stripQualifiedMotionGuards } from '../signature/release-browser-guards.mjs';
 import { stripQualifiedPersonalGuards } from '../personal/release-browser-guards.mjs';
 import { stripQualifiedDocumentationGuards } from '../documentation/release-browser-guards.mjs';
 import test from 'node:test';
@@ -29,7 +30,7 @@ test('link preview flips and clamps without changing anchor or page identity', (
   assert.deepEqual(positionLinkPreview({ left: -10, top: 50, bottom: 70 }, { width: 352, height: 100 }, { width: 320, height: 844 }), { left: 8, top: 80, width: 304 });
 });
 test('all public packages, CMS/source authority and release guards remain byte-identical', () => {
-  assert.equal(stripQualifiedDocumentationGuards(stripQualifiedPersonalGuards(readFileSync('.github/workflows/deploy.yml','utf8'))), execFileSync('git',['show',base+':.github/workflows/deploy.yml'],{encoding:'utf8'}), 'Only exact additional documentation browser guards are authorized');
+  assert.equal(stripQualifiedDocumentationGuards(stripQualifiedPersonalGuards(stripQualifiedMotionGuards(readFileSync('.github/workflows/deploy.yml','utf8')))), execFileSync('git',['show',base+':.github/workflows/deploy.yml'],{encoding:'utf8'}), 'Only exact additional documentation browser guards are authorized');
   for (const path of ['package.json','package-lock.json','cms/package-lock.json','gaga.app.json','content-release.json','content/emdash/published.json','content/emdash/published-receipt.json','cms/editorial/plugin.mjs','cms/editorial/admin.tsx','cms/editorial/studio.css','docs/UI-PRESERVATION.json','.github/workflows/content-release.yml','.github/workflows/content-publish.yml']) assert.deepEqual(readFileSync(path), execFileSync('git', ['show',base+':'+path]), path);
 });
 test('existing saved state and Save dispatch have no alternate store or duplicate app implementation', () => {

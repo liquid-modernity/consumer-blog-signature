@@ -115,9 +115,11 @@ test('Gaga Dynamic Notch Island + Dynamic Outline Peek signature', () => {
   assert.ok(actionRuntime.includes('data-gaga-action-island-toggle'), 'Island must have an explicit expand/collapse control');
   assert.ok(actionRuntime.includes('data-gaga-action-runtime-live'), 'Island must expose one live state surface for speech/status');
   assert.ok(actionStyles.includes('var(--gaga-safe-area-top)'), 'Island must be safe-area aware');
-  assert.ok(actionStyles.includes('--gaga-action-progress'), 'Island must render reading progress from one progress state');
-  assert.ok(actionRuntime.includes('role="progressbar"') && actionRuntime.includes('getUnifiedScrollMetrics().percentage'), 'Notch must expose semantic progress from the existing reading scroll authority');
-  assert.ok(actionStyles.includes('border-radius: 0 0'), 'Notch v2 must attach visually to the top viewport edge');
+  const motion = fs.readFileSync('src/scripts/systems/signature-motion.ts', 'utf8');
+  assert.ok(motion.includes('context.scrollContext.readingProgress(') && motion.includes("progress?.setAttribute('aria-valuenow', String(percent))") && motion.includes('outlineProgress.value = percent'), 'Both signatures must project one content-aware public Engine progress value');
+  assert.equal([...motion.matchAll(/addChangeListener\(/g)].length, 1, 'Signatures must share one scroll subscription');
+  assert.ok(actionRuntime.includes('role="progressbar"') && !actionRuntime.includes('addChangeListener') && !fs.readFileSync('src/scripts/systems/outline-peek.ts','utf8').includes('addChangeListener'), 'No parallel component scroll policy');
+  assert.ok(actionRuntime.includes('border-radius: 0 0'), 'Notch v2 must attach visually to the top viewport edge');
   assert.ok(outline.includes('data-gaga-outline-current-index'), 'Outline Peek must expose semantic section position');
   assert.ok(outline.includes('data-gaga-outline-sheet-current-label'), 'Expanded outline must expose the current semantic section label');
   assert.ok(!outline.includes('data-gaga-outline-close'), 'Outline v2 must not use a legacy close button');

@@ -75,6 +75,11 @@ jobs:
           node --test tools/personal/*.test.mjs
           npx --no-install playwright test --config tools/personal/playwright.config.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/personal-browser.log"
           node tools/personal/browser-report.mjs
+      - name: Signature motion and adaptive geometry qualification
+        run: |
+          node --test tools/signature/*.test.mjs
+          npx --no-install playwright test --config tools/signature/playwright.config.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/signature-browser.log"
+          node tools/signature/browser-report.mjs
       - name: Zero-vulnerability audit
         run: npm audit --audit-level=low --json > "$GAGA_EVIDENCE_DIRECTORY/audit.json"
       - name: Exact Worker dry run without rebuild or provider access
@@ -190,6 +195,12 @@ jobs:
         run: |
           npx --no-install playwright test --config tools/personal/playwright.config.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/personal-browser.log"
           node tools/personal/browser-report.mjs
+      - name: Signature motion and adaptive geometry production smoke
+        env:
+          GAGA_PRODUCTION_BROWSER_URL: https://consumer-blog-signature.ratriatra.workers.dev
+        run: |
+          npx --no-install playwright test --config tools/signature/playwright.config.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/signature-browser.log"
+          node tools/signature/browser-report.mjs
       - name: Restore the pinned previous version after failed production verification
         if: failure() && steps.preflight.outcome == 'success'
         env:

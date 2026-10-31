@@ -1,3 +1,4 @@
+import { initSignatureMotion } from './systems/signature-motion';
 import { initRouteNormalize } from './systems/route-normalize';
 import { initLayoutContext } from './systems/layout-context';
 import { initTheme } from './systems/theme';
@@ -122,6 +123,7 @@ async function boot() {
   keyboard?.initKeyboard();
   readingBehaviour?.initReadingBehavior();
   diagnosticHud?.initDiagnosticHud();
+  initSignatureMotion();
   document.documentElement.dataset.gagaRuntime = 'ready';
 
   onIdle(async () => {

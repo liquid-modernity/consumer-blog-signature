@@ -16,8 +16,8 @@ const profile = experienceSurfaceProfile(context);
 const documentProfile = documentExperience(path);
 const railPolicy = contextualRails(path);
 const actions = profile.notchActionIds.filter(id => !['smart-back', 'settings'].includes(id) && (id !== 'context-info' || railPolicy.right)).map(actionById);
-const primary = actions.filter(action => action.id !== 'context-info');
-const secondary = actions.filter(action => action.id === 'context-info');
+const primary = actions.filter(action => !['context-info', 'copy-link'].includes(action.id));
+const secondary = actions.filter(action => ['context-info', 'copy-link'].includes(action.id));
 const global = globalNavigationProjection();
 const islandLabel = i18nLabel('actionIsland.label');
 const toggleLabel = i18nLabel('actionIsland.toggle');
@@ -44,7 +44,7 @@ const presentation = resolveNotchPresentation(experienceConfig.notch);
         {['article', 'document'].includes(context) && <span class="gaga-visually-hidden" role="progressbar" aria-label="Progres membaca" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-gaga-reading-progress><span class="gaga-visually-hidden" data-gaga-reading-progress-value>0%</span></span>}
       </section>
       <section id="gaga-notch-system" class="gaga-notch-system" data-gaga-notch-system hidden inert aria-label="Pembaca dan navigasi">
-        <div class="gaga-notch-actions">
+        <div class="gaga-notch-actions" data-gaga-notch-overflow>
           {secondary.map(action => <button type="button" class="gaga-notch-button" data-gaga-action={action.command} data-gaga-action-id={action.id} data-gaga-quick-action={action.id} aria-label={action.label.id} data-gaga-i18n-id={action.label.id} data-gaga-i18n-en={action.label.en} data-gaga-i18n-target="aria"><Icon name={action.icon ?? 'article'} /><span class="gaga-visually-hidden" data-gaga-i18n-id={action.label.id} data-gaga-i18n-en={action.label.en}>{action.label.id}</span></button>)}
         </div>
         {railPolicy.left && <button type="button" class="gaga-notch-button" data-gaga-action="toggle-left-rail" aria-controls="gaga-left-rail"><Icon name="menu" /><span data-gaga-i18n-id="Navigasi bagian" data-gaga-i18n-en="Section navigation">Navigasi bagian</span></button>}
@@ -62,7 +62,7 @@ const presentation = resolveNotchPresentation(experienceConfig.notch);
   import { resolveNotchPresentation } from '../../config/contextual-ux.mjs';
   import { onRuntimeEvent, requestOutline, requestReaderPanel } from '@gaga/engine-runtime/runtime/events';
   import { runSiteCommand } from '../../scripts/systems/site-commands';
-  import { getUnifiedScrollMetrics, resolveReadingScrollContext } from '../../scripts/systems/reading-scroll';
+  import { signatureMotion } from '../../config/signature-motion.mjs';
 
   function setupActionRuntime() {
     const candidate = document.querySelector<HTMLElement>('[data-gaga-action-runtime]');
@@ -77,7 +77,7 @@ const presentation = resolveNotchPresentation(experienceConfig.notch);
     const reader = island.querySelector<HTMLElement>('[data-gaga-reader-panel]');
     const search = island.querySelector<HTMLElement>('[data-gaga-notch-search]')!;
     const finePointer = matchMedia('(hover: hover) and (pointer: fine)');
-    let hoverTimer = 0, touchTimer = 0, unsubscribe: (() => void) | undefined;
+    let hoverTimer = 0, touchTimer = 0;
     const readerOpen = () => reader?.dataset.gagaState === 'open';
     function setState(state: 'collapsed' | 'peek' | 'expanded', restore = false) {
       if (state !== 'expanded' && readerOpen()) requestReaderPanel({ action: 'close', source: 'click' });
@@ -105,16 +105,9 @@ const presentation = resolveNotchPresentation(experienceConfig.notch);
       const preset = resolveNotchPresentation(JSON.parse(container.dataset.gagaNotchConfig!), innerWidth);
       container.dataset.gagaNotchPlacement = preset.placement; container.dataset.gagaNotchShape = preset.shape;
     }
-    function progress() {
-      const value = Math.round(getUnifiedScrollMetrics().percentage);
-      const bar = island.querySelector<HTMLElement>('[data-gaga-reading-progress]');
-      bar?.setAttribute('aria-valuenow', String(value)); bar?.style.setProperty('--reading-progress', value + '%');
-      const label = island.querySelector('[data-gaga-reading-progress-value]'); if (label) label.textContent = value + '%';
-    }
-    function bindScroll() { unsubscribe?.(); unsubscribe = resolveReadingScrollContext()?.scrollContext.addChangeListener(progress); progress(); }
-    island.addEventListener('pointerenter', () => { clearTimeout(hoverTimer); if (finePointer.matches && island.dataset.gagaState === 'collapsed') hoverTimer = window.setTimeout(() => setState('peek'), 120); });
-    island.addEventListener('pointerleave', () => { clearTimeout(hoverTimer); if (finePointer.matches) hoverTimer = window.setTimeout(() => { if (island.dataset.gagaState === 'peek' && !island.matches(':focus-within')) setState('collapsed'); }, 300); });
-    island.addEventListener('touchstart', () => { if (island.dataset.gagaState === 'collapsed') touchTimer = window.setTimeout(() => setState('peek'), 280); }, { passive: true });
+    island.addEventListener('pointerenter', () => { clearTimeout(hoverTimer); if (finePointer.matches && island.dataset.gagaState === 'collapsed') hoverTimer = window.setTimeout(() => setState('peek'), signatureMotion.hoverMs); });
+    island.addEventListener('pointerleave', () => { clearTimeout(hoverTimer); if (finePointer.matches) hoverTimer = window.setTimeout(() => { if (island.dataset.gagaState === 'peek' && !island.matches(':focus-within')) setState('collapsed'); }, signatureMotion.leaveMs); });
+    island.addEventListener('touchstart', () => { if (island.dataset.gagaState === 'collapsed') touchTimer = window.setTimeout(() => setState('peek'), signatureMotion.holdMs); }, { passive: true });
     island.addEventListener('touchend', () => clearTimeout(touchTimer), { passive: true });
     island.addEventListener('touchcancel', () => clearTimeout(touchTimer), { passive: true });
     island.addEventListener('click', event => {
@@ -156,10 +149,10 @@ const presentation = resolveNotchPresentation(experienceConfig.notch);
       }
     }, { passive: true });
     onRuntimeEvent('readerPanelCommand', detail => { if (detail.action === 'open' || detail.action === 'toggle' && !readerOpen()) setState('expanded'); });
-    onRuntimeEvent('layoutChanged', () => { position(); bindScroll(); });
+    onRuntimeEvent('layoutChanged', position);
     window.addEventListener('resize', position, { passive: true });
-    window.addEventListener('pagehide', () => { stateObserver.disconnect(); unsubscribe?.(); clearTimeout(hoverTimer); clearTimeout(touchTimer); }, { once: true });
-    position(); bindScroll(); setState('collapsed');
+    window.addEventListener('pagehide', () => { stateObserver.disconnect(); clearTimeout(hoverTimer); clearTimeout(touchTimer); }, { once: true });
+    position(); setState('collapsed');
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setupActionRuntime, { once: true }); else setupActionRuntime();
 </script>
@@ -169,7 +162,7 @@ const presentation = resolveNotchPresentation(experienceConfig.notch);
   .gaga-app-frame .gaga-contextual-notch-container[data-gaga-notch-placement='bottom'] { top: auto; bottom: calc(var(--gaga-safe-area-bottom, 0px) + .5rem); }
   .gaga-app-frame .gaga-contextual-notch-container[data-gaga-notch-placement='left'] { top: 50%; left: .5rem; transform: translateY(-50%); }
   .gaga-app-frame .gaga-contextual-notch-container[data-gaga-notch-placement='right'] { top: 50%; left: auto; right: .5rem; transform: translateY(-50%); }
-  .gaga-contextual-notch { max-inline-size: calc(100vw - 1rem); color: var(--gaga-island-ink); }
+  .gaga-contextual-notch { max-inline-size: min(var(--gaga-notch-max,352px),calc(100vw - var(--gaga-safe-area-left) - var(--gaga-safe-area-right) - 2rem)); color: var(--gaga-island-ink); }
   .gaga-contextual-notch .gaga-action-runtime__shell { display: block; max-block-size: calc(100dvh - 1rem - var(--gaga-safe-area-top, 0px)); overflow: auto; padding: .125rem .25rem; border: 0; border-radius: 0 0 1.1rem 1.1rem; background: var(--gaga-island-bg); color: var(--gaga-island-ink); animation: none !important; transform: none; box-shadow: 0 .35rem 1.25rem #0003; }
   .gaga-contextual-notch-container[data-gaga-notch-shape='island'] .gaga-action-runtime__shell { border-radius: 1rem; margin-block-start: .5rem; }
   .gaga-contextual-notch-container[data-gaga-notch-shape='pill'] .gaga-action-runtime__shell { border-radius: 1.5rem; }
@@ -180,7 +173,7 @@ const presentation = resolveNotchPresentation(experienceConfig.notch);
   .gaga-contextual-notch .gaga-notch-button:disabled { opacity: .4; cursor: default; }
   .gaga-contextual-notch :is(button,a,summary):focus-visible { outline: 2px solid #fff; outline-offset: -3px; }
   .gaga-contextual-notch .gaga-notch-button:is(:hover,[aria-pressed='true']) { background: var(--gaga-island-hover); }
-  .gaga-contextual-notch .gaga-notch-context, .gaga-contextual-notch .gaga-notch-system { inline-size: min(28rem, calc(100vw - 2.25rem)); padding: .5rem .25rem; }
+  .gaga-contextual-notch .gaga-notch-context, .gaga-contextual-notch .gaga-notch-system { inline-size: 100%; padding: .5rem .25rem; }
   .gaga-contextual-notch [hidden] { display: none !important; }
   .gaga-contextual-notch .gaga-notch-page-title { margin: 0 0 .6rem; font-size: .9rem; line-height: 1.45; overflow-wrap: anywhere; }
   .gaga-contextual-notch .gaga-notch-actions { display: flex; flex-wrap: wrap; gap: .4rem; }
@@ -193,7 +186,7 @@ const presentation = resolveNotchPresentation(experienceConfig.notch);
   .gaga-contextual-notch details h2 { font-size: .9rem; }
   .gaga-contextual-notch details ul { padding-inline-start: 1.25rem; }
   .gaga-contextual-notch details a { display: inline-block; padding-block: .5rem; }
-  .gaga-contextual-notch .gaga-reader-panel { --gaga-surface: #242421; --gaga-surface-2: #242421; --gaga-surface-subtle: #1b1b18; --gaga-blue: var(--gaga-island-ink); --gaga-muted: var(--gaga-island-muted); --gaga-line: #56564e; position: static; inset: auto; display: none; inline-size: min(28rem, calc(100vw - 2.25rem)); width: auto; max-block-size: none; max-height: none; overflow: visible; transform: none; opacity: 1; border: 0; border-radius: 0; box-shadow: none; background: var(--gaga-island-bg); color: var(--gaga-island-ink); transition: none; }
+  .gaga-contextual-notch .gaga-reader-panel { --gaga-surface: #242421; --gaga-surface-2: #242421; --gaga-surface-subtle: #1b1b18; --gaga-blue: var(--gaga-island-ink); --gaga-muted: var(--gaga-island-muted); --gaga-line: #56564e; position: static; inset: auto; display: none; inline-size: 100%; width: auto; max-block-size: none; max-height: none; overflow: visible; transform: none; opacity: 1; border: 0; border-radius: 0; box-shadow: none; background: var(--gaga-island-bg); color: var(--gaga-island-ink); transition: none; }
   .gaga-contextual-notch .gaga-reader-panel[data-gaga-state='open'] { display: block; transform: none; }
   .gaga-contextual-notch:not([data-gaga-reader-closing]):has([data-gaga-reader-panel][data-gaga-state='open']) .gaga-notch-context,
   .gaga-contextual-notch:not([data-gaga-reader-closing]):has([data-gaga-reader-panel][data-gaga-state='open']) .gaga-notch-system > :not(.gaga-notch-actions),
@@ -208,8 +201,8 @@ const presentation = resolveNotchPresentation(experienceConfig.notch);
   .gaga-contextual-notch .gaga-notch-search input::placeholder { color:var(--gaga-island-muted); opacity:1; }
   .gaga-contextual-notch .gaga-notch-search input { min-inline-size:0; inline-size:100%; border:0; border-radius:.5rem; padding:.7rem; color:var(--gaga-island-ink); background:var(--gaga-island-hover); font:inherit; }
   .gaga-contextual-notch[data-gaga-live-state='speaking'] :is(.gaga-island-bar,.gaga-notch-context,.gaga-notch-system) { display:none; }
-  .gaga-contextual-notch :is(.gaga-notch-context,.gaga-notch-system,.gaga-reader-panel) { animation:gaga-island-reveal .18s ease-out; }
-  .gaga-contextual-notch .gaga-action-runtime__live { inline-size:min(28rem,calc(100vw - 2.25rem)); }
+  .gaga-contextual-notch :is(.gaga-notch-context,.gaga-notch-system,.gaga-reader-panel) { animation:gaga-island-reveal var(--gaga-signature-context,140ms) ease-out; }
+  .gaga-contextual-notch .gaga-action-runtime__live { inline-size:100%; }
   .gaga-contextual-notch .gaga-speech-dock__inner { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:.5rem; align-items:center; }
   .gaga-contextual-notch .gaga-speech-dock__info { min-inline-size:0; }
   .gaga-contextual-notch .gaga-speech-dock__text { display:block; max-inline-size:100%; color:var(--gaga-island-muted); }

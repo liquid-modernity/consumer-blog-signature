@@ -1,0 +1,111 @@
+name: Signature motion and adaptive geometry qualification
+on:
+  push:
+    branches: [review/signature-motion-geometry-v1]
+permissions:
+  contents: read
+jobs:
+  personal:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    env:
+      ASTRO_TELEMETRY_DISABLED: '1'
+      WRANGLER_SEND_METRICS: 'false'
+      GAGA_CONTENT_RELEASE_ENABLED: 'false'
+      PUBLIC_GIT_SHA: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.23.4'
+      - name: Exact runtime and clean committed dependencies
+        run: |
+          npm install --global npm@10.9.3 --ignore-scripts --no-audit --no-fund
+          test "$(node --version)" = v22.23.4
+          test "$(npm --version)" = 10.9.3
+          mkdir -p "$RUNNER_TEMP/signature"
+          echo "GAGA_EVIDENCE_DIRECTORY=$RUNNER_TEMP/signature" >> "$GITHUB_ENV"
+          node --input-type=module <<'JS'
+          import{writeFileSync}from'node:fs';import{execFileSync}from'node:child_process';
+          writeFileSync(process.env.RUNNER_TEMP+'/signature/runtime.json',JSON.stringify({node:process.version,npm:execFileSync('npm',['--version'],{encoding:'utf8'}).trim(),image:process.env.ImageOS,imageVersion:process.env.ImageVersion,source:process.env.GITHUB_SHA}));
+          JS
+          npm ci --ignore-scripts --no-audit --no-fund
+      - name: Pinned application, CMS and release contracts
+        id: historical
+        run: |
+          node tools/gaga/prepare.mjs
+          node --test tools/documentation/*.test.mjs tools/contextual/*.test.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/document-contracts.log"
+          npm run test:gaga | tee "$GAGA_EVIDENCE_DIRECTORY/gaga-tests.log"
+          npm run test:cms | tee "$GAGA_EVIDENCE_DIRECTORY/cms-tests.log"
+          npm test | tee "$GAGA_EVIDENCE_DIRECTORY/hardening.log"
+      - name: Motion resolver and geometry contracts
+        run: node --test tools/signature/*.test.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/signature-contracts.log"
+      - name: Personal state migration and anchor contracts
+        run: node --test tools/personal/*.test.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/personal-contracts.log"
+      - name: Strict application types and publication build
+        run: |
+          npm run check | tee "$GAGA_EVIDENCE_DIRECTORY/types.log"
+          export PUBLIC_BUILD_TIME="$(git show -s --format=%cI HEAD)"
+          npm run build | tee "$GAGA_EVIDENCE_DIRECTORY/build.log"
+          python3 tools/documentation/html-proof.py
+          python3 tools/contextual/metadata-proof.py
+          python3 tools/reference/html-semantics.py
+          npm run test:consumer | tee "$GAGA_EVIDENCE_DIRECTORY/consumer.log"
+      - run: npx --no-install playwright install --with-deps chromium
+      - name: Focused motion desktop and touch behavior
+        run: |
+          npx --no-install playwright test --config tools/signature/playwright.config.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/signature-browser.log"
+          node tools/signature/browser-report.mjs
+      - name: Preserve all ten existing release browser cases
+        run: |
+          npm run test:ui | tee "$GAGA_EVIDENCE_DIRECTORY/mandatory-browser.log"
+          node tools/gaga/browser-contract.mjs --report .gaga/browser-results.json
+      - name: Focused documentation desktop and touch behavior
+        run: |
+          npx --no-install playwright test --config tools/documentation/playwright.config.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/documentation-browser.log"
+          node tools/documentation/browser-report.mjs
+      - name: Synthetic desktop and touch personal state interactions
+        run: |
+          npx --no-install playwright test --config tools/personal/playwright.config.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/personal-browser.log"
+          node tools/personal/browser-report.mjs
+      - name: Audit, workflow lint and exact source evidence
+        env:
+          HISTORICAL_GATE: ${{ steps.historical.outcome }}
+        run: |
+          npm audit --audit-level=low --json > "$GAGA_EVIDENCE_DIRECTORY/audit.json"
+          go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.7 -shellcheck= .github/workflows/signature-motion.yml .github/workflows/deploy.yml
+          git diff --exit-code c462ab8074f2d17187f1fde5791457bde2ec15f3 HEAD -- cms editorial content package.json package-lock.json gaga.app.json wrangler.jsonc vendor content-release.json .github/workflows/content-release.yml .github/workflows/content-publish.yml tools/gaga/browser docs/UI-PRESERVATION.json
+          node --input-type=module <<'JS'
+          import assert from'node:assert/strict';import{readFileSync,writeFileSync}from'node:fs';import{execFileSync}from'node:child_process';import{createHash}from'node:crypto';import{sourceIdentity}from'./tools/gaga/source-identity.mjs';import{assertBrowserReport}from'./tools/gaga/browser-contract.mjs';
+          const dir=process.env.GAGA_EVIDENCE_DIRECTORY,read=p=>JSON.parse(readFileSync(p)),stats=read('.gaga/personal-results.json').stats;
+          assert.equal(stats.expected,16);for(const key of ['unexpected','skipped','flaky'])assert.equal(stats[key],0);
+          assert.equal(read(dir+'/audit.json').metadata.vulnerabilities.total,0);
+          assert.equal(process.env.HISTORICAL_GATE,'success','Historical gates remain mandatory');
+          writeFileSync(dir+'/qualification-receipt.json',JSON.stringify({status:'QUALIFIED_APPLICATION_SURFACE',source:sourceIdentity(),runtime:read(dir+'/runtime.json'),workerd:execFileSync('node_modules/.bin/workerd',['--version'],{encoding:'utf8'}).trim(),mandatory:assertBrowserReport(read('.gaga/browser-results.json')),personal:stats,signature:read('.gaga/signature-results.json').stats,documentation:read('.gaga/documentation-results.json').stats,html:read('.gaga/documentation-html.json'),searchSha256:createHash('sha256').update(readFileSync('dist/search-index.json')).digest('hex'),audit:read(dir+'/audit.json').metadata.vulnerabilities,preservationAdmission:'Separate exact-profile release gate remains mandatory',run:process.env.GITHUB_RUN_ID,productionMutations:0},null,2));
+          JS
+      - name: Require unchanged historical gates to pass before qualification
+        if: steps.historical.outcome != 'success'
+        run: |
+          echo 'Historical contract failure retained; candidate is NOT qualified.'
+          exit 1
+      - name: Preserve actual diagnostics and receipts
+        if: always()
+        run: |
+          if [ -d .gaga ]; then find .gaga -maxdepth 1 -type f -name '*.json' -exec cp '{}' "$GAGA_EVIDENCE_DIRECTORY/" ';'; fi
+          if [ -d .gaga ]; then find .gaga -maxdepth 1 -type f -name 'documentation-*.png' -exec cp '{}' "$GAGA_EVIDENCE_DIRECTORY/" ';'; fi
+          if [ -d .gaga/documentation-traces ]; then cp -R .gaga/documentation-traces "$GAGA_EVIDENCE_DIRECTORY/"; fi
+          if [ -d .gaga/signature-traces ]; then cp -R .gaga/signature-traces "$GAGA_EVIDENCE_DIRECTORY/"; fi
+          if [ -d .gaga/personal-traces ]; then cp -R .gaga/personal-traces "$GAGA_EVIDENCE_DIRECTORY/"; fi
+          if [ -d test-results ]; then cp -R test-results "$GAGA_EVIDENCE_DIRECTORY/"; fi
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: signature-motion-evidence
+          path: ${{ runner.temp }}/signature
+          if-no-files-found: error

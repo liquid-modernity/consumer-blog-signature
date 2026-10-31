@@ -2,7 +2,7 @@ import { hydrateDomOutlineIfSparse } from './toc-spy';
 import { createOutlinePeekCapability } from '@gaga/engine-runtime/runtime/outline-peek';
 import { onRuntimeEvent, requestLeftRail, requestReaderPanel, type SurfaceCommandDetail } from '@gaga/engine-runtime/runtime/events';
 import { getOutlinePeekAttachment, outlinePeekRequiresTableOfContents, supportsOutlinePeek } from '../../config/systems';
-import { articleReadingScopeIsActive, resolveReadingScrollContext, getUnifiedScrollMetrics } from './reading-scroll';
+import { resolveReadingScrollContext } from './reading-scroll';
 
 let initialized = false;
 
@@ -48,10 +48,8 @@ export function initOutlinePeek() {
     }
   });
 
-  let unsubscribeScrollContext: (() => void) | null = null;
   let scheduled = false;
   let frameId: number | undefined;
-  let lastScrollTop = 0;
   let gestureStartY: number | null = null;
 
   const isOpen = () => sheet.dataset.gagaState === 'open';
@@ -67,33 +65,10 @@ export function initOutlinePeek() {
     stack?.toggleAttribute('hidden', !available);
   }
 
-  function syncDynamicVisibility() {
-    const context = resolveReadingScrollContext();
-    if (!context || !stack || isOpen()) return;
-    const percentage = Math.round(getUnifiedScrollMetrics().percentage);
-    const progress = stack.querySelector<HTMLProgressElement>('[data-gaga-outline-progress]');
-    if (progress) progress.value = percentage;
-    const opener = stack.querySelector<HTMLElement>('[data-gaga-outline-opener]');
-    opener?.setAttribute('aria-label', `Daftar isi — ${currentLabel?.textContent ?? ''} — ${percentage}%`);
-    const measurements = context.scrollContext.measure();
-    const delta = measurements.scrollTop - lastScrollTop;
-    if (measurements.scrollTop > 140 && delta > 11) stack.dataset.gagaVisibility = 'micro';
-    else if (delta < -7 || measurements.scrollTop < 84) stack.dataset.gagaVisibility = 'visible';
-    lastScrollTop = measurements.scrollTop;
-  }
-
   function scheduleAvailability() {
     if (scheduled) return;
     scheduled = true;
-    frameId = requestAnimationFrame(() => { syncAvailability(); syncDynamicVisibility(); });
-  }
-
-  function bindScrollOwner() {
-    unsubscribeScrollContext?.();
-    const context = resolveReadingScrollContext();
-    lastScrollTop = context?.scrollContext.measure().scrollTop ?? 0;
-    unsubscribeScrollContext = context?.scrollContext.addChangeListener(scheduleAvailability) ?? null;
-    scheduleAvailability();
+    frameId = requestAnimationFrame(syncAvailability);
   }
 
   function updateSemanticPosition(id: string, label: string) {
@@ -105,8 +80,8 @@ export function initOutlinePeek() {
     if (sheetCurrentLabel && label) sheetCurrentLabel.textContent = label;
   }
 
-  bindScrollOwner();
-  onRuntimeEvent('layoutChanged', bindScrollOwner);
+  scheduleAvailability();
+  onRuntimeEvent('layoutChanged', scheduleAvailability);
   onRuntimeEvent('tocActiveChanged', (detail) => updateSemanticPosition(detail.id, detail.label));
 
   document.addEventListener('click', (event) => {
@@ -151,7 +126,6 @@ export function initOutlinePeek() {
   }, { passive: true });
 
   window.addEventListener('pagehide', () => {
-    unsubscribeScrollContext?.();
     if (frameId !== undefined) cancelAnimationFrame(frameId);
   }, { once: true });
 }

@@ -1,3 +1,4 @@
+import { signatureMotion } from './signature-motion.mjs';
 import { notchPresentation } from './contextual-ux.mjs';
 import { documentExperience } from './document-experience';
 import type { GagaActionId } from './actions';
@@ -20,6 +21,7 @@ export type ExperienceContextInput = {
 
 export const experienceConfig = {
   notch: notchPresentation,
+  signatureMotion,
   reading: { mode: 'immersive', density: 'comfortable', defaultContentWidth: 'reading' },
   navigation: { globalRail: 'vertical-icon-only', contextLeftRail: 'context-aware', contextRightRail: 'context-aware' },
   compact: { dock: 'contextual', articleDock: 'hidden', outlinePeek: 'semantic', fullBleedMedia: true },
