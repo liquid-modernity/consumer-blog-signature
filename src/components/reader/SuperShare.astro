@@ -1,0 +1,27 @@
+<section class="gaga-super-share" data-gaga-super-share-panel hidden inert role="region" aria-label="Super Share">
+  <div class="gaga-super-share__heading"><strong>Super Share</strong><button type="button" class="gaga-notch-button" data-gaga-share-close aria-label="Kembali dari Super Share">←</button></div>
+  <p data-gaga-share-context></p>
+  <div class="gaga-super-share__actions" role="group" aria-label="Salin dan kirim">
+    <button type="button" class="gaga-notch-button" data-gaga-share="link">Salin tautan</button>
+    <button type="button" class="gaga-notch-button" data-gaga-share="native" hidden>Native Share</button>
+  </div>
+  <details data-gaga-share-group><summary>Copy</summary><div class="gaga-super-share__actions">
+    <button type="button" class="gaga-notch-button" data-gaga-share="rich">Rich Link</button>
+    <button type="button" class="gaga-notch-button" data-gaga-share="quote" hidden>Kutipan</button>
+    <button type="button" class="gaga-notch-button" data-gaga-share="reference">Referensi</button>
+  </div></details>
+  <details data-gaga-share-group><summary>Export</summary><div class="gaga-super-share__actions">
+    <button type="button" class="gaga-notch-button" data-gaga-share="text">Text Card</button>
+    <button type="button" class="gaga-notch-button" data-gaga-share="poster">Poster PNG</button>
+  </div></details>
+  <p role="status" aria-live="polite" data-gaga-share-feedback></p>
+</section>
+<style is:global>
+  [data-gaga-share-open='true'] :is([data-gaga-notch-context],[data-gaga-notch-system]) { display:none!important; }
+  .gaga-super-share { padding:var(--gaga-context-space); inline-size:100%; box-sizing:border-box; overflow-wrap:anywhere; animation:gaga-context-emerge var(--gaga-context-motion-duration) var(--gaga-context-motion-easing); }
+  .gaga-super-share__heading { display:flex; justify-content:space-between; align-items:center; gap:var(--gaga-context-space); }
+  .gaga-super-share__actions { display:flex; flex-wrap:wrap; gap:var(--gaga-context-space); }
+  .gaga-super-share p { margin:.5rem 0; font:inherit; color:var(--gaga-context-muted); }
+  .gaga-super-share [role='status']:empty { display:none; }
+  .gaga-super-share button:disabled { opacity:.5; }
+</style>

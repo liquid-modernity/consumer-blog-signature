@@ -1,3 +1,4 @@
+import { openSuperShare } from './super-share';
 import { createWebCommandRegistry, type WebCommandInputSource } from '@gaga/engine-runtime/runtime/command-registry';
 import {
   requestCloseTopSurface,
@@ -92,23 +93,6 @@ function copyCurrentPage(pointer: { x?: number; y?: number }) {
   return true;
 }
 
-function shareCurrentPage(pointer: { x?: number; y?: number }) {
-  const shareData = {
-    title: document.title,
-    text: document.querySelector('meta[name="description"]')?.getAttribute('content') || document.title,
-    url: currentPageURL()
-  };
-  if (typeof navigator !== 'undefined' && navigator.share && (!navigator.canShare || navigator.canShare(shareData))) {
-    navigator.share(shareData)
-      .then(() => requestToast({ message: 'Tautan berhasil dibagikan', tone: 'ok', x: pointer.x, y: pointer.y }))
-      .catch((err) => {
-        if (err.name !== 'AbortError') {
-          requestToast({ message: 'Berbagi dibatalkan', tone: 'info', x: pointer.x, y: pointer.y });
-        }
-      });
-  } else copyCurrentPage(pointer);
-  return true;
-}
 
 function smartBack(pointer: { x?: number; y?: number }) {
   if (window.history.length > 1 && document.referrer && document.referrer.includes(window.location.host)) {
@@ -135,7 +119,7 @@ function runBuiltInCommand(command: GagaActionCommand, detail: SiteCommandDetail
   }
   if (command === 'open-search') return openSearch();
   if (command === 'copy-page-link') return copyCurrentPage(pointer);
-  if (command === 'share-page') return shareCurrentPage(pointer);
+  if (command === 'share-page') return openSuperShare({target:detail.target});
   if (command === 'smart-back') return smartBack(pointer);
   if (command === 'reset-knowledge-graph') return resetKnowledgeGraph(pointer);
   if (command === 'toggle-focus-mode') {

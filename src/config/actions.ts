@@ -210,7 +210,7 @@ export const gagaActions: readonly GagaAction[] = [
       }
     },
     feedback: {
-      label: 'Share',
+      label: 'Super Share',
       success: 'Share panel opened',
       fallbackSuccess: 'Link copied',
       failure: 'Could not share link',

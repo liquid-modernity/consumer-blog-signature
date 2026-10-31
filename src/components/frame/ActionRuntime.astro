@@ -1,6 +1,7 @@
 ---
 import { contextualSurfaceRoles } from '../../config/contextual-surfaces.mjs';
 import Icon from '../ui/Icon.astro';
+import SuperShare from '../reader/SuperShare.astro';
 import { siteConfig } from '../../config/site';
 import { identityConfig } from '../../config/identity';
 import { i18nLabel } from '../../config/i18n';
@@ -53,6 +54,7 @@ const presentation = resolveNotchPresentation(experienceConfig.notch);
         <div class="gaga-notch-navigation" aria-label="Navigasi situs">{global.items.map(item => <a href={item.href} aria-current={path === item.href ? 'page' : undefined}><Icon name={item.icon} /><span data-gaga-i18n-id={item.label} data-gaga-i18n-en={item.labelEn ?? item.label}>{item.label}</span></a>)}</div>
         <details><summary>Direktori informasi</summary>{global.groups.map(group => <section><h2>{group.label}</h2><ul>{group.items.map(item => <li><a href={item.href}>{item.label}</a></li>)}</ul></section>)}</details>
       </section>
+      <SuperShare />
       <slot name="reader" />
       <div data-gaga-action-runtime-live class="gaga-action-runtime__live" hidden></div>
     </div>
@@ -64,12 +66,14 @@ const presentation = resolveNotchPresentation(experienceConfig.notch);
   import { onRuntimeEvent, requestOutline, requestReaderPanel } from '@gaga/engine-runtime/runtime/events';
   import { runSiteCommand } from '../../scripts/systems/site-commands';
   import { signatureMotion } from '../../config/signature-motion.mjs';
+  import { closeSuperShare, currentShareContext } from '../../scripts/systems/super-share';
 
   function setupActionRuntime() {
     const candidate = document.querySelector<HTMLElement>('[data-gaga-action-runtime]');
     if (!candidate || candidate.dataset.wired === 'true') return;
     const island = candidate;
     island.dataset.wired = 'true';
+    if (!currentShareContext()) island.querySelectorAll<HTMLElement>('[data-gaga-action="share-page"]').forEach(button => button.hidden = true);
     const container = island.closest<HTMLElement>('[data-gaga-action-runtime-container]')!;
     const toggle = island.querySelector<HTMLButtonElement>('[data-gaga-action-island-toggle]')!;
     const context = island.querySelector<HTMLElement>('[data-gaga-notch-context]')!;
@@ -138,6 +142,7 @@ const presentation = resolveNotchPresentation(experienceConfig.notch);
     island.addEventListener('keydown', event => {
       if (event.key !== 'Escape') return;
       event.preventDefault(); event.stopPropagation();
+      if (closeSuperShare(true)) return;
       if (!search.hidden) { search.hidden = true; search.inert = true; const opener=island.querySelector<HTMLElement>('[data-gaga-notch-search-toggle]'); opener?.setAttribute('aria-expanded','false'); opener?.focus(); return; }
       if (readerOpen()) requestReaderPanel({ action: 'close', source: 'keyboard' });
       else setState(island.dataset.gagaState === 'expanded' ? 'peek' : 'collapsed', true);
@@ -150,7 +155,7 @@ const presentation = resolveNotchPresentation(experienceConfig.notch);
         if (closedReader) requestAnimationFrame(() => toggle.focus({ preventScroll: true }));
       }
     }, { passive: true });
-    onRuntimeEvent('readerPanelCommand', detail => { if (detail.action === 'open' || detail.action === 'toggle' && !readerOpen()) setState('expanded'); });
+    onRuntimeEvent('readerPanelCommand', detail => { if (detail.action !== 'close') closeSuperShare(); if (detail.action === 'open' || detail.action === 'toggle' && !readerOpen()) setState('expanded'); });
     onRuntimeEvent('layoutChanged', position);
     window.addEventListener('resize', position, { passive: true });
     window.addEventListener('pagehide', () => { stateObserver.disconnect(); clearTimeout(hoverTimer); clearTimeout(touchTimer); }, { once: true });

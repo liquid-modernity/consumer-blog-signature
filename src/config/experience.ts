@@ -30,7 +30,7 @@ export const experienceConfig = {
   labels: { mouse: 'hover', keyboard: 'focus', touch: 'contextual' },
   surfaces: {
     article: {
-      notchActionIds: ['smart-back', 'search', 'copy-link', 'share', 'save', 'focusmode', 'speak', 'context-info', 'settings'],
+      notchActionIds: ['smart-back', 'search', 'share', 'save', 'focusmode', 'speak', 'context-info', 'settings'],
       dockActionIds: [],
       dockMode: 'hidden'
     },
@@ -55,7 +55,7 @@ export const experienceConfig = {
       dockMode: 'workspace'
     },
     document: {
-      notchActionIds: ['smart-back', 'search', 'outline', 'copy-link', 'share', 'focusmode', 'settings'],
+      notchActionIds: ['smart-back', 'search', 'outline', 'share', 'focusmode', 'settings'],
       dockActionIds: [],
       dockMode: 'hidden'
     },
