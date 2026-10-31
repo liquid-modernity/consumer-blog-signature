@@ -64,6 +64,7 @@ jobs:
           export PUBLIC_BUILD_TIME="$(git show -s --format=%cI HEAD)"
           npm run build | tee "$GAGA_EVIDENCE_DIRECTORY/build.log"
           python3 tools/documentation/html-proof.py
+          python3 tools/navigation/html-proof.py
           python3 tools/contextual/metadata-proof.py
           python3 tools/reference/html-semantics.py
           npm run test:consumer | tee "$GAGA_EVIDENCE_DIRECTORY/consumer.log"
