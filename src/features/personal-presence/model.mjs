@@ -29,7 +29,7 @@ export function presenceSections(sections){
 export function createPresenceRegistry(config,{origin,providers,reservedPaths=[]}){
  const base=new URL(origin);required(base.protocol==='https:'&&!base.username&&!base.password&&base.pathname==='/'&&!base.search&&!base.hash,'canonical origin required');
  required(config&&config.routes&&Array.isArray(config.capabilities),'config required');
- const declared=new Set(),paths=new Set(),sourceEntryIds=new Set();const all=[];
+ const declared=new Set(),paths=new Set(),sourceEntryIds=new Set(),entryOwners=new Map();const all=[];
  ordered(config.capabilities,'capability');
  for(const capability of config.capabilities){
   required(!declared.has(capability.id),'duplicate capability ID');declared.add(capability.id);presenceLabel(capability.label);
@@ -37,8 +37,11 @@ export function createPresenceRegistry(config,{origin,providers,reservedPaths=[]
   required(['document','index','methods'].includes(capability.presentationProfile),'unsupported presentation profile');
   required(typeof capability.readable==='boolean'&&typeof capability.rootNavigation==='boolean','invalid eligibility/navigation');
   const path=presencePath(config.routes[capability.route]);
+  const claim=entry=>{required(text(entry),'invalid source entry');presencePath('/'+entry);required(!entryOwners.has(entry)||entryOwners.get(entry)===capability.id,'duplicate source ownership');entryOwners.set(entry,capability.id);sourceEntryIds.add(entry);};
+  required(capability.legacyEntries===undefined||Array.isArray(capability.legacyEntries),'invalid legacy source ownership');
+  for(const entry of capability.legacyEntries??[])claim(entry);
   const data=providers[capability.providerBinding](capability);
-  if(data?.sourceEntryId){required(text(data.sourceEntryId),'invalid source entry');sourceEntryIds.add(data.sourceEntryId);}
+  if(data?.sourceEntryId)claim(data.sourceEntryId);
   if(!capability.enabled)continue;
   required(!paths.has(path)&&!reservedPaths.some(p=>p.endsWith('/*')?(path===p.slice(0,-2)||path.startsWith(p.slice(0,-1))):p===path),'route collision: '+path);paths.add(path);
   if(data==null)continue; // An unpopulated optional capability never projects a placeholder or dead route.

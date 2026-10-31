@@ -72,7 +72,7 @@ export const navGroups: NavGroup[] = [
       { id: 'knowledge-references', label: 'Referensi', labelEn: 'References', href: '/knowledge/references', icon: 'article' }
     ]
   },
-  group('pages', 'navigation.pages', 'folder_open', presenceNavigation().map(p=>({...p,label:p.title}))),
+  group('pages', 'navigation.pages', 'folder_open', presenceNavigation(true).map(p=>({...p,label:p.title}))),
   group('legal', 'navigation.legal', 'policy', [
     item('privacy-policy', 'navigation.privacyPolicy', '/legal/privacy', 'shield'),
     item('terms-of-use', 'navigation.termsOfUse', '/legal/terms', 'contract'),

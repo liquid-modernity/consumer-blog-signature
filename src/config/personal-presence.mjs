@@ -11,6 +11,6 @@ export const personalPresenceConfig = {
   {id:'support',enabled:true,label:{id:'Dukungan',en:'Support'},route:'support',order:5,providerBinding:'support-information',presentationProfile:'methods',readable:false,rootNavigation:true,icon:'help'},
   {id:'contact',enabled:true,label:{id:'Kontak',en:'Contact'},route:'contact',order:6,providerBinding:'public-contact',presentationProfile:'methods',readable:false,rootNavigation:true,icon:'mail'},
   {id:'campaign',enabled:false,label:{id:'Kampanye',en:'Campaign'},route:'campaign',order:7,providerBinding:'unpopulated',presentationProfile:'document',readable:false,rootNavigation:false},
-  {id:'audience',enabled:false,label:{id:'Langganan',en:'Subscribe'},route:'audience',order:8,providerBinding:'unpopulated',presentationProfile:'methods',readable:false,rootNavigation:false}
+  {id:'audience',legacyEntries:['newsletter'],enabled:false,label:{id:'Langganan',en:'Subscribe'},route:'audience',order:8,providerBinding:'unpopulated',presentationProfile:'methods',readable:false,rootNavigation:false}
  ]
 };
