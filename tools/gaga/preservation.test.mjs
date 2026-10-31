@@ -200,3 +200,9 @@ test("touch admission rejects extra component bytes",()=>{
 test("touch admission cannot permit unrelated routes",()=>{
  const r=check(root=>{motionTouchProfile(root);const p=join(root,'src/config/routes.ts');writeFileSync(p,readFileSync(p,'utf8')+'\n// not qualified\n');});assert.notEqual(r.status,0);assert.match(r.stderr,/Unintended application UI/);
 });
+
+function contextualFamily(root) { for (const f of inventory.files) writeFileSync(join(root,f.path),execFileSync('git',['show','e842974a49fb79105bc897fd8850fa8c22470682:'+f.path])); }
+test("whole contextual family passes with exact hosted provenance",()=>{const r=check(contextualFamily);assert.equal(r.status,0,r.stderr);assert.match(r.stdout,/whole qualified contextual family profile e842974a49fb79105bc897fd8850fa8c22470682/);assert.match(r.stdout,/41190571334/);});
+test("family and earlier surfaces cannot form unqualified hybrids",()=>{const r=check(root=>{contextualFamily(root);const p='src/styles/partials/_reader.scss';writeFileSync(join(root,p),execFileSync('git',['show','7aa1c27082afed9619defea9cc6797bdeb2af569:'+p]));});assert.notEqual(r.status,0);assert.match(r.stderr,/Unintended application UI/);});
+test("extra family bytes fail closed",()=>{const r=check(root=>{contextualFamily(root);const p=join(root,'src/components/frame/AppFrameBase.astro');writeFileSync(p,readFileSync(p,'utf8')+'\n<!-- not qualified -->\n');});assert.notEqual(r.status,0);assert.match(r.stderr,/Unintended application UI/);});
+test("family admission cannot authorize unrelated routes",()=>{const r=check(root=>{contextualFamily(root);const p=join(root,'src/config/routes.ts');writeFileSync(p,readFileSync(p,'utf8')+'\n// not qualified\n');});assert.notEqual(r.status,0);assert.match(r.stderr,/Unintended application UI/);});
