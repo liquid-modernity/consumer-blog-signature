@@ -122,6 +122,30 @@ const approvedMotion = Object.freeze({
     "src/styles/partials/_reader.scss": "e212c0e2bebd013beaa7904b9466eab9830ed878e62880c5f3cc980ea0edf955"
   }
 });
+// Exact touch-pan correction; prior whole profiles remain valid historical evidence.
+const approvedMotionTouch = Object.freeze({
+  "sourceCommit": "dbf5502751c1b74bba392e9792260f4ae0cfb1ec",
+  "sourceTree": "8bc6e2ecb5479c82402420f5300b4a333409165d",
+  "qualification": "https://github.com/liquid-modernity/consumer-blog-signature/actions/runs/41180574062",
+  "acceptanceReceiptSha256": "2fcbe64ae33e94367135ad954440f615c132d0f54a1eb6c5af0289e33e68b8e5",
+  "files": {
+    "src/components/frame/ActionRuntime.astro": "cf0c34d7cc43aa5b273dcb1b48732906b555782d162ce7cec3800a99420bd85d",
+    "src/components/frame/AppFrameBase.astro": "989f98c4c72414400d428cd9b0c25f172fde4f88185219d702c174691d9d77c0",
+    "src/components/frame/ArticleOutlinePeek.astro": "8164f472ab8994df418f5cb2ee873f7c2074b7b565192ad534c5ce9ebfa720ba",
+    "src/components/frame/LeftRail.astro": "2d9d068f4b58e3f33a08f0ee08adb44a89ce3bf7985b5aaf78dd4805bd3087fe",
+    "src/components/frame/RightInfoRail.astro": "8b13376ca332d19632b409ad935420e5d36f333f210e04bb48134bb4e704c636",
+    "src/components/frame/StandaloneAppFrame.astro": "496c125172fc95085975dea545b5b51a85d059ccb6dc9fbea16fbb46261012b8",
+    "src/components/gaga/ArticleShell.astro": "5ba40e4820a75779485622ef256f854cdaa639f3ac7d00c5b734895ffb705317",
+    "src/components/gaga/MarkdownContent.astro": "5244b38e779359bf55db1d9cdaac4d7661d3783275e0bb4f02c9afddf8df9b85",
+    "src/components/gaga/PageFrame.astro": "ed7434c2f74770cc5be22853ee13c0db6f43be17424fd2417cbe30371a7acbde",
+    "src/config/nav.ts": "cae2b243b44e71cc94cd1a1ec67bad232f605ea9fad598597cfacae408e10930",
+    "src/styles/partials/_action-island.scss": "14bcbb8bc42b2eb708d209e9aac47b870d1a1cb5d551f0f72e103d21ff5f8c43",
+    "src/styles/partials/_content.scss": "361e793ecb93cd1b4fe1fca9d601a31fe6a3fce8fc20f9413fa3633bfc280787",
+    "src/styles/partials/_frame.scss": "16c72655342178657aae90b3d2902a07df163a847f5e37582d8d591bb346e39c",
+    "src/styles/partials/_outline-peek.scss": "e684221f26dfc12f91a8d845c76217cdc7a4d7724f38645354e640ca4f6ea17f",
+    "src/styles/partials/_reader.scss": "e212c0e2bebd013beaa7904b9466eab9830ed878e62880c5f3cc980ea0edf955"
+  }
+});
 const historical = readFileSync("docs/UI-PRESERVATION.json");
 assert.equal(
   createHash("sha256").update(historical).digest("hex"),
@@ -141,17 +165,19 @@ for (const [path, digest] of Object.entries(approvedPolish.files)) assert.ok(his
 for (const [path, digest] of Object.entries(approvedDocumentation.files)) assert.ok(historicalHashes.has(path) && /^[a-f0-9]{64}$/.test(digest));
 for (const [path, digest] of Object.entries(approvedPersonal.files)) assert.ok(historicalHashes.has(path) && /^[a-f0-9]{64}$/.test(digest));
 for (const [path, digest] of Object.entries(approvedMotion.files)) assert.ok(historicalHashes.has(path) && /^[a-f0-9]{64}$/.test(digest));
+for (const [path, digest] of Object.entries(approvedMotionTouch.files)) assert.ok(historicalHashes.has(path) && /^[a-f0-9]{64}$/.test(digest));
 const actual = new Map(inventory.files.map(f => [f.path, createHash("sha256").update(
   readFileSync(f.path, "utf8").replaceAll("@gaga/engine-web", "@gaga/engine-runtime")
     .replaceAll("@gaga/engine/", "@gaga/engine-capabilities/"),
 ).digest("hex")]));
+const motionTouchProfile = Object.entries(approvedMotionTouch.files).every(([path, digest]) => actual.get(path) === digest);
 const motionProfile = Object.entries(approvedMotion.files).every(([path, digest]) => actual.get(path) === digest);
 const personalProfile = Object.entries(approvedPersonal.files).every(([path, digest]) => actual.get(path) === digest);
 const documentationProfile = Object.entries(approvedDocumentation.files).every(([path, digest]) => actual.get(path) === digest);
 const polishProfile = Object.entries(approvedPolish.files).every(([path, digest]) => actual.get(path) === digest);
 const historicalProfile = Object.keys(approvedUx.files).every(path => actual.get(path) === historicalHashes.get(path));
 for (const f of inventory.files) {
-  const expected = motionProfile ? approvedMotion.files[f.path] ?? historicalHashes.get(f.path) : personalProfile ? approvedPersonal.files[f.path] ?? historicalHashes.get(f.path) : documentationProfile ? approvedDocumentation.files[f.path] ?? historicalHashes.get(f.path) : polishProfile ? approvedPolish.files[f.path] ?? historicalHashes.get(f.path) : historicalProfile ? historicalHashes.get(f.path) : approvedUx.files[f.path] ?? historicalHashes.get(f.path);
+  const expected = motionTouchProfile ? approvedMotionTouch.files[f.path] ?? historicalHashes.get(f.path) : motionProfile ? approvedMotion.files[f.path] ?? historicalHashes.get(f.path) : personalProfile ? approvedPersonal.files[f.path] ?? historicalHashes.get(f.path) : documentationProfile ? approvedDocumentation.files[f.path] ?? historicalHashes.get(f.path) : polishProfile ? approvedPolish.files[f.path] ?? historicalHashes.get(f.path) : historicalProfile ? historicalHashes.get(f.path) : approvedUx.files[f.path] ?? historicalHashes.get(f.path);
   assert.equal(actual.get(f.path), expected, "Unintended application UI/style/routing change: " + f.path);
 }
 console.log(
@@ -160,5 +186,5 @@ console.log(
   "entries; one exact qualified main-landmark correction from",
   approvedMain.sourceCommit,
   approvedMain.qualification,
-  motionProfile ? "whole qualified motion profile " + approvedMotion.sourceCommit + " " + approvedMotion.qualification : personalProfile ? "whole qualified personal profile " + approvedPersonal.sourceCommit + " " + approvedPersonal.qualification : documentationProfile ? "whole qualified documentation profile " + approvedDocumentation.sourceCommit + " " + approvedDocumentation.qualification : polishProfile ? "whole qualified polish profile " + approvedPolish.sourceCommit + " " + approvedPolish.qualification : historicalProfile ? "historical profile" : "whole accepted UX profile " + approvedUx.sourceCommit + " " + approvedUx.qualification,
+  motionTouchProfile ? "whole qualified motion-touch profile " + approvedMotionTouch.sourceCommit + " " + approvedMotionTouch.qualification : motionProfile ? "whole qualified motion profile " + approvedMotion.sourceCommit + " " + approvedMotion.qualification : personalProfile ? "whole qualified personal profile " + approvedPersonal.sourceCommit + " " + approvedPersonal.qualification : documentationProfile ? "whole qualified documentation profile " + approvedDocumentation.sourceCommit + " " + approvedDocumentation.qualification : polishProfile ? "whole qualified polish profile " + approvedPolish.sourceCommit + " " + approvedPolish.qualification : historicalProfile ? "historical profile" : "whole accepted UX profile " + approvedUx.sourceCommit + " " + approvedUx.qualification,
 );

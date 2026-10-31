@@ -184,3 +184,19 @@ test("extra motion component bytes remain rejected",()=>{
 test("motion admission cannot permit unrelated routing changes",()=>{
  const r=check(root=>{motionProfile(root);const p=join(root,'src/config/routes.ts');writeFileSync(p,readFileSync(p,'utf8')+'\n// not qualified\n');});assert.notEqual(r.status,0);assert.match(r.stderr,/Unintended application UI/);
 });
+
+function motionTouchProfile(root) {
+ for (const file of inventory.files) writeFileSync(join(root,file.path),execFileSync('git',['show','dbf5502751c1b74bba392e9792260f4ae0cfb1ec:'+file.path]));
+}
+test("whole native touch-pan correction passes with exact hosted provenance",()=>{
+ const r=check(motionTouchProfile);assert.equal(r.status,0,r.stderr);assert.match(r.stdout,/whole qualified motion-touch profile dbf5502751c1b74bba392e9792260f4ae0cfb1ec/);assert.match(r.stdout,/41180574062/);
+});
+test("touch correction cannot mix with pre-motion styles",()=>{
+ const r=check(root=>{motionTouchProfile(root);const p='src/styles/partials/_action-island.scss';writeFileSync(join(root,p),execFileSync('git',['show','307118dd9776630bc0dd2ccc605285d8d52ef452:'+p]));});assert.notEqual(r.status,0);assert.match(r.stderr,/Unintended application UI/);
+});
+test("touch admission rejects extra component bytes",()=>{
+ const r=check(root=>{motionTouchProfile(root);const p=join(root,'src/components/frame/ActionRuntime.astro');writeFileSync(p,readFileSync(p,'utf8')+'\n<!-- not qualified -->\n');});assert.notEqual(r.status,0);assert.match(r.stderr,/Unintended application UI/);
+});
+test("touch admission cannot permit unrelated routes",()=>{
+ const r=check(root=>{motionTouchProfile(root);const p=join(root,'src/config/routes.ts');writeFileSync(p,readFileSync(p,'utf8')+'\n// not qualified\n');});assert.notEqual(r.status,0);assert.match(r.stderr,/Unintended application UI/);
+});
