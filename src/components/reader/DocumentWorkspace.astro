@@ -13,7 +13,7 @@ const Container = profile?.id === 'section' ? 'section' : 'article';
   </nav>
   {profile?.navigation === 'inline' && navigation.length > 1 && <details class="gaga-document-navigation" data-gaga-document-navigation>
     <summary>Navigasi {profile.label}</summary>
-    <nav aria-label={`Navigasi ${profile.label}`}><ul>{navigation.map(item => <li><a href={item.href} aria-current={item.href === Astro.url.pathname.replace(/\/$/, '') ? 'page' : undefined}>{item.title}</a></li>)}</ul></nav>
+    <nav aria-label={`Navigasi ${profile.label}`}><ul>{navigation.map(item => <li><a href={item.href} data-gaga-i18n-id={item.title} data-gaga-i18n-en={item.labelEn??item.title} aria-current={item.href === Astro.url.pathname.replace(/\/$/, '') ? 'page' : undefined}>{item.title}</a></li>)}</ul></nav>
   </details>}
   <slot />
 </Container>

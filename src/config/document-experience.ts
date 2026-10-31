@@ -1,10 +1,11 @@
 import { presence, presenceNavigation } from '../lib/presence.ts';
+import { presenceLabel } from '../features/personal-presence/model.mjs';
 import { personalPresenceConfig } from './personal-presence.mjs';
 import { getEnabledRootSections, referenceRegistry } from './pakrpp-architecture.ts';
 
 export const documentProfiles = [
   { id: 'knowledge', root: '/knowledge', label: 'Pengetahuan', navigation: 'rail', outline: true },
-  { id: 'information', root: personalPresenceConfig.routes.profile, label: 'Tentang', navigation: 'inline', outline: true },
+  { id: 'information', root: personalPresenceConfig.routes.profile, label: presenceLabel(personalPresenceConfig.capabilities.find(c=>c.id==='profile')!.label), navigation: 'inline', outline: true },
   { id: 'legal', root: '/legal', label: 'Legal', navigation: 'inline', outline: true },
   { id: 'system', root: '/system', label: 'Sistem', navigation: 'rail', outline: true },
   { id: 'section', root: '/sections', label: 'Sections', navigation: 'editorial', outline: false }
@@ -24,8 +25,8 @@ export function documentExperience(pathname: string) {
 export function documentNavigation(profile: Pick<DocumentProfile, 'id' | 'root' | 'label'>) {
   if(profile.id==='information')return presenceNavigation();
   const section = getEnabledRootSections().find(s => s.id === (profile.id === 'information' ? 'about' : profile.id));
-  const items = (section?.items ?? []).filter(i => !i.external).map(i => ({ href: i.href, title: i.label, summary: i.meta ?? '' }));
-  return [{ href: profile.root, title: profile.label, summary: section?.description ?? '' }, ...items.filter(i => i.href !== profile.root)];
+  const items = (section?.items ?? []).filter(i => !i.external).map(i => ({ href: i.href, title: i.label, labelEn:i.labelEn, summary: i.meta ?? '' }));
+  return [{ href: profile.root, title: profile.label, labelEn:profile.label, summary: section?.description ?? '' }, ...items.filter(i => i.href !== profile.root)];
 }
 export function documentBreadcrumbs(pathname: string, title: string) {
   const path = cleanDocumentPath(pathname), profile = documentExperience(path);
@@ -38,7 +39,8 @@ export function documentBreadcrumbs(pathname: string, title: string) {
 }
 // Navigation metadata is an existing public application projection, never a second CMS model.
 export function documentDiscoveryEntries() {
-  return documentProfiles.filter(p => p.id !== 'section').flatMap(profile => documentNavigation(profile).map(item => ({ ...item, kind: profile.id })) ).concat(
-    referenceRegistry.map(ref => ({ href: '/knowledge/references/' + ref.slug, title: ref.title, summary: ref.summary, kind: 'knowledge' as const }))
-  );
+  return [
+    ...documentProfiles.filter(p => p.id !== 'section').flatMap(profile => documentNavigation(profile).map(item => ({ ...item, kind: profile.id }))),
+    ...referenceRegistry.map(ref => ({ href: '/knowledge/references/' + ref.slug, title: ref.title, summary: ref.summary, kind: 'knowledge' as const }))
+  ];
 }

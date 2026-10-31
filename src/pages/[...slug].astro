@@ -22,7 +22,7 @@ export async function getStaticPaths() {
   };
 
   const entries = await getCollection('docs');
-  const paths=projectPresenceRoutes(presence,entries,toRouteSlug);
+  const paths: any[]=projectPresenceRoutes(presence,entries,toRouteSlug);
 
   if (!paths.some((path) => path.params.slug === undefined)) {
     throw new Error('[GAGA] Root content route is missing. Expected src/content/docs/index.md or index.mdx.');
