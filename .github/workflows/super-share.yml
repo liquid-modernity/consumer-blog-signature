@@ -62,6 +62,8 @@ jobs:
           python3 tools/reference/html-semantics.py
           npm run test:consumer | tee "$GAGA_EVIDENCE_DIRECTORY/consumer.log"
       - run: npx --no-install playwright install --with-deps chromium
+      - name: Focused selection entry regression before full browser qualification
+        run: npx --no-install playwright test --config tools/share/playwright.config.mjs --grep "selection entry|local Text|ineligible index" | tee "$GAGA_EVIDENCE_DIRECTORY/share-entry-regression.log"
       - name: Super Share desktop and touch behavior
         run: |
           npx --no-install playwright test --config tools/share/playwright.config.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/share-browser.log"

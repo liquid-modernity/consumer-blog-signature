@@ -85,6 +85,11 @@ jobs:
           node --test tools/family/*.test.mjs
           npx --no-install playwright test --config tools/family/playwright.config.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/family-browser.log"
           node tools/family/browser-report.mjs
+      - name: Super Share qualification
+        run: |
+          node --test tools/share/*.test.mjs
+          npx --no-install playwright test --config tools/share/playwright.config.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/share-browser.log"
+          node tools/share/browser-report.mjs
       - name: Zero-vulnerability audit
         run: npm audit --audit-level=low --json > "$GAGA_EVIDENCE_DIRECTORY/audit.json"
       - name: Exact Worker dry run without rebuild or provider access
@@ -212,6 +217,12 @@ jobs:
         run: |
           npx --no-install playwright test --config tools/family/playwright.config.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/family-browser.log"
           node tools/family/browser-report.mjs
+      - name: Super Share production smoke
+        env:
+          GAGA_PRODUCTION_BROWSER_URL: https://consumer-blog-signature.ratriatra.workers.dev
+        run: |
+          npx --no-install playwright test --config tools/share/playwright.config.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/share-browser.log"
+          node tools/share/browser-report.mjs
       - name: Restore the pinned previous version after failed production verification
         if: failure() && steps.preflight.outcome == 'success'
         env:
