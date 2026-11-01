@@ -133,13 +133,12 @@
 @media(max-width:bp.$mobile-max){.gaga-outline-peek-preview{max-inline-size:min(100%,21rem)}}
 @media(prefers-reduced-motion:reduce){.gaga-outline-peek,.gaga-outline-peek-preview{transition:none}}
 
-.gaga-outline-peek-preview progress { inline-size:2.5rem; block-size:3px; accent-color:var(--gaga-island-ink); border:0; }
-.gaga-outline-peek-preview progress::-webkit-progress-bar { background:var(--gaga-island-hover); }
-.gaga-outline-peek-preview progress::-webkit-progress-value { background:var(--gaga-island-ink); }
-
-.gaga-outline-stack { transition:transform var(--gaga-signature-reveal,180ms) ease-out,opacity var(--gaga-signature-reveal,180ms) ease-out; }
-.gaga-outline-stack[data-gaga-signature-state='retracted'] { transform:translate(-50%,calc(100% + var(--gaga-safe-area-bottom) + 1rem));opacity:0;transition-duration:var(--gaga-signature-retract,160ms); }
-.gaga-outline-stack[data-gaga-signature-state='retracted'] .gaga-outline-peek-preview { pointer-events:none; }
+.gaga-outline-progress-trace { display:block;inline-size:100%;block-size:2px;margin:0;pointer-events:none;border:0;accent-color:var(--gaga-context-text);background:var(--gaga-context-surface); }
+.gaga-outline-progress-trace[hidden] { display:none; }
+.gaga-outline-progress-trace::-webkit-progress-bar { background:var(--gaga-context-surface); }
+.gaga-outline-progress-trace::-webkit-progress-value { background:var(--gaga-context-muted); }
+.gaga-outline-stack > :not(.gaga-outline-progress-trace) { transition:transform var(--gaga-signature-reveal,180ms) ease-out,opacity var(--gaga-signature-reveal,180ms) ease-out; }
+.gaga-outline-stack[data-gaga-signature-state='retracted'] > :not(.gaga-outline-progress-trace) { transform:translateY(calc(100% + 1rem));opacity:0;pointer-events:none;transition-duration:var(--gaga-signature-retract,160ms); }
 .gaga-outline-stack:focus-within { transform:translateX(-50%);opacity:1;transition:none; }
-.gaga-outline-stack:focus-within .gaga-outline-peek-preview { pointer-events:auto; }
+.gaga-outline-stack:focus-within .gaga-outline-peek-preview { pointer-events:auto;transform:none;opacity:1; }
 @media(prefers-reduced-motion:reduce) { .gaga-outline-stack { transition:none; } }

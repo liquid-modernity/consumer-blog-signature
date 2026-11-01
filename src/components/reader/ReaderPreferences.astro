@@ -19,10 +19,7 @@ const advanced = [
 ];
 ---
 <section id="gaga-reader-panel" class="gaga-reader-panel" data-gaga-reader-panel data-gaga-state="closed" role="dialog" aria-modal="true" aria-labelledby="gaga-reader-panel-title" aria-hidden="true" inert>
-  <div class="gaga-reader-panel__head">
-    <h2 id="gaga-reader-panel-title" data-gaga-i18n-id="Preferensi pembaca" data-gaga-i18n-en="Reader preferences">Preferensi pembaca</h2>
-    <button type="button" data-gaga-reader-close data-gaga-action="close-top-surface" aria-label="Kembali ke aksi" title="Kembali ke aksi"><Icon name="arrow_back" /></button>
-  </div>
+    <h2 id="gaga-reader-panel-title" class="gaga-visually-hidden" data-gaga-i18n-id="Preferensi pembaca" data-gaga-i18n-en="Reader preferences">Preferensi pembaca</h2>
   <div class="gaga-reader-panel__grid">
     <fieldset class="gaga-reader-panel__presets" data-gaga-reader-presets-primary>
       <legend class="gaga-visually-hidden">Preset</legend>
@@ -55,8 +52,6 @@ const advanced = [
 </section>
 <style is:global>
 .gaga-contextual-notch .gaga-reader-panel { padding:.25rem; }
-.gaga-contextual-notch .gaga-reader-panel__head { display:flex; justify-content:space-between; align-items:center; padding:0 0 .5rem; border:0; }
-.gaga-contextual-notch .gaga-reader-panel__head h2 { font:600 .9rem var(--gaga-font-ui); margin:0; }
 .gaga-contextual-notch .gaga-reader-panel__grid,.gaga-contextual-notch .gaga-reader-panel__advanced-grid { display:grid; grid-template-columns:minmax(0,1fr); gap:1rem; }
 .gaga-contextual-notch .gaga-reader-panel fieldset { margin:0; padding:0; border:0; min-inline-size:0; background:transparent; }
 .gaga-contextual-notch .gaga-reader-panel legend { font:.78rem var(--gaga-font-ui); color:var(--gaga-island-muted); padding-block:0 .4rem; letter-spacing:normal; text-transform:none; }

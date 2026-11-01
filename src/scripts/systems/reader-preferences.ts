@@ -1,3 +1,4 @@
+import {attachNotchSpine,restoreNotchSpine,prepareNotchReturn} from './notch';
 import { createReaderPreferencesCapability } from '@gaga/engine-runtime/runtime/reader-preferences';
 import {
   requestLeftRail,
@@ -217,12 +218,13 @@ export function initReaderPreferences() {
       clear: owner => {
         // Reveal the application-owned return target before Engine restores focus.
         const island = document.querySelector<HTMLElement>('[data-gaga-action-runtime]');
-        if (island) island.dataset.gagaReaderClosing = 'true';
+        if(island&&panel?.dataset.gagaState==='open'){island.dataset.gagaReaderClosing='true';restoreNotchSpine();prepareNotchReturn();}
         clearModalIsolation(owner);
       }
     },
     modalOwner: 'reader-panel',
     beforeOpen: () => {
+      if(panel)attachNotchSpine(panel);
       requestOutline({ action: 'close', source: 'reader-open' });
       if (getConfiguredLeftRailState(document.documentElement.dataset.gagaLayout) !== 'expanded') {
         requestLeftRail({ action: 'collapse', source: 'reader-open' });

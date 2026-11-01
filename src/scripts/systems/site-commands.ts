@@ -66,34 +66,6 @@ export function triggerActiveSelector(selector: string) {
   return true;
 }
 
-function openSearch() {
-  const action = actionForCommand('open-search');
-  const input = document.querySelector<HTMLInputElement>('[data-gaga-search-input]');
-  if (input && canUseTarget(input) && action?.href && isSameSitePath(location.pathname, action.href, location.origin)) {
-    input.focus({ preventScroll: true });
-    return true;
-  }
-  const trigger = document.querySelector<HTMLAnchorElement>('[data-gaga-search-trigger]');
-  if (trigger?.href && canUseTarget(trigger)) window.location.href = trigger.href;
-  else window.location.href = action?.href ?? '/search';
-  return true;
-}
-
-function currentPageURL() {
-  const href = document.querySelector<HTMLLinkElement>('link[rel="canonical"]')?.href;
-  try { const url = new URL(href ?? location.href); if (['https:', 'http:'].includes(url.protocol)) return url.href; } catch { /* The active public URL remains the fallback. */ }
-  return location.href;
-}
-
-function copyCurrentPage(pointer: { x?: number; y?: number }) {
-  if (navigator.clipboard) navigator.clipboard.writeText(currentPageURL())
-    .then(() => requestToast({ message: 'Tautan disalin ke papan klip', tone: 'ok', ...pointer }))
-    .catch(() => requestToast({ message: 'Gagal menyalin tautan. Gunakan alamat halaman ini.', tone: 'warn', ...pointer }));
-  else window.prompt('Salin tautan halaman ini', currentPageURL());
-  return true;
-}
-
-
 function smartBack(pointer: { x?: number; y?: number }) {
   if (window.history.length > 1 && document.referrer && document.referrer.includes(window.location.host)) {
     requestToast({ message: 'Kembali ke halaman sebelumnya', tone: 'info', x: pointer.x, y: pointer.y });
@@ -117,8 +89,7 @@ function runBuiltInCommand(command: GagaActionCommand, detail: SiteCommandDetail
     requestCloseTopSurface({ source: detail.source ?? 'site-command', x: pointer.x ?? window.innerWidth / 2, y: pointer.y ?? window.innerHeight / 2 });
     return true;
   }
-  if (command === 'open-search') return openSearch();
-  if (command === 'copy-page-link') return copyCurrentPage(pointer);
+  if (command === 'open-search') return false;
   if (command === 'share-page') return openSuperShare({target:detail.target});
   if (command === 'smart-back') return smartBack(pointer);
   if (command === 'reset-knowledge-graph') return resetKnowledgeGraph(pointer);

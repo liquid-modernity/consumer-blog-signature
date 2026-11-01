@@ -78,7 +78,7 @@ export function initSignatureMotion() {
     const percent = Math.round(context.scrollContext.readingProgress(body ?? context.readingElement));
     progress?.setAttribute('aria-valuenow', String(percent));
     if (progressLabel) progressLabel.textContent = percent + '%';
-    if (outlineProgress) outlineProgress.value = percent;
+    if(outlineProgress){outlineProgress.value=percent;outlineProgress.hidden=!body?.closest('[data-gaga-personal-readable="true"]')||!context||body.scrollHeight<context.scrollContext.measure().viewportHeight*1.25;}
     outlineOpener?.setAttribute('aria-label', `Daftar isi — ${outlineLabel?.textContent ?? ''} — ${percent}%`);
     const isReduced = signatureReducedMotion(reduced.matches, document.documentElement.dataset.gagaReaderMotion);
     document.documentElement.dataset.gagaSignatureReduced = String(isReduced);

@@ -1,0 +1,2 @@
+import type{Page}from'@playwright/test';
+export async function longReading(page:Page){await page.locator('[data-gaga-article-body]').evaluate(body=>{const section=document.createElement('section');section.id='hierarchy-reading-fixture';for(let i=0;i<24;i++){const p=document.createElement('p');p.textContent='Synthetic hierarchy reading paragraph '+i+'.';p.style.minHeight='80px';section.append(p);}body.prepend(section);});}

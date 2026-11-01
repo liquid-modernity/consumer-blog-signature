@@ -59,6 +59,7 @@ export type NavItemInput = {
 };
 
 export type NavGroupInput = {
+  purpose?: 'discovery' | 'navigation';
   id: string;
   label: string;
   labelEn?: string;

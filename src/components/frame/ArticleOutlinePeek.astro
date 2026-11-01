@@ -1,6 +1,6 @@
 ---
 import { contextualSurfaceRoles } from '../../config/contextual-surfaces.mjs';
-import { hasLocalNavigation } from '../../features/local-navigation/model.mjs';
+import { hasLocalNavigation,localNavigationLayout } from '../../features/local-navigation/model.mjs';
 import { localNavigationLabels } from '../../config/local-navigation';
 import type { localContext as resolveLocalContext } from '../../lib/local-navigation';
 import TocBlock from '../information/TocBlock.astro';
@@ -43,7 +43,7 @@ const allLocal = (localContext?.localNavigation ?? []).flatMap(i => [i,...(i.chi
       <span id={outlineOpenLabelId} class="gaga-visually-hidden" data-gaga-i18n-key={rail.labels.outlineOpenPrefix.key} data-gaga-i18n-id={rail.labels.outlineOpenPrefix.id} data-gaga-i18n-en={rail.labels.outlineOpenPrefix.en}>{rail.labels.outlineOpenPrefix.id}</span>
       <span id={outlineCounterLabelId} class="gaga-visually-hidden"><span data-gaga-outline-current-index>1</span>/<span data-gaga-outline-total>{outlineItems.length}</span></span>
       <span id={outlineCurrentLabelId} class="gaga-outline-peek-preview__title" data-gaga-outline-current-label>{initialOutlineLabel}</span>
-      <progress data-gaga-outline-progress max="100" value="0" aria-label="Progres membaca"></progress>
+
     </button>
 
     <span class="gaga-outline-peek__scrim" data-gaga-outline-scrim aria-hidden="true"></span>
@@ -69,7 +69,7 @@ const allLocal = (localContext?.localNavigation ?? []).flatMap(i => [i,...(i.chi
         <span class="gaga-visually-hidden" data-gaga-outline-sheet-current-label aria-live="polite">{initialOutlineLabel}</span>
       </header>
       <div class="gaga-outline-peek__scroll" data-gaga-outline-peek-scroll>
-        {local && <nav data-gaga-local-navigation aria-label={localNavigationLabels.title.id}>
+        {local && <nav data-gaga-local-navigation aria-label={localNavigationLabels.title.id} data-gaga-local-layout={localNavigationLayout(localContext!.localNavigation)}>
           <ul class="gaga-outline-local-list">{localContext!.localNavigation.map(item => <li>
             <a href={item.href} aria-current={active(item.href)} data-gaga-i18n-id={item.label} data-gaga-i18n-en={item.labelEn ?? item.label}>{item.label}</a>
             {item.children?.length && <ul>{item.children.map(child => <li><a href={child.href} aria-current={active(child.href)}>{child.label}</a></li>)}</ul>}
@@ -84,6 +84,7 @@ const allLocal = (localContext?.localNavigation ?? []).flatMap(i => [i,...(i.chi
         </nav>}
       </div>
     </section>
+    <progress data-gaga-outline-progress class="gaga-outline-progress-trace" max="100" value="0" aria-label="Progres membaca" hidden></progress>
   </div>
 ) : null}
 
@@ -91,6 +92,8 @@ const allLocal = (localContext?.localNavigation ?? []).flatMap(i => [i,...(i.chi
   .gaga-outline-local-list, .gaga-outline-local-list ul { list-style: none; margin: 0; padding: 0; }
   .gaga-outline-local-list ul { padding-inline-start: 1rem; }
   .gaga-outline-local-list a, .gaga-outline-sequence a { display: flex; align-items: center; min-block-size: 44px; padding-inline: .5rem; color: inherit; text-decoration: none; overflow-wrap: anywhere; }
+  [data-gaga-local-layout='compact'] .gaga-outline-local-list { display:flex;flex-wrap:wrap;gap:var(--gaga-context-space); }
+  [data-gaga-local-layout='compact'] .gaga-outline-local-list li { flex:1 1 auto; }
   .gaga-outline-local-list a[aria-current] { font-weight: 700; text-decoration: underline; text-underline-offset: .25em; }
   .gaga-outline-local-list a:focus-visible, .gaga-outline-sequence a:focus-visible { outline: 2px solid var(--gaga-context-focus); outline-offset: -2px; }
   .gaga-outline-sequence { display: flex; flex-wrap: wrap; gap: .5rem; justify-content: space-between; margin-block-start: .75rem; }

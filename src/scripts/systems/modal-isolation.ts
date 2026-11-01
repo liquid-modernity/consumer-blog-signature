@@ -20,7 +20,7 @@ function backgroundElements() {
     const main = document.querySelector<HTMLElement>('[data-gaga-main-region]');
     const mainChildren = Array.from(main?.children ?? []).filter((element): element is HTMLElement => element instanceof HTMLElement && !element.contains(panel));
     const frameSiblings = frameChildren().filter(element => element !== main && !element.contains(panel));
-    const notchBackground = Array.from(document.querySelectorAll<HTMLElement>('[data-gaga-island-bar], [data-gaga-notch-context], [data-gaga-notch-system]'));
+    const notchBackground = Array.from(document.querySelectorAll<HTMLElement>('[data-gaga-notch-context], [data-gaga-notch-system]'));
     return [...(skipLink ? [skipLink] : []), ...frameSiblings, ...mainChildren, ...notchBackground];
   }
   if (activeOwner === 'context-surface') {
@@ -37,7 +37,7 @@ const controller = createModalIsolationController({
   getBackgroundElements: backgroundElements,
   isOwnerElement(owner, element) {
     if (owner === 'reader-panel') return element.matches('[data-gaga-reader-panel]');
-    if (owner === 'context-surface') return element.matches('[data-gaga-right-rail], [data-gaga-context-surface-scrim]');
+    if (owner === 'context-surface') return element.matches('[data-gaga-right-rail], [data-gaga-context-surface-scrim]')||!!element.querySelector('[data-gaga-right-rail]');
     return element.matches('[data-gaga-left-rail], [data-gaga-left-rail-scrim]');
   },
   shouldRemainInert(element) {

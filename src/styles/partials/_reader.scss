@@ -25,23 +25,6 @@
   pointer-events: auto;
 }
 
-.gaga-reader-panel__head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1rem;
-  border-block-end: 1px solid var(--gaga-line);
-}
-
-.gaga-reader-panel__head h2 {
-  display: flex;
-  align-items: center;
-  gap: .5rem;
-  margin: 0;
-  font-size: var(--gaga-type-subheading-size);
-  line-height: var(--gaga-type-subheading-line-height);
-}
-
 .gaga-reader-panel__grid {
   display: grid;
   gap: .75rem;
@@ -379,37 +362,6 @@ body[data-gaga-reader-links='underlined'] :is(.main-pane, [data-gaga-article-she
   max-width: var(--gaga-article-measure, 44rem);
 }
 
-.gaga-reader-panel__head [data-gaga-tooltip] {
-  position: relative;
-}
-
-.gaga-reader-panel__head [data-gaga-tooltip]::after {
-  position: absolute;
-  inset-block-start: calc(100% + .4rem);
-  inset-inline-end: 0;
-  z-index: var(--gaga-z-panel);
-  width: max-content;
-  max-width: 14rem;
-  padding: .38rem .5rem;
-  border: 1px solid var(--gaga-line);
-  background: var(--gaga-tooltip-bg);
-  color: var(--gaga-tooltip-ink);
-  content: attr(aria-label);
-  font-family: var(--gaga-font-mono);
-  font-size: var(--gaga-type-label-size);
-  font-weight: var(--gaga-type-label-weight);
-  line-height: var(--gaga-type-label-line-height);
-  opacity: 0;
-  pointer-events: none;
-  visibility: hidden;
-  white-space: normal;
-}
-
-.gaga-reader-panel__head [data-gaga-tooltip]:is(:hover, :focus-visible)::after {
-  opacity: 1;
-  visibility: visible;
-}
-
 mark.gaga-highlight-mark,
 .gaga-highlight-mark {
   background-color: rgba(234, 179, 8, 0.26);
@@ -591,33 +543,6 @@ mark.gaga-highlight-mark,
   }
 }
 
-
-.gaga-speech-dock {
-  position: fixed;
-  bottom: 1.5rem;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 90;
-  width: min(92vw, 540px);
-  background: var(--gaga-surface-elevated, #14283f);
-  border: 1px solid var(--gaga-line-strong, rgba(188, 215, 241, 0.35));
-  border-radius: 9999px;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.52);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  animation: gagaDockSlideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes gagaDockSlideUp {
-  from {
-    opacity: 0;
-    transform: translate(-50%, 16px);
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, 0);
-  }
-}
 
 .gaga-speech-dock__inner {
   display: flex;

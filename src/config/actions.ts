@@ -5,7 +5,6 @@ export type GagaActionId =
   | 'menu'
   | 'save'
   | 'share'
-  | 'copy-link'
   | 'settings'
   | 'focusmode'
   | 'search'
@@ -31,7 +30,6 @@ export type GagaActionCommand =
   | 'toggle-left-rail'
   | 'toggle-save'
   | 'share-page'
-  | 'copy-page-link'
   | 'smart-back'
   | 'highlight'
   | 'speak'
@@ -185,12 +183,6 @@ export const gagaActions: readonly GagaAction[] = [
       }
     },
     feedback: { label: 'Save current page', success: 'Saved current page', cancelled: 'Removed from saved', sfx: 'confirm' }
-  },
-  {
-    id: 'copy-link', kind: 'command', tier: 'CONTEXTUAL_ACTION',
-    label: i18nLabel('navigation.copyLink'), description: i18nLabel('navigation.copyLink'),
-    icon: 'link', command: 'copy-page-link', projections: ['article-utility'],
-    tooltip: i18nLabel('navigation.copyLink'), feedback: { label: 'Copy link', sfx: 'click' }
   },
   {
     id: 'share',

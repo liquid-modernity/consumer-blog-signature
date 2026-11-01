@@ -10,7 +10,7 @@ export function resolveLocalContext({ path, title, family, items = [], ordered =
   const seen = new Set(), destinations = new Set();
   function validate(entries) {
     for (const item of entries) {
-      if (!item.id || !item.label?.trim() || seen.has(item.id) || destinations.has(item.href) || (!/^\/(?!\/)[^?#\\\s]*$/.test(item.href) || /(?:^|\/)\.\.?(?:\/|$)|%2f|%5c|%2e/i.test(item.href))) throw new Error('Invalid or duplicate local navigation');
+      if ((item.href.includes('#')&&item.href.split('#')[0]!==path)||!item.id || !item.label?.trim() || seen.has(item.id) || destinations.has(item.href) || (!/^\/(?!\/)[^?#\\\s]*(?:#[a-zA-Z][\w-]*)?$/.test(item.href) || /(?:^|\/)\.\.?(?:\/|$)|%2f|%5c|%2e/i.test(item.href))) throw new Error('Invalid or duplicate local navigation');
       seen.add(item.id); destinations.add(item.href); validate(item.children ?? []);
     }
   }
@@ -42,3 +42,5 @@ export function headingSequence(items, id) {
     ...(items[index+1] ? [{...items[index+1],relation:'next'}] : [])
   ]);
 }
+
+export function localNavigationLayout(items){return items.length<=5&&items.every(i=>!i.children?.length&&i.label.length<=32)?'compact':'list';}

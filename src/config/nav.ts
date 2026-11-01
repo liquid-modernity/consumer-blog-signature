@@ -12,6 +12,7 @@ export type NavItem = {
 };
 
 export type NavGroup = {
+  purpose?: 'discovery' | 'navigation';
   id: string;
   label: string;
   labelEn?: string;

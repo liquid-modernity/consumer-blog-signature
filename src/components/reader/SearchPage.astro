@@ -56,7 +56,7 @@ const tabs = [
 </section>
 <script>
   import type { GagaDiscoveryRecord } from '../../lib/discovery';
-  import {defineQuery,executeSearchReference,type SearchableArtifactDescriptor} from '@gaga/engine-capabilities/search';
+  import {loadPublicSearch,searchPublicIndex,type PublicSearchIndex} from '../../lib/public-search';
   import { runSiteCommand } from '../../scripts/systems/site-commands';
   import type { GagaActionCommand } from '../../config/actions';
 
@@ -93,24 +93,13 @@ const tabs = [
   const emptyMessage = 'Ketik minimal dua karakter untuk mencari di sistem publikasi ini.';
   let index: SearchItem[] = [];
   let discovery: GagaDiscoveryRecord[] = [];
-  let artifacts: readonly SearchableArtifactDescriptor[] = [];
-  let artifactLinks: Record<string,string> = {};
+  let publicIndex:PublicSearchIndex;
   let loading: Promise<void> | null = null;
   let activeQuery = '';
   const commandProviders: CommandProvider[] = JSON.parse(commandsScript?.textContent || '[]');
 
   function loadIndex() {
-    loading ??= fetch('/search-index.json')
-      .then((response) => response.json())
-      .then((data: { items?: SearchItem[]; records?: GagaDiscoveryRecord[]; artifacts?: SearchableArtifactDescriptor[]; links?:Record<string,string> }) => {
-        index = data.items ?? [];
-        discovery = data.records ?? [];
-        artifacts = data.artifacts ?? [];
-        artifactLinks = data.links ?? {};
-      })
-      .catch(() => {
-        index = [];
-      });
+    loading ??= loadPublicSearch().then(data=>{publicIndex=data;index=data.items;discovery=data.records;}).catch(()=>{index=[];});
     return loading;
   }
 
@@ -191,9 +180,8 @@ const tabs = [
   }
 
   function matchingArticles(query: string) {
-    const result=executeSearchReference({id:'blog-ui-search',query:defineQuery({id:'blog-ui-query',text:query,filters:[],facets:[],scope:[],constraints:[],diagnostics:[]}),artifacts,limitations:[],diagnostics:[]});
-    const hrefs=new Set(result.output.matchedArtifactIds.map(id=>artifactLinks[id]));
-    return index.filter(item=>hrefs.has(item.href)).slice(0,12);
+    const records=searchPublicIndex(publicIndex,query,Number.MAX_SAFE_INTEGER),hrefs=new Set(records.map(r=>r.href));
+    return records.flatMap(r=>index.filter(item=>item.href===r.href)).slice(0,12);
   }
 
   function matchingCommands(query: string) {
@@ -243,9 +231,7 @@ const tabs = [
 
   function renderDocumentResults(query: string) {
     const kinds: Partial<Record<GagaDiscoveryRecord['kind'], string>> = { knowledge: 'Pengetahuan', information: 'Informasi', legal: 'Legal', system: 'Sistem', section: 'Ruang editorial' };
-    const result = executeSearchReference({ id:'document-ui-search', query:defineQuery({id:'document-query',text:query,filters:[],facets:[],scope:[],constraints:[],diagnostics:[]}),artifacts,limitations:[],diagnostics:[] });
-    const hrefs = new Set(result.output.matchedArtifactIds.map(id => artifactLinks[id]));
-    const matches = discovery.filter(record => kinds[record.kind] && hrefs.has(record.href));
+    const matches=searchPublicIndex(publicIndex,query,Number.MAX_SAFE_INTEGER).filter(record=>kinds[record.kind]);
     if (!matches.length) return null;
     const node = section('Dokumen & informasi', 'DOCUMENT_PROVIDER', '');
     node.dataset.gagaDocumentSearch = '';

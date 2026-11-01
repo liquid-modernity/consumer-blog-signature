@@ -12,7 +12,7 @@ import { experienceSurfaceProfile, resolveExperienceContext } from '../../config
 interface Props {
   pageId: string;
   pageTitle: string;
-  contextAvailability?: {left:boolean;right:boolean};
+  contextAvailability?: {left:boolean;right:boolean;leftLabel?:string};
   contentKind?: string;
   contentClass?: string;
   mainElement?: 'main' | 'div';

@@ -10,12 +10,13 @@ import type { EditorialSectionSummary } from './editorial';
 export function localContext(path: string, title: string, topics: TopicGroup[], sections: EditorialSectionSummary[], archive: ArchiveYearGroup[] = [], tags: TagGroup[] = []) {
   const profile = documentExperience(path);
   const configured = getEnabledRootSections();
-  const family = profile?.id === 'information' ? 'about' : profile?.id === 'section' ? 'sections' : profile?.id
+  const family = path===routes.root?'root':profile?.id === 'information' ? 'about' : profile?.id === 'section' ? 'sections' : profile?.id
     ?? configured.find(s => (s.id === 'topics' || s.id === 'archive') && (path === routes[s.id].index || path.startsWith(routes[s.id].index + '/')))?.id;
   const config = configured.find(s => s.id === family);
   let items: { id: string; label: string; labelEn?: string; href: string; children?: {id:string;label:string;href:string}[] }[] = [];
   let ordered: {id:string;label:string;href:string}[] = [];
-  if (family === 'sections' && routeRegistry.sections.enabled) {
+  if(family==='root'){items=configured.map(s=>({id:s.id,label:s.label,labelEn:s.labelEn,href:routes.root+'#'+s.anchor}));
+  } else if (family === 'sections' && routeRegistry.sections.enabled) {
     items = [{id:'sections',label:profile!.label,href:profile!.root}, ...sections.map(s => ({id:s.slug,label:s.name,href:s.href}))];
   } else if (family === 'topics' && routeRegistry.topics.enabled && config) {
     items = [{id:family,label:config.label,href:routes.topics.index}, ...getEnabledTopics().filter(t => topics.some(g => g.slug === t.slug && g.count > 0)).map(t => ({id:t.id,label:t.label,labelEn:t.labelEn,href:routes.topics.detail(t.slug)}))];

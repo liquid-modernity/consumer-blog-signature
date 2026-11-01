@@ -1,43 +1,12 @@
-import { onRuntimeEvent, type ToastDetail } from '@gaga/engine-runtime/runtime/events';
-
-let toastEl: HTMLElement | null = null;
-let lastPointer = { x: 24, y: 24 };
-let clearTimer = 0;
-
-function ensureToast() {
-  if (toastEl) return toastEl;
-  toastEl = document.createElement('output');
-  toastEl.className = 'gaga-toast';
-  toastEl.setAttribute('role', 'status');
-  toastEl.setAttribute('aria-live', 'polite');
-  toastEl.dataset.gagaState = 'hidden';
-  document.body.append(toastEl);
-  return toastEl;
-}
-
-function show(detail: ToastDetail) {
-  const node = ensureToast();
-  const x = detail.x ?? lastPointer.x;
-  const y = detail.y ?? lastPointer.y;
-  const offset = 18;
-  node.textContent = detail.message;
-  node.dataset.gagaState = 'visible';
-  node.dataset.gagaTone = detail.tone ?? 'info';
-  node.style.left = `${Math.min(Math.max(10, x + offset), window.innerWidth - 180)}px`;
-  node.style.top = `${Math.min(Math.max(10, y + offset), window.innerHeight - 64)}px`;
-  window.clearTimeout(clearTimer);
-  clearTimer = window.setTimeout(() => {
-    if (toastEl) toastEl.dataset.gagaState = 'hidden';
-  }, 980);
-}
-
-export function initToast() {
-  document.addEventListener('pointermove', (event) => {
-    lastPointer = { x: event.clientX, y: event.clientY };
-  }, { passive: true });
-
-  onRuntimeEvent('toastRequested', (detail) => {
-    if (!detail.message) return;
-    show(detail);
-  });
-}
+import {onRuntimeEvent,type ToastDetail} from '@gaga/engine-runtime/runtime/events';
+import {feedbackSurfaceRoles} from '../../config/contextual-surfaces.mjs';
+import {contextViewport} from '../../lib/context-viewport';
+let toast:HTMLOutputElement|undefined,timer=0;
+function position(){if(!toast)return;const v=contextViewport();toast.style.left=(v.left+v.width/2)+'px';toast.style.bottom='calc('+Math.max(0,innerHeight-v.top-v.height+56)+'px + var(--gaga-safe-area-bottom,0px))';toast.style.maxWidth=Math.max(1,v.width-32)+'px';}
+export function initToast(){window.addEventListener('resize',position,{passive:true});window.visualViewport?.addEventListener('resize',position,{passive:true});onRuntimeEvent('toastRequested',(detail:ToastDetail)=>{
+ if(!detail.message)return;
+ if(!toast){toast=document.createElement('output');toast.className='gaga-toast';toast.dataset.gagaFeedbackSurface=feedbackSurfaceRoles.status;toast.setAttribute('role','status');toast.setAttribute('aria-live','polite');toast.setAttribute('aria-atomic','true');document.body.append(toast);}
+ toast.textContent=detail.message;toast.dataset.gagaState='visible';toast.dataset.gagaTone=detail.tone??'info';
+ position();
+ clearTimeout(timer);timer=window.setTimeout(()=>{if(toast)toast.dataset.gagaState='hidden';},Math.max(2400,Math.min(5000,detail.message.length*55)));
+});}

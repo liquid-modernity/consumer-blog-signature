@@ -81,7 +81,7 @@ test('Reading Intelligence uses one runtime path without legacy component-local 
   assert.ok(!actionRuntime.includes('SpeechSynthesisUtterance'), 'ActionRuntime must not own speech synthesis');
   assert.ok(!actionRuntime.includes('gaga:highlights:v1'), 'ActionRuntime must not own highlight persistence');
   assert.ok(!actionRuntime.includes('gaga-selection-popover'), 'ActionRuntime must not own a duplicate selection menu');
-  assert.ok(actionRuntime.includes('runSiteCommand'), 'ActionRuntime must dispatch through the site command registry');
+  assert.ok(actionRuntime.includes('initNotch')&&fs.readFileSync('src/scripts/systems/notch.ts','utf8').includes('runSiteCommand'), 'ActionRuntime must dispatch through the site command registry');
 
   const enhancements = fs.readFileSync('src/scripts/systems/reader-enhancements.ts', 'utf8');
   assert.ok(enhancements.includes("registerSiteCommand('highlight'"), 'Highlight command must be owned by Reader Enhancements');
@@ -116,7 +116,7 @@ test('Gaga Dynamic Notch Island + Dynamic Outline Peek signature', () => {
   assert.ok(actionRuntime.includes('data-gaga-action-runtime-live'), 'Island must expose one live state surface for speech/status');
   assert.ok(actionStyles.includes('var(--gaga-safe-area-top)'), 'Island must be safe-area aware');
   const motion = fs.readFileSync('src/scripts/systems/signature-motion.ts', 'utf8');
-  assert.ok(motion.includes('context.scrollContext.readingProgress(') && motion.includes("progress?.setAttribute('aria-valuenow', String(percent))") && motion.includes('outlineProgress.value = percent'), 'Both signatures must project one content-aware public Engine progress value');
+  assert.ok(motion.includes('context.scrollContext.readingProgress(') && motion.includes("progress?.setAttribute('aria-valuenow', String(percent))") && /outlineProgress\.value\s*=\s*percent/.test(motion), 'Both signatures must project one content-aware public Engine progress value');
   assert.equal([...motion.matchAll(/addChangeListener\(/g)].length, 1, 'Signatures must share one scroll subscription');
   assert.ok(actionRuntime.includes('role="progressbar"') && !actionRuntime.includes('addChangeListener') && !fs.readFileSync('src/scripts/systems/outline-peek.ts','utf8').includes('addChangeListener'), 'No parallel component scroll policy');
   assert.ok(actionRuntime.includes('border-radius: 0 0'), 'Notch v2 must attach visually to the top viewport edge');
@@ -126,7 +126,7 @@ test('Gaga Dynamic Notch Island + Dynamic Outline Peek signature', () => {
   assert.ok(![...outline.matchAll(/class="([^"]+)"/g)].flatMap(m=>m[1].split(/\s+/)).includes('gaga-outline-peek__head'), 'Outline v2 must not restore the legacy visible utility header');
   assert.ok(outline.includes('data-gaga-depth="expanded"'), 'Outline v2 must support progressive sheet depth');
   assert.ok(outline.includes('data-gaga-outline-progress') && actionRuntime.includes('class="gaga-visually-hidden" role="progressbar"'), 'Outline owns visible reading progress; Notch must not add a second visible percentage');
-  assert.ok(outlineStyles.includes('var(--gaga-viewport-left,0px)') && outlineStyles.includes('var(--gaga-safe-area-left)') && outlineStyles.includes(' / 2') && outlineStyles.includes('translate(-50%'), 'Outline Peek must remain centred in the usable visual viewport');
+  assert.ok(outlineStyles.includes('var(--gaga-viewport-left,0px)') && outlineStyles.includes('var(--gaga-safe-area-left)') && outlineStyles.includes(' / 2') && /translate(?:X)?\(-50%/.test(outlineStyles), 'Outline Peek must remain centred in the usable visual viewport');
   assert.ok(systems.includes("enabledModes: ['mobile', 'tablet-mini', 'tablet-large', 'desktop']"), 'Outline Peek must be available across all device classes');
   assert.ok(appFrame.includes('showGagaDock'), 'Layout must resolve Gaga Dock coexistence from the surface profile');
   assert.ok(!fs.existsSync('src/components/navigation/NotchIslandAction.astro'), 'Legacy parallel notch action component must be removed');

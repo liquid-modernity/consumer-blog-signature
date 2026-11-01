@@ -1,5 +1,6 @@
+import {stripHierarchyGuards} from '../hierarchy/release-browser-guards.mjs';
 import {stripDeviceGuards} from '../device/release-browser-guards.mjs';
-const stripNavigationGuards = source => stripNavigationOnly(stripDeviceGuards(source));
+const stripNavigationGuards = source => stripNavigationOnly(stripDeviceGuards(stripHierarchyGuards(source)));
 import test from 'node:test';import assert from 'node:assert/strict';import{readFileSync}from'node:fs';import{execFileSync}from'node:child_process';
 import{qualificationGuard,productionGuard,stripNavigationGuards as stripNavigationOnly}from'./release-browser-guards.mjs';
 test('local navigation gates are additive, source-byte readback precedes smoke, rollback remains mandatory',()=>{const s=readFileSync('.github/workflows/deploy.yml','utf8');assert.equal(stripNavigationGuards(s),execFileSync('git',['show','da8a76ee6f2056b2ea3be34f74dded8f24d0ed21:.github/workflows/deploy.yml'],{encoding:'utf8'}));assert.ok(s.indexOf('node tools/gaga/production-readback.mjs')<s.indexOf(productionGuard));assert.ok(s.indexOf(productionGuard)<s.indexOf('      - name: Restore the pinned previous version'));});

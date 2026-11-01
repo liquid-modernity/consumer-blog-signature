@@ -122,7 +122,7 @@ export function createLeftRailInput(
   return {
     available: contextualRailRelevance({groups:projection.groups}).left,
     ariaLabel: i18nLabel('navigation.publication'),
-    title: projection.title,
+    title: projection.groups.length===1&&projection.groups[0].purpose==='discovery'?projection.groups[0].label:projection.title,
     subtitle: projection.subtitle,
     icon: projection.icon,
     groups: projection.groups,

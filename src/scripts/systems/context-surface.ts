@@ -1,9 +1,12 @@
+import {attachNotchSpine,restoreNotchSpine,prepareNotchReturn} from './notch';
 import { onRuntimeEvent, requestLeftRail, requestOutline, requestReaderPanel, requestRightRail } from '@gaga/engine-runtime/runtime/events';
 import { activateModalIsolation, clearModalIsolation } from './modal-isolation';
 import { registerSiteCommand, runSiteCommand } from './site-commands';
 
 let initialized = false;
 let opener: HTMLElement | null = null;
+let home:Comment|undefined;
+function restoreRail(surface:HTMLElement){if(home?.isConnected)home.before(surface);}
 
 function rail() {
   return document.querySelector<HTMLElement>('[data-gaga-right-rail]');
@@ -41,11 +44,12 @@ export function closeContextSurface(options: { restoreFocus?: boolean } = {}) {
   const surface = rail();
   if (!surface) return;
   surface.dataset.gagaContextSurfaceState = 'closed';
+  restoreNotchSpine();restoreRail(surface);
   const compact = compactMode();
   surface.setAttribute('aria-hidden', compact ? 'true' : 'false');
   if (compact) {
     surface.setAttribute('role', 'dialog');
-    surface.setAttribute('aria-modal', 'true');
+    surface.removeAttribute('aria-modal');
     surface.setAttribute('inert', '');
   } else {
     surface.removeAttribute('role');
@@ -58,7 +62,8 @@ export function closeContextSurface(options: { restoreFocus?: boolean } = {}) {
     control.setAttribute('aria-expanded', 'false');
     control.dataset.gagaActive = 'false';
   });
-  if (options.restoreFocus !== false && opener?.isConnected) opener.focus({ preventScroll: true });
+  if(options.restoreFocus!==false&&opener?.isConnected)prepareNotchReturn();
+  const target=opener;if(options.restoreFocus!==false&&target?.isConnected)requestAnimationFrame(()=>target.focus({preventScroll:true}));
   opener = null;
 }
 
@@ -69,12 +74,15 @@ function openContextSurface(trigger?: HTMLElement | null) {
   requestOutline({ action: 'close', source: 'context-surface-open' });
   requestReaderPanel({ action: 'close', source: 'context-surface-open' });
   requestLeftRail({ action: 'close', source: 'context-surface-open' });
+  if(!home){home=document.createComment('context rail position');surface.before(home);}
+  document.querySelector('[data-gaga-action-runtime] .gaga-action-runtime__shell')?.append(surface);
   surface.dataset.gagaContextSurfaceState = 'open';
   surface.setAttribute('role', 'dialog');
-  surface.setAttribute('aria-modal', 'true');
+  surface.setAttribute('aria-modal','true');
   surface.setAttribute('aria-hidden', 'false');
   surface.removeAttribute('inert');
   scrim()?.removeAttribute('hidden');
+  attachNotchSpine(surface);
   activateModalIsolation('context-surface');
   document.querySelectorAll<HTMLElement>('[data-gaga-action="toggle-context-surface"]').forEach((control) => {
     control.setAttribute('aria-expanded', 'true');
@@ -108,6 +116,7 @@ function syncLayout() {
   const restore = surface.contains(document.activeElement) || surface.dataset.gagaContextSurfaceState === 'open';
   if (!compactMode()) {
     surface.dataset.gagaContextSurfaceState = 'closed';
+    restoreNotchSpine();restoreRail(surface);
     surface.setAttribute('aria-hidden', 'false');
     surface.removeAttribute('role');
     surface.removeAttribute('aria-modal');

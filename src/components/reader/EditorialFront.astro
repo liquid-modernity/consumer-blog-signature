@@ -389,51 +389,18 @@ const socialSection = sectionById.get('social');
     if (!stages.length) return;
 
     function applyStageContext(stage: HTMLElement) {
-      const stageId = stage.dataset.pakrppViewportStage ?? '01';
-      const stageIndex = stage.dataset.stageIndex ?? '1';
-      const badge = stage.dataset.stageBadge ?? '01 · TERBARU';
-      const title = stage.dataset.stageTitle ?? 'PakRPP';
-      const anchors = (stage.dataset.stageAnchors ?? '')
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean);
-
-      // 1. Sync Gaga Dynamic Global Notch
-      const statusBadge = document.querySelector<HTMLElement>('[data-gaga-island-status-badge]');
-      const peekTitle = document.querySelector<HTMLElement>('[data-gaga-island-peek-title]');
-      const focusTitle = document.querySelector<HTMLElement>('[data-gaga-island-focus-title]');
-
-      if (statusBadge) {
-        statusBadge.textContent = badge;
-        statusBadge.dataset.gagaDefaultBadge = badge;
+      const anchors = (stage.dataset.stageAnchors ?? '').split(',').map(value=>value.trim()).filter(Boolean);
+      const title = stage.dataset.stageTitle ?? '';
+      for(const link of document.querySelectorAll<HTMLAnchorElement>('[data-gaga-outline-local="root"] [data-gaga-local-navigation] a')){
+        const active=anchors.includes(link.hash.slice(1));link.dataset.gagaActive=String(active);
+        if(active)link.setAttribute('aria-current','location');else link.removeAttribute('aria-current');
       }
-      if (peekTitle) peekTitle.textContent = title;
-      if (focusTitle) focusTitle.textContent = document.querySelector('h1')?.textContent?.trim() || 'PakRPP';
-
-      for (const pill of document.querySelectorAll<HTMLAnchorElement>('[data-gaga-island-anchor]')) {
-        const href = pill.getAttribute('href') ?? '';
-        const anchorName = href.replace(/^\/?#/, '');
-        const active = anchors.includes(anchorName);
-        pill.classList.toggle('gaga-is-current', active);
-      }
-
-      // 2. Sync Gaga Dynamic Outline Peek (Bottom Pill & Sheet)
-      const sheetIdx = document.querySelector<HTMLElement>('[data-gaga-outline-sheet-current-index]');
-      const sheetLbl = document.querySelector<HTMLElement>('[data-gaga-outline-sheet-current-label]');
-      if (sheetIdx) sheetIdx.textContent = stageIndex;
-      if (sheetLbl) sheetLbl.textContent = title;
-
-      for (const tocLink of document.querySelectorAll<HTMLAnchorElement>('[data-gaga-info-field="outline"] a')) {
-        const href = tocLink.getAttribute('href') ?? '';
-        const targetSlug = href.replace(/^#/, '');
-        const isCurrent = targetSlug === `stage-${stageId}` || anchors.includes(targetSlug);
-        tocLink.dataset.gagaActive = String(isCurrent);
-        if (isCurrent) {
-          tocLink.setAttribute('aria-current', 'location');
-        } else {
-          tocLink.removeAttribute('aria-current');
-        }
-      }
+      const fields:Record<string,string>={
+        'current-index':stage.dataset.stageIndex ?? '1',
+        'sheet-current-index':stage.dataset.stageIndex ?? '1',
+        'current-label':title,'sheet-current-label':title,'total':String(stages.length)
+      };
+      for(const [field,value]of Object.entries(fields))for(const element of document.querySelectorAll('[data-gaga-outline-'+field+']'))element.textContent=value;
     }
 
     const observer = new IntersectionObserver(

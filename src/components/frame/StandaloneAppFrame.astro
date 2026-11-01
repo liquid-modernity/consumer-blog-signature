@@ -68,7 +68,7 @@ const outlineRail = { ...rightRail, outlineItems: resolvedOutlineItems };
 const articleOutline = resolvedOutlineItems.length > 0;
 ---
 <AppFrameBase
-  contextAvailability={{left:rail.available,right:rightRail.available}}
+  contextAvailability={{left:rail.available,right:rightRail.available,leftLabel:rail.title}}
   pageId={pageId}
   pageTitle={pageTitle}
   contentKind={contentKind}

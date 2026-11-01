@@ -10,7 +10,7 @@ export function initInputMode() {
   createInputModeCapability({
     getLayoutMode: () => document.documentElement.dataset.gagaLayout,
     isGestureEnabled: supportsGagaDock,
-    isVerticalCloseTarget: (target) => !!target?.closest('.gaga-reader-panel__head'),
+    isVerticalCloseTarget: (target) => !!target?.closest('[data-gaga-reader-panel] [data-gaga-notch-spine]'),
     onEdgeSwipe({ x, y }) {
       const rail = document.querySelector('[data-gaga-left-rail]') as HTMLElement | null;
       if (!rail || !supportsGagaDock(document.documentElement.dataset.gagaLayout)) return;

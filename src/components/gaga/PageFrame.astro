@@ -101,7 +101,7 @@ const showCoveragePromotion = !documentProfile && coveragePromotion
   && normalizeCurrentPath(coveragePromotion.article.href) !== currentPath;
 ---
 <AppFrameBase
-  contextAvailability={{left:leftRail.available,right:rightRail.available}}
+  contextAvailability={{left:leftRail.available,right:rightRail.available,leftLabel:leftRail.title}}
   pageId={pageId}
   pageTitle={pageTitle}
   contentKind={contentKind}

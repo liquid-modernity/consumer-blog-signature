@@ -1,5 +1,6 @@
+import {stripHierarchyGuards} from '../hierarchy/release-browser-guards.mjs';
 import {stripDeviceGuards} from '../device/release-browser-guards.mjs';
-const stripNavigationGuards = source => stripNavigationOnly(stripDeviceGuards(source));
+const stripNavigationGuards = source => stripNavigationOnly(stripDeviceGuards(stripHierarchyGuards(source)));
 import {contextualRailRelevance,resolveSurfacePlan} from '../../src/config/surface-projection.mjs';
 import { stripNavigationGuards as stripNavigationOnly } from '../navigation/release-browser-guards.mjs';
 import { stripPresenceGuards } from '../presence/release-browser-guards.mjs';
@@ -43,7 +44,7 @@ test('all public packages, CMS/source authority and release guards remain byte-i
   for (const path of ['package.json','package-lock.json','cms/package-lock.json','gaga.app.json','content-release.json','content/emdash/published.json','content/emdash/published-receipt.json','cms/editorial/plugin.mjs','cms/editorial/admin.tsx','cms/editorial/studio.css','docs/UI-PRESERVATION.json','.github/workflows/content-release.yml','.github/workflows/content-publish.yml']) assert.deepEqual(readFileSync(path), execFileSync('git', ['show',base+':'+path]), path);
 });
 test('existing saved state and Save dispatch have no alternate store or duplicate app implementation', () => {
-  const root=readFileSync('src/components/reader/EditorialFront.astro','utf8'),notch=readFileSync('src/components/frame/ActionRuntime.astro','utf8'),adapter=readFileSync('src/scripts/systems/saved-reading.ts','utf8');
+  const root=readFileSync('src/components/reader/EditorialFront.astro','utf8'),notch=readFileSync('src/scripts/systems/notch.ts','utf8'),adapter=readFileSync('src/scripts/systems/saved-reading.ts','utf8');
   assert.ok(root.includes('personalState.saved().slice(0, 5)'));
   const personal=readFileSync('src/lib/personal-state.ts','utf8');
   assert.ok(personal.includes('readArray(keys.saved') && personal.includes('isSavedItem(v)') && personal.includes('localPersonalHref(v.href, origin)'), 'Root must use the same Engine-validated, local-only Saved domain as the library');

@@ -12,7 +12,7 @@ import { positionLinkPreview } from '../../config/contextual-ux.mjs';
 type SpeechMode = 'article'|'selection';
 type SpeechState = 'idle'|'playing'|'paused'|'completed'|'error';
 interface SpeakerController { state:SpeechState; mode:SpeechMode; currentText:string; rate:number; progress:number; voice:SpeechSynthesisVoice|null; playSelection:(text:string,lang:string)=>void; playArticle:(elements:HTMLElement[],lang:string)=>void; pause:()=>void; resume:()=>void; stop:()=>void; setRate:(rate:number)=>void; setVoice:(voice:SpeechSynthesisVoice)=>void; }
-let activeSpeaker:SpeakerController|null=null, speechDockEl:HTMLElement|null=null, speechDockEmbedded=false;
+let activeSpeaker:SpeakerController|null=null, speechDockEl:HTMLElement|null=null;
 let selectionMenuEl:HTMLElement|null=null, activeHighlightPopupEl:HTMLElement|null=null, popupAnchor:HTMLElement|null=null;
 let initialized=false;
 function getArticleMetadata(article:HTMLElement){const c=currentPersonalContent()?.content;return {route:c?.href??location.pathname,title:c?.title??document.querySelector('h1')?.textContent?.trim()??document.title,author:c?.author,topic:undefined,language:c?.language??resolveContentLanguage(article)};}
@@ -379,7 +379,6 @@ function renderSpeechDock(controller: SpeakerController) {
     const embeddedSurface = document.querySelector<HTMLElement>('[data-gaga-action-runtime-live]');
     if (embeddedSurface) {
       speechDockEl = embeddedSurface;
-      speechDockEmbedded = true;
       speechDockEl.hidden = false;
       speechDockEl.setAttribute('role', 'region');
       speechDockEl.setAttribute('aria-label', 'Kontrol Narasi Suara');
@@ -388,13 +387,7 @@ function renderSpeechDock(controller: SpeakerController) {
         runtime.dataset.gagaLiveState = 'speaking';
         runtime.dataset.gagaState = 'expanded';
       }
-    } else {
-      speechDockEl = document.createElement('div');
-      speechDockEl.className = 'gaga-speech-dock';
-      speechDockEl.setAttribute('role', 'region');
-      speechDockEl.setAttribute('aria-label', 'Kontrol Narasi Suara');
-      document.body.appendChild(speechDockEl);
-    }
+    } else return;
   }
 
   const snippet =
@@ -453,7 +446,7 @@ function closeSpeechDock() {
   syncSpeechActionState(null);
   if (!speechDockEl) return;
 
-  if (speechDockEmbedded) {
+  {
     const restoreFocus = speechDockEl.contains(document.activeElement);
     const runtime = speechDockEl.closest<HTMLElement>('[data-gaga-action-runtime]');
     speechDockEl.innerHTML = '';
@@ -466,12 +459,9 @@ function closeSpeechDock() {
       runtime.querySelector('[data-gaga-action-island-toggle]')?.setAttribute('aria-expanded', 'false');
       if (restoreFocus) runtime.querySelector<HTMLElement>('[data-gaga-action-island-toggle]')?.focus({preventScroll:true});
     }
-  } else {
-    speechDockEl.remove();
   }
 
   speechDockEl = null;
-  speechDockEmbedded = false;
 }
 
 function escapeHtml(str: string): string {

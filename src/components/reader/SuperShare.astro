@@ -1,6 +1,6 @@
 <section class="gaga-super-share" data-gaga-super-share-panel hidden inert role="region" aria-label="Super Share">
-  <div class="gaga-super-share__heading"><strong>Super Share</strong><button type="button" class="gaga-notch-button" data-gaga-share-close aria-label="Kembali dari Super Share">←</button></div>
   <p data-gaga-share-context></p>
+  <div data-gaga-share-options>
   <div class="gaga-super-share__actions" role="group" aria-label="Salin dan kirim">
     <button type="button" class="gaga-notch-button" data-gaga-share="link">Salin tautan</button>
     <button type="button" class="gaga-notch-button" data-gaga-share="native" hidden>Native Share</button>
@@ -14,14 +14,19 @@
     <button type="button" class="gaga-notch-button" data-gaga-share="text">Text Card</button>
     <button type="button" class="gaga-notch-button" data-gaga-share="poster">Poster PNG</button>
   </div></details>
+  </div>
+  <div data-gaga-poster-preview hidden aria-label="Pratinjau poster">
+    <img data-gaga-poster-image alt="Pratinjau poster yang akan diunduh" width="1080" height="1350" />
+    <div class="gaga-super-share__actions"><button type="button" class="gaga-notch-button" data-gaga-poster-download>Unduh PNG</button><button type="button" class="gaga-notch-button" data-gaga-poster-native hidden>Kirim gambar</button></div>
+  </div>
   <p role="status" aria-live="polite" data-gaga-share-feedback></p>
 </section>
 <style is:global>
   [data-gaga-share-open='true'] :is([data-gaga-notch-context],[data-gaga-notch-system]) { display:none!important; }
   .gaga-super-share { padding:var(--gaga-context-space); inline-size:100%; box-sizing:border-box; overflow-wrap:anywhere; animation:gaga-context-emerge var(--gaga-context-motion-duration) var(--gaga-context-motion-easing); }
-  .gaga-super-share__heading { display:flex; justify-content:space-between; align-items:center; gap:var(--gaga-context-space); }
   .gaga-super-share__actions { display:flex; flex-wrap:wrap; gap:var(--gaga-context-space); }
   .gaga-super-share p { margin:.5rem 0; font:inherit; color:var(--gaga-context-muted); }
   .gaga-super-share [role='status']:empty { display:none; }
   .gaga-super-share button:disabled { opacity:.5; }
+  [data-gaga-poster-image] { display:block;inline-size:auto;max-inline-size:100%;block-size:auto;max-block-size:45dvh;object-fit:contain;margin-inline:auto; }
 </style>
