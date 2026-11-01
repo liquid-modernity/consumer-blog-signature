@@ -21,3 +21,5 @@ test('content CMS dependencies public index inputs and personal formats remain b
 test('all untouched anchoring speech progress preference and deterministic poster semantics stay exact',()=>{assertReaderIntegrity();assertMotionIntegrity();assertPreferencesIntegrity();assertShareIntegrity();});
 
 test('root orientation consumes existing stage context and search commands cannot become outside dismissal',()=>{const root=read('src/components/reader/EditorialFront.astro');assert.ok(root.includes('[data-gaga-local-navigation] a'));assert.ok(!root.includes('data-gaga-island-anchor'));assert.ok(!root.includes('data-gaga-island-status-badge'));assert.ok(read('src/scripts/systems/super-search.ts').includes("if(entry.command){event.stopPropagation();close();"));});
+
+test('Notch observers survive a persisted history transition while pending intent timers clear',()=>{const s=read('src/scripts/systems/notch.ts');assert.ok(s.includes('if(!event.persisted)titleObserver.disconnect()'));assert.ok(s.includes('if(!event.persisted)stateObserver.disconnect()'));assert.ok(s.includes('clearTimeout(hoverTimer); clearTimeout(touchTimer)'));});

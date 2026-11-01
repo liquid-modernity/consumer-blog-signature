@@ -45,7 +45,7 @@ import {closeContextSurface,contextSurfaceIsOpen} from './context-surface';
       if(title&&title.hidden!==(titleVisible||!!cap))title.hidden=titleVisible||!!cap;
       const level=state==='expanded'?'2':state==='peek'?'1':'0';island.dataset.gagaLevel=level;toggle.setAttribute('aria-expanded',String(level!=='0'));more.setAttribute('aria-expanded',String(level==='2'));
     }
-    const h1=document.querySelector('main h1');if(h1){const titleObserver=new IntersectionObserver(entries=>{titleVisible=entries[0].isIntersecting;project();});titleObserver.observe(h1);window.addEventListener('pagehide',()=>titleObserver.disconnect(),{once:true});}
+    const h1=document.querySelector('main h1');if(h1){const titleObserver=new IntersectionObserver(entries=>{titleVisible=entries[0].isIntersecting;project();});titleObserver.observe(h1);window.addEventListener('pagehide',event=>{if(!event.persisted)titleObserver.disconnect();},{once:true});}
     const clearSearch=initSuperSearch(search as HTMLFormElement,()=>{search.hidden=true;search.inert=true;clearSearch();setState('peek');});
     function closeActive(){
       if(closeSuperShare(true))return true;
@@ -121,6 +121,6 @@ import {closeContextSurface,contextSurfaceIsOpen} from './context-surface';
     onRuntimeEvent('layoutChanged', position);
     window.visualViewport?.addEventListener('resize',position,{passive:true});
     window.addEventListener('resize', position, { passive: true });
-    window.addEventListener('pagehide', () => { stateObserver.disconnect(); clearTimeout(hoverTimer); clearTimeout(touchTimer); }, { once: true });
+    window.addEventListener('pagehide', event => { if(!event.persisted)stateObserver.disconnect(); clearTimeout(hoverTimer); clearTimeout(touchTimer); }, { once: true });
     position(); setState('collapsed');project();
   }
