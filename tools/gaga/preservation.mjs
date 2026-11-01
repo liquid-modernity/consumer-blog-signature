@@ -222,6 +222,32 @@ const approvedPresence = Object.freeze({
     "src/config/routes.ts": "a1faf69463d00a4d4be677a342474ec395a7d2326b02ad50bed0e1098b63cd4a"
   }
 });
+// Exact hosted-qualified local navigation profile; all historical inventories and profiles remain immutable.
+const approvedLocalNavigation = Object.freeze({
+  "sourceCommit": "77abb2950c9400fc4a20ca8f79afdd809f27989a",
+  "sourceTree": "4cd12c30e2bd13d121bbd45831fdee36cb89217e",
+  "qualification": "https://github.com/liquid-modernity/consumer-blog-signature/actions/runs/41254715596",
+  "acceptanceReceiptSha256": "7b7654c2419fe7352333540d5c2c6ab40eeb4643cb07f622c33b3af14be3ed12",
+  "files": {
+    "src/components/frame/ActionRuntime.astro": "265a9e9175baf67ea33569beb0e65ae24c92f6231f0fbb3ee31c97658ec675dc",
+    "src/components/frame/AppFrameBase.astro": "d6e53074fd67201ea8f7c8de368d12cc067c62dabbc72e42c24642548cfa40d8",
+    "src/components/frame/ArticleOutlinePeek.astro": "766ed55148672b9603290e0dbf2efeae8e35843848355fbf48c07395d84317f2",
+    "src/components/frame/LeftRail.astro": "2d9d068f4b58e3f33a08f0ee08adb44a89ce3bf7985b5aaf78dd4805bd3087fe",
+    "src/components/frame/RightInfoRail.astro": "8b13376ca332d19632b409ad935420e5d36f333f210e04bb48134bb4e704c636",
+    "src/components/frame/StandaloneAppFrame.astro": "07b05dc40af425c7b0cf412368658124069bb26bf840158aec23ffaaf1b65b7f",
+    "src/components/gaga/ArticleShell.astro": "5ba40e4820a75779485622ef256f854cdaa639f3ac7d00c5b734895ffb705317",
+    "src/components/gaga/MarkdownContent.astro": "5244b38e779359bf55db1d9cdaac4d7661d3783275e0bb4f02c9afddf8df9b85",
+    "src/components/gaga/PageFrame.astro": "45ada41317d9e863b96c00f37d88a4425213b1f737a33770f03aa9561fa77a2d",
+    "src/config/nav.ts": "d6fa86a5cc9328c4c6788ebc296d41be5d1d25cf70c4f3b50e1df3f273afe447",
+    "src/styles/partials/_action-island.scss": "14bcbb8bc42b2eb708d209e9aac47b870d1a1cb5d551f0f72e103d21ff5f8c43",
+    "src/styles/partials/_content.scss": "361e793ecb93cd1b4fe1fca9d601a31fe6a3fce8fc20f9413fa3633bfc280787",
+    "src/styles/partials/_frame.scss": "16c72655342178657aae90b3d2902a07df163a847f5e37582d8d591bb346e39c",
+    "src/styles/partials/_outline-peek.scss": "1bf4f5e5fc4f6a488fdb18ec085aa538f97ac9cc63ce226e5041d1030d0d0212",
+    "src/styles/partials/_reader.scss": "346ddfd9d1e62eb4c515b6aeab49f29d420600518b52c6deb5a02d6f54cd3a63",
+    "src/styles/signature.scss": "4dc0b36890c3b293cc93bd19e5164201ff14af308437455984c7c9acd8aaf866",
+    "src/config/routes.ts": "e455d71e9506506490f79a3aaad3dbea3b13fa08bb60a8779139b07a75446b98"
+  }
+});
 const historical = readFileSync("docs/UI-PRESERVATION.json");
 assert.equal(
   createHash("sha256").update(historical).digest("hex"),
@@ -245,10 +271,12 @@ for (const [path, digest] of Object.entries(approvedMotionTouch.files)) assert.o
 for (const [path,digest] of Object.entries(approvedFamily.files)) assert.ok(historicalHashes.has(path) && /^[a-f0-9]{64}$/.test(digest));
 for (const [path,digest] of Object.entries(approvedSuperShare.files)) assert.ok(historicalHashes.has(path) && /^[a-f0-9]{64}$/.test(digest));
 for (const [path,digest] of Object.entries(approvedPresence.files)) assert.ok(historicalHashes.has(path) && /^[a-f0-9]{64}$/.test(digest));
+for (const [path,digest] of Object.entries(approvedLocalNavigation.files)) assert.ok(historicalHashes.has(path) && /^[a-f0-9]{64}$/.test(digest));
 const actual = new Map(inventory.files.map(f => [f.path, createHash("sha256").update(
   readFileSync(f.path, "utf8").replaceAll("@gaga/engine-web", "@gaga/engine-runtime")
     .replaceAll("@gaga/engine/", "@gaga/engine-capabilities/"),
 ).digest("hex")]));
+const localNavigationProfile = Object.entries(approvedLocalNavigation.files).every(([path,digest]) => actual.get(path) === digest);
 const presenceProfile = Object.entries(approvedPresence.files).every(([path,digest]) => actual.get(path) === digest);
 const superShareProfile = Object.entries(approvedSuperShare.files).every(([path,digest]) => actual.get(path) === digest);
 const familyProfile = Object.entries(approvedFamily.files).every(([path,digest]) => actual.get(path) === digest);
@@ -259,7 +287,7 @@ const documentationProfile = Object.entries(approvedDocumentation.files).every((
 const polishProfile = Object.entries(approvedPolish.files).every(([path, digest]) => actual.get(path) === digest);
 const historicalProfile = Object.keys(approvedUx.files).every(path => actual.get(path) === historicalHashes.get(path));
 for (const f of inventory.files) {
-  const expected = presenceProfile ? approvedPresence.files[f.path] ?? historicalHashes.get(f.path) : superShareProfile ? approvedSuperShare.files[f.path] ?? historicalHashes.get(f.path) : familyProfile ? approvedFamily.files[f.path] ?? historicalHashes.get(f.path) : motionTouchProfile ? approvedMotionTouch.files[f.path] ?? historicalHashes.get(f.path) : motionProfile ? approvedMotion.files[f.path] ?? historicalHashes.get(f.path) : personalProfile ? approvedPersonal.files[f.path] ?? historicalHashes.get(f.path) : documentationProfile ? approvedDocumentation.files[f.path] ?? historicalHashes.get(f.path) : polishProfile ? approvedPolish.files[f.path] ?? historicalHashes.get(f.path) : historicalProfile ? historicalHashes.get(f.path) : approvedUx.files[f.path] ?? historicalHashes.get(f.path);
+  const expected = localNavigationProfile ? approvedLocalNavigation.files[f.path] ?? historicalHashes.get(f.path) : presenceProfile ? approvedPresence.files[f.path] ?? historicalHashes.get(f.path) : superShareProfile ? approvedSuperShare.files[f.path] ?? historicalHashes.get(f.path) : familyProfile ? approvedFamily.files[f.path] ?? historicalHashes.get(f.path) : motionTouchProfile ? approvedMotionTouch.files[f.path] ?? historicalHashes.get(f.path) : motionProfile ? approvedMotion.files[f.path] ?? historicalHashes.get(f.path) : personalProfile ? approvedPersonal.files[f.path] ?? historicalHashes.get(f.path) : documentationProfile ? approvedDocumentation.files[f.path] ?? historicalHashes.get(f.path) : polishProfile ? approvedPolish.files[f.path] ?? historicalHashes.get(f.path) : historicalProfile ? historicalHashes.get(f.path) : approvedUx.files[f.path] ?? historicalHashes.get(f.path);
   assert.equal(actual.get(f.path), expected, "Unintended application UI/style/routing change: " + f.path);
 }
 console.log(
@@ -268,5 +296,5 @@ console.log(
   "entries; one exact qualified main-landmark correction from",
   approvedMain.sourceCommit,
   approvedMain.qualification,
-  presenceProfile ? "whole qualified Personal Presence profile " + approvedPresence.sourceCommit + " " + approvedPresence.qualification : superShareProfile ? "whole qualified Super Share profile " + approvedSuperShare.sourceCommit + " " + approvedSuperShare.qualification : familyProfile ? "whole qualified contextual family profile " + approvedFamily.sourceCommit + " " + approvedFamily.qualification : motionTouchProfile ? "whole qualified motion-touch profile " + approvedMotionTouch.sourceCommit + " " + approvedMotionTouch.qualification : motionProfile ? "whole qualified motion profile " + approvedMotion.sourceCommit + " " + approvedMotion.qualification : personalProfile ? "whole qualified personal profile " + approvedPersonal.sourceCommit + " " + approvedPersonal.qualification : documentationProfile ? "whole qualified documentation profile " + approvedDocumentation.sourceCommit + " " + approvedDocumentation.qualification : polishProfile ? "whole qualified polish profile " + approvedPolish.sourceCommit + " " + approvedPolish.qualification : historicalProfile ? "historical profile" : "whole accepted UX profile " + approvedUx.sourceCommit + " " + approvedUx.qualification,
+  localNavigationProfile ? "whole qualified local navigation profile " + approvedLocalNavigation.sourceCommit + " " + approvedLocalNavigation.qualification : presenceProfile ? "whole qualified Personal Presence profile " + approvedPresence.sourceCommit + " " + approvedPresence.qualification : superShareProfile ? "whole qualified Super Share profile " + approvedSuperShare.sourceCommit + " " + approvedSuperShare.qualification : familyProfile ? "whole qualified contextual family profile " + approvedFamily.sourceCommit + " " + approvedFamily.qualification : motionTouchProfile ? "whole qualified motion-touch profile " + approvedMotionTouch.sourceCommit + " " + approvedMotionTouch.qualification : motionProfile ? "whole qualified motion profile " + approvedMotion.sourceCommit + " " + approvedMotion.qualification : personalProfile ? "whole qualified personal profile " + approvedPersonal.sourceCommit + " " + approvedPersonal.qualification : documentationProfile ? "whole qualified documentation profile " + approvedDocumentation.sourceCommit + " " + approvedDocumentation.qualification : polishProfile ? "whole qualified polish profile " + approvedPolish.sourceCommit + " " + approvedPolish.qualification : historicalProfile ? "historical profile" : "whole accepted UX profile " + approvedUx.sourceCommit + " " + approvedUx.qualification,
 );
