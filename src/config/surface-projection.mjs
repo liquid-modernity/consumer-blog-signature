@@ -1,6 +1,6 @@
 import { breakpoints } from './systems.ts';
 // Relevance is semantic; capacity changes only the projection of available context.
-export const surfaceProjectionPolicy = Object.freeze({ minimumRelated: 2, minimumGroups: 2, denseNavigation: 8, minimumRailSpace: breakpoints.tabletLargeMin });
+export const surfaceProjectionPolicy = Object.freeze({ minimumRelated: 2, minimumGroups: 2, denseNavigation: 8, minimumRailSpace: breakpoints.desktopMin });
 /** @param {{groups?:Array<{items?:unknown[]}>, discovery?:Array<{href:string}>, facts?:Array<{id:string,values?:Array<{href?:string}>}>}} input */
 export function contextualRailRelevance({ groups = [], discovery = [], facts = [] } = {}, policy = surfaceProjectionPolicy) {
   const independent = groups.filter(g => g.items?.length);
