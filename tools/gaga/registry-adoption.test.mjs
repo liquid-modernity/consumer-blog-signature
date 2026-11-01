@@ -1,4 +1,6 @@
-import { stripNavigationGuards } from '../navigation/release-browser-guards.mjs';
+import {stripDeviceGuards} from '../device/release-browser-guards.mjs';
+const stripNavigationGuards = source => stripNavigationOnly(stripDeviceGuards(source));
+import { stripNavigationGuards as stripNavigationOnly } from '../navigation/release-browser-guards.mjs';
 import { stripPresenceGuards } from '../presence/release-browser-guards.mjs';
 import { stripSuperShareGuards } from '../share/release-browser-guards.mjs';
 import { stripQualifiedFamilyGuards } from '../family/release-browser-guards.mjs';

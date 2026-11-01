@@ -77,6 +77,7 @@ export type SearchBoxInput = {
 };
 
 export type LeftRailInput = {
+  available: boolean;
   ariaLabel: GagaComponentLabel;
   title: string;
   subtitle: string;
@@ -169,6 +170,7 @@ export type RightRailOutlineItemInput = {
 export type RightRailMode = 'summary';
 
 export type RightRailInput = {
+  available: boolean;
   mode: RightRailMode;
   kind: string;
   outlineItems: RightRailOutlineItemInput[];

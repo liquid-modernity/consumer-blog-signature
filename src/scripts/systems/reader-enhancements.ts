@@ -1,3 +1,4 @@
+import { contextViewport } from '../../lib/context-viewport';
 import { openSuperShare, shareSelectionIsCurrent } from './super-share';
 import { contextualSurfaceRoles } from '../../config/contextual-surfaces.mjs';
 import { renderIconSvg } from '../../lib/icons';
@@ -16,7 +17,13 @@ let selectionMenuEl:HTMLElement|null=null, activeHighlightPopupEl:HTMLElement|nu
 let initialized=false;
 function getArticleMetadata(article:HTMLElement){const c=currentPersonalContent()?.content;return {route:c?.href??location.pathname,title:c?.title??document.querySelector('h1')?.textContent?.trim()??document.title,author:c?.author,topic:undefined,language:c?.language??resolveContentLanguage(article)};}
 function focusReading(target:HTMLElement|null){if(!target?.isConnected)return;const temporary=!target.hasAttribute('tabindex');if(temporary){target.tabIndex=-1;target.addEventListener('blur',()=>target.removeAttribute('tabindex'),{once:true});}target.focus({preventScroll:true});}
-function placeSurface(surface:HTMLElement,rect:DOMRect){surface.style.position='fixed';const p=positionLinkPreview(rect,surface.getBoundingClientRect(),{width:innerWidth,height:innerHeight});const island=document.querySelector<HTMLElement>('[data-gaga-action-runtime]')?.getBoundingClientRect();let top=p.top;if(island&&top<island.bottom&&top+surface.offsetHeight>island.top&&p.left<island.right&&p.left+p.width>island.left)top=island.bottom+surface.offsetHeight+8<innerHeight?island.bottom+8:Math.max(8,island.top-surface.offsetHeight-8);surface.style.left=p.left+'px';surface.style.top=top+'px';surface.style.width=p.width+'px';}
+function placeSurface(surface:HTMLElement,rect:DOMRect){
+ const viewport=contextViewport();surface.style.position='fixed';surface.style.maxWidth=Math.max(1,viewport.width-16)+'px';surface.style.maxHeight=Math.max(1,viewport.height-16)+'px';
+ const box=surface.getBoundingClientRect(),p=positionLinkPreview(rect,box,viewport);
+ const island=document.querySelector<HTMLElement>('[data-gaga-action-runtime]')?.getBoundingClientRect();let top=p.top;
+ if(island&&top<island.bottom&&top+box.height>island.top&&p.left<island.right&&p.left+p.width>island.left)top=island.bottom+box.height+8<viewport.top+viewport.height?island.bottom+8:Math.max(viewport.top+8,island.top-box.height-8);
+ surface.style.left=p.left+'px';surface.style.top=top+'px';surface.style.width=p.width+'px';
+}
 function textRangeForHighlight(element:HTMLElement,highlight:HighlightEntity):Range|null{
  const pos=resolvePersonalAnchor(element.textContent??'',highlight,element.dataset.gagaBlockHash??'');if(!pos)return null;
  const nodes:Text[]=[];const walker=document.createTreeWalker(element,NodeFilter.SHOW_TEXT);while(walker.nextNode())nodes.push(walker.currentNode as Text);
@@ -51,8 +58,8 @@ function persistCapture(c:SelectionCapture,note?:string,quoted=false){if(!captur
  if(!saveHighlight(entity)){requestToast({message:'Fragmen belum tersimpan. Penyimpanan tidak tersedia.',tone:'warn'});return false;}
  const body=currentPersonalContent()?.body;if(body&&!body.querySelector('[data-gaga-highlight-id="'+CSS.escape(entity.id)+'"]'))applyHighlightToElement(c.block,entity);window.getSelection()?.removeAllRanges();requestToast({message:quoted?'Kutipan tersimpan di perangkat ini.':note?'Catatan tersimpan di perangkat ini.':'Sorotan tersimpan di perangkat ini.',tone:'ok'});return true;
 }
-let selectionEpoch=0, dismissedSelection='', selectionReturn:HTMLElement|null=null;
-function closeSelectionMenu(restore=false){selectionEpoch++;selectionMenuEl?.remove();selectionMenuEl=null;if(restore)focusReading(selectionReturn);selectionReturn=null;}
+let selectionEpoch=0, dismissedSelection='', selectionReturn:HTMLElement|null=null, selectionGeometry:(()=>DOMRect)|null=null;
+function closeSelectionMenu(restore=false){selectionEpoch++;selectionMenuEl?.remove();selectionMenuEl=null;selectionGeometry=null;if(restore)focusReading(selectionReturn);selectionReturn=null;}
 function initSelectionIntelligence(body:HTMLElement){let timer:number|undefined,entered=false;
  const handle=()=>{if(window.getSelection()?.isCollapsed&&!document.activeElement?.matches('.gaga-selection-menu textarea'))dismissedSelection='';window.clearTimeout(timer);const epoch=++selectionEpoch;timer=window.setTimeout(()=>{void(async()=>{
   if(selectionMenuEl?.contains(document.activeElement)&&(!window.getSelection()?.isCollapsed||document.activeElement?.matches('textarea')))return;
@@ -66,7 +73,11 @@ function initSelectionIntelligence(body:HTMLElement){let timer:number|undefined,
   else if(event.key==='Tab'&&selectionMenuEl&&!entered&&!selectionMenuEl.contains(document.activeElement)){event.preventDefault();entered=true;selectionMenuEl.querySelector<HTMLElement>('button:not([hidden])')?.focus();}
  });
  document.addEventListener('pointerdown',e=>{const target=e.target as Element;if(!target.closest('.gaga-selection-menu,.gaga-highlight-popup,.gaga-highlight-mark')){closeSelectionMenu();closeHighlightPopup();}});
- window.addEventListener('resize',()=>{closeSelectionMenu();closeHighlightPopup();});
+ let viewportFrame=0;
+ const reposition=()=>{viewportFrame=0;if(selectionMenuEl&&selectionGeometry){if(selectionReturn?.isConnected)placeSurface(selectionMenuEl,selectionGeometry());else closeSelectionMenu();}if(activeHighlightPopupEl&&popupAnchor){if(popupAnchor.isConnected)placeSurface(activeHighlightPopupEl,popupAnchor.getBoundingClientRect());else closeHighlightPopup();}};
+ const scheduleViewport=()=>{if(!viewportFrame)viewportFrame=requestAnimationFrame(reposition);};
+ window.addEventListener('resize',scheduleViewport,{passive:true});window.visualViewport?.addEventListener('resize',scheduleViewport,{passive:true});window.visualViewport?.addEventListener('scroll',scheduleViewport,{passive:true});
+ window.addEventListener('pagehide',()=>{if(viewportFrame)cancelAnimationFrame(viewportFrame);});
 }
 function renderSelectionMenu(c:SelectionCapture){closeSelectionMenu();const menu=document.createElement('div');menu.className='gaga-selection-menu';menu.dataset.gagaContextSurface=contextualSurfaceRoles.selection;menu.setAttribute('role','toolbar');menu.setAttribute('aria-label','Aksi seleksi');
  menu.innerHTML=`
@@ -106,7 +117,7 @@ function renderSelectionMenu(c:SelectionCapture){closeSelectionMenu();const menu
       <button type="button" class="gaga-btn gaga-btn--sm gaga-btn--primary" data-gaga-action="save-selection-note">Simpan</button>
     </div>
 `;
- document.body.append(menu);selectionMenuEl=menu;selectionReturn=c.block;placeSurface(menu,c.range.getBoundingClientRect());menu.querySelector<HTMLButtonElement>('[data-gaga-action="selection-listen"]')!.hidden=!('speechSynthesis'in window);
+ document.body.append(menu);selectionMenuEl=menu;selectionReturn=c.block;selectionGeometry=()=>c.range.getBoundingClientRect();placeSurface(menu,c.range.getBoundingClientRect());menu.querySelector<HTMLButtonElement>('[data-gaga-action="selection-listen"]')!.hidden=!('speechSynthesis'in window);
  menu.addEventListener('pointerdown',e=>{if((e.target as Element).closest('button,summary'))e.preventDefault();});
  menu.querySelector('[data-gaga-action="selection-highlight"]')?.addEventListener('click',()=>{if(persistCapture(c))closeSelectionMenu(true);});
  menu.querySelector('[data-gaga-action="selection-listen"]')?.addEventListener('click',()=>{if(captureIsCurrent(c))listenToSelection(c.text,c.content.language??'id');closeSelectionMenu(true);});

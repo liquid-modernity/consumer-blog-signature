@@ -1,3 +1,4 @@
+import { signatureMotion } from '../../config/signature-motion.mjs';
 import { headingSequence } from '../../features/local-navigation/model.mjs';
 import { hydrateDomOutlineIfSparse } from './toc-spy';
 import { createOutlinePeekCapability } from '@gaga/engine-runtime/runtime/outline-peek';
@@ -133,14 +134,15 @@ export function initOutlinePeek() {
     }
   });
 
-  sheet.addEventListener('pointerdown', (event) => { gestureStartY = event.clientY; }, { passive: true });
+  sheet.addEventListener('pointerdown', (event) => { gestureStartY = event.target instanceof Element && event.target.closest('.gaga-outline-peek__handle, .gaga-outline-peek__header') ? event.clientY : null; }, { passive: true });
+  sheet.addEventListener('pointercancel',()=>{gestureStartY=null;},{passive:true});
   sheet.addEventListener('pointerup', (event) => {
     if (gestureStartY === null) return;
     const delta = event.clientY - gestureStartY;
     gestureStartY = null;
-    if (delta < -56) sheet.dataset.gagaDepth = 'full';
-    else if (delta > 56 && sheet.dataset.gagaDepth === 'full') sheet.dataset.gagaDepth = 'expanded';
-    else if (delta > 72) close('swipe-down');
+    if (delta < -signatureMotion.outlineExpandTravel) sheet.dataset.gagaDepth = 'full';
+    else if (delta > signatureMotion.outlineExpandTravel && sheet.dataset.gagaDepth === 'full') sheet.dataset.gagaDepth = 'expanded';
+    else if (delta > signatureMotion.outlineCloseTravel) close('swipe-down');
   }, { passive: true });
 
   window.addEventListener('pagehide', () => {

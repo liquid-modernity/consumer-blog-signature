@@ -1,4 +1,6 @@
-import { stripNavigationGuards } from '../navigation/release-browser-guards.mjs';
+import {stripDeviceGuards} from '../device/release-browser-guards.mjs';
+const stripNavigationGuards = source => stripNavigationOnly(stripDeviceGuards(source));
+import { stripNavigationGuards as stripNavigationOnly } from '../navigation/release-browser-guards.mjs';
 import test from 'node:test';import assert from 'node:assert/strict';import{readFileSync}from'node:fs';import{execFileSync}from'node:child_process';import{qualificationGuard,productionGuard,stripPresenceGuards}from'./release-browser-guards.mjs';
 test('Personal Presence adds mandatory checks after source-byte readback without changing historical deployment guards',()=>{const s=readFileSync('.github/workflows/deploy.yml','utf8');assert.equal(stripPresenceGuards(stripNavigationGuards(s)),execFileSync('git',['show','367c84de51491ba07a8a0d40ca2d101f9c36c065:.github/workflows/deploy.yml'],{encoding:'utf8'}));assert.ok(s.indexOf('node tools/gaga/production-readback.mjs')<s.indexOf(productionGuard));assert.ok(s.indexOf(productionGuard)<s.indexOf('      - name: Restore the pinned previous version'));});
 test('missing altered or duplicated Presence qualification/smoke gates fail closed',()=>{const s=readFileSync('.github/workflows/deploy.yml','utf8');for(const guard of [qualificationGuard,productionGuard])for(const candidate of [s.replace(guard,''),s+guard,s.replace(guard,guard.replace('node tools/presence/browser-report.mjs','true'))])assert.throws(()=>stripPresenceGuards(candidate));});

@@ -2,7 +2,6 @@
 import NavGroup from '../navigation/NavGroup.astro';
 import RailToggle from '../navigation/RailToggle.astro';
 import Icon from '../ui/Icon.astro';
-import { contextualRails } from '../../config/contextual-ux.mjs';
 import type { LeftRailInput } from './component-inputs';
 
 interface Props {
@@ -12,13 +11,14 @@ interface Props {
 }
 
 const { rail, workspaceId, contextRole } = Astro.props;
-const enabled = contextualRails(Astro.url.pathname).left && rail.groups.some(group => group.items.length > 0);
+const enabled = rail.available && rail.groups.some(group => group.items.length > 0);
 ---
 {enabled && <>
 <aside
   id="gaga-left-rail"
   class="gaga-left-rail gaga-left-rail--tree"
   data-gaga-left-rail
+  data-gaga-projection="sheet"
   data-gaga-state="collapsed"
   data-gaga-has-content="true"
   data-gaga-signature-surface="context-left-rail"

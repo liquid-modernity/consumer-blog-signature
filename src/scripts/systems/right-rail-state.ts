@@ -32,7 +32,7 @@ export function initRightRailState() {
       if (!hasOutline && base === 'expanded') return 'collapsed';
       return base;
     },
-    isAvailable: supportsRightRail,
+    isAvailable: mode => supportsRightRail(mode) && rail.dataset.gagaProjection === 'rail',
     isPersistentPreferenceMode: (mode) => hasOutline && mode === 'desktop',
     beforeExpand: () => {
       if (getConfiguredLeftRailState(document.documentElement.dataset.gagaLayout) !== 'expanded') {

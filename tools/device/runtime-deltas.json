@@ -1,0 +1,82 @@
+{
+  "src/config/signature-motion.mjs": [
+    {
+      "before": "  hoverMs: 120, leaveMs: 300, holdMs: 280,\n  narrowWidth: 480, primaryNarrow: 5, primaryWide: 8, margin: 16\n",
+      "after": "  hoverMs: 120, leaveMs: 300, holdMs: 280,\n  outlineExpandTravel: 56, outlineCloseTravel: 72,\n  narrowWidth: 480, primaryNarrow: 5, primaryWide: 8, margin: 16\n"
+    }
+  ],
+  "src/scripts/systems/signature-motion.ts": [
+    {
+      "before": "import { createWindowScrollContext } from '@gaga/engine-runtime/runtime/scroll-context';\n",
+      "after": "import { contextViewport } from '../../lib/context-viewport';\nimport { createWindowScrollContext } from '@gaga/engine-runtime/runtime/scroll-context';\n"
+    },
+    {
+      "before": "  const reduced = matchMedia('(prefers-reduced-motion: reduce)');\n  const fine = matchMedia('(hover: hover) and (pointer: fine)');\n  let context = resolveReadingScrollContext();\n",
+      "after": "  const reduced = matchMedia('(prefers-reduced-motion: reduce)');\n  let context = resolveReadingScrollContext();\n"
+    },
+    {
+      "before": "    const actions = primary ? Array.from(primary.children).filter(el => el instanceof HTMLElement && !el.hidden).length : 0;\n    const geometry = notchGeometry({state:notch!.dataset.gagaState,search:!!search && !search.hidden,audio:!!live && !live.hidden,panel:reader?.dataset.gagaState==='open',viewport:innerWidth,actions});\n    notch!.dataset.gagaNotchGeometry = geometry.geometry;\n",
+      "after": "    const actions = primary ? Array.from(primary.children).filter(el => el instanceof HTMLElement && !el.hidden).length : 0;\n    const geometry = notchGeometry({state:notch!.dataset.gagaState,search:!!search && !search.hidden,audio:!!live && !live.hidden,panel:reader?.dataset.gagaState==='open',viewport:contextViewport().width,actions});\n    notch!.dataset.gagaNotchGeometry = geometry.geometry;\n"
+    },
+    {
+      "before": "  for (const [surface, isNotch] of [[notch,true],[outline,false]] as const) if (surface) {\n    listen(surface,'pointerenter', event => { if (fine.matches && (event as PointerEvent).pointerType !== 'touch') {if(isNotch)pointerNotch=true;else pointerOutline=true;schedule();} });\n    listen(surface,'pointerleave', () => {if(isNotch)pointerNotch=false;else pointerOutline=false;schedule();});\n",
+      "after": "  for (const [surface, isNotch] of [[notch,true],[outline,false]] as const) if (surface) {\n    listen(surface,'pointerenter', event => { if ((event as PointerEvent).pointerType === 'mouse') {if(isNotch)pointerNotch=true;else pointerOutline=true;schedule();} });\n    listen(surface,'pointerleave', () => {if(isNotch)pointerNotch=false;else pointerOutline=false;schedule();});\n"
+    },
+    {
+      "before": "  listen(window,'resize',() => {geometryDirty=true;schedule();},{passive:true});\n  listen(window,'hashchange',bind);\n",
+      "after": "  listen(window,'resize',() => {geometryDirty=true;schedule();},{passive:true});\n  if(window.visualViewport)listen(window.visualViewport,'resize',() => {geometryDirty=true;schedule();},{passive:true});\n  listen(window,'hashchange',bind);\n"
+    }
+  ],
+  "src/scripts/systems/information-surface.ts": [
+    {
+      "before": "import { initInformationSurface as initEngineInformationSurface } from '@gaga/engine-runtime/runtime/information-surface';\n",
+      "after": "import { contextViewport } from '../../lib/context-viewport';\nimport { initInformationSurface as initEngineInformationSurface } from '@gaga/engine-runtime/runtime/information-surface';\n"
+    },
+    {
+      "before": "  let pointer: {x:number; y:number} | null = null;\n  card.id = id; card.setAttribute('role', 'tooltip');\n",
+      "after": "  let pointer: {x:number; y:number} | null = null;\n  let positionFrame = 0;\n  const schedulePosition = () => { if (!positionFrame) positionFrame = requestAnimationFrame(() => {positionFrame=0;position();}); };\n  card.id = id; card.setAttribute('role', 'tooltip');\n"
+    },
+    {
+      "before": "    const rect = active.getBoundingClientRect();\n    if (rect.bottom < 0 || rect.top > innerHeight) { close(); return; }\n    const anchor = pointer ?? { x:rect.left, y:rect.bottom };\n",
+      "after": "    const rect = active.getBoundingClientRect();\n    const viewport = contextViewport();\n    if (rect.bottom < viewport.top || rect.top > viewport.top + viewport.height) { close(); return; }\n    const anchor = pointer ?? { x:rect.left, y:rect.bottom };\n"
+    },
+    {
+      "before": "    const anchor = pointer ?? { x:rect.left, y:rect.bottom };\n    const point = positionLinkPreview({left:anchor.x, top:anchor.y, bottom:anchor.y}, card!.getBoundingClientRect(), { width: innerWidth, height: innerHeight });\n    card!.style.left = point.left + 'px'; card!.style.top = point.top + 'px'; card!.style.width = point.width + 'px';\n",
+      "after": "    const anchor = pointer ?? { x:rect.left, y:rect.bottom };\n    const point = positionLinkPreview({left:anchor.x, top:anchor.y, bottom:anchor.y}, card!.getBoundingClientRect(), viewport);\n    card!.style.left = point.left + 'px'; card!.style.top = point.top + 'px'; card!.style.width = point.width + 'px';\n"
+    },
+    {
+      "before": "        if(active!==target||suppressed===target||!target.isConnected)return;\n        card.hidden = matchMedia('(hover: none)').matches && !target.matches(':focus-visible');\n        if(!card.hidden){target.setAttribute('aria-describedby', [...new Set((target.getAttribute('aria-describedby') ?? '').split(/\\s+/).filter(Boolean).concat(id))].join(' '));position();}\n",
+      "after": "        if(active!==target||suppressed===target||!target.isConnected)return;\n        card.hidden = pointer === null && matchMedia('(hover: none)').matches && !target.matches(':focus-visible');\n        if(!card.hidden){target.setAttribute('aria-describedby', [...new Set((target.getAttribute('aria-describedby') ?? '').split(/\\s+/).filter(Boolean).concat(id))].join(' '));position();}\n"
+    },
+    {
+      "before": "  });\n  document.addEventListener('pointermove', event => { if (event.pointerType !== 'mouse' || !active?.contains(event.target as Node)) return; pointer = {x:event.clientX,y:event.clientY}; position(); }, {passive:true});\n  document.addEventListener('focusin', () => { pointer = null; requestAnimationFrame(position); });\n  card.dataset.gagaPreviewReady = 'true';\n",
+      "after": "  });\n  document.addEventListener('pointermove', event => { if (event.pointerType !== 'mouse' || !active?.contains(event.target as Node)) return; pointer = {x:event.clientX,y:event.clientY}; schedulePosition(); }, {passive:true});\n  document.addEventListener('focusin', () => { pointer = null; schedulePosition(); });\n  card.dataset.gagaPreviewReady = 'true';\n"
+    },
+    {
+      "before": "  document.addEventListener('keydown', event => { if (event.key === 'Escape' && !card.hidden) { event.preventDefault(); event.stopPropagation(); suppressed = active; close(); } }, { capture: true });\n  document.addEventListener('scroll', position, { capture: true, passive: true });\n  window.addEventListener('resize', position, { passive: true });\n  window.addEventListener('pagehide', () => { window.clearTimeout(intentTimer);capability.cleanup(); observer.disconnect(); }, { once: true });\n}\n",
+      "after": "  document.addEventListener('keydown', event => { if (event.key === 'Escape' && !card.hidden) { event.preventDefault(); event.stopPropagation(); suppressed = active; close(); } }, { capture: true });\n  document.addEventListener('scroll', schedulePosition, { capture: true, passive: true });\n  window.addEventListener('resize', schedulePosition, { passive: true });\n  window.visualViewport?.addEventListener('resize',schedulePosition,{passive:true});window.visualViewport?.addEventListener('scroll',schedulePosition,{passive:true});\n  window.addEventListener('pagehide',event=>{if(event.persisted)return;window.clearTimeout(intentTimer);if(positionFrame)cancelAnimationFrame(positionFrame);capability.cleanup();observer.disconnect();});\n}\n"
+    }
+  ],
+  "src/scripts/systems/reader-enhancements.ts": [
+    {
+      "before": "import { openSuperShare, shareSelectionIsCurrent } from './super-share';\n",
+      "after": "import { contextViewport } from '../../lib/context-viewport';\nimport { openSuperShare, shareSelectionIsCurrent } from './super-share';\n"
+    },
+    {
+      "before": "function focusReading(target:HTMLElement|null){if(!target?.isConnected)return;const temporary=!target.hasAttribute('tabindex');if(temporary){target.tabIndex=-1;target.addEventListener('blur',()=>target.removeAttribute('tabindex'),{once:true});}target.focus({preventScroll:true});}\nfunction placeSurface(surface:HTMLElement,rect:DOMRect){surface.style.position='fixed';const p=positionLinkPreview(rect,surface.getBoundingClientRect(),{width:innerWidth,height:innerHeight});const island=document.querySelector<HTMLElement>('[data-gaga-action-runtime]')?.getBoundingClientRect();let top=p.top;if(island&&top<island.bottom&&top+surface.offsetHeight>island.top&&p.left<island.right&&p.left+p.width>island.left)top=island.bottom+surface.offsetHeight+8<innerHeight?island.bottom+8:Math.max(8,island.top-surface.offsetHeight-8);surface.style.left=p.left+'px';surface.style.top=top+'px';surface.style.width=p.width+'px';}\nfunction textRangeForHighlight(element:HTMLElement,highlight:HighlightEntity):Range|null{\n",
+      "after": "function focusReading(target:HTMLElement|null){if(!target?.isConnected)return;const temporary=!target.hasAttribute('tabindex');if(temporary){target.tabIndex=-1;target.addEventListener('blur',()=>target.removeAttribute('tabindex'),{once:true});}target.focus({preventScroll:true});}\nfunction placeSurface(surface:HTMLElement,rect:DOMRect){\n const viewport=contextViewport();surface.style.position='fixed';surface.style.maxWidth=Math.max(1,viewport.width-16)+'px';surface.style.maxHeight=Math.max(1,viewport.height-16)+'px';\n const box=surface.getBoundingClientRect(),p=positionLinkPreview(rect,box,viewport);\n const island=document.querySelector<HTMLElement>('[data-gaga-action-runtime]')?.getBoundingClientRect();let top=p.top;\n if(island&&top<island.bottom&&top+box.height>island.top&&p.left<island.right&&p.left+p.width>island.left)top=island.bottom+box.height+8<viewport.top+viewport.height?island.bottom+8:Math.max(viewport.top+8,island.top-box.height-8);\n surface.style.left=p.left+'px';surface.style.top=top+'px';surface.style.width=p.width+'px';\n}\nfunction textRangeForHighlight(element:HTMLElement,highlight:HighlightEntity):Range|null{\n"
+    },
+    {
+      "before": "}\nlet selectionEpoch=0, dismissedSelection='', selectionReturn:HTMLElement|null=null;\nfunction closeSelectionMenu(restore=false){selectionEpoch++;selectionMenuEl?.remove();selectionMenuEl=null;if(restore)focusReading(selectionReturn);selectionReturn=null;}\nfunction initSelectionIntelligence(body:HTMLElement){let timer:number|undefined,entered=false;\n",
+      "after": "}\nlet selectionEpoch=0, dismissedSelection='', selectionReturn:HTMLElement|null=null, selectionGeometry:(()=>DOMRect)|null=null;\nfunction closeSelectionMenu(restore=false){selectionEpoch++;selectionMenuEl?.remove();selectionMenuEl=null;selectionGeometry=null;if(restore)focusReading(selectionReturn);selectionReturn=null;}\nfunction initSelectionIntelligence(body:HTMLElement){let timer:number|undefined,entered=false;\n"
+    },
+    {
+      "before": " document.addEventListener('pointerdown',e=>{const target=e.target as Element;if(!target.closest('.gaga-selection-menu,.gaga-highlight-popup,.gaga-highlight-mark')){closeSelectionMenu();closeHighlightPopup();}});\n window.addEventListener('resize',()=>{closeSelectionMenu();closeHighlightPopup();});\n}\n",
+      "after": " document.addEventListener('pointerdown',e=>{const target=e.target as Element;if(!target.closest('.gaga-selection-menu,.gaga-highlight-popup,.gaga-highlight-mark')){closeSelectionMenu();closeHighlightPopup();}});\n let viewportFrame=0;\n const reposition=()=>{viewportFrame=0;if(selectionMenuEl&&selectionGeometry){if(selectionReturn?.isConnected)placeSurface(selectionMenuEl,selectionGeometry());else closeSelectionMenu();}if(activeHighlightPopupEl&&popupAnchor){if(popupAnchor.isConnected)placeSurface(activeHighlightPopupEl,popupAnchor.getBoundingClientRect());else closeHighlightPopup();}};\n const scheduleViewport=()=>{if(!viewportFrame)viewportFrame=requestAnimationFrame(reposition);};\n window.addEventListener('resize',scheduleViewport,{passive:true});window.visualViewport?.addEventListener('resize',scheduleViewport,{passive:true});window.visualViewport?.addEventListener('scroll',scheduleViewport,{passive:true});\n window.addEventListener('pagehide',()=>{if(viewportFrame)cancelAnimationFrame(viewportFrame);});\n}\n"
+    },
+    {
+      "before": "`;\n document.body.append(menu);selectionMenuEl=menu;selectionReturn=c.block;placeSurface(menu,c.range.getBoundingClientRect());menu.querySelector<HTMLButtonElement>('[data-gaga-action=\"selection-listen\"]')!.hidden=!('speechSynthesis'in window);\n menu.addEventListener('pointerdown',e=>{if((e.target as Element).closest('button,summary'))e.preventDefault();});\n",
+      "after": "`;\n document.body.append(menu);selectionMenuEl=menu;selectionReturn=c.block;selectionGeometry=()=>c.range.getBoundingClientRect();placeSurface(menu,c.range.getBoundingClientRect());menu.querySelector<HTMLButtonElement>('[data-gaga-action=\"selection-listen\"]')!.hidden=!('speechSynthesis'in window);\n menu.addEventListener('pointerdown',e=>{if((e.target as Element).closest('button,summary'))e.preventDefault();});\n"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+# Multi-device refinement
+
+The existing `responsiveShellConfig.breakpoints` remains authoritative. Its original four layout modes and generated Sass thresholds are unchanged; `tools/architecture/sync-responsive-contract.mjs --check` prevents drift. Representative qualification widths are not extra breakpoints.
+
+The existing public Engine layout/input/rail ports execute interactions. Application composition derives rail relevance from normalized context: independent dense groups for navigation, or explicit graph relationships and distinct related publications for reference context. Space determines rail versus the existing command-invoked context sheet; space and route names never create relevance. Family navigation remains in Outline. No second content/provider model is introduced.
+
+One ephemeral visual-viewport reader supplies safe-area-aware bounds to the existing surface controllers. The existing layout lifecycle projects those bounds into CSS; RAF-coalesced viewport changes reposition current selection/annotation surfaces rather than destroying unsaved notes. Preview accepts actual mouse intent on hybrid devices. Outline owns its handle/header gesture; the global input callback no longer competes with it or dismisses on content pan. Media figures also constrain intrinsic grid children and retain explicit wide/bleed presentation. Search, narration, selection anchoring, persistence schemas, public Search and CMS ownership remain unchanged.
+
+Qualification uses a bounded pairwise desktop/touch suite and four hosted WebKit cases, alongside every mandatory previous browser suite. Synthetic fixtures cover keyboard-sized viewports, orientation, safe areas, long labels, exports, rail fallback and private-data exclusion. Fixture state and selected text never enter production assets. Screenshots are limited to six representative states. Performance evidence records bounded long-task observations without an FPS gate or telemetry.
+
+Extraction pressure: record only. Arsenal Site has first-consumer evidence for semantic relevance/projection composition; Arsenal Experience for visual-viewport integration; Arsenal Application/Core for composing existing contracts. No second consumer is demonstrated. Engine already supplies the necessary public runtime ports. Corps requires no change. No extraction or package publication occurs.
+
+Limitations: simulated viewports and touch/pointer events do not certify physical hardware. Hosted Playwright WebKit is not physical iOS Safari. Full screen-reader certification and certified frame-rate measurement are not claimed.

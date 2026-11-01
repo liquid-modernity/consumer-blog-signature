@@ -43,7 +43,7 @@ export function initLeftRailState() {
       if (!hasContent && base === 'expanded') return 'collapsed';
       return base;
     },
-    isCompactMode: supportsGagaDock,
+    isCompactMode: () => rail.dataset.gagaProjection === 'sheet',
     isPersistentPreferenceMode: (mode) => hasContent && mode === 'desktop',
     modalIsolation: {
       activate: activateModalIsolation,

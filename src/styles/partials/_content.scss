@@ -1043,6 +1043,10 @@ button.gaga-search-card {
   margin-block: 1.35rem;
 }
 
+.gaga-markdown-content .gaga-media:not([data-presentation]) { margin-inline: 0; }
+.gaga-markdown-content .gaga-media > picture { display: block; min-inline-size: 0; }
+.gaga-markdown-content .gaga-media > picture img { display: block; max-inline-size: 100%; block-size: auto; }
+
 .gaga-app-frame[data-gaga-content-kind='article'] .gaga-markdown-content .gaga-media :where(audio, iframe) {
   inline-size: 100%;
 }

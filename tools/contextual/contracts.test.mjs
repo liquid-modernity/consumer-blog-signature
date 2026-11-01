@@ -1,4 +1,7 @@
-import { stripNavigationGuards } from '../navigation/release-browser-guards.mjs';
+import {stripDeviceGuards} from '../device/release-browser-guards.mjs';
+const stripNavigationGuards = source => stripNavigationOnly(stripDeviceGuards(source));
+import {contextualRailRelevance,resolveSurfacePlan} from '../../src/config/surface-projection.mjs';
+import { stripNavigationGuards as stripNavigationOnly } from '../navigation/release-browser-guards.mjs';
 import { stripPresenceGuards } from '../presence/release-browser-guards.mjs';
 import { stripSuperShareGuards } from '../share/release-browser-guards.mjs';
 import { stripQualifiedFamilyGuards } from '../family/release-browser-guards.mjs';
@@ -9,7 +12,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { resolveNotchPresentation, contextualRails, positionLinkPreview, outlineForRoute } from '../../src/config/contextual-ux.mjs';
+import { resolveNotchPresentation, positionLinkPreview, outlineForRoute } from '../../src/config/contextual-ux.mjs';
 const base = '93b7c9617a2055543958852fd39205cb3aa0aac7';
 test('validated presentation presets have deterministic desktop/mobile defaults and side fallbacks', () => {
   assert.deepEqual(resolveNotchPresentation(undefined, 1440), { placement: 'top', shape: 'notch' });
@@ -21,11 +24,13 @@ test('validated presentation presets have deterministic desktop/mobile defaults 
   for (const value of [{ placement: 'bottom', shape: 'notch' }, { placement: 'random', shape: 'pill' }, { placement: 'top', shape: 'custom' }, { placement: 'top', shape: 'notch', style: 'arbitrary' }, null]) assert.throws(() => resolveNotchPresentation(value), /Unsupported/);
   for (const width of [0, -1, NaN, Infinity]) assert.throws(() => resolveNotchPresentation(undefined, width));
 });
-test('only meaningful route families are eligible for rails, with no global empty reservations', () => {
-  for (const path of ['/', '/saved', '/search', '/publications/article', '/publications', '/archive/2026', '/about']) assert.deepEqual(contextualRails(path), { left: false, right: false });
-  assert.deepEqual(contextualRails('/topics/teknologi/'), { left: true, right: true });
-  assert.deepEqual(contextualRails('/sections'), { left: true, right: false });
-  assert.deepEqual(contextualRails('/knowledge/index'), { left: true, right: false });
+test('only meaningful semantic context is eligible for rails, with no global or route reservations', () => {
+ const empty=contextualRailRelevance();assert.deepEqual(empty,{left:false,right:false});
+ for(const width of [320,768,1024,1440])assert.deepEqual(resolveSurfacePlan({mode:'desktop',width,relevance:empty}),{left:'absent',right:'absent'});
+ const relation={facts:[{id:'graph',values:[{href:'/knowledge'}]}],discovery:[{href:'/a'},{href:'/b'}]};
+ assert.equal(contextualRailRelevance(relation).right,true);
+ assert.equal(contextualRailRelevance({...relation,facts:[]}).right,false);
+ assert.equal(contextualRailRelevance({...relation,discovery:[{href:'/a'},{href:'/a'}]}).right,false);
 });
 test('link preview flips and clamps without changing anchor or page identity', () => {
   const anchor = { left: 295, top: 700, bottom: 725 }, before = structuredClone(anchor);

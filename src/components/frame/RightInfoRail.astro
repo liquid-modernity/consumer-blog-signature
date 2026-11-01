@@ -2,7 +2,6 @@
 import RailToggle from '../navigation/RailToggle.astro';
 import ContextDiscoveryBlock from '../information/ContextDiscoveryBlock.astro';
 import Icon from '../ui/Icon.astro';
-import { contextualRails } from '../../config/contextual-ux.mjs';
 import type { RightRailInput } from './component-inputs';
 
 interface Props {
@@ -20,9 +19,9 @@ const hasSummary = Boolean(rail.snippet);
 const hasOutline = false;
 const contextSignalCount = (rail.facts?.length ?? 0) + (rail.discovery?.length ?? 0) + (hasSummary ? 1 : 0) + (rail.cta ? 1 : 0);
 const contextRichness = contextSignalCount >= 5 ? 'rich' : contextSignalCount >= 2 ? 'standard' : 'minimal';
-const railHeaderLabel = isRootPage ? rail.labels.railLabel : rail.labels.outlineTitle;
+const railHeaderLabel = rail.labels.explore;
 const railHeaderRole = contextRole;
-const enabled = contextualRails(cleanCurrentPath).right && hasDiscovery;
+const enabled = rail.available && hasDiscovery;
 ---
 
 {enabled && <>
@@ -42,6 +41,7 @@ const enabled = contextualRails(cleanCurrentPath).right && hasDiscovery;
   id="gaga-right-rail"
   class="gaga-right-rail"
   data-gaga-right-rail
+  data-gaga-projection="sheet"
   data-gaga-context-inspector
   data-gaga-state="collapsed"
   data-gaga-has-outline={String(hasOutline)}

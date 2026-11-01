@@ -21,7 +21,7 @@
 .gaga-contextual-notch {
   inline-size:fit-content;
   min-inline-size:var(--gaga-notch-min,0px);
-  max-inline-size:min(var(--gaga-notch-max,352px),calc(100vw - var(--gaga-safe-area-left) - var(--gaga-safe-area-right) - 2rem));
+  max-inline-size:min(var(--gaga-notch-max,352px),100%);
   transition:min-inline-size var(--gaga-signature-geometry,200ms) ease,transform var(--gaga-signature-reveal,180ms) ease-out,opacity var(--gaga-signature-reveal,180ms) ease-out;
 }
 [data-gaga-signature-state='retracted'] .gaga-contextual-notch { transform:translateY(calc(-100% - var(--gaga-safe-area-top) - 1rem)); opacity:0; pointer-events:none; transition-duration:var(--gaga-signature-retract,160ms); }

@@ -99,7 +99,7 @@ const rightRailSource = read('src/components/frame/RightInfoRail.astro');
 if (rightRailSource.includes('const Meta = () =>')) {
   fail('RightInfoRail must not return Astro markup from frontmatter TypeScript');
 }
-if (!rightRailSource.includes('<ContextDiscoveryBlock items={rail.discovery}') || !rightRailSource.includes('contextualRails(cleanCurrentPath).right && hasDiscovery')) {
+if (!rightRailSource.includes('<ContextDiscoveryBlock items={rail.discovery}') || !rightRailSource.includes('rail.available && hasDiscovery')) {
   fail('RightInfoRail must render meaningful discovery through its dedicated component only on eligible routes');
 }
 if (!fs.existsSync('src/components/frame/RightRailMeta.astro')) {

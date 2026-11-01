@@ -1,5 +1,4 @@
 import { onRuntimeEvent, requestLeftRail, requestOutline, requestReaderPanel, requestRightRail } from '@gaga/engine-runtime/runtime/events';
-import { supportsGagaDock } from '../../config/systems';
 import { activateModalIsolation, clearModalIsolation } from './modal-isolation';
 import { registerSiteCommand, runSiteCommand } from './site-commands';
 
@@ -15,7 +14,7 @@ function scrim() {
 }
 
 function compactMode() {
-  return supportsGagaDock(document.documentElement.dataset.gagaLayout);
+  return rail()?.dataset.gagaProjection === 'sheet';
 }
 
 function desktopContextExpanded() {
@@ -90,6 +89,7 @@ function toggleContextSurface(trigger?: HTMLElement | null) {
     const surface = rail();
     if (!surface) return false;
     const action = surface.dataset.gagaState === 'expanded' ? 'collapse' : 'open';
+    opener = action === 'open' ? trigger ?? null : null;
     requestRightRail({ action, source: 'context-surface-toggle' });
     window.requestAnimationFrame(syncTriggerState);
     return true;
@@ -105,6 +105,7 @@ function toggleContextSurface(trigger?: HTMLElement | null) {
 function syncLayout() {
   const surface = rail();
   if (!surface) return;
+  const restore = surface.contains(document.activeElement) || surface.dataset.gagaContextSurfaceState === 'open';
   if (!compactMode()) {
     surface.dataset.gagaContextSurfaceState = 'closed';
     surface.setAttribute('aria-hidden', 'false');
@@ -113,10 +114,12 @@ function syncLayout() {
     surface.removeAttribute('inert');
     scrim()?.setAttribute('hidden', '');
     clearModalIsolation('context-surface');
+    if (restore && opener?.isConnected) opener.focus({preventScroll:true});
+    opener=null;
     syncTriggerState();
     return;
   }
-  closeContextSurface({ restoreFocus: false });
+  closeContextSurface({ restoreFocus: restore });
   syncTriggerState();
 }
 

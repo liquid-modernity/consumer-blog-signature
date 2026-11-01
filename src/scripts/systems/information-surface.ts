@@ -1,3 +1,4 @@
+import { contextViewport } from '../../lib/context-viewport';
 import { initInformationSurface as initEngineInformationSurface } from '@gaga/engine-runtime/runtime/information-surface';
 import { getInformationPreviewRestoreDelayMs } from '../../config/systems';
 import { positionLinkPreview } from '../../config/contextual-ux.mjs';
@@ -20,6 +21,8 @@ export function initInformationSurface() {
   let active: HTMLElement | null = null, suppressed: HTMLElement | null = null;
   const id = 'gaga-link-preview';
   let pointer: {x:number; y:number} | null = null;
+  let positionFrame = 0;
+  const schedulePosition = () => { if (!positionFrame) positionFrame = requestAnimationFrame(() => {positionFrame=0;position();}); };
   card.id = id; card.setAttribute('role', 'tooltip');
   function unbind() {
     if (!active) return;
@@ -30,9 +33,10 @@ export function initInformationSurface() {
   function position() {
     if (!active || card!.hidden) return;
     const rect = active.getBoundingClientRect();
-    if (rect.bottom < 0 || rect.top > innerHeight) { close(); return; }
+    const viewport = contextViewport();
+    if (rect.bottom < viewport.top || rect.top > viewport.top + viewport.height) { close(); return; }
     const anchor = pointer ?? { x:rect.left, y:rect.bottom };
-    const point = positionLinkPreview({left:anchor.x, top:anchor.y, bottom:anchor.y}, card!.getBoundingClientRect(), { width: innerWidth, height: innerHeight });
+    const point = positionLinkPreview({left:anchor.x, top:anchor.y, bottom:anchor.y}, card!.getBoundingClientRect(), viewport);
     card!.style.left = point.left + 'px'; card!.style.top = point.top + 'px'; card!.style.width = point.width + 'px';
   }
   let intentTimer:number|undefined, intentTarget:HTMLElement|null=null;
@@ -82,7 +86,7 @@ export function initInformationSurface() {
       const meta = card.querySelector<HTMLElement>('[data-gaga-hover-preview-meta]'); if (meta) meta.textContent = target.dataset.gagaPreviewMeta ?? '';
       const reveal=()=>{
         if(active!==target||suppressed===target||!target.isConnected)return;
-        card.hidden = matchMedia('(hover: none)').matches && !target.matches(':focus-visible');
+        card.hidden = pointer === null && matchMedia('(hover: none)').matches && !target.matches(':focus-visible');
         if(!card.hidden){target.setAttribute('aria-describedby', [...new Set((target.getAttribute('aria-describedby') ?? '').split(/\s+/).filter(Boolean).concat(id))].join(' '));position();}
       };
       // Focus fires before the browser scrolls its target into view.
@@ -90,15 +94,16 @@ export function initInformationSurface() {
       return undefined;
     }
   });
-  document.addEventListener('pointermove', event => { if (event.pointerType !== 'mouse' || !active?.contains(event.target as Node)) return; pointer = {x:event.clientX,y:event.clientY}; position(); }, {passive:true});
-  document.addEventListener('focusin', () => { pointer = null; requestAnimationFrame(position); });
+  document.addEventListener('pointermove', event => { if (event.pointerType !== 'mouse' || !active?.contains(event.target as Node)) return; pointer = {x:event.clientX,y:event.clientY}; schedulePosition(); }, {passive:true});
+  document.addEventListener('focusin', () => { pointer = null; schedulePosition(); });
   card.dataset.gagaPreviewReady = 'true';
   const observer = new MutationObserver(() => {
     if (!card.hasAttribute('data-gaga-preview-state')) { close(); active = null; suppressed = null; }
   });
   observer.observe(card, { attributes: true, attributeFilter: ['data-gaga-preview-state'] });
   document.addEventListener('keydown', event => { if (event.key === 'Escape' && !card.hidden) { event.preventDefault(); event.stopPropagation(); suppressed = active; close(); } }, { capture: true });
-  document.addEventListener('scroll', position, { capture: true, passive: true });
-  window.addEventListener('resize', position, { passive: true });
-  window.addEventListener('pagehide', () => { window.clearTimeout(intentTimer);capability.cleanup(); observer.disconnect(); }, { once: true });
+  document.addEventListener('scroll', schedulePosition, { capture: true, passive: true });
+  window.addEventListener('resize', schedulePosition, { passive: true });
+  window.visualViewport?.addEventListener('resize',schedulePosition,{passive:true});window.visualViewport?.addEventListener('scroll',schedulePosition,{passive:true});
+  window.addEventListener('pagehide',event=>{if(event.persisted)return;window.clearTimeout(intentTimer);if(positionFrame)cancelAnimationFrame(positionFrame);capability.cleanup();observer.disconnect();});
 }

@@ -1,3 +1,4 @@
+import { contextViewport } from '../../lib/context-viewport';
 import { createWindowScrollContext } from '@gaga/engine-runtime/runtime/scroll-context';
 import { resolveReadingScrollContext } from './reading-scroll';
 import { onRuntimeEvent } from '@gaga/engine-runtime/runtime/events';
@@ -24,7 +25,6 @@ export function initSignatureMotion() {
   const outlineOpener = outline?.querySelector<HTMLElement>('[data-gaga-outline-opener]');
   const outlineLabel = outline?.querySelector<HTMLElement>('[data-gaga-outline-current-label]');
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
-  const fine = matchMedia('(hover: hover) and (pointer: fine)');
   let context = resolveReadingScrollContext();
   let body: HTMLElement | undefined;
   let contentEnd = 0, frame = 0, active = false, geometryDirty = true;
@@ -90,7 +90,7 @@ export function initSignatureMotion() {
       });
     }
     const actions = primary ? Array.from(primary.children).filter(el => el instanceof HTMLElement && !el.hidden).length : 0;
-    const geometry = notchGeometry({state:notch!.dataset.gagaState,search:!!search && !search.hidden,audio:!!live && !live.hidden,panel:reader?.dataset.gagaState==='open',viewport:innerWidth,actions});
+    const geometry = notchGeometry({state:notch!.dataset.gagaState,search:!!search && !search.hidden,audio:!!live && !live.hidden,panel:reader?.dataset.gagaState==='open',viewport:contextViewport().width,actions});
     notch!.dataset.gagaNotchGeometry = geometry.geometry;
     notch!.style.setProperty('--gaga-notch-min', geometry.min + 'px');
     notch!.style.setProperty('--gaga-notch-max', geometry.max + 'px');
@@ -110,7 +110,7 @@ export function initSignatureMotion() {
   listen(document, 'focusin', () => { if (notch.contains(document.activeElement)) {notchState='pinned';project();} if (outline?.contains(document.activeElement)) {outlineState='pinned';project();} schedule(); }, true);
   listen(document, 'focusout', schedule, true);
   for (const [surface, isNotch] of [[notch,true],[outline,false]] as const) if (surface) {
-    listen(surface,'pointerenter', event => { if (fine.matches && (event as PointerEvent).pointerType !== 'touch') {if(isNotch)pointerNotch=true;else pointerOutline=true;schedule();} });
+    listen(surface,'pointerenter', event => { if ((event as PointerEvent).pointerType === 'mouse') {if(isNotch)pointerNotch=true;else pointerOutline=true;schedule();} });
     listen(surface,'pointerleave', () => {if(isNotch)pointerNotch=false;else pointerOutline=false;schedule();});
   }
   const stateObserver = new MutationObserver(schedule);
@@ -119,6 +119,7 @@ export function initSignatureMotion() {
   stateObserver.observe(document.documentElement,{attributes:true,attributeFilter:['data-gaga-reader-motion']});
   listen(reduced,'change',schedule);
   listen(window,'resize',() => {geometryDirty=true;schedule();},{passive:true});
+  if(window.visualViewport)listen(window.visualViewport,'resize',() => {geometryDirty=true;schedule();},{passive:true});
   listen(window,'hashchange',bind);
   const unlayout = onRuntimeEvent('layoutChanged',bind);
   bind(); update();

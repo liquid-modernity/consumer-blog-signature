@@ -51,7 +51,7 @@ test('Contextual Rails separation: Navigation vs Intelligence', () => {
   assert.ok(leftRail.includes('gaga-left-rail'), 'Left rail is dedicated to navigation ("Where can I go?")');
   assert.ok(rightRail.includes('gaga-right-rail'), 'Right rail is dedicated to intelligence ("What should I know?")');
   assert.ok(!rightRail.includes('TocBlock'), 'Right Intelligence Rail must not duplicate the bottom semantic outline');
-  assert.ok(rightRail.includes('<ContextDiscoveryBlock items={rail.discovery}') && rightRail.includes('contextualRails(cleanCurrentPath).right && hasDiscovery'), 'Right rail renders real contextual discovery only where justified');
+  assert.ok(rightRail.includes('<ContextDiscoveryBlock items={rail.discovery}') && rightRail.includes('rail.available && hasDiscovery'), 'Right rail renders real contextual discovery only where justified');
 });
 
 test('Personal Reading Intelligence & Persistent Knowledge Memory', () => {
@@ -126,7 +126,7 @@ test('Gaga Dynamic Notch Island + Dynamic Outline Peek signature', () => {
   assert.ok(![...outline.matchAll(/class="([^"]+)"/g)].flatMap(m=>m[1].split(/\s+/)).includes('gaga-outline-peek__head'), 'Outline v2 must not restore the legacy visible utility header');
   assert.ok(outline.includes('data-gaga-depth="expanded"'), 'Outline v2 must support progressive sheet depth');
   assert.ok(outline.includes('data-gaga-outline-progress') && actionRuntime.includes('class="gaga-visually-hidden" role="progressbar"'), 'Outline owns visible reading progress; Notch must not add a second visible percentage');
-  assert.ok(outlineStyles.includes('inset-inline-start: 50%'), 'Outline Peek must anchor bottom-center');
+  assert.ok(outlineStyles.includes('var(--gaga-viewport-left,0px)') && outlineStyles.includes('var(--gaga-safe-area-left)') && outlineStyles.includes(' / 2') && outlineStyles.includes('translate(-50%'), 'Outline Peek must remain centred in the usable visual viewport');
   assert.ok(systems.includes("enabledModes: ['mobile', 'tablet-mini', 'tablet-large', 'desktop']"), 'Outline Peek must be available across all device classes');
   assert.ok(appFrame.includes('showGagaDock'), 'Layout must resolve Gaga Dock coexistence from the surface profile');
   assert.ok(!fs.existsSync('src/components/navigation/NotchIslandAction.astro'), 'Legacy parallel notch action component must be removed');

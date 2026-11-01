@@ -12,6 +12,7 @@ import { experienceSurfaceProfile, resolveExperienceContext } from '../../config
 interface Props {
   pageId: string;
   pageTitle: string;
+  contextAvailability?: {left:boolean;right:boolean};
   contentKind?: string;
   contentClass?: string;
   mainElement?: 'main' | 'div';
@@ -37,6 +38,7 @@ interface Props {
 const {
   pageId,
   pageTitle,
+  contextAvailability = {left:false,right:false},
   contentKind = 'page',
   contentClass = contentKind,
   mainElement = 'main',
@@ -100,13 +102,13 @@ const showGagaDock = false;
   <slot name="before-main" />
   {mainElement === 'main' ? (
     <main id="gaga-main" class="gaga-main-region" data-gaga-main-region tabindex="-1">
-      {showActionRuntime && <ActionRuntime context={runtimeContext} pageTitle={pageTitle} workspaceId={workspaceId}><ReaderPreferences slot="reader" preferences={shell.readerPreferences} /></ActionRuntime>}
+      {showActionRuntime && <ActionRuntime contextAvailability={contextAvailability} context={runtimeContext} pageTitle={pageTitle} workspaceId={workspaceId}><ReaderPreferences slot="reader" preferences={shell.readerPreferences} /></ActionRuntime>}
       <slot />
       <slot name="after-content" />
     </main>
   ) : (
     <div id="gaga-main" class="gaga-main-region" data-gaga-main-region tabindex="-1">
-      {showActionRuntime && <ActionRuntime context={runtimeContext} pageTitle={pageTitle} workspaceId={workspaceId}><ReaderPreferences slot="reader" preferences={shell.readerPreferences} /></ActionRuntime>}
+      {showActionRuntime && <ActionRuntime contextAvailability={contextAvailability} context={runtimeContext} pageTitle={pageTitle} workspaceId={workspaceId}><ReaderPreferences slot="reader" preferences={shell.readerPreferences} /></ActionRuntime>}
       <slot />
       <slot name="after-content" />
     </div>
@@ -134,10 +136,10 @@ const showGagaDock = false;
     box-sizing: border-box;
     position: fixed;
     inset: auto;
-    max-block-size: min(40vh, 18rem);
+    max-block-size: min(40dvh,18rem,calc(var(--gaga-viewport-block-size,100dvh) - var(--gaga-safe-area-top) - var(--gaga-safe-area-bottom) - 1rem));
     overflow: auto;
     z-index: 45;
-    inline-size: min(22rem, calc(100vw - 2rem));
+    inline-size: min(22rem,calc(var(--gaga-viewport-inline-size,100vw) - var(--gaga-safe-area-left) - var(--gaga-safe-area-right) - 1rem));
     padding: calc(var(--gaga-context-space) * 1.5);
     border: 0;
     background: var(--gaga-context-surface);

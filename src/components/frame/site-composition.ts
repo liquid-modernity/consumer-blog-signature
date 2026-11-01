@@ -1,3 +1,4 @@
+import { contextualRailRelevance } from '../../config/surface-projection.mjs';
 import {
   actionById,
   ariaForProjection,
@@ -119,6 +120,7 @@ export function createLeftRailInput(
   }
 ): LeftRailInput {
   return {
+    available: contextualRailRelevance({groups:projection.groups}).left,
     ariaLabel: i18nLabel('navigation.publication'),
     title: projection.title,
     subtitle: projection.subtitle,
@@ -283,6 +285,7 @@ export function createRightRailInput(info: ScreenInfo): RightRailInput {
   const outlineItems = sanitizeOutlineItems(info.outlineItems);
   return {
     ...info,
+    available: contextualRailRelevance(info).right,
     mode: 'summary',
     outlineItems,
     railToggle: createRailToggleInput('right'),
