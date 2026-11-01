@@ -17,7 +17,7 @@ test('all five experience families retain main, H1, skip target, page identity a
   await ready(page,path);await expect(page.locator('[data-gaga-app-frame]')).toHaveAttribute('data-gaga-experience',profile);await expect(page.locator('main')).toHaveCount(1);await expect(page.locator('h1')).toHaveCount(1);
   await expect(page.locator('a.gaga-skip-link')).toHaveAttribute('href','#gaga-main');await page.locator('a.gaga-skip-link').focus();await page.keyboard.press('Enter');await expect(page.locator('#gaga-main')).toBeFocused();
   for(const width of [320,390,768,1440]){await page.setViewportSize({width,height:900});await page.waitForTimeout(120);expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);}
-  const title=await page.locator('h1').innerText();await expect(page.locator('.gaga-island-brand span')).toHaveText(title);
+  const title=await page.locator('h1').innerText(),brand=await page.locator('meta[property="og:site_name"]').getAttribute('content');expect(brand).toBeTruthy();await expect(page.locator('[data-gaga-app-frame]')).toHaveAttribute('data-gaga-page-title',title);await expect(page.locator('[data-gaga-island-focus-title]')).toHaveText(title);await expect(page.locator('[data-gaga-notch-spine] .gaga-island-brand span')).toHaveText(brand!);
  }
 });
 test('knowledge hierarchy has exact current local navigation and a real ordered alphabet pager',async({page})=>{
