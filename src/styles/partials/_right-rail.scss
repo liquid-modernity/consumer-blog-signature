@@ -350,15 +350,8 @@
 .gaga-main-region .right-sidebar {
   border-inline-start: 0;
 }
-/* Same contextual inspector, projected as a sheet when persistence cannot fit. */
-html[data-gaga-runtime='ready'] .gaga-right-rail[data-gaga-projection='sheet'] {
-  display:none; position:fixed; inset:auto; z-index:var(--gaga-z-panel);
-  left:calc(var(--gaga-viewport-left,0px) + var(--gaga-safe-area-left) + (var(--gaga-viewport-inline-size,100vw) - var(--gaga-safe-area-left) - var(--gaga-safe-area-right)) / 2);
-  top:calc(var(--gaga-viewport-top,0px) + var(--gaga-safe-area-top) + (var(--gaga-viewport-block-size,100dvh) - var(--gaga-safe-area-top) - var(--gaga-safe-area-bottom)) / 2);
-  inline-size:min(32rem,calc(var(--gaga-viewport-inline-size,100vw) - var(--gaga-safe-area-left) - var(--gaga-safe-area-right) - 2rem));
-  max-block-size:min(42rem,calc(var(--gaga-viewport-block-size,100dvh) - var(--gaga-safe-area-top) - var(--gaga-safe-area-bottom) - 2rem));
-  margin:0; padding:0; background:var(--gaga-surface-elevated,var(--gaga-surface)); box-shadow:var(--gaga-shadow); transform:translate(-50%,-50%);
-}
+/* The inspector is attached to Notch when persistence cannot fit. */
+html[data-gaga-runtime='ready'] .gaga-right-rail[data-gaga-projection='sheet'] { display:none; }
 html[data-gaga-runtime='ready'] .gaga-right-rail[data-gaga-projection='sheet'][data-gaga-context-surface-state='open'] { display:flex; }
 html[data-gaga-runtime='ready'] .gaga-right-rail[data-gaga-projection='sheet'] .gaga-right-rail__body { overflow:auto; min-block-size:0; }
 html[data-gaga-runtime='ready'] .gaga-right-rail[data-gaga-projection='sheet'] .gaga-right-rail__head { display:flex; flex:0 0 auto; min-block-size:44px; }
