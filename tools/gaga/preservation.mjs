@@ -274,6 +274,36 @@ const approvedLocalNavigationContrast = Object.freeze({
     "src/config/routes.ts": "e455d71e9506506490f79a3aaad3dbea3b13fa08bb60a8779139b07a75446b98"
   }
 });
+// Exact hosted-qualified multi-device profile; historical inventories and profiles remain immutable.
+const approvedMultiDevice = Object.freeze({
+  "sourceCommit": "223b7e54b7a962945c3c8cacea00db2667cf7811",
+  "sourceTree": "87989f72c5e000f7e73cf1f3a503c9d640a1f463",
+  "qualification": "https://github.com/liquid-modernity/consumer-blog-signature/actions/runs/41302684917",
+  "acceptanceReceiptSha256": "5c8ddc1a28b123600c14364ffe22abb82ba6a0bfb57fe15e0cf0d120a007d863",
+  "files": {
+    "src/components/frame/ActionRuntime.astro": "7b2d50a03a01f641a19140fe58d106cfa25604321d1086e5c7b6b8762ffb8eb5",
+    "src/components/frame/AppFrameBase.astro": "86bfdaafbdc6eea03f1d19d1604d6fb770b58b9b0a75e7f209978dddc2c06bfd",
+    "src/components/frame/ArticleOutlinePeek.astro": "766ed55148672b9603290e0dbf2efeae8e35843848355fbf48c07395d84317f2",
+    "src/components/frame/LeftRail.astro": "50ef509899f0174f3d55a1f55b1f1443914600d9ddc2c3606808939dfd51c44f",
+    "src/components/frame/RightInfoRail.astro": "3bc9119427c460be205b48623cbdbe8cc132d1ced4018e846368ffaa2d841c77",
+    "src/components/frame/StandaloneAppFrame.astro": "ec1afa7ab350fe1f35e9cd372e03f3b91591e4061e859092ddaabb0f4a7ffcfe",
+    "src/components/gaga/ArticleShell.astro": "5ba40e4820a75779485622ef256f854cdaa639f3ac7d00c5b734895ffb705317",
+    "src/components/gaga/MarkdownContent.astro": "5244b38e779359bf55db1d9cdaac4d7661d3783275e0bb4f02c9afddf8df9b85",
+    "src/components/gaga/PageFrame.astro": "a4b4dbc7edb7b66ad21ee3bffac117a662769955164d32cca48c976775a3bfe0",
+    "src/config/nav.ts": "d6fa86a5cc9328c4c6788ebc296d41be5d1d25cf70c4f3b50e1df3f273afe447",
+    "src/styles/partials/_action-island.scss": "c62960dbfca44b661dbc946461924123525ed7678dfc434048949d51f39a4e6e",
+    "src/styles/partials/_content.scss": "d1d1064489270ad7912cbd227c41002dd49d504446a9a0dc2637908fbe913fec",
+    "src/styles/partials/_frame.scss": "16c72655342178657aae90b3d2902a07df163a847f5e37582d8d591bb346e39c",
+    "src/styles/partials/_outline-peek.scss": "9b19f65cc46017ca1748b06c0b3be44b8daa5d1d857fa06731d96dbf55582794",
+    "src/styles/partials/_reader.scss": "346ddfd9d1e62eb4c515b6aeab49f29d420600518b52c6deb5a02d6f54cd3a63",
+    "src/styles/signature.scss": "4dc0b36890c3b293cc93bd19e5164201ff14af308437455984c7c9acd8aaf866",
+    "src/config/routes.ts": "e455d71e9506506490f79a3aaad3dbea3b13fa08bb60a8779139b07a75446b98",
+    "src/components/frame/component-inputs.ts": "576a0ced0059302f71beba904e348946118b3e6d8bd998daf4365c05be9f3a13",
+    "src/components/frame/site-composition.ts": "9e620e2ba0b64e17942d278e4d645e4d4ac7298efc37b0cf3c2799cea8fba1f6",
+    "src/styles/partials/_left-rail.scss": "547473be2df7dca4d7aaa902d30fc5f2b34ad6538e91566e1adf1c1f5fd11d1b",
+    "src/styles/partials/_right-rail.scss": "8d4ebc6fa3f41edca3462e7b96e7d1dab342c279f66d73ffeac46486515fc8e7"
+  }
+});
 const historical = readFileSync("docs/UI-PRESERVATION.json");
 assert.equal(
   createHash("sha256").update(historical).digest("hex"),
@@ -299,10 +329,12 @@ for (const [path,digest] of Object.entries(approvedSuperShare.files)) assert.ok(
 for (const [path,digest] of Object.entries(approvedPresence.files)) assert.ok(historicalHashes.has(path) && /^[a-f0-9]{64}$/.test(digest));
 for (const [path,digest] of Object.entries(approvedLocalNavigation.files)) assert.ok(historicalHashes.has(path) && /^[a-f0-9]{64}$/.test(digest));
 for (const [path,digest] of Object.entries(approvedLocalNavigationContrast.files)) assert.ok(historicalHashes.has(path) && /^[a-f0-9]{64}$/.test(digest));
+for (const [path,digest] of Object.entries(approvedMultiDevice.files)) assert.ok(historicalHashes.has(path) && /^[a-f0-9]{64}$/.test(digest));
 const actual = new Map(inventory.files.map(f => [f.path, createHash("sha256").update(
   readFileSync(f.path, "utf8").replaceAll("@gaga/engine-web", "@gaga/engine-runtime")
     .replaceAll("@gaga/engine/", "@gaga/engine-capabilities/"),
 ).digest("hex")]));
+const multiDeviceProfile = Object.entries(approvedMultiDevice.files).every(([path,digest]) => actual.get(path) === digest);
 const localNavigationContrastProfile = Object.entries(approvedLocalNavigationContrast.files).every(([path,digest]) => actual.get(path) === digest);
 const localNavigationProfile = Object.entries(approvedLocalNavigation.files).every(([path,digest]) => actual.get(path) === digest);
 const presenceProfile = Object.entries(approvedPresence.files).every(([path,digest]) => actual.get(path) === digest);
@@ -315,7 +347,7 @@ const documentationProfile = Object.entries(approvedDocumentation.files).every((
 const polishProfile = Object.entries(approvedPolish.files).every(([path, digest]) => actual.get(path) === digest);
 const historicalProfile = Object.keys(approvedUx.files).every(path => actual.get(path) === historicalHashes.get(path));
 for (const f of inventory.files) {
-  const expected = localNavigationContrastProfile ? approvedLocalNavigationContrast.files[f.path] ?? historicalHashes.get(f.path) : localNavigationProfile ? approvedLocalNavigation.files[f.path] ?? historicalHashes.get(f.path) : presenceProfile ? approvedPresence.files[f.path] ?? historicalHashes.get(f.path) : superShareProfile ? approvedSuperShare.files[f.path] ?? historicalHashes.get(f.path) : familyProfile ? approvedFamily.files[f.path] ?? historicalHashes.get(f.path) : motionTouchProfile ? approvedMotionTouch.files[f.path] ?? historicalHashes.get(f.path) : motionProfile ? approvedMotion.files[f.path] ?? historicalHashes.get(f.path) : personalProfile ? approvedPersonal.files[f.path] ?? historicalHashes.get(f.path) : documentationProfile ? approvedDocumentation.files[f.path] ?? historicalHashes.get(f.path) : polishProfile ? approvedPolish.files[f.path] ?? historicalHashes.get(f.path) : historicalProfile ? historicalHashes.get(f.path) : approvedUx.files[f.path] ?? historicalHashes.get(f.path);
+  const expected = multiDeviceProfile ? approvedMultiDevice.files[f.path] ?? historicalHashes.get(f.path) : localNavigationContrastProfile ? approvedLocalNavigationContrast.files[f.path] ?? historicalHashes.get(f.path) : localNavigationProfile ? approvedLocalNavigation.files[f.path] ?? historicalHashes.get(f.path) : presenceProfile ? approvedPresence.files[f.path] ?? historicalHashes.get(f.path) : superShareProfile ? approvedSuperShare.files[f.path] ?? historicalHashes.get(f.path) : familyProfile ? approvedFamily.files[f.path] ?? historicalHashes.get(f.path) : motionTouchProfile ? approvedMotionTouch.files[f.path] ?? historicalHashes.get(f.path) : motionProfile ? approvedMotion.files[f.path] ?? historicalHashes.get(f.path) : personalProfile ? approvedPersonal.files[f.path] ?? historicalHashes.get(f.path) : documentationProfile ? approvedDocumentation.files[f.path] ?? historicalHashes.get(f.path) : polishProfile ? approvedPolish.files[f.path] ?? historicalHashes.get(f.path) : historicalProfile ? historicalHashes.get(f.path) : approvedUx.files[f.path] ?? historicalHashes.get(f.path);
   assert.equal(actual.get(f.path), expected, "Unintended application UI/style/routing change: " + f.path);
 }
 console.log(
@@ -324,5 +356,5 @@ console.log(
   "entries; one exact qualified main-landmark correction from",
   approvedMain.sourceCommit,
   approvedMain.qualification,
-  localNavigationContrastProfile ? "whole qualified local navigation contrast profile " + approvedLocalNavigationContrast.sourceCommit + " " + approvedLocalNavigationContrast.qualification : localNavigationProfile ? "whole qualified local navigation profile " + approvedLocalNavigation.sourceCommit + " " + approvedLocalNavigation.qualification : presenceProfile ? "whole qualified Personal Presence profile " + approvedPresence.sourceCommit + " " + approvedPresence.qualification : superShareProfile ? "whole qualified Super Share profile " + approvedSuperShare.sourceCommit + " " + approvedSuperShare.qualification : familyProfile ? "whole qualified contextual family profile " + approvedFamily.sourceCommit + " " + approvedFamily.qualification : motionTouchProfile ? "whole qualified motion-touch profile " + approvedMotionTouch.sourceCommit + " " + approvedMotionTouch.qualification : motionProfile ? "whole qualified motion profile " + approvedMotion.sourceCommit + " " + approvedMotion.qualification : personalProfile ? "whole qualified personal profile " + approvedPersonal.sourceCommit + " " + approvedPersonal.qualification : documentationProfile ? "whole qualified documentation profile " + approvedDocumentation.sourceCommit + " " + approvedDocumentation.qualification : polishProfile ? "whole qualified polish profile " + approvedPolish.sourceCommit + " " + approvedPolish.qualification : historicalProfile ? "historical profile" : "whole accepted UX profile " + approvedUx.sourceCommit + " " + approvedUx.qualification,
+  multiDeviceProfile ? "whole qualified multi-device profile " + approvedMultiDevice.sourceCommit + " " + approvedMultiDevice.qualification : localNavigationContrastProfile ? "whole qualified local navigation contrast profile " + approvedLocalNavigationContrast.sourceCommit + " " + approvedLocalNavigationContrast.qualification : localNavigationProfile ? "whole qualified local navigation profile " + approvedLocalNavigation.sourceCommit + " " + approvedLocalNavigation.qualification : presenceProfile ? "whole qualified Personal Presence profile " + approvedPresence.sourceCommit + " " + approvedPresence.qualification : superShareProfile ? "whole qualified Super Share profile " + approvedSuperShare.sourceCommit + " " + approvedSuperShare.qualification : familyProfile ? "whole qualified contextual family profile " + approvedFamily.sourceCommit + " " + approvedFamily.qualification : motionTouchProfile ? "whole qualified motion-touch profile " + approvedMotionTouch.sourceCommit + " " + approvedMotionTouch.qualification : motionProfile ? "whole qualified motion profile " + approvedMotion.sourceCommit + " " + approvedMotion.qualification : personalProfile ? "whole qualified personal profile " + approvedPersonal.sourceCommit + " " + approvedPersonal.qualification : documentationProfile ? "whole qualified documentation profile " + approvedDocumentation.sourceCommit + " " + approvedDocumentation.qualification : polishProfile ? "whole qualified polish profile " + approvedPolish.sourceCommit + " " + approvedPolish.qualification : historicalProfile ? "historical profile" : "whole accepted UX profile " + approvedUx.sourceCommit + " " + approvedUx.qualification,
 );
