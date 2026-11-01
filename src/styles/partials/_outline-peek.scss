@@ -117,6 +117,7 @@
 .gaga-outline-peek__scroll{min-block-size:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;}
 .gaga-outline-peek__scroll::-webkit-scrollbar{display:none;}
 .gaga-outline-peek__scroll .gaga-info-block{padding:var(--gaga-context-space);}
+.gaga-outline-peek__scroll .gaga-info-block h2{color:var(--gaga-context-text);}
 .gaga-outline-peek__scroll .gaga-toc-list{display:grid;gap:.16rem;color:var(--gaga-context-muted);}
 .gaga-outline-peek__scroll .gaga-toc-list a{display:block;padding:.5rem .65rem;border-radius:.65rem;color:var(--gaga-context-text);text-decoration:none;}
 .gaga-outline-peek__scroll .gaga-toc-list a:is(:hover,:focus-visible,[aria-current='location'],[data-gaga-active='true']){
