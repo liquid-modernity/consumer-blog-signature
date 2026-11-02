@@ -18,16 +18,24 @@ const baseline='e4e8149f3ce03969e71575dd7a719ad3b6882358';
 const read=path=>JSON.parse(readFileSync(path));
 const admission=read('vendor/arsenal-consumer.json');
 
-test('official 0.2.0 admission, lock SRI and installed public package identity agree',()=>{
- assert.equal(admission.sourceCommit,'4e53068363fd842ee8e672c316a9ee64af8a6f8f');assert.equal(admission.registryVerificationRun,40518413061);
- assert.deepEqual(admission.artifacts.map(a=>a.sha256),['fd39d9ac310087c3484ad5ab1ad845ac6dda21935242e6fbf41d2dc8e42e7c63','d293129c3cf2a3614ae43c6eafd4a70378ea60452b4260d9b2e9c96a9a37875f']);
+test('official 0.3.0 admission, lock SRI and installed public package identity agree',()=>{
+ assert.equal(admission.sourceCommit,'195ee572c147797e1cdc7a3c9ec093d4376fc2da');assert.equal(admission.sourceTree,'323ceafd909213cf61b138319cc400e546a4783a');assert.equal(admission.qualificationRun,41482398314);assert.equal(admission.publicationRun,41506110039);assert.equal(admission.registryVerificationRun,41506110039);
+ assert.deepEqual(admission.artifacts.map(a=>a.sha256),['3aeaeffdb0b87545512e070b0e3ef0ffd54f58f28f995c7ff399d1086b465c30','d8173dcca5fb93989c704427ca2307327201f6b6555b6a07e480445fc0851396']);
  const pkg=read('package.json'),lock=read('package-lock.json');
  for(const a of admission.artifacts){
   const entry=lock.packages['node_modules/'+a.name],installed=read('node_modules/'+a.name+'/package.json');
-  assert.equal(pkg.dependencies[a.name],'0.2.0');assert.equal(lock.packages[''].dependencies[a.name],'0.2.0');assert.equal(entry.version,'0.2.0');assert.equal(installed.version,'0.2.0');assert.equal(installed.name,a.name);
+  assert.equal(pkg.dependencies[a.name],'0.3.0');assert.equal(lock.packages[''].dependencies[a.name],'0.3.0');assert.equal(entry.version,'0.3.0');assert.equal(installed.version,'0.3.0');assert.equal(installed.name,a.name);
   assert.ok(entry.resolved.startsWith(admission.registry));assert.equal(entry.integrity,a.integrity);assert.equal(entry.integrity,'sha512-'+Buffer.from(a.sha512,'hex').toString('base64'));
  }
  execFileSync(process.execPath,['tools/gaga/boundaries.mjs'],{stdio:'pipe'});
+});
+
+test('historical 0.2.0 admission and its committed lock remain exactly recorded',()=>{
+ const reference=admission.historicalRegistryAdmission;assert.equal(reference.applicationCommit,'1edf5c63117e6529c4460ddfb9c34c9a0b31e03e');assert.equal(reference.path,'vendor/arsenal-consumer.json');
+ const historical=JSON.parse(execFileSync('git',['show',reference.applicationCommit+':'+reference.path],{encoding:'utf8'})),lock=JSON.parse(execFileSync('git',['show',reference.applicationCommit+':package-lock.json'],{encoding:'utf8'}));
+ assert.equal(historical.sourceCommit,'4e53068363fd842ee8e672c316a9ee64af8a6f8f');assert.equal(historical.registryVerificationRun,40518413061);
+ assert.deepEqual(historical.artifacts.map(a=>a.sha256),['fd39d9ac310087c3484ad5ab1ad845ac6dda21935242e6fbf41d2dc8e42e7c63','d293129c3cf2a3614ae43c6eafd4a70378ea60452b4260d9b2e9c96a9a37875f']);
+ for(const a of historical.artifacts){assert.equal(a.version,'0.2.0');assert.equal(lock.packages['node_modules/'+a.name].version,a.version);assert.equal(lock.packages['node_modules/'+a.name].integrity,a.integrity);}
 });
 
 function alteredGuard(change,legacyFlag=false){

@@ -1,14 +1,14 @@
 # Reference-product extraction migration — review checkpoint
 
-Status: **PARTIAL / pre-publication qualification**. Production remains canonical
+Status: **PARTIAL / public registry admitted; normal production qualification pending**. Production remains canonical
 `1edf5c63117e6529c4460ddfb9c34c9a0b31e03e` on Publication Worker
 `ed83438b-8138-49fe-af9e-8870ff76692e`; CMS is unchanged. This review is not
 production-admissible until exact Arsenal 0.3.0 registry admission and the normal
 Application 1 qualification/deployment path succeed.
 
 Application 1 consumes the two existing Arsenal package identities through public
-subpaths. The new source declaration uses exact numeric 0.3.0; the old registry
-lock/admission intentionally remains historical until publication. The isolated
+subpaths. The source declaration and actual registry lock/admission use exact numeric 0.3.0.
+The previous 0.2.0 admission remains immutable in its recorded canonical commit. The isolated
 `reference-extraction.yml` reusable proof runs from Arsenal CI with its own
 read-only Actions token, checks out an exact public application commit and installs only the hosted-qualified tarballs,
 retains the original source lock, rejects unrelated dependency drift and confirms
@@ -102,3 +102,21 @@ that acceptance. No protected acceptance value is read by this migration.
 Until actual public package publication, fresh numeric registry lock/admission,
 normal Application qualification and exact-artifact deployment pass, this remains
 a qualified **staged public-API consumer**, not a newly deployed production release.
+
+## Actual registry admission
+
+Publication [41506110039](https://github.com/liquid-modernity/gaga-arsenal/actions/runs/41506110039)
+passed the existing independent-host acceptance gate and published both exact
+0.3.0 artifacts. Anonymous SHA-256/SHA-512/SRI/export readback matches the accepted
+bytes; supported-host public consumers passed on Node 22.22.2. Application lock
+SHA-256 is `15a7fde56eb24d66c879535c750507aa41eaa565627c798e151320ced1a253a5`;
+only the two Arsenal dependency entries and root declarations differ. No file or
+workspace resolutions are admitted. Vendor provenance pins the actual publication
+and preserves the historical 0.2.0 admission.
+
+The earlier `cleanCommittedLockInstall=false` described a regenerated temporary
+held-artifact fixture lock, followed by successful clean npm ci. It did not prove
+an unchanged committed registry lock. The normal production qualification must
+now install this committed numeric registry lock on required Node 22.22.2, verify
+installed package bytes and seal the exact application artifact. Local Node
+22.19 observations are not substituted for that supported-host gate.

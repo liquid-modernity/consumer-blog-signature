@@ -1,36 +1,41 @@
 {
   "distribution": "public-registry",
   "registry": "https://npm.cloudsmith.io/gaga/gaga/",
-  "sourceCommit": "4e53068363fd842ee8e672c316a9ee64af8a6f8f",
-  "sourceSha256": "3fc629ab825605094c7067b618ce2593897b16aae73bb957f396a91fc129fa22",
+  "sourceCommit": "195ee572c147797e1cdc7a3c9ec093d4376fc2da",
+  "sourceSha256": "741f56de9ac47ad6b75eb7f099f902b92cfaf812976748650016aa112ee4f52f",
   "controllerCommit": "edf8680bf0974d0b632d409f4ade88bb1ce30460",
-  "qualificationRun": 40499814407,
-  "publicationRun": 40506236943,
+  "qualificationRun": 41482398314,
+  "publicationRun": 41506110039,
   "schemaStatus": "EXPERIMENTAL",
   "authoringApiStatus": "EXPERIMENTAL",
   "historicalDevelopmentAdmission": "vendor/arsenal-dev1.json",
   "artifacts": [
     {
       "name": "@gaga/arsenal-contracts",
-      "version": "0.2.0",
-      "sha256": "fd39d9ac310087c3484ad5ab1ad845ac6dda21935242e6fbf41d2dc8e42e7c63",
-      "sha512": "a51fb3c115efadc5d878ef822834f85afb4a712086f106035a38b0677ac5a2bd9955919db0daf5a61d96cd2ec273baf479df5ec14af3b7678027ae037aa3953f",
-      "integrity": "sha512-pR+zwRXvrcXYeO+CKDT4WvtKcSCG8QYDWjiwZ3rFor2ZVZGdsNr1ph2WzS7Cc7r0ed9ewUrzt2eAJ64DeqOVPw=="
+      "version": "0.3.0",
+      "sha256": "3aeaeffdb0b87545512e070b0e3ef0ffd54f58f28f995c7ff399d1086b465c30",
+      "sha512": "e7025f78d9c2b01b1c9dd14c64701e0494adee0d1dc96b6fc5a4ff7ae88ed5932c7680b06b8b6f04e8793e3874f6b71bf2ae06531eb4f1f7a25165c11f9601e9",
+      "integrity": "sha512-5wJfeNnCsBscndFMZHAeBJSt7g0dyWtvxaT/euiO1ZMsdoCwa4tvBOh5Pjh09rcb8q4GUx608feiUWXBH5YB6Q=="
     },
     {
       "name": "@gaga/arsenal",
-      "version": "0.2.0",
-      "sha256": "d293129c3cf2a3614ae43c6eafd4a70378ea60452b4260d9b2e9c96a9a37875f",
-      "sha512": "32f104d73bfd0713e897e40fc7e54e3beb5e4bd70f6336bcab572d0b34b3eb87b9720dd3c42833b0edc9e3dd10a9233872fbeb0271375a1fc05bd00fd57bfdde",
-      "integrity": "sha512-MvEE1zv9BxPol+QPx+VOO+teS9cPYza8q1ctCzSz64e5cg3TxCgzsO3J490QqSM4cvvrAnE3Wh/AW9AP1Xv93g=="
+      "version": "0.3.0",
+      "sha256": "d8173dcca5fb93989c704427ca2307327201f6b6555b6a07e480445fc0851396",
+      "sha512": "2a5e433c4cbb5e839a97a3bc0d8325cbdaade01774f8a26921df6edef688a3e1d734251f45d3651b83544c68788443f2821cfd2326aa0c5e2ae4da44a7fadc5e",
+      "integrity": "sha512-Kl5DPEy7XoOal6O8DYMly9qt4Bd0+KJpId9u3vaIo+HXNCUfRdNlG4NUTGh4hEPyghz9IyaqDF4q5NpEp/rcXg=="
     }
   ],
-  "sourceTree": "e6e2baa7b0d11019dcd46d95bcfde698940fa9cc",
-  "registryVerificationRun": 40518413061,
-  "registryProofCommit": "1946bba9b7e01cbecf3d678db8d24590aaa4f089",
-  "publicationRunNote": "Both exact uploads verified; its post-publication editorial harness failure was resolved by separate read-only registry proof 40518413061.",
+  "sourceTree": "323ceafd909213cf61b138319cc400e546a4783a",
+  "registryVerificationRun": 41506110039,
+  "registryProofCommit": "195ee572c147797e1cdc7a3c9ec093d4376fc2da",
+  "publicationRunNote": "Both exact accepted artifacts published and verified, including supported-host anonymous registry consumers; no artifact rebuild.",
   "historicalStableAdmission": {
     "applicationCommit": "e4e8149f3ce03969e71575dd7a719ad3b6882358",
     "path": "vendor/arsenal-consumer.json"
+  },
+  "historicalRegistryAdmission": {
+    "applicationCommit": "1edf5c63117e6529c4460ddfb9c34c9a0b31e03e",
+    "path": "vendor/arsenal-consumer.json",
+    "version": "0.2.0"
   }
 }
