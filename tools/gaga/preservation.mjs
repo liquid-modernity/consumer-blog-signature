@@ -335,6 +335,69 @@ const approvedHierarchy = Object.freeze({
     "src/styles/partials/_motion.scss": "9e235c879da2b673f7645e4004e39d01f7021fc2bbaa334eba4248ba169acb03"
   }
 });
+// Exact runtime-qualified extraction profile; registry and production admission remain separate.
+const approvedExtraction=Object.freeze({
+  "sourceCommit": "334b879c66cd816d553bdd67e6e91ba3be057c7a",
+  "sourceTree": "7c41bab71aa772b427ff2caff0bbc5c886f8735c",
+  "qualification": "https://github.com/liquid-modernity/gaga-arsenal/actions/runs/41489610845",
+  "acceptanceReceiptSha256": "5dac44c89949f4730d3896341cdd44fd128701f8904ed5878bd5cbd4dcf0acda",
+  "files": {
+    "src/components/frame/ActionRuntime.astro": "fcd4ae1efeb1d10eaf5dde6be3b317b1a5561023881b27aaacf4a60db6482c7b",
+    "src/components/frame/AppFrameBase.astro": "752a85eeec048c97f534a1ab19e28eda3c93fcc0913b39befd909bff121a4e76",
+    "src/components/frame/ArticleOutlinePeek.astro": "9def03d45b799bee0cf71135f39ba73debba093fd4ebc1c113da5d426c507a6d",
+    "src/components/frame/GagaDock.astro": "3ae6ddbc7cdb8553509ec9a87e83033b61a082c9cd20e6cbcc0d4998bd69bd51",
+    "src/components/frame/GlobalNavigationRail.astro": "ea48ff8c6ccdf6f425172cefec93c7925f3d581957fbc5cda1db257f07d3bbd0",
+    "src/components/frame/LeftRail.astro": "50ef509899f0174f3d55a1f55b1f1443914600d9ddc2c3606808939dfd51c44f",
+    "src/components/frame/MainCanvas.astro": "d2ee933444c8d4ed15572943610cd5db2d340c9c52d525438865a878419ea630",
+    "src/components/frame/RightInfoRail.astro": "3bc9119427c460be205b48623cbdbe8cc132d1ced4018e846368ffaa2d841c77",
+    "src/components/frame/RightRailMeta.astro": "9ac4806356517bd891ba725aaed8752ab00e0430072a2d6813363295ed0a48ae",
+    "src/components/frame/StandaloneAppFrame.astro": "a515691faaa8873226549b58e512e6029cab58e391a98f3d83f99c15f9041c56",
+    "src/components/frame/component-inputs.ts": "a203a81cd518f0a9970b91056ffaa7414fa2b6b5655e4bf2bc76b43f6da93bb1",
+    "src/components/frame/site-composition.ts": "b857894a1d9ad39ccbedfc5c856807c15f9d8e7494a5204bc62dcc96afc01e73",
+    "src/components/gaga/ArticleShell.astro": "5ba40e4820a75779485622ef256f854cdaa639f3ac7d00c5b734895ffb705317",
+    "src/components/gaga/ContentPanel.astro": "cc221e99db643eeb0703bbb98919f74ea54515cdf9113dfd532eddb5a225568a",
+    "src/components/gaga/GagaSiteLayout.astro": "ab878fb1b320f8d0b996bfc439e1914cb519a1ea3c27af3f2967aa4433ae66ab",
+    "src/components/gaga/Head.astro": "fc2664bf2cc0f8336d35b2d6dc918a6b79bd8bdb2753b4ec8f7bad2fd149e8e6",
+    "src/components/gaga/MarkdownContent.astro": "5244b38e779359bf55db1d9cdaac4d7661d3783275e0bb4f02c9afddf8df9b85",
+    "src/components/gaga/PageFrame.astro": "38976e25175502eddc99b35cc405c996ba130b6d149866b2761ec522e020ecb4",
+    "src/components/gaga/PageTitle.astro": "8db1a53cf87b5fd7109b44457f7581a25357bbbbc224a777dcf017767340eff3",
+    "src/components/gaga/media/GagaImage.astro": "0f5284568d088ee55ddaade6c060bce037d2afe6711b3ffb10423b06b73d8ca2",
+    "src/config/design.ts": "df9ae23f2a09cd3c47e3bd0dcfa6a8b6452d05cdceafad75e98c5977790e252e",
+    "src/config/nav.ts": "e1f063c8dff842ee9560538add2efb974386152f03cf1ac2ec843cb9430d2522",
+    "src/config/reader.ts": "4329f5f484416e983412eaf03a754d8457ea6c66fe672c2717102e9ebf81ad44",
+    "src/config/routes.ts": "e1f9af11b46d5840cdb957c355c3aba5ddddc5e943c11c4cc38b135fb00ff23e",
+    "src/config/theme.ts": "3c576402c8e72d53ea3617177701b727468fc841dd9800019b66e28106c24de6",
+    "src/styles/components/rail-behaviour.scss": "f921eaebd6256b8aa69cd350378d7fa0f827a7738f48c007c8b3f0e1b897f951",
+    "src/styles/components/rail-runtime.scss": "3d546435d70af7b77bd5c4c14b7c2b81c2f31238bd2c0ceace378101634a792e",
+    "src/styles/gaga-tokens.css": "ace74246b1021ebf889f457f9aaee2e0d6b82c56244a92552e8319ddd2378c2f",
+    "src/styles/partials/_a11y.scss": "78fc8b98d4270e9e63a148818fccaeca3c7420d4df75fc60ae2149cb6aaf0357",
+    "src/styles/partials/_action-island.scss": "c62960dbfca44b661dbc946461924123525ed7678dfc434048949d51f39a4e6e",
+    "src/styles/partials/_breakpoints.generated.scss": "871d90056d38a154637b26fe2f9f76cc6340a0b551881b0dccaefe24ea567147",
+    "src/styles/partials/_breakpoints.scss": "14cc4bf8c73a114d8f459b6a6453673fc49fd27e4fce225865ee0b3f5950ce18",
+    "src/styles/partials/_content.scss": "d1d1064489270ad7912cbd227c41002dd49d504446a9a0dc2637908fbe913fec",
+    "src/styles/partials/_coverage.scss": "5d0e9217853ac08bf3cf0872d76fceb557758727a3bfc5b81c124c071c2d1a8f",
+    "src/styles/partials/_design-languages.scss": "e5f15ac20d2b0eda34be046be7af1a85cabd19d44d97a256bbf845fc86e1e76a",
+    "src/styles/partials/_editorial-front.scss": "c08d1e8082cf2bcc1ce72330aefdd420606b124a4a3eddee92874962b887c3b7",
+    "src/styles/partials/_frame.scss": "16c72655342178657aae90b3d2902a07df163a847f5e37582d8d591bb346e39c",
+    "src/styles/partials/_gaga-dock.scss": "e8c8c118a3910f149561aa666a8fe29a2f0958d2f158b9fefa62e18f3228501c",
+    "src/styles/partials/_global-nav.scss": "97fc4e00da3b6e9ce07e4efd4485cb2cdc266a1f3d554ef2e65cfcd8227a86f8",
+    "src/styles/partials/_knowledge-graph.scss": "3a09495d759fd9ac2d3ace0ca7babd4234ffc6f0a4a9c8c675210ee8b5c2f8f4",
+    "src/styles/partials/_landing.scss": "b1fc962a96ffba12d7b47341145aa167cc4c1753ee748745b5a4cf48785858c6",
+    "src/styles/partials/_left-rail.scss": "547473be2df7dca4d7aaa902d30fc5f2b34ad6538e91566e1adf1c1f5fd11d1b",
+    "src/styles/partials/_motion.scss": "9e235c879da2b673f7645e4004e39d01f7021fc2bbaa334eba4248ba169acb03",
+    "src/styles/partials/_outline-peek.scss": "c28a887be05ba782d964edea42e2618da3d12c8b3df62fa4f35476e9a3e27e1e",
+    "src/styles/partials/_people.scss": "084021d4cd47f51637185c78b3dc79c390d7b80a79c88920699499a272755e75",
+    "src/styles/partials/_rail-polish.scss": "b4fb9b756b910c9bb3050c9addb53e156757048ac47169c1855b7fcb28cf11c0",
+    "src/styles/partials/_reader.scss": "47b1a088344aa97a4b0130aa38029f8dacaf0601a7a951bdee6474c093e02214",
+    "src/styles/partials/_right-rail.scss": "a752427360b5faa1fd642433fede6643d284e849f633bf1164d1baacbdfaf355",
+    "src/styles/partials/_section-front.scss": "220e0573e085f4d5c213fc7981df04ffae140582f14a8a58c857630a0429f024",
+    "src/styles/partials/_visual-polish.scss": "6188a9f85afde0f35d1966affa0e81adf3cbad55810ff8e178d1935a7cff1559",
+    "src/styles/signature.scss": "4dc0b36890c3b293cc93bd19e5164201ff14af308437455984c7c9acd8aaf866",
+    "src/styles/tokens.css": "83707608d34729fc2deae6e932ce55161e48a8d1f38efe2fb763953506238f8b",
+    "src/styles/tokens/_gaga-motion.scss": "ba66f73483a4b618e9a3ca41eaca8f3af145dd3823e099578d8297e7b3275e45",
+    "src/styles/tokens/_gaga-surfaces.scss": "ad71fe1e8e645cc4ac65be820e15d0834da3973cf391f3a6e13524f11e153e28"
+  }
+});
 const historical = readFileSync("docs/UI-PRESERVATION.json");
 assert.equal(
   createHash("sha256").update(historical).digest("hex"),
@@ -362,10 +425,12 @@ for (const [path,digest] of Object.entries(approvedLocalNavigation.files)) asser
 for (const [path,digest] of Object.entries(approvedLocalNavigationContrast.files)) assert.ok(historicalHashes.has(path) && /^[a-f0-9]{64}$/.test(digest));
 for (const [path,digest] of Object.entries(approvedMultiDevice.files)) assert.ok(historicalHashes.has(path) && /^[a-f0-9]{64}$/.test(digest));
 for (const [path,digest] of Object.entries(approvedHierarchy.files)) assert.ok(historicalHashes.has(path) && /^[a-f0-9]{64}$/.test(digest));
+for (const [path,digest] of Object.entries(approvedExtraction.files)) assert.ok(historicalHashes.has(path) && /^[a-f0-9]{64}$/.test(digest));
 const actual = new Map(inventory.files.map(f => [f.path, createHash("sha256").update(
   readFileSync(f.path, "utf8").replaceAll("@gaga/engine-web", "@gaga/engine-runtime")
     .replaceAll("@gaga/engine/", "@gaga/engine-capabilities/"),
 ).digest("hex")]));
+const extractionProfile=Object.entries(approvedExtraction.files).every(([path,digest])=>actual.get(path)===digest);
 const hierarchyProfile = Object.entries(approvedHierarchy.files).every(([path,digest]) => actual.get(path) === digest);
 const multiDeviceProfile = Object.entries(approvedMultiDevice.files).every(([path,digest]) => actual.get(path) === digest);
 const localNavigationContrastProfile = Object.entries(approvedLocalNavigationContrast.files).every(([path,digest]) => actual.get(path) === digest);
@@ -380,7 +445,7 @@ const documentationProfile = Object.entries(approvedDocumentation.files).every((
 const polishProfile = Object.entries(approvedPolish.files).every(([path, digest]) => actual.get(path) === digest);
 const historicalProfile = Object.keys(approvedUx.files).every(path => actual.get(path) === historicalHashes.get(path));
 for (const f of inventory.files) {
-  const expected = hierarchyProfile ? approvedHierarchy.files[f.path] ?? historicalHashes.get(f.path) : multiDeviceProfile ? approvedMultiDevice.files[f.path] ?? historicalHashes.get(f.path) : localNavigationContrastProfile ? approvedLocalNavigationContrast.files[f.path] ?? historicalHashes.get(f.path) : localNavigationProfile ? approvedLocalNavigation.files[f.path] ?? historicalHashes.get(f.path) : presenceProfile ? approvedPresence.files[f.path] ?? historicalHashes.get(f.path) : superShareProfile ? approvedSuperShare.files[f.path] ?? historicalHashes.get(f.path) : familyProfile ? approvedFamily.files[f.path] ?? historicalHashes.get(f.path) : motionTouchProfile ? approvedMotionTouch.files[f.path] ?? historicalHashes.get(f.path) : motionProfile ? approvedMotion.files[f.path] ?? historicalHashes.get(f.path) : personalProfile ? approvedPersonal.files[f.path] ?? historicalHashes.get(f.path) : documentationProfile ? approvedDocumentation.files[f.path] ?? historicalHashes.get(f.path) : polishProfile ? approvedPolish.files[f.path] ?? historicalHashes.get(f.path) : historicalProfile ? historicalHashes.get(f.path) : approvedUx.files[f.path] ?? historicalHashes.get(f.path);
+  const expected = extractionProfile ? approvedExtraction.files[f.path] : hierarchyProfile ? approvedHierarchy.files[f.path] ?? historicalHashes.get(f.path) : multiDeviceProfile ? approvedMultiDevice.files[f.path] ?? historicalHashes.get(f.path) : localNavigationContrastProfile ? approvedLocalNavigationContrast.files[f.path] ?? historicalHashes.get(f.path) : localNavigationProfile ? approvedLocalNavigation.files[f.path] ?? historicalHashes.get(f.path) : presenceProfile ? approvedPresence.files[f.path] ?? historicalHashes.get(f.path) : superShareProfile ? approvedSuperShare.files[f.path] ?? historicalHashes.get(f.path) : familyProfile ? approvedFamily.files[f.path] ?? historicalHashes.get(f.path) : motionTouchProfile ? approvedMotionTouch.files[f.path] ?? historicalHashes.get(f.path) : motionProfile ? approvedMotion.files[f.path] ?? historicalHashes.get(f.path) : personalProfile ? approvedPersonal.files[f.path] ?? historicalHashes.get(f.path) : documentationProfile ? approvedDocumentation.files[f.path] ?? historicalHashes.get(f.path) : polishProfile ? approvedPolish.files[f.path] ?? historicalHashes.get(f.path) : historicalProfile ? historicalHashes.get(f.path) : approvedUx.files[f.path] ?? historicalHashes.get(f.path);
   assert.equal(actual.get(f.path), expected, "Unintended application UI/style/routing change: " + f.path);
 }
 console.log(
@@ -389,5 +454,5 @@ console.log(
   "entries; one exact qualified main-landmark correction from",
   approvedMain.sourceCommit,
   approvedMain.qualification,
-  hierarchyProfile ? "whole qualified hierarchy profile " + approvedHierarchy.sourceCommit + " " + approvedHierarchy.qualification : multiDeviceProfile ? "whole qualified multi-device profile " + approvedMultiDevice.sourceCommit + " " + approvedMultiDevice.qualification : localNavigationContrastProfile ? "whole qualified local navigation contrast profile " + approvedLocalNavigationContrast.sourceCommit + " " + approvedLocalNavigationContrast.qualification : localNavigationProfile ? "whole qualified local navigation profile " + approvedLocalNavigation.sourceCommit + " " + approvedLocalNavigation.qualification : presenceProfile ? "whole qualified Personal Presence profile " + approvedPresence.sourceCommit + " " + approvedPresence.qualification : superShareProfile ? "whole qualified Super Share profile " + approvedSuperShare.sourceCommit + " " + approvedSuperShare.qualification : familyProfile ? "whole qualified contextual family profile " + approvedFamily.sourceCommit + " " + approvedFamily.qualification : motionTouchProfile ? "whole qualified motion-touch profile " + approvedMotionTouch.sourceCommit + " " + approvedMotionTouch.qualification : motionProfile ? "whole qualified motion profile " + approvedMotion.sourceCommit + " " + approvedMotion.qualification : personalProfile ? "whole qualified personal profile " + approvedPersonal.sourceCommit + " " + approvedPersonal.qualification : documentationProfile ? "whole qualified documentation profile " + approvedDocumentation.sourceCommit + " " + approvedDocumentation.qualification : polishProfile ? "whole qualified polish profile " + approvedPolish.sourceCommit + " " + approvedPolish.qualification : historicalProfile ? "historical profile" : "whole accepted UX profile " + approvedUx.sourceCommit + " " + approvedUx.qualification,
+  extractionProfile ? "whole qualified extraction profile " + approvedExtraction.sourceCommit + " " + approvedExtraction.qualification : hierarchyProfile ? "whole qualified hierarchy profile " + approvedHierarchy.sourceCommit + " " + approvedHierarchy.qualification : multiDeviceProfile ? "whole qualified multi-device profile " + approvedMultiDevice.sourceCommit + " " + approvedMultiDevice.qualification : localNavigationContrastProfile ? "whole qualified local navigation contrast profile " + approvedLocalNavigationContrast.sourceCommit + " " + approvedLocalNavigationContrast.qualification : localNavigationProfile ? "whole qualified local navigation profile " + approvedLocalNavigation.sourceCommit + " " + approvedLocalNavigation.qualification : presenceProfile ? "whole qualified Personal Presence profile " + approvedPresence.sourceCommit + " " + approvedPresence.qualification : superShareProfile ? "whole qualified Super Share profile " + approvedSuperShare.sourceCommit + " " + approvedSuperShare.qualification : familyProfile ? "whole qualified contextual family profile " + approvedFamily.sourceCommit + " " + approvedFamily.qualification : motionTouchProfile ? "whole qualified motion-touch profile " + approvedMotionTouch.sourceCommit + " " + approvedMotionTouch.qualification : motionProfile ? "whole qualified motion profile " + approvedMotion.sourceCommit + " " + approvedMotion.qualification : personalProfile ? "whole qualified personal profile " + approvedPersonal.sourceCommit + " " + approvedPersonal.qualification : documentationProfile ? "whole qualified documentation profile " + approvedDocumentation.sourceCommit + " " + approvedDocumentation.qualification : polishProfile ? "whole qualified polish profile " + approvedPolish.sourceCommit + " " + approvedPolish.qualification : historicalProfile ? "historical profile" : "whole accepted UX profile " + approvedUx.sourceCommit + " " + approvedUx.qualification,
 );

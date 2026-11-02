@@ -32,7 +32,7 @@ publication authority remain with their existing hosts. No public consumer impor
 package internals. No new package, storage model, provider or search engine exists.
 
 The package architecture decision is recorded in Arsenal
-[ADR 0002](https://github.com/liquid-modernity/gaga-arsenal/blob/d63afaeb26a6e784fbf8ce996b15d10302376370/docs/ADR-0002-reference-product-extraction-v1.md).
+[ADR 0002](https://github.com/liquid-modernity/gaga-arsenal/blob/195ee572c147797e1cdc7a3c9ec093d4376fc2da/docs/ADR-0002-reference-product-extraction-v1.md).
 It distinguishes the accepted bounded extraction from the proposed four-family
 monorepo and deferred umbrella distribution. Existing GAGA STANDARD 1.1.0 is
 preserved; its framework-adapter ownership conflict has an explicit versioned
@@ -81,3 +81,24 @@ it is distinct from the separately verified clean packed-package installation.
 Legacy private DOM hook names remain for qualified selector compatibility. They
 do not supply identity text, routes or package semantics; a rename would require
 a separately qualified selector migration.
+
+## Final held-artifact proof and remaining release boundary
+
+Hosted run [41489610845](https://github.com/liquid-modernity/gaga-arsenal/actions/runs/41489610845)
+qualified application source `334b879c66cd816d553bdd67e6e91ba3be057c7a`:
+318 Node tests, 186 browser cases (178 Chromium and 8 WebKit), zero failures,
+skips or flakes, strict types, the 121-page build and two exact-renderer branding
+substitutions. The whole UI source profile is admitted additively with negative
+hybrid/drift tests; historical inventories and profiles are unchanged. This is
+presentation evidence, not a waiver of public registry or production admission.
+
+The exact two package artifacts belong to canonical Arsenal release source
+`195ee572c147797e1cdc7a3c9ec093d4376fc2da`, stable qualification `41482398314`.
+Publication attempt `41487482921` stopped at independent host acceptance before
+any upload. The existing Release Control Plane requires the operator to accept
+the exact qualified proposal; code, tests and credentials do not substitute for
+that acceptance. No protected acceptance value is read by this migration.
+
+Until actual public package publication, fresh numeric registry lock/admission,
+normal Application qualification and exact-artifact deployment pass, this remains
+a qualified **staged public-API consumer**, not a newly deployed production release.
