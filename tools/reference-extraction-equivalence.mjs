@@ -1,3 +1,4 @@
+import {stripProductionTraceRetention} from './hierarchy/release-browser-guards.mjs';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
@@ -32,5 +33,6 @@ export function readPublicModule(specifier){return readFileSync(new URL(import.m
 export function assertFrozenInput(path,current,expected){
  if(path==='package.json'||path==='package-lock.json')return assertExtractionDependencyDelta(path);
  if(path==='src/config/signature-motion.mjs')return assertExtractedMotionIntegrity();
+ if(path==='.github/workflows/deploy.yml')return assert.equal(stripProductionTraceRetention(current.toString()),expected.toString(),path);
  assert.deepEqual(current,expected,path);
 }

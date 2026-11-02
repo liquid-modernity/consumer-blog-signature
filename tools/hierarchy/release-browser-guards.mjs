@@ -14,4 +14,6 @@ export const productionGuard=`      - name: Surface hierarchy and continuity pro
           npx --no-install playwright test --config tools/hierarchy/playwright.config.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/hierarchy-browser.log"
           node tools/hierarchy/browser-report.mjs
 `;
-export function stripHierarchyGuards(source){for(const guard of [qualificationGuard,productionGuard])assert.equal(source.split(guard).length,2,'Exactly one mandatory hierarchy guard');return source.replace(qualificationGuard,'').replace(productionGuard,'');}
+export const productionTraceRetention='            ${{ runner.temp }}/publication-deployment/*-traces\n';
+export function stripProductionTraceRetention(source){assert.equal(source.split(productionTraceRetention).length,2,'Exactly one complete production trace retention path');return source.replace(productionTraceRetention,'');}
+export function stripHierarchyGuards(source){source=stripProductionTraceRetention(source);for(const guard of [qualificationGuard,productionGuard])assert.equal(source.split(guard).length,2,'Exactly one mandatory hierarchy guard');return source.replace(qualificationGuard,'').replace(productionGuard,'');}
