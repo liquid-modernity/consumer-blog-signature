@@ -2,7 +2,7 @@
 import { getCollection, render } from 'astro:content';
 import { siteConfig } from '../config/site';
 import { presence } from '../lib/presence';
-import { projectPresenceRoutes } from '../features/personal-presence/model.mjs';
+import { projectPresenceRoutes } from '../lib/presence-routes.mjs';
 import { resolvePresenceContent } from '../lib/presence-content';
 import PresenceContent from '../components/reader/PresenceContent.astro';
 import GagaSiteLayout from '../components/gaga/GagaSiteLayout.astro';

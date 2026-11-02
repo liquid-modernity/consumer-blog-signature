@@ -1,6 +1,6 @@
 import { routes } from './routes.ts';
 import { presence, presenceNavigation } from '../lib/presence.ts';
-import { presenceLabel } from '../features/personal-presence/model.mjs';
+import { presenceLabel } from '../config/presence-composition.mjs';
 import { personalPresenceConfig } from './personal-presence.mjs';
 import { getEnabledRootSections, referenceRegistry } from './pakrpp-architecture.ts';
 

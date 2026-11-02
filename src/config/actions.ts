@@ -1,3 +1,4 @@
+import {createCapabilityCatalog} from '@gaga/arsenal/application';
 import { i18nLabel, type GagaLocalizedLabel } from './i18n';
 import type { LayoutMode } from '../lib/schema';
 
@@ -406,19 +407,17 @@ export const gagaActions: readonly GagaAction[] = [
   }
 ];
 
-const actionMap = new Map<GagaActionId, GagaAction>(gagaActions.map((action) => [action.id, action]));
+export const actionCatalog=createCapabilityCatalog(gagaActions);
 const commandMap = new Map<GagaActionCommand, GagaAction>(
   gagaActions.flatMap((action) => action.command ? [[action.command, action] as const] : [])
 );
 
 export function isGagaActionId(id: string): id is GagaActionId {
-  return actionMap.has(id as GagaActionId);
+  return actionCatalog.has(id as GagaActionId);
 }
 
 export function actionById(id: GagaActionId) {
-  const action = actionMap.get(id);
-  if (!action) throw new Error(`Unknown Gaga action: ${id}`);
-  return action;
+  return actionCatalog.get(id);
 }
 
 export function actionForCommand(command: string | null | undefined) {

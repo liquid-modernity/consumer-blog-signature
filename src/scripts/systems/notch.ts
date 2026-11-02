@@ -1,3 +1,4 @@
+import {projectNotchContext} from '@gaga/arsenal/experience';
 let spineHome:Comment|undefined,returnCommands:(()=>void)|undefined;
 export function attachNotchSpine(panel:HTMLElement){const spine=document.querySelector<HTMLElement>('[data-gaga-notch-spine]');if(!spine)return;if(!spineHome){spineHome=document.createComment('Notch spine position');spine.before(spineHome);}panel.prepend(spine);}
 export function restoreNotchSpine(){const spine=document.querySelector<HTMLElement>('[data-gaga-notch-spine]');if(spine&&spineHome?.isConnected)spineHome.before(spine);}
@@ -32,18 +33,18 @@ import {closeContextSurface,contextSurfaceIsOpen} from './context-surface';
     const back=spine.querySelector<HTMLButtonElement>('[data-gaga-action="smart-back"]')!;
     const title=island.querySelector<HTMLElement>('[data-gaga-island-focus-title]');
     let titleVisible=true;
-    function capability(){return island.dataset.gagaShareOpen==='true'?'share':readerOpen()&&!island.hasAttribute('data-gaga-reader-closing')?'reader':!island.querySelector<HTMLElement>('[data-gaga-action-runtime-live]')!.hidden?'audio':!search.hidden?'search':contextSurfaceIsOpen()?'information':island.dataset.gagaState==='expanded'?'navigation':'';}
+    function notchContext(){return projectNotchContext({state:island.dataset.gagaState??'collapsed',shareOpen:island.dataset.gagaShareOpen==='true',readerOpen:readerOpen(),readerClosing:island.hasAttribute('data-gaga-reader-closing'),audioOpen:!island.querySelector<HTMLElement>('[data-gaga-action-runtime-live]')!.hidden,searchOpen:!search.hidden,informationOpen:contextSurfaceIsOpen(),h1Visible:titleVisible});}
     function project(){
-      const state=island.dataset.gagaState,cap=capability();island.dataset.gagaNotchCapability=cap;
+      const projection=notchContext(),cap=projection.capability;island.dataset.gagaNotchCapability=cap;
       const names:Record<string,string>={share:'Super Share',reader:'Tampilan',audio:'Dengarkan',search:'Cari',information:'Informasi',navigation:'Navigasi'};
       if(capabilityLabel.textContent!==(names[cap]??''))capabilityLabel.textContent=names[cap]??'';if(capabilityLabel.hidden!==!cap)capabilityLabel.hidden=!cap;
       island.setAttribute('aria-label',names[cap]??island.dataset.gagaI18nId??'Navigasi');island.setAttribute('role','navigation');
       const label=cap?'Kembali ke aksi':'Kembali';back.setAttribute('aria-label',label);back.dataset.gagaI18nId=label;back.dataset.gagaI18nEn=cap?'Back to actions':'Back';back.disabled=!cap&&location.pathname==='/';
-      const hideContext=state==='collapsed'||state==='micro'||['share','reader','audio','information'].includes(cap);
+      const hideContext=projection.contextHidden;
       if(context.hidden!==hideContext){context.hidden=hideContext;context.inert=hideContext;}
-      const hideSystem=state!=='expanded'||!!cap&&cap!=='navigation';if(system.hidden!==hideSystem){system.hidden=hideSystem;system.inert=hideSystem;}
-      if(title&&title.hidden!==(titleVisible||!!cap))title.hidden=titleVisible||!!cap;
-      const level=state==='expanded'?'2':state==='peek'?'1':'0';island.dataset.gagaLevel=level;toggle.setAttribute('aria-expanded',String(level!=='0'));more.setAttribute('aria-expanded',String(level==='2'));
+      const hideSystem=projection.systemHidden;if(system.hidden!==hideSystem){system.hidden=hideSystem;system.inert=hideSystem;}
+      if(title&&title.hidden!==projection.titleHidden)title.hidden=projection.titleHidden;
+      const level=projection.level;island.dataset.gagaLevel=level;toggle.setAttribute('aria-expanded',String(level!=='0'));more.setAttribute('aria-expanded',String(level==='2'));
     }
     const h1=document.querySelector('main h1');if(h1){const titleObserver=new IntersectionObserver(entries=>{titleVisible=entries[0].isIntersecting;project();});titleObserver.observe(h1);window.addEventListener('pagehide',event=>{if(!event.persisted)titleObserver.disconnect();},{once:true});}
     const clearSearch=initSuperSearch(search as HTMLFormElement,()=>{search.hidden=true;search.inert=true;clearSearch();setState('peek');});

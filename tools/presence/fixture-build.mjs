@@ -1,10 +1,10 @@
 // Isolated Astro host renders the exact production component with two configurations/providers.
 import assert from 'node:assert/strict';import {mkdtempSync,mkdirSync,writeFileSync,readFileSync,realpathSync,copyFileSync,symlinkSync,rmSync}from'node:fs';import{tmpdir}from'node:os';import{join,resolve,relative}from'node:path';import{execFileSync}from'node:child_process';import{pathToFileURL}from'node:url';import{createHash}from'node:crypto';
-import{createPresenceRegistry,presenceSections}from'../../src/features/personal-presence/model.mjs';import{fixtureConfig,alternateConfig,fixtureProviders}from'./fixtures.mjs';
+import{createPresenceRegistry,presenceSections}from'../../src/config/presence-composition.mjs';import{fixtureConfig,alternateConfig,fixtureProviders}from'./fixtures.mjs';
 const component=resolve('src/components/reader/PresenceContent.astro'),before=createHash('sha256').update(readFileSync(component)).digest('hex'),root=realpathSync(mkdtempSync(join(tmpdir(),'gaga-presence-fixture-')));let proof;
 try{
  symlinkSync(resolve('node_modules'),join(root,'node_modules'),'dir');mkdirSync(join(root,'src/pages'),{recursive:true});
- mkdirSync(join(root,'src/components/reader'),{recursive:true});mkdirSync(join(root,'src/features/personal-presence'),{recursive:true});copyFileSync(component,join(root,'src/components/reader/PresenceContent.astro'));copyFileSync(resolve('src/features/personal-presence/model.mjs'),join(root,'src/features/personal-presence/model.mjs'));
+ mkdirSync(join(root,'src/components/reader'),{recursive:true});mkdirSync(join(root,'src/config'),{recursive:true});copyFileSync(component,join(root,'src/components/reader/PresenceContent.astro'));copyFileSync(resolve('src/config/presence-composition.mjs'),join(root,'src/config/presence-composition.mjs'));
  writeFileSync(join(root,'package.json'),JSON.stringify({type:'module'}));writeFileSync(join(root,'astro.config.mjs'),"export default {site:'https://fixture.example',build:{format:'directory'}};");
  const configs={default:fixtureConfig(),alternate:alternateConfig()};configs.alternate.capabilities.push({...configs.alternate.capabilities[0],id:'speaking',route:'speaking',label:{id:'Berbicara',en:'Speaking'}});configs.alternate.routes.speaking='/speaking';
  const projections=[];

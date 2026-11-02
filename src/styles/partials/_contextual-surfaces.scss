@@ -1,3 +1,4 @@
+@use '@gaga/arsenal/experience.scss';
 /* One projection of admitted root appearance attributes, including body-mounted menus. */
 :root {
   --gaga-context-surface: #151513;
@@ -32,24 +33,3 @@
 :root[data-gaga-design-language='blueprintism'] { --gaga-context-radius: .5rem; }
 :root:is([data-gaga-design-language='brutalism'],[data-gaga-design-language='minimal']) { --gaga-context-radius: 0px; }
 :root:is([data-gaga-design-language='enterprise'],[data-gaga-design-language='corporate']) { --gaga-context-radius: .75rem; }
-[data-gaga-context-surface] {
-  color-scheme: dark;
-  background: var(--gaga-context-surface);
-  color: var(--gaga-context-text);
-  border: 0;
-  border-radius: var(--gaga-context-radius);
-  box-shadow: var(--gaga-context-shadow);
-  font: 500 var(--gaga-context-control-size)/1.4 var(--gaga-font-ui);
-}
-[data-gaga-context-surface] :is(button,summary,input,textarea,a):focus-visible {
-  outline: 2px solid var(--gaga-context-focus);
-  outline-offset: -3px;
-}
-[data-gaga-context-surface] .gaga-icon { width:16px; min-width:16px; height:16px; }
-[data-gaga-context-surface] :is(button,summary) { min-block-size:44px; min-inline-size:44px; }
-@keyframes gaga-context-emerge { from { opacity:0; } to { opacity:1; } }
-:root[data-gaga-reader-motion='reduced'] [data-gaga-context-surface],
-:root[data-gaga-reader-motion='reduced'] [data-gaga-context-surface] * { animation:none!important;transition:none!important; }
-@media(prefers-reduced-motion:reduce) {
-  [data-gaga-context-surface], [data-gaga-context-surface] * { animation:none!important;transition:none!important; }
-}

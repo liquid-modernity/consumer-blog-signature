@@ -1,6 +1,6 @@
 import { getAuthors } from './content';
 import { toCanonicalPublications } from './pakrpp-content';
-import { presenceSections } from '../features/personal-presence/model.mjs';
+import { presenceSections } from '../config/presence-composition.mjs';
 export async function resolvePresenceContent(capability: {providerBinding:string; data:{id:string;title:string;summary:string;language?:string;sections:any[];[key:string]:any}}) {
  const data=capability.data;
  if(capability.providerBinding!=='editorial-authors')return data;

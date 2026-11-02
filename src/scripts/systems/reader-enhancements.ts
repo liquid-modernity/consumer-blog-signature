@@ -1,6 +1,6 @@
 import { contextViewport } from '../../lib/context-viewport';
 import { openSuperShare, shareSelectionIsCurrent } from './super-share';
-import { contextualSurfaceRoles } from '../../config/contextual-surfaces.mjs';
+import { contextualSurfaceRoles } from '@gaga/arsenal/experience';
 import { renderIconSvg } from '../../lib/icons';
 import { readAllHighlights, saveHighlight, removeHighlight, updateHighlightNote, resolveContentLanguage, type HighlightEntity, type HighlightLocation } from './reading-knowledge';
 import { personalState, resolvePersonalAnchor } from '../../lib/personal-state';

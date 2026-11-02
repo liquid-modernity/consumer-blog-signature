@@ -1,3 +1,4 @@
+import {assertFrozenInput} from '../reference-extraction-equivalence.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -54,5 +55,6 @@ test('Core/Site: independent application identity and source names compose witho
 });
 test('Safety: Studio, published export, locks, provider/release/auth contracts and Search assembly remain exact qualified inputs',()=>{
  const paths=['cms/editorial/admin.tsx','cms/editorial/studio.css','cms/editorial/plugin.mjs','cms/package.json','cms/package-lock.json','package-lock.json','gaga.app.json','wrangler.jsonc','content-release.json','content/emdash/published.json','content/emdash/published-receipt.json','editorial/content-semantics.mjs','editorial/content-release.mjs','src/lib/application-search.ts','src/config/systems.ts','.github/workflows/deploy.yml','.github/workflows/content-release.yml','.github/workflows/content-publish.yml'];
- for(const path of paths)assert.deepEqual(readFileSync(path),execFileSync('git',['show',baseline+':'+path]),path);
+ // Surface/multi-device workflows were already admitted by the completed 1edf5c6 release.
+ for(const path of paths)assertFrozenInput(path,readFileSync(path),execFileSync('git',['show',(['src/config/systems.ts','.github/workflows/deploy.yml'].includes(path)?'1edf5c63117e6529c4460ddfb9c34c9a0b31e03e':baseline)+':'+path]));
 });

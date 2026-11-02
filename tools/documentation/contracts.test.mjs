@@ -1,3 +1,4 @@
+import {assertFrozenInput} from '../reference-extraction-equivalence.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, writeFileSync, mkdtempSync, rmSync } from 'node:fs';
@@ -44,7 +45,7 @@ test('only explicit editorial section membership groups a writer publication, ne
  }finally{rmSync(dir,{recursive:true,force:true});}
 });
 test('CMS, metadata contracts, storage authority and package identities remain pinned',()=>{
- for(const file of ['package.json','package-lock.json','cms/package-lock.json','gaga.app.json','content-release.json','content/emdash/published.json','content/emdash/published-receipt.json','cms/editorial/plugin.mjs','cms/editorial/admin.tsx','cms/editorial/studio.css','src/lib/content.ts','src/lib/editorial.ts','src/scripts/systems/saved-reading.ts','src/scripts/systems/reading-knowledge.ts','docs/UI-PRESERVATION.json'])assert.deepEqual(readFileSync(file),execFileSync('git',['show',(personalAdapters.has(file)?personalAdapterSource:base)+':'+file]),file);
+ for(const file of ['package.json','package-lock.json','cms/package-lock.json','gaga.app.json','content-release.json','content/emdash/published.json','content/emdash/published-receipt.json','cms/editorial/plugin.mjs','cms/editorial/admin.tsx','cms/editorial/studio.css','src/lib/content.ts','src/lib/editorial.ts','src/scripts/systems/saved-reading.ts','src/scripts/systems/reading-knowledge.ts','docs/UI-PRESERVATION.json'])assertFrozenInput(file,readFileSync(file),execFileSync('git',['show',(personalAdapters.has(file)?personalAdapterSource:base)+':'+file]));
  const before=execFileSync('git',['show',base+':src/pages/legal/[slug].astro'],{encoding:'utf8'}),after=readFileSync('src/pages/legal/[slug].astro','utf8');
  assert.equal(after.slice(after.indexOf('const legalDocs:'),after.indexOf('const doc =')),before.slice(before.indexOf('const legalDocs:'),before.indexOf('const doc =')),'Legal source text must not change');
 });

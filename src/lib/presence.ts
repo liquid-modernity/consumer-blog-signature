@@ -1,4 +1,4 @@
-import { createPresenceRegistry } from '../features/personal-presence/model.mjs';
+import { createPresenceRegistry } from '../config/presence-composition.mjs';
 import { personalPresenceConfig } from '../config/personal-presence.mjs';
 import { presenceContent } from '../config/presence-content.ts';
 import { routeRegistry } from '../config/routes.ts';

@@ -1,3 +1,4 @@
+import {routePath} from '@gaga/arsenal/site';
 import { personalPresenceConfig } from './personal-presence.mjs';
 export const routes = {
   presence: personalPresenceConfig.routes,
@@ -15,7 +16,7 @@ export const routes = {
   },
   publications: {
     index: '/publications',
-    detail: (slug: string) => `/publications/${String(slug).replace(/^\/+|\/+$/g, '')}`
+    detail: (slug: string) => routePath('/publications/:slug',{slug})
   },
   discovery: {
     latest: '/latest',
@@ -23,23 +24,23 @@ export const routes = {
   },
   topics: {
     index: '/topics',
-    detail: (slug: string) => `/topics/${String(slug).replace(/^\/+|\/+$/g, '')}`
+    detail: (slug: string) => routePath('/topics/:slug',{slug})
   },
-  sections: { index: '/sections', detail: (slug: string) => `/sections/${String(slug).replace(/^\/+|\/+$/g, '')}` },
+  sections: { index: '/sections', detail: (slug: string) => routePath('/sections/:slug',{slug}) },
   archive: {
     index: '/archive',
-    year: (year: string | number) => `/archive/${year}`,
+    year: (year: string | number) => routePath('/archive/:year',{year}),
     month: (year: string | number, month: string | number) =>
-      `/archive/${year}/${String(month).padStart(2, '0')}`
+      routePath('/archive/:year/:month',{year,month:String(month).padStart(2,'0')})
   },
   knowledge: {
     root: '/knowledge',
     graph: '/knowledge/graph',
     index: '/knowledge/index',
     tags: '/knowledge/tags',
-    tagDetail: (slug: string) => `/knowledge/tags/${String(slug).replace(/^\/+|\/+$/g, '')}`,
+    tagDetail: (slug: string) => routePath('/knowledge/tags/:slug',{slug}),
     references: '/knowledge/references',
-    referenceDetail: (slug: string) => `/knowledge/references/${String(slug).replace(/^\/+|\/+$/g, '')}`
+    referenceDetail: (slug: string) => routePath('/knowledge/references/:slug',{slug})
   },
   about: {
     root: personalPresenceConfig.routes.profile,

@@ -1,5 +1,5 @@
 import {loadPublicSearch,searchPublicIndex} from '../../lib/public-search';
-import {searchRank,normalizeSearch} from '../../features/search/model.mjs';
+import {searchRank,normalizeSearch} from '@gaga/arsenal/search';
 import {runSiteCommand} from './site-commands';
 import type {GagaActionCommand} from '../../config/actions';
 export function initSuperSearch(form:HTMLFormElement,close:()=>void){

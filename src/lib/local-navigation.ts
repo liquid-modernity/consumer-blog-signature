@@ -1,4 +1,4 @@
-import { resolveLocalContext, flattenNavigation } from '../features/local-navigation/model.mjs';
+import { resolveLocalContext, flattenNavigation } from '@gaga/arsenal/site';
 import { documentExperience, documentNavigation } from '../config/document-experience.ts';
 import { getEnabledRootSections, getEnabledTopics, referenceRegistry } from '../config/pakrpp-architecture.ts';
 import { routes, routeRegistry } from '../config/routes.ts';

@@ -1,7 +1,7 @@
 import { createShareCapability } from '@gaga/engine-runtime/runtime/share';
 import { requestReaderPanel } from '@gaga/engine-runtime/runtime/events';
 import { currentPersonalContent } from './personal-context';
-import { resolveShareContext,shareActions,shareCopy,sharePayload,textCard,posterInput,wrapPosterText,shareOutcomeMessage } from '../../features/super-share/model.mjs';
+import { resolveShareContext,shareActions,shareCopy,sharePayload,textCard,posterInput,wrapPosterText,shareOutcomeMessage } from '../../config/super-share.mjs';
 import { siteConfig } from '../../config/site';
 type Context=NonNullable<ReturnType<typeof resolveShareContext>>;
 let active:Context|null=null,returnTo:HTMLElement|null=null,previousState='collapsed';

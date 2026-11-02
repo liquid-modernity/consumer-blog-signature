@@ -53,8 +53,6 @@ const required = [
   'tools/audit-coverage-foundation.mjs',
   'architecture/context-aware-surfaces-policy.json',
   'src/config/context-rails.ts',
-  'src/config/signature-surfaces.ts',
-  'src/gaga/extraction/signature-surface-contract.ts',
   'tools/audit-context-aware-surfaces.mjs',
   'architecture/rail-interaction-policy.json',
   'src/scripts/systems/rail-preview.ts',

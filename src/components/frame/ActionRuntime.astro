@@ -1,11 +1,11 @@
 ---
-import { contextualSurfaceRoles } from '../../config/contextual-surfaces.mjs';
+import { contextualSurfaceRoles } from '@gaga/arsenal/experience';
 import Icon from '../ui/Icon.astro';
 import SuperShare from '../reader/SuperShare.astro';
 import { siteConfig } from '../../config/site';
 import { identityConfig } from '../../config/identity';
 import { i18nLabel } from '../../config/i18n';
-import { actionById } from '../../config/actions';
+import { actionCatalog } from '../../config/actions';
 import { experienceConfig, experienceSurfaceProfile, type ExperienceContext } from '../../config/experience';
 import { globalNavigationProjection } from '../../config/context-rails';
 import { resolveNotchPresentation } from '../../config/contextual-ux.mjs';
@@ -14,7 +14,7 @@ const { contextAvailability = {left:false,right:false}, className = '', context 
 const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
 const profile = experienceSurfaceProfile(context);
 const railPolicy = contextAvailability;
-const actions = profile.notchActionIds.filter(id => !['smart-back', 'settings'].includes(id) && (id !== 'context-info' || railPolicy.right)).map(actionById);
+const actions = actionCatalog.project({ids:profile.notchActionIds,available:{'smart-back':false,settings:false,'context-info':railPolicy.right}}).primary;
 const primary = actions;
 const global = globalNavigationProjection();
 const islandLabel = i18nLabel('actionIsland.label');

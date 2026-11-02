@@ -1,3 +1,5 @@
+import assert from 'node:assert/strict';
+import {contextualSurfaceRoles,feedbackSurfaceRoles,projectNotchContext} from '@gaga/arsenal/experience';
 import fs from 'node:fs';
 
 const failures = [];
@@ -10,9 +12,7 @@ if (policy.schema !== 'gaga.context-aware-surfaces-policy.v1') {
 }
 
 for (const file of [
-  'src/config/signature-surfaces.ts',
   'src/config/context-rails.ts',
-  'src/gaga/extraction/signature-surface-contract.ts',
   'src/components/frame/GlobalNavigationRail.astro',
   'src/components/frame/LeftRail.astro',
   'src/components/frame/RightInfoRail.astro'
@@ -80,11 +80,9 @@ for (const marker of ['resolveGagaWorkspace', 'resolveGagaShellContext', 'projec
   if (!standalone.includes(marker)) fail(`standalone route context integration missing: ${marker}`);
 }
 
-const extraction = read('src/gaga/extraction/signature-surface-contract.ts');
-for (const marker of ['engineCandidates', 'siteOwned', 'extractionRule']) {
-  if (!extraction.includes(marker)) fail(`engine extraction boundary missing: ${marker}`);
-}
-
+assert.deepEqual(Object.values(contextualSurfaceRoles),['command','orientation','selection','preview']);
+assert.deepEqual(feedbackSurfaceRoles,{status:'status'});
+assert.equal(projectNotchContext({state:'expanded',informationOpen:true}).capability,'information');
 
 const inputs = read('src/components/frame/component-inputs.ts');
 const searchPrimitive = 'src/components/navigation/SearchBox.astro';
@@ -118,4 +116,4 @@ console.log('✓ Dynamic Notch Island owns context-surface triggering');
 console.log('✓ Dynamic Outline Peek is the sole article outline surface');
 console.log('✓ left rail is route-local context; right rail is context intelligence');
 console.log('✓ native and standalone routes share the same workspace/context contract');
-console.log('✓ reusable signature contracts have an explicit Gaga Engine extraction boundary');
+console.log('✓ reusable signature roles and continuity consume the public Arsenal Experience contract');

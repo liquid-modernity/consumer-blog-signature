@@ -1,7 +1,8 @@
+import {readPublicModule} from '../reference-extraction-equivalence.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { resolveLocalContext, hasLocalNavigation, flattenNavigation, headingSequence } from '../../src/features/local-navigation/model.mjs';
+import { resolveLocalContext, hasLocalNavigation, flattenNavigation, headingSequence } from '@gaga/arsenal/site';
 import { localContext } from '../../src/lib/local-navigation.ts';
 import { presence } from '../../src/lib/presence.ts';
 const item=(id,href='/family/'+id)=>({id,label:id,href});
@@ -39,8 +40,8 @@ test('all seven families resolve canonical registry-driven root and child contex
  assert.deepEqual((await localContext('/topics','Topics',[],[])).localNavigation.map(i=>i.href),['/topics']);assert.deepEqual((await localContext('/sections','Sections',[],[])).localNavigation.map(i=>i.href),['/sections']);
  assert.deepEqual((await localContext('/about','About',[],[])).localNavigation.map(i=>i.href),presence.navigation().map(i=>i.href));
 });
-test('renderer/controller remain provider neutral and retain Engine availability/focus boundary',()=>{
- for(const p of ['src/features/local-navigation/model.mjs','src/lib/local-navigation.ts','src/components/frame/ArticleOutlinePeek.astro','src/scripts/systems/outline-peek.ts'])assert.doesNotMatch(readFileSync(p,'utf8'),/from ['"][^'"]*(?:emdash|cms\/)/);
+test('renderer/controller remain provider neutral and retain Engine availability/focus boundary',()=>{assert.doesNotMatch(readPublicModule('@gaga/arsenal/site'),/from ['\"][^'\"]*(?:emdash|cms\/)/);
+ for(const p of ['src/lib/local-navigation.ts','src/components/frame/ArticleOutlinePeek.astro','src/scripts/systems/outline-peek.ts'])assert.doesNotMatch(readFileSync(p,'utf8'),/from ['"][^'"]*(?:emdash|cms\/)/);
  assert.match(readFileSync('src/scripts/systems/outline-peek.ts','utf8'),/createOutlinePeekCapability/);
  assert.match(readFileSync('src/scripts/systems/toc-spy.ts','utf8'),/data-gaga-outline-toc-eligible/);
 });

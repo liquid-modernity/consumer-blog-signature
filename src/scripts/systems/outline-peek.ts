@@ -1,5 +1,5 @@
 import { signatureMotion } from '../../config/signature-motion.mjs';
-import { headingSequence } from '../../features/local-navigation/model.mjs';
+import { headingSequence } from '@gaga/arsenal/site';
 import { hydrateDomOutlineIfSparse } from './toc-spy';
 import { createOutlinePeekCapability } from '@gaga/engine-runtime/runtime/outline-peek';
 import { onRuntimeEvent, requestLeftRail, requestReaderPanel, type SurfaceCommandDetail } from '@gaga/engine-runtime/runtime/events';

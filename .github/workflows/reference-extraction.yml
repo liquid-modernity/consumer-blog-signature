@@ -1,0 +1,83 @@
+name: Reference extraction staged application proof
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: reference-extraction-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    defaults:
+      run:
+        shell: bash
+    env:
+      ASTRO_TELEMETRY_DISABLED: '1'
+      ASTRO_DEV_BACKGROUND: '1'
+      WRANGLER_SEND_METRICS: 'false'
+      PUBLIC_GIT_SHA: ${{ github.sha }}
+      PUBLIC_SITE_URL: https://consumer-blog-signature.ratriatra.workers.dev
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.4'
+      - name: Stage only exact hosted-qualified public package artifacts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GAGA_CONTROLLER_READ_TOKEN }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/reference-extraction"
+          export GAGA_EVIDENCE_DIRECTORY="$RUNNER_TEMP/reference-extraction"
+          printf 'GAGA_EVIDENCE_DIRECTORY=%s\n' "$GAGA_EVIDENCE_DIRECTORY" >> "$GITHUB_ENV"
+          node tools/reference/stage-consumer.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/staging.log"
+      - name: Qualified product semantics and source preservation
+        run: |
+          node tools/reference/dead-imports.mjs --verify-removed
+          node tools/gaga/prepare.mjs
+          node --test tools/gaga/application.test.mjs tools/gaga/production-deploy.test.mjs tools/gaga/production-admission.test.mjs tools/gaga/source-identity.test.mjs tools/gaga/browser-contract.test.mjs tools/gaga/browser-source-readback.test.mjs tools/gaga/preservation.test.mjs tools/gaga/production-readback.test.mjs tools/gaga/registry-read.test.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/gaga.log"
+          npm run test:cms | tee "$GAGA_EVIDENCE_DIRECTORY/cms.log"
+          npm test | tee "$GAGA_EVIDENCE_DIRECTORY/signature.log"
+          node --test tools/personal/*.test.mjs tools/signature/*.test.mjs tools/family/*.test.mjs tools/share/*.test.mjs tools/presence/*.test.mjs tools/navigation/*.test.mjs tools/device/*.test.mjs tools/hierarchy/*.test.mjs tools/contextual/*.test.mjs tools/documentation/*.test.mjs tools/reference/*.test.mjs | tee "$GAGA_EVIDENCE_DIRECTORY/experience.log"
+      - name: Types and production-shaped build, no production admission
+        run: |
+          npm run check | tee "$GAGA_EVIDENCE_DIRECTORY/types.log"
+          export PUBLIC_BUILD_TIME="$(git show -s --format=%cI HEAD)"
+          npm run build | tee "$GAGA_EVIDENCE_DIRECTORY/build.log"
+          node tools/presence/fixture-build.mjs
+          python3 tools/navigation/html-proof.py
+      - run: npx --no-install playwright install --with-deps chromium webkit
+      - name: Existing desktop, touch, responsive, WebKit and contextual journeys
+        run: |
+          npm run test:ui | tee "$GAGA_EVIDENCE_DIRECTORY/browser.log"
+          for suite in documentation personal signature family presence share navigation device hierarchy; do
+            npx --no-install playwright test --config "tools/$suite/playwright.config.mjs" | tee "$GAGA_EVIDENCE_DIRECTORY/$suite-browser.log"
+            node "tools/$suite/browser-report.mjs"
+          done
+      - name: Audit and workflow lint
+        run: npm audit --audit-level=low --json > "$GAGA_EVIDENCE_DIRECTORY/audit.json"
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+      - run: go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.7 -shellcheck= .github/workflows/reference-extraction.yml
+      - name: Retain bounded evidence, including failed traces
+        if: always()
+        run: |
+          node --input-type=module <<'JS'
+          import{existsSync,readdirSync,copyFileSync,cpSync}from'node:fs';
+          const out=process.env.GAGA_EVIDENCE_DIRECTORY;if(!out)process.exit(0);
+          if(existsSync('.gaga'))for(const name of readdirSync('.gaga')){
+            if(/\.(json|png)$/.test(name))copyFileSync('.gaga/'+name,out+'/'+name);
+            if(/-traces$/.test(name))cpSync('.gaga/'+name,out+'/'+name,{recursive:true});
+          }
+          if(existsSync('test-results'))cpSync('test-results',out+'/browser-details',{recursive:true});
+          JS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reference-extraction-staged-evidence
+          path: ${{ runner.temp }}/reference-extraction

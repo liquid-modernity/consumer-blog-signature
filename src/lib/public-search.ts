@@ -1,4 +1,4 @@
-import {publicSearch} from '../features/search/model.mjs';
+import {publicSearch} from '@gaga/arsenal/search';
 import type {GagaDiscoveryRecord} from './discovery';
 import type {SearchableArtifactDescriptor} from '@gaga/engine-capabilities/search';
 export type PublicSearchIndex={items:{title:string;slug:string;description?:string;tags?:string[];topics?:string[]}[];records:GagaDiscoveryRecord[];artifacts:SearchableArtifactDescriptor[];links:Record<string,string>};

@@ -1,3 +1,4 @@
+import {assertFrozenInput} from '../reference-extraction-equivalence.mjs';
 import {stripHierarchyGuards} from '../hierarchy/release-browser-guards.mjs';
 import {stripDeviceGuards} from '../device/release-browser-guards.mjs';
 const stripNavigationGuards = source => stripNavigationOnly(stripDeviceGuards(stripHierarchyGuards(source)));
@@ -41,7 +42,7 @@ test('link preview flips and clamps without changing anchor or page identity', (
 });
 test('all public packages, CMS/source authority and release guards remain byte-identical', () => {
   assert.equal(stripQualifiedDocumentationGuards(stripQualifiedPersonalGuards(stripQualifiedMotionGuards(stripQualifiedFamilyGuards(stripSuperShareGuards(stripPresenceGuards(stripNavigationGuards(readFileSync('.github/workflows/deploy.yml','utf8')))))))), execFileSync('git',['show',base+':.github/workflows/deploy.yml'],{encoding:'utf8'}), 'Only exact additional documentation browser guards are authorized');
-  for (const path of ['package.json','package-lock.json','cms/package-lock.json','gaga.app.json','content-release.json','content/emdash/published.json','content/emdash/published-receipt.json','cms/editorial/plugin.mjs','cms/editorial/admin.tsx','cms/editorial/studio.css','docs/UI-PRESERVATION.json','.github/workflows/content-release.yml','.github/workflows/content-publish.yml']) assert.deepEqual(readFileSync(path), execFileSync('git', ['show',base+':'+path]), path);
+  for (const path of ['package.json','package-lock.json','cms/package-lock.json','gaga.app.json','content-release.json','content/emdash/published.json','content/emdash/published-receipt.json','cms/editorial/plugin.mjs','cms/editorial/admin.tsx','cms/editorial/studio.css','docs/UI-PRESERVATION.json','.github/workflows/content-release.yml','.github/workflows/content-publish.yml']) assertFrozenInput(path,readFileSync(path),execFileSync('git',['show',base+':'+path]));
 });
 test('existing saved state and Save dispatch have no alternate store or duplicate app implementation', () => {
   const root=readFileSync('src/components/reader/EditorialFront.astro','utf8'),notch=readFileSync('src/scripts/systems/notch.ts','utf8'),adapter=readFileSync('src/scripts/systems/saved-reading.ts','utf8');

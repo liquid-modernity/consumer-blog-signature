@@ -1,3 +1,4 @@
+import type {Visibility} from '@gaga/arsenal/experience';
 import { contextViewport } from '../../lib/context-viewport';
 import { createWindowScrollContext } from '@gaga/engine-runtime/runtime/scroll-context';
 import { resolveReadingScrollContext } from './reading-scroll';
@@ -31,7 +32,7 @@ export function initSignatureMotion() {
   let intent = initialScrollIntent(context?.scrollContext.measure().scrollTop ?? 0);
   let unsubscribe: (() => void) | undefined;
   let pointerNotch = false, pointerOutline = false;
-  let notchState = 'visible', outlineState = 'visible';
+  let notchState:Visibility = 'visible', outlineState:Visibility = 'visible';
   const releases: (() => void)[] = [];
   const listen = (target: EventTarget, name: string, handler: EventListener, options?: AddEventListenerOptions | boolean) => {
     target.addEventListener(name, handler, options); releases.push(() => target.removeEventListener(name, handler, options));

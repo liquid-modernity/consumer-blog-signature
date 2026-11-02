@@ -1,5 +1,5 @@
 import {onRuntimeEvent,type ToastDetail} from '@gaga/engine-runtime/runtime/events';
-import {feedbackSurfaceRoles} from '../../config/contextual-surfaces.mjs';
+import {feedbackSurfaceRoles} from '@gaga/arsenal/experience';
 import {contextViewport} from '../../lib/context-viewport';
 let toast:HTMLOutputElement|undefined,timer=0;
 function position(){if(!toast)return;const v=contextViewport();toast.style.left=(v.left+v.width/2)+'px';toast.style.bottom='calc('+Math.max(0,innerHeight-v.top-v.height+56)+'px + var(--gaga-safe-area-bottom,0px))';toast.style.maxWidth=Math.max(1,v.width-32)+'px';}

@@ -1,0 +1,23 @@
+{
+  "status": "HOSTED_QUALIFIED_PACKAGES_NOT_REGISTRY_ADMITTED",
+  "source": "7b8db3434f55e83550b1c50e9b158b6cf05c1702",
+  "run": 41476870751,
+  "artifact": 13158525659,
+  "archiveSha256": "f7bfe0636d566874a329e4dc17ce31ba4b0c915e5462849eb64f8220e3fbf92b",
+  "packages": [
+    {
+      "name": "@gaga/arsenal-contracts",
+      "version": "0.3.0",
+      "file": "gaga-arsenal-contracts-0.3.0.tgz",
+      "sha256": "3aeaeffdb0b87545512e070b0e3ef0ffd54f58f28f995c7ff399d1086b465c30",
+      "sha512Base64": "5wJfeNnCsBscndFMZHAeBJSt7g0dyWtvxaT/euiO1ZMsdoCwa4tvBOh5Pjh09rcb8q4GUx608feiUWXBH5YB6Q=="
+    },
+    {
+      "name": "@gaga/arsenal",
+      "version": "0.3.0",
+      "file": "gaga-arsenal-0.3.0.tgz",
+      "sha256": "e8ff53727b9320466cd1fa45e222323b812cf8eb0c51ab30827aca5e27d2f078",
+      "sha512Base64": "MakYFnDOZMnb1lSg0vWPa900G0V2PrfaoYoFODkvRnO87iSodoDicIoumkIHK5eltnIpqFwlvhiuqzYyQ/afkg=="
+    }
+  ]
+}
