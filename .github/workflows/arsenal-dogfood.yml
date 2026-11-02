@@ -15,7 +15,12 @@ concurrency:
   group: blog-arsenal-${{ github.ref }}
   cancel-in-progress: false
 jobs:
+  reference-extraction:
+    if: github.ref == 'refs/heads/review/reference-product-hardening-v1'
+    uses: ./.github/workflows/reference-extraction.yml
+    secrets: inherit
   verify:
+    if: github.ref != 'refs/heads/review/reference-product-hardening-v1'
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     defaults:
