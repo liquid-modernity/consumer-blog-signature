@@ -2,6 +2,8 @@ import declaration from '../../gaga.app.json' with {type:'json'};
 
 export const siteConfig = {
   name: 'PAKRPP',
+  displayName: 'PakRPP',
+  navigationLabel: 'PAKRPP Knowledge Publication System',
   title: 'Scalable Knowledge Publication System',
   description: 'Sistem publikasi pengetahuan yang scalable, softcoded, terstruktur, dan berbasis kontras editorial.',
   url: declaration.host.site,

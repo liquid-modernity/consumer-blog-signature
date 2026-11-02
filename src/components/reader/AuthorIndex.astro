@@ -1,4 +1,5 @@
 ---
+import {siteConfig} from '../../config/site';
 import { getAuthors, getArticlesByAuthorRef } from '../../lib/content';
 
 const authors = await getAuthors();
@@ -9,7 +10,7 @@ const rows = await Promise.all(authors.map(async (author) => ({
 ---
 <section class="gaga-author-index" aria-labelledby="gaga-authors-title">
   <header class="gaga-directory-header">
-    <p class="gaga-system-kicker">PAKRPP / PEOPLE</p>
+    <p class="gaga-system-kicker">{siteConfig.name} / PEOPLE</p>
     <h1 id="gaga-authors-title">Authors</h1>
   </header>
   <ul class="gaga-author-index__list">

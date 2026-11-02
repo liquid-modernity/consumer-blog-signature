@@ -10,7 +10,7 @@ import { experienceConfig, experienceSurfaceProfile, type ExperienceContext } fr
 import { globalNavigationProjection } from '../../config/context-rails';
 import { resolveNotchPresentation } from '../../config/contextual-ux.mjs';
 interface Props { contextAvailability?: {left:boolean;right:boolean;leftLabel?:string}; className?: string; context?: ExperienceContext; pageTitle?: string; workspaceId?: string; }
-const { contextAvailability = {left:false,right:false}, className = '', context = 'default', pageTitle = 'PakRPP' } = Astro.props;
+const { contextAvailability = {left:false,right:false}, className = '', context = 'default', pageTitle = siteConfig.displayName } = Astro.props;
 const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
 const profile = experienceSurfaceProfile(context);
 const railPolicy = contextAvailability;

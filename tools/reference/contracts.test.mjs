@@ -28,3 +28,10 @@ test('application consumes public implementations and removes superseded copies'
 test('personal data, CMS authority, source content and deployment ownership are untouched',()=>{
  for(const path of ['src/config/personal-state.mjs','src/lib/personal-state.ts','src/config/reader.ts','src/scripts/systems/saved-reading.ts','src/scripts/systems/reading-knowledge.ts','src/scripts/systems/reader-preferences.ts','cms/package.json','cms/package-lock.json','content/emdash/published.json','content/emdash/published-receipt.json','content-release.json','gaga.app.json','wrangler.jsonc'])assert.equal(read(path),execFileSync('git',['show',baseline+':'+path],{encoding:'utf8'}),path);
 });
+
+test('configured branding keeps admitted defaults and provider profile data without component identity literals',async()=>{
+ const {presenceContent}=await import('../../src/config/presence-content.ts');
+ const old=execFileSync('git',['show',baseline+':src/lib/presence.ts'],{encoding:'utf8'}).match(/'profile-document':\(\)=>\((\{[^\n]+\})\),/);assert.ok(old);
+ const expected=Function('return ('+old[1]+');')();assert.deepEqual(presenceContent.profile,expected);
+ for(const [file,marker]of [['reader/EditorialFront.astro','siteConfig.displayName'],['reader/AuthorIndex.astro','siteConfig.name'],['reader/TopicIndex.astro','siteConfig.displayName'],['frame/GlobalNavigationRail.astro','siteConfig.navigationLabel'],['frame/ActionRuntime.astro','pageTitle = siteConfig.displayName'],['graph/KnowledgeGraph.astro','siteConfig.name']]){const source=read('src/components/'+file);assert.ok(source.includes(marker));assert.doesNotMatch(source,/>PakRPP<|>PAKRPP \/|data-gaga-preview-author="PakRPP"|pageTitle = 'PakRPP'/);}
+});

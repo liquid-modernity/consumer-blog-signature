@@ -57,6 +57,7 @@ jobs:
           export PUBLIC_BUILD_TIME="$(git show -s --format=%cI HEAD)"
           npm run build | tee "$GAGA_EVIDENCE_DIRECTORY/build.log"
           node tools/presence/fixture-build.mjs
+          node tools/reference/branding-proof.mjs
           python3 tools/navigation/html-proof.py
       - run: npx --no-install playwright install --with-deps chromium webkit
       - name: Existing desktop, touch, responsive, WebKit and contextual journeys

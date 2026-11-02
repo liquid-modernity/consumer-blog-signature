@@ -1,4 +1,5 @@
 ---
+import {siteConfig} from '../../config/site';
 import { contentDefaults } from '../../config/content';
 import { getEditorialFront } from '../../lib/editorial';
 import { toArticlePreview } from '../../lib/content';
@@ -48,7 +49,7 @@ const socialSection = sectionById.get('social');
 ---
 
 <div class="gaga-editorial-front pakrpp-root-index" aria-labelledby="pakrpp-root-title" data-pakrpp-root-index>
-  <h1 id="pakrpp-root-title" class="gaga-visually-hidden">PakRPP</h1>
+  <h1 id="pakrpp-root-title" class="gaga-visually-hidden">{siteConfig.displayName}</h1>
 
   {/* VIEWPORT STAGE 01: 01 TERBARU (1_08edb1cd.png) */}
   {latestSection && (

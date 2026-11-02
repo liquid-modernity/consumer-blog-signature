@@ -1,5 +1,6 @@
 // Existing admitted application-owned About copy relocated from the fixed route, not new editorial facts.
 export const presenceContent = {
+ profile:{id:'consumer.page.about',title:'Tentang PakRPP',summary:'Sistem publikasi pengetahuan yang mengutamakan ketertelusuran argumen, disiplin bukti, dan kejelasan struktur.',sourceEntryId:'about',sections:[]},
  author:{id:'pakrpp.about.author',title:'Penulis & Redaksi',summary:'Daftar penulis dan kontributor aktif pada sistem pengetahuan PAKRPP.',sections:[
   {id:'profil-penulis',type:'text',enabled:true,order:1,label:{id:'Profil Penulis',en:'Author profile'},text:'PakRPP & Tim Editorial mengelola publikasi pengetahuan lintas topik Pelaporan, Teknologi, dan Anomali dengan penekanan pada ketertelusuran argumen dan struktur sistem yang jernih.'}
  ]},

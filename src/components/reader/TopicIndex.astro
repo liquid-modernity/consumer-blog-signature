@@ -1,4 +1,5 @@
 ---
+import {siteConfig} from '../../config/site';
 import { getTopicGroups } from '../../lib/content';
 import { i18nCount } from '../../config/i18n';
 
@@ -15,7 +16,7 @@ const topics = await getTopicGroups();
       data-gaga-preview-topics={group.topic}
       data-gaga-preview-tags="Topik Kanonik"
       data-gaga-preview-read-time={i18nCount('article', group.count)}
-      data-gaga-preview-author="PakRPP"
+      data-gaga-preview-author={siteConfig.displayName}
     >
       <span>{group.topic}</span>
       {group.summary ? <small>{group.summary}</small> : null}

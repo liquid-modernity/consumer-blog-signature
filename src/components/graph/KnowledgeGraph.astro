@@ -1,4 +1,6 @@
 ---
+import {siteConfig} from '../../config/site';
+import {routes} from '../../config/routes';
 import Icon from '../ui/Icon.astro';
 import type { KnowledgeGraphData, KnowledgeGraphNodeKind } from '../../lib/knowledge-graph';
 
@@ -22,7 +24,7 @@ for (const edge of graph.edges) {
 <section class="gaga-knowledge-graph" data-gaga-knowledge-graph data-gaga-graph-labels="true" aria-labelledby="gaga-graph-title">
   <header class="gaga-knowledge-graph__toolbar">
     <div class="gaga-knowledge-graph__identity">
-      <p class="gaga-system-kicker">PAKRPP / GRAPH</p>
+      <p class="gaga-system-kicker">{siteConfig.name} / GRAPH</p>
       <h1 id="gaga-graph-title">{title}</h1>
       <p class="gaga-knowledge-graph__summary">
         {graph.nodes.length} node · {graph.edges.length} relationship · public knowledge only
@@ -146,7 +148,7 @@ for (const edge of graph.edges) {
   </details>
 
   <p class="gaga-knowledge-graph__policy-link">
-    <a href="/knowledge">Kembali ke pengetahuan</a>
+    <a href={routes.knowledge.root}>Kembali ke pengetahuan</a>
   </p>
 
   <script type="application/json" data-gaga-graph-data set:html={graphJson}></script>

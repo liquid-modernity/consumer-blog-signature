@@ -64,3 +64,20 @@ Conformance references are bounded claims, not automatic verification. Automated
 browser/contract/performance evidence cannot certify subjective desirability,
 usefulness-in-context or humane copy. Those items require human review; physical
 iOS/Safari and complete assistive-technology certification are not implied.
+
+## Branding neutrality proof
+
+Existing site configuration now supplies mixed-case display identity and navigation
+accessibility identity. Root H1, navigation monogram/label, preview source label,
+Notch fallback title and author/graph kickers read those values. Their current
+production strings remain unchanged. Profile descriptor data lives with the
+existing presence-content configuration; RSS/knowledge links consume route helpers.
+
+`tools/reference/branding-proof.mjs` renders the exact six application components
+with two synthetic identity/favicon/provider configurations in isolated Astro
+hosts. Component bytes are checked before and after; no component source is
+modified for either instance. This renderer proof shares installed test tooling;
+it is distinct from the separately verified clean packed-package installation.
+Legacy private DOM hook names remain for qualified selector compatibility. They
+do not supply identity text, routes or package semantics; a rename would require
+a separately qualified selector migration.
