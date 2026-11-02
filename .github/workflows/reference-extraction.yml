@@ -1,8 +1,14 @@
 name: Reference extraction staged application proof
 on:
   workflow_call:
+    inputs:
+      application_source:
+        description: Exact Application 1 source consumed by the Arsenal-owned artifact proof
+        required: true
+        type: string
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: reference-extraction-${{ github.ref }}
   cancel-in-progress: false
@@ -17,11 +23,13 @@ jobs:
       ASTRO_TELEMETRY_DISABLED: '1'
       ASTRO_DEV_BACKGROUND: '1'
       WRANGLER_SEND_METRICS: 'false'
-      PUBLIC_GIT_SHA: ${{ github.sha }}
+      PUBLIC_GIT_SHA: ${{ inputs.application_source }}
       PUBLIC_SITE_URL: https://consumer-blog-signature.ratriatra.workers.dev
     steps:
       - uses: actions/checkout@v4
         with:
+          repository: liquid-modernity/consumer-blog-signature
+          ref: ${{ inputs.application_source }}
           fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-node@v4
@@ -29,7 +37,7 @@ jobs:
           node-version: '22.23.4'
       - name: Stage only exact hosted-qualified public package artifacts
         env:
-          GITHUB_TOKEN: ${{ secrets.GAGA_CONTROLLER_READ_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           mkdir -p "$RUNNER_TEMP/reference-extraction"
           export GAGA_EVIDENCE_DIRECTORY="$RUNNER_TEMP/reference-extraction"

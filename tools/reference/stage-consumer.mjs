@@ -16,6 +16,7 @@ const response=await fetch(base+'/actions/artifacts/'+pin.artifact+'/zip',{heade
 const archive=join(work,'qualified.zip');writeFileSync(archive,bytes);copyFileSync(archive,join(out,'arsenal-qualified.zip'));
 execFileSync('python3',['-c',"import sys,zipfile,pathlib; z=zipfile.ZipFile(sys.argv[1]); assert all(not n.startswith('/') and '..' not in pathlib.PurePosixPath(n).parts for n in z.namelist()); z.extractall(sys.argv[2])",archive,work]);
 const original=readFileSync('package.json'),originalLock=readFileSync('package-lock.json'),manifest=JSON.parse(original);writeFileSync(join(out,'source-package.json'),original);writeFileSync(join(out,'source-package-lock.json'),originalLock);
+const applicationSource=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();assert.equal(applicationSource,process.env.PUBLIC_GIT_SHA,'Application source must match the pinned checkout');
 const originalIdentity={manifest:hash(original),lock:hash(originalLock)};
 const packages=pin.packages.map(p=>{const path=join(work,'reference/packages',p.file),data=readFileSync(path);assert.equal(hash(data),p.sha256);const installed=JSON.parse(execFileSync('tar',['-xOf',path,'package/package.json'],{encoding:'utf8'}));assert.equal(installed.name,p.name);assert.equal(installed.version,p.version);assert.equal(manifest.dependencies[p.name],p.version);manifest.dependencies[p.name]='file:'+path;return{...p,path};});
 writeFileSync('package.json',JSON.stringify(manifest,null,2)+'\n');
@@ -28,5 +29,5 @@ for(const p of packages){const key='node_modules/'+p.name;assert.equal(lock.pack
 assert.deepEqual(lock,baseline,'Staged qualification must not change unrelated dependency identities');
 const guard=(()=>{try{execFileSync(process.execPath,['tools/gaga/boundaries.mjs'],{encoding:'utf8',stdio:['ignore','pipe','pipe']});return null;}catch(e){return String(e.stderr);}})();assert.match(guard,/Local package resolutions are not production dependencies/);
 writeFileSync(join(out,'held-production-rejection.log'),guard);
-writeFileSync(join(out,'staging-receipt.json'),JSON.stringify({status:'STAGED_ONLY',productionAdmissible:false,source:{commit:process.env.GITHUB_SHA,...originalIdentity},packageSource:pin.source,packageQualification:pin.run,packages:packages.map(({path,...p})=>p),unrelatedDependenciesUnchanged:true,productionBoundaryRejectsHeldPackages:true,productionMutations:0},null,2)+'\n');
+writeFileSync(join(out,'staging-receipt.json'),JSON.stringify({status:'STAGED_ONLY',productionAdmissible:false,source:{commit:applicationSource,...originalIdentity},packageSource:pin.source,packageQualification:pin.run,packages:packages.map(({path,...p})=>p),unrelatedDependenciesUnchanged:true,productionBoundaryRejectsHeldPackages:true,productionMutations:0},null,2)+'\n');
 console.log('Exact hosted-qualified package bytes staged; production guard correctly rejects held dependencies.');

@@ -9,7 +9,8 @@ Application 1 qualification/deployment path succeed.
 Application 1 consumes the two existing Arsenal package identities through public
 subpaths. The new source declaration uses exact numeric 0.3.0; the old registry
 lock/admission intentionally remains historical until publication. The isolated
-`reference-extraction.yml` proof installs only the hosted-qualified tarballs,
+`reference-extraction.yml` reusable proof runs from Arsenal CI with its own
+read-only Actions token, checks out an exact public application commit and installs only the hosted-qualified tarballs,
 retains the original source lock, rejects unrelated dependency drift and confirms
 that the unchanged production boundary rejects local package resolutions. That
 staged proof never substitutes for the production registry gate.
