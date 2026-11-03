@@ -46,21 +46,42 @@ jobs:
           git rev-parse HEAD | tee "$RUNNER_TEMP/quiet-v4/source.txt"
           npm ci --ignore-scripts --no-audit --no-fund | tee "$RUNNER_TEMP/quiet-v4/install.txt"
       - name: Types and production build
+        id: build
         run: |
           npm run check | tee "$RUNNER_TEMP/quiet-v4/check.txt"
           npm run build | tee "$RUNNER_TEMP/quiet-v4/build.txt"
       - name: Public packages, consumer, search and native runtime
         run: npm run test:consumer | tee "$RUNNER_TEMP/quiet-v4/consumer.txt"
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install --with-deps chromium webkit
       - name: Mandatory browser suite
         run: npm run test:ui | tee "$RUNNER_TEMP/quiet-v4/browser.txt"
-      - name: Relevant existing surface and responsive suites
+      - name: Existing hierarchy browser suite
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |
-          for suite in hierarchy navigation device family share; do
-            npx --no-install playwright test --config "tools/$suite/playwright.config.mjs" | tee "$RUNNER_TEMP/quiet-v4/$suite-browser.txt"
-            node "tools/$suite/browser-report.mjs"
-          done
+          npx --no-install playwright test --config tools/hierarchy/playwright.config.mjs | tee "$RUNNER_TEMP/quiet-v4/hierarchy-browser.txt"
+          node tools/hierarchy/browser-report.mjs
+      - name: Existing navigation browser suite
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          npx --no-install playwright test --config tools/navigation/playwright.config.mjs | tee "$RUNNER_TEMP/quiet-v4/navigation-browser.txt"
+          node tools/navigation/browser-report.mjs
+      - name: Existing device browser suite
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          npx --no-install playwright test --config tools/device/playwright.config.mjs | tee "$RUNNER_TEMP/quiet-v4/device-browser.txt"
+          node tools/device/browser-report.mjs
+      - name: Existing family browser suite
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          npx --no-install playwright test --config tools/family/playwright.config.mjs | tee "$RUNNER_TEMP/quiet-v4/family-browser.txt"
+          node tools/family/browser-report.mjs
+      - name: Existing share browser suite
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          npx --no-install playwright test --config tools/share/playwright.config.mjs | tee "$RUNNER_TEMP/quiet-v4/share-browser.txt"
+          node tools/share/browser-report.mjs
       - name: Existing application, CMS and signature regressions
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |
           npm run test:gaga | tee "$RUNNER_TEMP/quiet-v4/gaga.txt"
           npm run test:cms | tee "$RUNNER_TEMP/quiet-v4/cms.txt"
