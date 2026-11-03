@@ -45,11 +45,6 @@ jobs:
           sha256sum package-lock.json | tee "$RUNNER_TEMP/quiet-v4/lock.txt"
           git rev-parse HEAD | tee "$RUNNER_TEMP/quiet-v4/source.txt"
           npm ci --ignore-scripts --no-audit --no-fund | tee "$RUNNER_TEMP/quiet-v4/install.txt"
-      - name: Existing application, CMS and signature regressions
-        run: |
-          npm run test:gaga | tee "$RUNNER_TEMP/quiet-v4/gaga.txt"
-          npm run test:cms | tee "$RUNNER_TEMP/quiet-v4/cms.txt"
-          npm test | tee "$RUNNER_TEMP/quiet-v4/signature.txt"
       - name: Types and production build
         run: |
           npm run check | tee "$RUNNER_TEMP/quiet-v4/check.txt"
@@ -65,6 +60,11 @@ jobs:
             npx --no-install playwright test --config "tools/$suite/playwright.config.mjs" | tee "$RUNNER_TEMP/quiet-v4/$suite-browser.txt"
             node "tools/$suite/browser-report.mjs"
           done
+      - name: Existing application, CMS and signature regressions
+        run: |
+          npm run test:gaga | tee "$RUNNER_TEMP/quiet-v4/gaga.txt"
+          npm run test:cms | tee "$RUNNER_TEMP/quiet-v4/cms.txt"
+          npm test | tee "$RUNNER_TEMP/quiet-v4/signature.txt"
       - name: Preserve informational diagnostics
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
