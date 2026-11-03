@@ -53,7 +53,15 @@ export function initSurfaceCoordinator() {
       },
       {
         isOpen: outlineIsOpen,
-        close: (detail) => requestOutline({ action: 'close', source: detail.source ?? 'close-top-surface', x: detail.x, y: detail.y, target: detail.target })
+        close: (detail) => requestOutline({ action: 'close', source: detail.source ?? 'close-top-surface', x: detail.x, y: detail.y, target: detail.target }),
+        restoreFocus: () => {
+          const active = document.activeElement;
+          if (active instanceof HTMLElement && active !== document.body && active !== document.documentElement && !active.closest('[hidden], [inert], [aria-hidden="true"]')) return;
+          const toggle = document.querySelector<HTMLButtonElement>('[data-gaga-action-island-toggle]');
+          if (toggle?.isConnected && !toggle.disabled && !toggle.closest('[hidden], [inert], [aria-hidden="true"]') && toggle.getClientRects().length) {
+            toggle.focus({ preventScroll: true });
+          }
+        }
       },
       {
         isOpen: readerIsOpen,

@@ -48,6 +48,7 @@ export function initInformationSurface() {
       if((type==='pointerout'||type==='focusout')&&related instanceof Node&&card.contains(related))return;
       if(type==='pointerout'){if(intentTarget&&related instanceof Node&&intentTarget.contains(related))return;window.clearTimeout(intentTimer);intentTarget=null;}
       if(type==='pointerover'||type==='focusin'){
+        if (document.querySelector('[data-gaga-outline-peek][data-gaga-state="open"]')) return;
         const target=(event.target instanceof Element?event.target:null)?.closest<HTMLElement>('[data-gaga-preview]');
         if(!target)return;
         let url:URL;try{url=new URL(target.dataset.gagaPreviewHref??target.getAttribute('href')??'',location.href);}catch{return;}
@@ -73,8 +74,23 @@ export function initInformationSurface() {
     removeEventListener: ((type:string,listener:EventListenerOrEventListenerObject,options?:EventListenerOptions|boolean)=>{const wrapped=listeners.get(listener);if(wrapped){document.removeEventListener(type,wrapped,options);listeners.delete(listener);}}) as Document['removeEventListener'],
     get activeElement() { return document.activeElement; }
   };
-  const capability = initEngineInformationSurface({
+  // A preview instance can schedule a deferred focus-out restore after cleanup.
+  const previewTimers = new Set<number>();
+  const previewWindow: Pick<Window, 'setTimeout' | 'clearTimeout'> = {
+    setTimeout: ((handler: TimerHandler, delay?: number, ...args: unknown[]) => {
+      if (typeof handler !== 'function') throw new TypeError('Preview timer requires a function');
+      const id = window.setTimeout(() => { previewTimers.delete(id); handler(...args); }, delay);
+      previewTimers.add(id);
+      return id;
+    }) as Window['setTimeout'],
+    clearTimeout: ((id?: number) => {
+      if (id !== undefined) { previewTimers.delete(id); window.clearTimeout(id); }
+    }) as Window['clearTimeout']
+  };
+  const clearPreviewTimers = () => { for (const id of previewTimers) window.clearTimeout(id); previewTimers.clear(); };
+  const createPreviewCapability = () => initEngineInformationSurface({
     document: projection,
+    window: previewWindow,
     restoreDelayMs: getInformationPreviewRestoreDelayMs(),
     ctaText: 'Baca publikasi',
     getFeedback: ({ target, title, href }) => {
@@ -94,6 +110,7 @@ export function initInformationSurface() {
       return undefined;
     }
   });
+  let capability = createPreviewCapability();
   document.addEventListener('pointermove', event => { if (event.pointerType !== 'mouse' || !active?.contains(event.target as Node)) return; pointer = {x:event.clientX,y:event.clientY}; schedulePosition(); }, {passive:true});
   document.addEventListener('focusin', () => { pointer = null; schedulePosition(); });
   card.dataset.gagaPreviewReady = 'true';
@@ -101,9 +118,16 @@ export function initInformationSurface() {
     if (!card.hasAttribute('data-gaga-preview-state')) { close(); active = null; suppressed = null; }
   });
   observer.observe(card, { attributes: true, attributeFilter: ['data-gaga-preview-state'] });
+  const outline = document.querySelector<HTMLElement>('[data-gaga-outline-peek]');
+  const outlineObserver = new MutationObserver(() => {
+    if (outline?.dataset.gagaState !== 'open') return;
+    window.clearTimeout(intentTimer); intentTarget = null; close(); active = null; suppressed = null;
+    capability.cleanup(); clearPreviewTimers(); capability = createPreviewCapability();
+  });
+  if (outline) outlineObserver.observe(outline, { attributes: true, attributeFilter: ['data-gaga-state'] });
   document.addEventListener('keydown', event => { if (event.key === 'Escape' && !card.hidden) { event.preventDefault(); event.stopPropagation(); suppressed = active; close(); } }, { capture: true });
   document.addEventListener('scroll', schedulePosition, { capture: true, passive: true });
   window.addEventListener('resize', schedulePosition, { passive: true });
   window.visualViewport?.addEventListener('resize',schedulePosition,{passive:true});window.visualViewport?.addEventListener('scroll',schedulePosition,{passive:true});
-  window.addEventListener('pagehide',event=>{if(event.persisted)return;window.clearTimeout(intentTimer);if(positionFrame)cancelAnimationFrame(positionFrame);capability.cleanup();observer.disconnect();});
+  window.addEventListener('pagehide',event=>{if(event.persisted)return;window.clearTimeout(intentTimer);if(positionFrame)cancelAnimationFrame(positionFrame);capability.cleanup();clearPreviewTimers();observer.disconnect();outlineObserver.disconnect();});
 }

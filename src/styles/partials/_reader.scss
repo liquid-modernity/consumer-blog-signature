@@ -345,6 +345,13 @@ body[data-gaga-reader-motion='reduced'] * {
 body[data-gaga-reader-links='plain'] :is(.main-pane, [data-gaga-article-shell], [data-gaga-reading-surface], .gaga-flagship-article) a {
   text-decoration: none !important;
 }
+body[data-gaga-reader-links='plain'] :is(.gaga-article-body, .gaga-markdown-content) p a {
+  color: var(--gaga-blue);
+  font-weight: 600;
+}
+body[data-gaga-reader-links='plain'] :is(.main-pane, [data-gaga-article-shell], [data-gaga-reading-surface]) a:is(:hover, :focus-visible) {
+  text-decoration: underline !important;
+}
 
 body[data-gaga-reader-links='underlined'] :is(.main-pane, [data-gaga-article-shell], [data-gaga-reading-surface], .gaga-flagship-article) a:not(.gaga-button):not(.pakrpp-filter-chip) {
   text-decoration: underline !important;

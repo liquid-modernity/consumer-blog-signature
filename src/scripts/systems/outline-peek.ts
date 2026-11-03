@@ -33,6 +33,36 @@ export function initOutlinePeek() {
   const sheetCurrentIndex = stack?.querySelector<HTMLElement>('[data-gaga-outline-sheet-current-index]') ?? null;
   const sheetCurrentLabel = stack?.querySelector<HTMLElement>('[data-gaga-outline-sheet-current-label]') ?? null;
   const links = Array.from(sheet.querySelectorAll<HTMLAnchorElement>('[data-gaga-info-field="outline"] a[href^="#"]'));
+  const preview = stack?.querySelector<HTMLButtonElement>('[data-gaga-outline-peek-preview]');
+  let collisionFrame = 0;
+  const updateCollision = () => {
+    collisionFrame = 0;
+    if (!stack || !preview || stack.hidden) return;
+    const rect = preview.getBoundingClientRect();
+    const selectors = 'a,button,input,textarea,select,summary,p,h1,h2,h3,h4,h5,h6,li,figcaption,img,video,table';
+    let obstructed = false;
+    if (rect.width > 0 && rect.height > 0) {
+      for (let ix = 0; ix <= 8 && !obstructed; ix++) for (let iy = 0; iy <= 2 && !obstructed; iy++) {
+        const x = Math.min(innerWidth - 1, Math.max(0, rect.left + rect.width * ix / 8));
+        const y = Math.min(innerHeight - 1, Math.max(0, rect.top + rect.height * iy / 2));
+        obstructed = document.elementsFromPoint(x, y).some(el => !stack.contains(el) && !!el.closest(selectors) && !stack.contains(el.closest(selectors)));
+      }
+    }
+    stack.toggleAttribute('data-gaga-outline-obstructed', obstructed);
+  };
+  const scheduleCollision = () => { if (!collisionFrame) collisionFrame = requestAnimationFrame(updateCollision); };
+  const collisionOwner = context?.owner ?? document.scrollingElement;
+  collisionOwner?.addEventListener('scroll', scheduleCollision, { passive: true });
+  window.addEventListener('scroll', scheduleCollision, { passive: true });
+  window.addEventListener('resize', scheduleCollision, { passive: true });
+  window.visualViewport?.addEventListener('resize', scheduleCollision, { passive: true });
+  stack?.addEventListener('transitionend', scheduleCollision);
+  const collisionObserver = new MutationObserver(scheduleCollision);
+  if (stack) collisionObserver.observe(stack, { attributes: true, attributeFilter: ['hidden', 'data-gaga-signature-state'] });
+  const collisionResize = new ResizeObserver(scheduleCollision);
+  if (context?.readingElement) collisionResize.observe(context.readingElement);
+  if (context?.owner && context.owner !== context.readingElement) collisionResize.observe(context.owner);
+  scheduleCollision();
 
   const capability = createOutlinePeekCapability({
     sheet,
@@ -61,7 +91,14 @@ export function initOutlinePeek() {
   const isOpen = () => sheet.dataset.gagaState === 'open';
   const close = (source: string) => {
     if (!isOpen()) return;
+    const focusWasInside = sheet.contains(document.activeElement);
     capability.runCommand({ action: 'toggle', target: sheet, source } satisfies SurfaceCommandDetail);
+    const active = document.activeElement;
+    const focusLost = !(active instanceof HTMLElement) || active === document.body || active === document.documentElement || !!active.closest('[hidden], [inert], [aria-hidden="true"]');
+    if (focusWasInside && ['escape', 'keyboard-down', 'swipe-down'].includes(source) && focusLost) {
+      const toggle = document.querySelector<HTMLButtonElement>('[data-gaga-action-island-toggle]');
+      if (toggle?.isConnected && !toggle.disabled && !toggle.closest('[hidden], [inert], [aria-hidden="true"]') && toggle.getClientRects().length) toggle.focus({ preventScroll: true });
+    }
   };
 
   function syncAvailability() {
@@ -145,7 +182,16 @@ export function initOutlinePeek() {
     else if (delta > signatureMotion.outlineCloseTravel) close('swipe-down');
   }, { passive: true });
 
-  window.addEventListener('pagehide', () => {
+  window.addEventListener('pagehide', (event) => {
+    if (event.persisted) return;
     if (frameId !== undefined) cancelAnimationFrame(frameId);
+    if (collisionFrame) cancelAnimationFrame(collisionFrame);
+    collisionObserver.disconnect();
+    collisionResize.disconnect();
+    collisionOwner?.removeEventListener('scroll', scheduleCollision);
+    window.removeEventListener('scroll', scheduleCollision);
+    window.removeEventListener('resize', scheduleCollision);
+    window.visualViewport?.removeEventListener('resize', scheduleCollision);
+    stack?.removeEventListener('transitionend', scheduleCollision);
   }, { once: true });
 }

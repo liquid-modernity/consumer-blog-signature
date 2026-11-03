@@ -19,6 +19,7 @@ interface Props {
   fetchPriority?: 'high' | 'low' | 'auto';
   critical?: boolean;
   class?: string;
+  presentation?: 'inline' | 'wide' | 'bleed';
 }
 
 const {
@@ -36,7 +37,8 @@ const {
   decoding = 'async',
   fetchPriority,
   critical = false,
-  class: className = ''
+  class: className = '',
+  presentation = 'bleed'
 } = Astro.props;
 
 if (!src || !isSafeMediaSource(src)) throw new Error('MediaFigure requires a safe HTTP(S), blob, or relative src.');
@@ -52,7 +54,7 @@ const renderedLoading = loading ?? (critical ? 'eager' : 'lazy');
 const renderedFetchPriority = fetchPriority ?? (critical ? 'high' : 'auto');
 const srcset = (items: GagaResponsiveImageCandidate[]) => items.map((candidate) => `${candidate.src} ${candidate.width}w`).join(', ');
 ---
-<figure class:list={['gaga-media', 'gaga-media--figure', className]} data-gaga-media-kind="figure" data-gaga-media-critical={critical ? 'true' : undefined}>
+<figure class:list={['gaga-media', 'gaga-media--figure', className]} data-presentation={presentation} data-gaga-media-kind="figure" data-gaga-media-critical={critical ? 'true' : undefined}>
   <picture>
     {sources.map((source) => <source type={source.type} media={source.media} sizes={source.sizes ?? sizes} srcset={srcset(source.candidates)} />)}
     <img

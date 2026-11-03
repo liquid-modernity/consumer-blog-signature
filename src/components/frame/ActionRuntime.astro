@@ -14,7 +14,8 @@ const { contextAvailability = {left:false,right:false}, className = '', context 
 const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
 const profile = experienceSurfaceProfile(context);
 const railPolicy = contextAvailability;
-const actions = actionCatalog.project({ids:profile.notchActionIds,available:{'smart-back':false,settings:false,'context-info':railPolicy.right}}).primary;
+const outlineAwareActions = profile.notchActionIds.includes('outline') ? profile.notchActionIds : [...profile.notchActionIds, 'outline' as const];
+const actions = actionCatalog.project({ids:outlineAwareActions,available:{'smart-back':false,settings:false,'context-info':railPolicy.right}}).primary;
 const primary = actions;
 const global = globalNavigationProjection();
 const islandLabel = i18nLabel('actionIsland.label');

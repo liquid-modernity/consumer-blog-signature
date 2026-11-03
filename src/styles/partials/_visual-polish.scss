@@ -30,7 +30,7 @@
   inline-size: var(--gaga-reading-header-measure);
   margin-inline: auto;
   padding-block: clamp(1.2rem,3vw,2.15rem) clamp(1.35rem,3vw,2.25rem);
-  border-block-end: 1px solid var(--gaga-line);
+  border-block-end: 0;
 }
 .gaga-app-frame[data-gaga-content-kind='article'] .gaga-breadcrumb { margin-block-end: clamp(.9rem,2vw,1.35rem); }
 .gaga-app-frame[data-gaga-content-kind='article'] .gaga-breadcrumb ol {
@@ -89,7 +89,7 @@
 .gaga-app-frame[data-gaga-content-kind='article'] .gaga-markdown-content blockquote {
   margin: clamp(1.8rem,4vw,2.75rem) 0;
   padding: .2rem 0 .2rem 1rem;
-  border-inline-start: 2px solid var(--gaga-line-strong);
+  border-inline-start: 0;
   color: var(--gaga-muted);
   font-size: clamp(1.05rem,1.7vw,1.22rem);
   line-height: 1.6;
@@ -98,7 +98,7 @@
 .gaga-app-frame[data-gaga-content-kind='article'] .gaga-markdown-content hr {
   margin-block: clamp(2.4rem,6vw,4rem);
   border: 0;
-  border-block-start: 1px solid var(--gaga-line);
+  border-block-start: 0;
 }
 
 .gaga-markdown-content :where(pre,table,figure) { margin-block: clamp(1.5rem,3vw,2.4rem); }
@@ -163,8 +163,8 @@
   inline-size: min(58rem,100%);
   margin-inline: auto;
 }
-.gaga-screen-section-head { padding-block: .2rem .85rem; border-block-end: 1px solid var(--gaga-line); }
-.gaga-mission-item { border-block-end: 1px solid color-mix(in srgb,var(--gaga-line) 70%,transparent); }
+.gaga-screen-section-head { padding-block: .2rem .85rem; border-block-end: 0; }
+.gaga-mission-item { border-block-end: 0; }
 .gaga-mission-link { gap: .6rem; padding-block: .85rem; }
 .gaga-mission-title { text-wrap: balance; }
 
@@ -183,18 +183,16 @@
 .gaga-author-card { padding-block: 1rem; }
 .gaga-author-card:is(:hover,:focus-visible) { background: var(--gaga-surface-subtle); }
 
-.gaga-topic-index { grid-template-columns: repeat(auto-fit,minmax(min(100%,15.5rem),1fr)); gap: 1rem; }
+.gaga-topic-index { display: block; }
 .gaga-topic-index a {
-  min-block-size: 12rem;
+  min-block-size: 0;
   aspect-ratio: auto;
-  padding: 1.15rem;
-  border: 1px solid transparent;
-  background: var(--gaga-surface);
+  padding: 1.15rem 0;
+  border: 0;
+  background: transparent;
 }
-.gaga-topic-index a:is(:hover,:focus-visible) {
-  border-color: var(--gaga-line);
-  background: var(--gaga-surface-subtle);
-}
+.gaga-topic-index a:is(:hover,:focus-visible) { background: var(--gaga-surface-subtle); }
+.gaga-topic-index a:focus-visible { outline: 2px solid var(--gaga-focus-ring); outline-offset: .2rem; }
 .gaga-tag-index__list { gap: .55rem; }
 .gaga-tag-index__list a { min-block-size: 2.4rem; padding: .55rem .7rem; }
 

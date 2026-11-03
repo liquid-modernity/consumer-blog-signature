@@ -99,7 +99,7 @@ export const defaultReaderState: ReaderState = {
   measure: 'comfortable',
   contrast: 'normal',
   motion: 'system',
-  links: 'underlined',
+  links: 'plain',
   preset: defaultReaderPreset
 };
 

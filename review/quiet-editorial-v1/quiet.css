@@ -1,0 +1,13 @@
+/* Review-only: injected onto the existing public pages, never loaded by production. */
+body.gaga-review-quiet #stage-01 { justify-content: flex-start; padding-block: clamp(6.5rem, 14vh, 9rem) 5.5rem; }
+body.gaga-review-quiet #stage-01 .pakrpp-viewport-stage__inner { margin-block: 0; max-inline-size: 44rem; }
+body.gaga-review-quiet .gaga-review-intro { border-bottom: 1px solid var(--gaga-line, #d7d4cf); padding-bottom: 1.25rem; margin-bottom: 1rem; }
+body.gaga-review-quiet .gaga-review-intro__label { font: 500 .75rem/1.4 var(--gaga-font-body, sans-serif); letter-spacing: .09em; text-transform: uppercase; }
+body.gaga-review-quiet .gaga-review-intro__title { margin: .35rem 0 0; font: 600 clamp(2rem, 5vw, 3.4rem)/1.05 var(--gaga-font-display, serif); text-align: left; }
+body.gaga-review-quiet .pakrpp-publication-row { padding-block: .55rem; border-bottom: 1px solid var(--gaga-line, #d7d4cf); }
+body.gaga-review-quiet .pakrpp-publication-row__title { white-space: normal; overflow: visible; font-size: 1rem; line-height: 1.45; }
+body.gaga-review-quiet .gaga-topic-index { display: block; border-top: 1px solid var(--gaga-line, #d7d4cf); }
+body.gaga-review-quiet .gaga-topic-index a { aspect-ratio: auto; min-height: 0; height: auto; padding: 1.1rem 0; border-bottom: 1px solid var(--gaga-line, #d7d4cf); background: transparent; }
+body.gaga-review-quiet .gaga-topic-index small { margin-block: .3rem; max-width: 46rem; }
+body.gaga-review-quiet .gaga-topic-index a:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+@media (max-width: 600px) { body.gaga-review-quiet #stage-01 { block-size: auto; min-block-size: 100dvh; } }

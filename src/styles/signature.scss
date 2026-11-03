@@ -36,6 +36,7 @@ body {
 
 a {
   color: var(--gaga-blue);
+  text-decoration: none;
   text-decoration-color: var(--gaga-line-strong);
   text-underline-offset: .18em;
 }
@@ -113,11 +114,56 @@ a:hover {
   margin-inline: 50%;
   transform: translateX(-50%);
 }
-@media (max-width: 1023px) {
-  .gaga-app-frame[data-gaga-content-kind='article'] .gaga-markdown-content :where(.gaga-media, .gaga-rich-media)[data-presentation='bleed'] {
-    inline-size: 100vw;
-    margin-inline: 50%;
-    transform: translateX(-50%);
-    border-radius: 0;
-  }
+.gaga-app-frame[data-gaga-content-kind='article'] .gaga-markdown-content :where(.gaga-media, .gaga-rich-media)[data-presentation='bleed'] {
+  inline-size: 100vw;
+  max-width: none;
+  margin-inline: 50%;
+  transform: translateX(-50%);
+  border-radius: 0;
+}
+.gaga-app-frame[data-gaga-content-kind='article'] .gaga-markdown-content .gaga-media-image--bleed {
+  max-width: none;
+}
+.gaga-media[data-presentation='bleed'] > picture img,
+.gaga-media[data-presentation='bleed'] > video {
+  inline-size: 100%;
+  block-size: auto;
+}
+
+/* Portable-text figures and standalone Markdown images are editorial media.
+   Explicit inline presentation keeps diagrams and contextual media in measure. */
+.gaga-app-frame[data-gaga-content-kind='article'] .gaga-article-body > :is(
+  figure:not([data-presentation='inline']):has(> img, > picture > img, > video),
+  p:not([data-presentation='inline']):has(> img:only-child),
+  p:not([data-presentation='inline']):has(> a:only-child > img:only-child)
+) {
+  inline-size: 100vw;
+  max-width: none;
+  margin-inline: 50%;
+  transform: translateX(-50%);
+}
+.gaga-app-frame[data-gaga-content-kind='article'] .gaga-article-body > :is(
+  figure:not([data-presentation='inline']):has(> img, > picture > img, > video),
+  p:not([data-presentation='inline']):has(> img:only-child),
+  p:not([data-presentation='inline']):has(> a:only-child > img:only-child)
+) :where(img, video) {
+  display: block;
+  inline-size: 100%;
+  max-inline-size: 100%;
+  block-size: auto;
+  object-fit: contain;
+}
+.gaga-app-frame[data-gaga-content-kind='article'] .gaga-article-body > figure:not([data-presentation='inline']):has(> img, > picture > img, > video) > figcaption {
+  box-sizing: border-box;
+  max-inline-size: var(--gaga-article-measure, 40.5rem);
+  margin-inline: auto;
+  padding-inline: max(1rem, env(safe-area-inset-left)) max(1rem, env(safe-area-inset-right));
+}
+.gaga-app-frame[data-gaga-content-kind='article'] .gaga-article-body > video:not([data-presentation='inline']) {
+  display: block;
+  inline-size: 100vw;
+  max-inline-size: none;
+  block-size: auto;
+  margin-inline: 50%;
+  transform: translateX(-50%);
 }

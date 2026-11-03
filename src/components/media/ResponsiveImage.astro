@@ -16,13 +16,13 @@ const {
   alt,
   caption,
   credit,
-  aspectRatio = '16/9',
-  layout = 'inline',
+  aspectRatio = 'auto',
+  layout = 'bleed',
   id = `media-img-${Math.random().toString(36).substring(2, 9)}`
 } = Astro.props;
 ---
 <figure class={`gaga-media-image gaga-media-image--${layout}`} data-gaga-media="image" id={id}>
-  <div class="gaga-media-image__wrapper" style={`--aspect-ratio: ${aspectRatio};`}>
+  <div class="gaga-media-image__wrapper" data-fixed-ratio={aspectRatio === 'auto' ? undefined : 'true'} style={`--aspect-ratio: ${aspectRatio};`}>
     {src ? (
       <img
         src={src}
@@ -127,28 +127,35 @@ const {
   }
 
   .gaga-media-image--bleed {
-    width: 100%;
-    max-width: 100%;
+    width: 100vw;
+    max-width: none;
+    margin-inline: calc(50% - 50vw);
   }
 
   .gaga-media-image__wrapper {
     position: relative;
     width: 100%;
-    aspect-ratio: var(--aspect-ratio, 16/9);
-    border-radius: var(--gaga-radius-md);
+    aspect-ratio: var(--aspect-ratio, auto);
     overflow: hidden;
     background: var(--gaga-surface-subtle);
-    border: 1px solid var(--gaga-line);
+    border: 0;
   }
 
   .gaga-media-image__element {
     width: 100%;
-    height: 100%;
-    object-fit: cover;
+    height: auto;
+    object-fit: contain;
     display: block;
   }
 
+  .gaga-media-image__wrapper[data-fixed-ratio] .gaga-media-image__element {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+  }
+
   .gaga-media-image__fallback {
+    min-block-size: 12rem;
     width: 100%;
     height: 100%;
     display: grid;

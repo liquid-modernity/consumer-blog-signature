@@ -15,6 +15,7 @@ interface Props {
   preload?: 'none' | 'metadata' | 'auto';
   playsInline?: boolean;
   class?: string;
+  presentation?: 'inline' | 'wide' | 'bleed';
 }
 
 const {
@@ -29,7 +30,8 @@ const {
   credit,
   preload = 'metadata',
   playsInline = true,
-  class: className = ''
+  class: className = '',
+  presentation = 'bleed'
 } = Astro.props;
 
 if (!Array.isArray(sources) || sources.length === 0) throw new Error('MediaVideo requires at least one source.');
@@ -45,7 +47,7 @@ if (credit?.href && !isSafeMediaLink(credit.href)) throw new Error('MediaVideo c
 
 const hasCaption = Boolean(caption || transcript || credit);
 ---
-<figure class:list={['gaga-media', 'gaga-media--video', className]} data-gaga-media-kind="video">
+<figure class:list={['gaga-media', 'gaga-media--video', className]} data-presentation={presentation} data-gaga-media-kind="video">
   <video controls preload={preload} poster={poster} width={width} height={height} playsinline={playsInline}>
     {sources.map((source) => <source src={source.src} type={source.type} media={source.media} />)}
     {tracks.map((track) => (

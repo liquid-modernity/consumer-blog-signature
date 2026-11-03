@@ -49,7 +49,8 @@ const socialSection = sectionById.get('social');
 ---
 
 <div class="gaga-editorial-front pakrpp-root-index" aria-labelledby="pakrpp-root-title" data-pakrpp-root-index>
-  <h1 id="pakrpp-root-title" class="gaga-visually-hidden">{siteConfig.displayName}</h1>
+  {!latestSection && <h1 id="pakrpp-root-title" class="gaga-visually-hidden">{siteConfig.displayName}</h1>}
+
 
   {/* VIEWPORT STAGE 01: 01 TERBARU (1_08edb1cd.png) */}
   {latestSection && (
@@ -63,6 +64,10 @@ const socialSection = sectionById.get('social');
     >
       <div class="pakrpp-viewport-stage__inner pakrpp-viewport-stage__inner--stage01">
         <section id={latestSection.anchor} class="pakrpp-section pakrpp-section--latest" aria-label="Publikasi Terbaru">
+          <header class="pakrpp-editorial-heading">
+            <span class="pakrpp-editorial-heading__label">{latestSection.label}</span>
+            <h1 id="pakrpp-root-title">{siteConfig.displayName}</h1>
+          </header>
           <ol class="pakrpp-publication-list" data-gaga-preview-scope>
             {latestPublications.map((pub, index) => {
               const pubType = resolvePublicationType(pub.type);
@@ -512,7 +517,27 @@ const socialSection = sectionById.get('social');
   }
 
   .pakrpp-viewport-stage__inner--stage01 {
-    max-inline-size: 38rem;
+    max-inline-size: 44rem;
+  }
+
+  .pakrpp-viewport-stage:has(.pakrpp-viewport-stage__inner--stage01) {
+    block-size: auto;
+    min-block-size: 100dvh;
+    justify-content: flex-start;
+    padding-block: clamp(6.5rem, 14vh, 9rem) 5.5rem;
+  }
+
+  .pakrpp-viewport-stage__inner--stage01 { margin-block: 0; }
+  .pakrpp-editorial-heading { margin-block-end: 1.5rem; }
+  .pakrpp-editorial-heading__label {
+    font: 500 .75rem/1.4 var(--gaga-font-body, sans-serif);
+    letter-spacing: .09em;
+    text-transform: uppercase;
+  }
+  .pakrpp-editorial-heading h1 {
+    margin: .35rem 0 0;
+    font: 600 clamp(2rem, 5vw, 3.4rem)/1.05 var(--gaga-font-display, serif);
+    text-align: start;
   }
 
   .pakrpp-publication-list {
@@ -528,7 +553,7 @@ const socialSection = sectionById.get('social');
     grid-template-columns: 2.15rem minmax(0, 1fr);
     align-items: baseline;
     gap: 0.35rem;
-    padding: clamp(0.18rem, 0.42vh, 0.34rem) 0;
+    padding: .55rem 0;
     border: 0;
   }
 
@@ -547,15 +572,14 @@ const socialSection = sectionById.get('social');
 
   .pakrpp-publication-row__title {
     font-family: var(--gaga-font-body, inherit);
-    font-size: clamp(0.86rem, 1.35vh, 0.95rem);
+    font-size: 1rem;
     font-weight: 500;
     color: var(--gaga-ink);
     text-decoration: none;
-    line-height: 1.35;
+    line-height: 1.45;
     letter-spacing: var(--gaga-article-letter-spacing, 0em);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
 
   .pakrpp-publication-row__title:hover {
