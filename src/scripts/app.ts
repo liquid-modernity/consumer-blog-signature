@@ -69,8 +69,6 @@ async function boot() {
   const [
     inputMode,
     gagaDock,
-    toast,
-    readerPreferences,
     savedReading,
     readingContinuity,
     quickActionsState,
@@ -85,8 +83,6 @@ async function boot() {
   ] = await Promise.all([
     import('./systems/input-mode').catch(() => null),
     import('./systems/gaga-dock').catch(() => null),
-    import('./systems/toast').catch(() => null),
-    import('./systems/reader-preferences').catch(() => null),
     import('./systems/saved-reading').catch(() => null),
     hasCapability('[data-gaga-personal-readable="true"], [data-gaga-saved-page]')
       ? import('./systems/reading-continuity').catch(() => null)
@@ -110,8 +106,6 @@ async function boot() {
 
   inputMode?.initInputMode();
   gagaDock?.initGagaDock();
-  toast?.initToast();
-  readerPreferences?.initReaderPreferences();
   savedReading?.initSavedReading();
   readingContinuity?.initReadingContinuity();
   quickActionsState?.initQuickActionsState();

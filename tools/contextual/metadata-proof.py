@@ -8,7 +8,7 @@ class Page(HTMLParser):
         super().__init__(convert_charrefs=True)
         self.fields = {}; self.rows = []; self.canonical = None; self.title = ''; self.depth = 0
         self.field = None; self.heading = None; self.hrefs = []; self.description = None
-        self.times = {}; self.time = None
+        self.times = {}; self.time = None; self.knowledge_accordions = 0
         self.topic = None; self.topic_label = ''; self.topic_heading = None; self.topic_links = []
         self.feed(text)
     def handle_starttag(self, tag, attrs):
@@ -20,6 +20,7 @@ class Page(HTMLParser):
         if tag == 'td' and a.get('data-gaga-info-field'):
             self.field = (self.depth, a['data-gaga-info-field']); self.fields[self.field[1]] = ''
         if a.get('data-gaga-info-block'): self.rows.append(a['data-gaga-info-block'])
+        if 'data-gaga-knowledge-details' in a: self.knowledge_accordions += 1
         if tag == 'h1' and a.get('id') == '_top': self.heading = self.depth
         if a.get('data-gaga-topic-screen'): self.topic = {'slug':a['data-gaga-topic-screen'],'id':a['data-gaga-topic-id'],'count':int(a['data-gaga-topic-count'])}
         if tag == 'h2' and a.get('id') == 'topic-title': self.topic_heading = self.depth
@@ -55,7 +56,13 @@ for d in posts:
     if metadata.get('readTime'): assert page.fields.get('readTime','').strip() == metadata['readTime'], ('readTime',path)
     if metadata.get('section'): assert page.fields.get('section','').strip() == metadata['section'], ('section',path)
     assert len(page.rows) == len(set(page.rows)), ('duplicate metadata row',path)
-    assert 'contextMeta' not in page.fields and 'objectId' not in page.fields and 'knowledgeRelations' not in page.fields
+    assert 'contextMeta' not in page.fields, ('internal context metadata',path)
+    assert page.fields.get('objectId','').strip() == d['applicationId'], ('object identity',path)
+    assert page.rows.count('objectId') == 1 and page.rows.count('graph') == 1, ('object/graph duplication',path)
+    assert page.rows.count('knowledgeRelations') <= 1 and page.knowledge_accordions == 0, ('knowledge duplication',path)
+    relations = page.fields.get('knowledgeRelations','')
+    assert 'taggedWith:' not in relations and 'writtenBy:' not in relations, ('duplicated tags or authors',path)
+    assert not relations or all(item.strip().startswith('belongsTo: ') for item in relations.split(' · ')), ('unexpected relation',path,relations)
     if metadata.get('publishedAt'): assert page.times.get('publishedDate','')[:10] == metadata['publishedAt'][:10], ('date',path)
     records.append({'path':path,'contentId':d['applicationId'],'publishedRevision':d['pin']['liveRevisionId'],'title':page.title.strip(),'canonical':page.canonical,'fields':{k:v.strip() for k,v in page.fields.items()},'times':page.times,'publishedSummary':item['data'].get('summary'),'headDescription':page.description})
 root = Page(Path('dist/index.html').read_text()); assert len(root.hrefs) == min(20,len(posts)) and len(set(root.hrefs)) == len(root.hrefs)

@@ -118,6 +118,7 @@ a:hover {
   inline-size: min(72rem, calc(100vw - 2rem));
   max-width: none;
 }
+.gaga-media[data-presentation='wide'] > img,
 .gaga-media[data-presentation='wide'] > picture img,
 .gaga-media[data-presentation='wide'] > video {
   inline-size: 100%;
@@ -133,6 +134,7 @@ a:hover {
 .gaga-app-frame[data-gaga-content-kind='article'] .gaga-markdown-content .gaga-media-image--bleed {
   max-width: none;
 }
+.gaga-media[data-presentation='bleed'] > img,
 .gaga-media[data-presentation='bleed'] > picture img,
 .gaga-media[data-presentation='bleed'] > video {
   inline-size: 100%;
@@ -142,7 +144,7 @@ a:hover {
 /* Portable-text figures and standalone Markdown images are editorial media.
    Explicit inline presentation keeps diagrams and contextual media in measure. */
 .gaga-app-frame[data-gaga-content-kind='article'] .gaga-article-body > :is(
-  figure:not([data-presentation='inline']):has(> img, > picture > img, > video),
+  figure:not([data-presentation='inline']):not([data-presentation='wide']):has(> img, > picture > img, > video),
   p:not([data-presentation='inline']):has(> img:only-child),
   p:not([data-presentation='inline']):has(> a:only-child > img:only-child)
 ) {
@@ -152,7 +154,7 @@ a:hover {
   transform: translateX(-50%);
 }
 .gaga-app-frame[data-gaga-content-kind='article'] .gaga-article-body > :is(
-  figure:not([data-presentation='inline']):has(> img, > picture > img, > video),
+  figure:not([data-presentation='inline']):not([data-presentation='wide']):has(> img, > picture > img, > video),
   p:not([data-presentation='inline']):has(> img:only-child),
   p:not([data-presentation='inline']):has(> a:only-child > img:only-child)
 ) :where(img, video) {
@@ -162,7 +164,7 @@ a:hover {
   block-size: auto;
   object-fit: contain;
 }
-.gaga-app-frame[data-gaga-content-kind='article'] .gaga-article-body > figure:not([data-presentation='inline']):has(> img, > picture > img, > video) > figcaption {
+.gaga-app-frame[data-gaga-content-kind='article'] .gaga-article-body > figure:not([data-presentation='inline']):not([data-presentation='wide']):has(> img, > picture > img, > video) > figcaption {
   box-sizing: border-box;
   max-inline-size: var(--gaga-article-measure, 40.5rem);
   margin-inline: auto;

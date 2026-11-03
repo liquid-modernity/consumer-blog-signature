@@ -58,6 +58,11 @@ export const blockRegistry = [
       text("url", "Image URL"),
       text("alt", "Alternative text"),
       text("caption", "Caption"),
+      { type: "select", action_id: "presentation", label: "Presentation", options: [
+        { value: "bleed", label: "Full bleed" },
+        { value: "wide", label: "Wide" },
+        { value: "inline", label: "Inline" },
+      ] },
     ],
   },
   {

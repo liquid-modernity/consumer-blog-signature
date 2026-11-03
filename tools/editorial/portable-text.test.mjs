@@ -291,3 +291,15 @@ test("structured citation and cross-reference targets receive advisory mismatch 
   assert.ok(warnings.includes("Broken reference: #ref-missing"));
   assert.ok(warnings.includes("Broken reference: #figure-absent"));
 });
+
+test('optional editorial media presentations round trip and reject unknown values', () => {
+  for (const type of ['figure', 'image', 'video']) for (const presentation of ['bleed', 'wide', 'inline']) {
+    const media = { _type: type, _key: 'media', url: '/media.png', alt: 'Example', presentation };
+    const roundTrip = JSON.parse(JSON.stringify([media]));
+    assert.deepEqual(validatePortableText(roundTrip), [media]);
+    assert.match(renderPortableText(roundTrip), new RegExp(`data-presentation="${presentation}"`));
+    assert.throws(() => renderPortableText([{ ...media, presentation: 'unsupported' }]), /Invalid media presentation/);
+  }
+  const legacy = [{ _type: 'figure', _key: 'old', url: '/media.png', alt: 'Example' }];
+  assert.doesNotMatch(renderPortableText(legacy), /data-presentation/);
+});

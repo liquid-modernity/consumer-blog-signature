@@ -94,6 +94,11 @@ export function renderPortableText(
   { sections = {}, trail = [], mediaOrigin = "" } = {},
 ) {
   blocks = resolveSections(blocks, { sections, trail });
+  validatePortableText(blocks);
+  for (const block of blocks) {
+    if (["image", "figure", "video"].includes(block._type) && block.presentation !== undefined &&
+        !["bleed", "wide", "inline"].includes(block.presentation)) throw new TypeError("Invalid media presentation");
+  }
   const e = escapeHtml,
     targets = new Map(blocks.filter((b) => b.id).map((b) => [b.id, b]));
   const noteUses = new Map(),
@@ -171,13 +176,16 @@ export function renderPortableText(
     }
     return safe;
   }
+  function presentation(block) {
+    return block.presentation ? ` class="gaga-media" data-presentation="${e(block.presentation)}"` : "";
+  }
   function image(i, key) {
     const sized =
       Number.isInteger(i.width) &&
       i.width > 0 &&
       Number.isInteger(i.height) &&
       i.height > 0;
-    return `<figure${key ? ` id="figure-${e(key)}"` : ""}><img src="${e(mediaUrl(i.asset?.url ?? i.url))}" alt="${e(i.alt)}" loading="${sized ? "lazy" : "eager"}"${sized ? ` width="${i.width}" height="${i.height}"` : ""}>${i.caption ? `<figcaption>${e(i.caption)}</figcaption>` : ""}</figure>`;
+    return `<figure${key ? ` id="figure-${e(key)}"` : ""}${presentation(i)}><img src="${e(mediaUrl(i.asset?.url ?? i.url))}" alt="${e(i.alt)}" loading="${sized ? "lazy" : "eager"}"${sized ? ` width="${i.width}" height="${i.height}"` : ""}>${i.caption ? `<figcaption>${e(i.caption)}</figcaption>` : ""}</figure>`;
   }
   let result = "",
     lists = [];
@@ -229,7 +237,7 @@ export function renderPortableText(
         result += `<div class="editorial-gallery">${b.images.map((i) => image(i)).join("")}</div>`;
         break;
       case "video":
-        result += `<figure><video controls preload="metadata" src="${e(mediaUrl(b.src ?? b.asset?.url ?? b.url))}" aria-label="${e(b.title ?? "Video")}"></video>${b.caption ? `<figcaption>${e(b.caption)}</figcaption>` : ""}</figure>`;
+        result += `<figure${presentation(b)}><video controls preload="metadata" src="${e(mediaUrl(b.src ?? b.asset?.url ?? b.url))}" aria-label="${e(b.title ?? "Video")}"></video>${b.caption ? `<figcaption>${e(b.caption)}</figcaption>` : ""}</figure>`;
         break;
       case "code":
       case "listing":
