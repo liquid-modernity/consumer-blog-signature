@@ -143,9 +143,3 @@
 .gaga-outline-stack:focus-within > :not(.gaga-outline-progress-trace) { transition:none; }
 .gaga-outline-stack:focus-within .gaga-outline-peek-preview { pointer-events:auto;transform:none;opacity:1; }
 @media(prefers-reduced-motion:reduce) { .gaga-outline-stack { transition:none; } }
-
-/* When the resting preview would cover content, the existing Notch command remains available. */
-.gaga-outline-stack[data-gaga-outline-obstructed]:not(:focus-within) .gaga-outline-peek-preview {
-  visibility: hidden;
-  pointer-events: none;
-}

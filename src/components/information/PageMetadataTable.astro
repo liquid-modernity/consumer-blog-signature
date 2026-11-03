@@ -19,8 +19,7 @@ type SpecRow = {
 const { rail } = Astro.props;
 
 const rows: SpecRow[] = [];
-const readerFacts = new Set(['publicationType', 'author', 'contributors', 'readTime', 'topic', 'topics', 'tags', 'section', 'publishedDate', 'updatedDate']);
-const knowledgeFacts = (rail.facts ?? []).filter(fact => ['objectId', 'knowledgeRelations', 'graph'].includes(fact.id));
+const readerFacts = new Set(['objectId', 'knowledgeRelations', 'graph', 'publicationType', 'author', 'contributors', 'readTime', 'topic', 'topics', 'tags', 'section', 'publishedDate', 'updatedDate']);
 const seenIds = new Set<string>();
 
 function addRow(id: string, label: { key?: string; id: string; en: string }, values: PageContextValue[]) {
@@ -33,7 +32,8 @@ function addRow(id: string, label: { key?: string; id: string; en: string }, val
 
 for (const fact of rail.facts ?? []) {
   if (readerFacts.has(fact.id) && !(fact.id === 'updatedDate' && rail.updatedAtDisplay?.datetime === rail.publishedDate?.datetime) && fact.values && fact.values.length > 0) {
-    addRow(fact.id, { id: fact.label.id, en: fact.label.en }, fact.values);
+    const values = fact.id === 'knowledgeRelations' ? fact.values.filter(item => item.text.startsWith('belongsTo: ')) : fact.values;
+    addRow(fact.id, { id: fact.label.id, en: fact.label.en }, values);
   }
 }
 
@@ -175,10 +175,6 @@ if (rail.tags?.length && !seenIds.has('tags')) {
     </div>
   </section>
 ) : null}
-{knowledgeFacts.length > 0 && <details class="gaga-page-metadata-spec" data-gaga-knowledge-details>
-  <summary>Pengetahuan</summary>
-  <dl>{knowledgeFacts.map(fact => <div><dt>{fact.label.id}</dt><dd>{fact.values.map((item, index) => <>{index > 0 && ' · '}{item.href ? <a href={item.href}>{item.text}</a> : item.text}</>)}</dd></div>)}</dl>
-</details>}
 
 <style>
   @layer gaga.core {
@@ -216,7 +212,7 @@ if (rail.tags?.length && !seenIds.has('tags')) {
 
     .gaga-page-metadata-spec__table thead th {
       padding: 0.55rem 0.85rem;
-      border-block-end: 1px solid var(--gaga-line-strong, var(--gaga-line));
+      border-block-end: 0;
       background: var(--gaga-surface-subtle, var(--gaga-surface-2));
       color: var(--gaga-muted);
       font-family: var(--gaga-font-mono);
@@ -228,11 +224,11 @@ if (rail.tags?.length && !seenIds.has('tags')) {
     }
 
     .gaga-page-metadata-spec__table thead th + th {
-      border-inline-start: 1px solid var(--gaga-line);
+      border-inline-start: 0;
     }
 
     .gaga-page-metadata-spec__table tbody tr + tr {
-      border-block-start: 1px solid var(--gaga-line);
+      border-block-start: 0;
     }
 
     .gaga-page-metadata-spec__key,
@@ -254,14 +250,14 @@ if (rail.tags?.length && !seenIds.has('tags')) {
     }
 
     .gaga-page-metadata-spec__val {
-      border-inline-start: 1px solid var(--gaga-line);
+      border-inline-start: 0;
       color: var(--gaga-ink);
       font-variant-numeric: tabular-nums;
     }
 
     .gaga-page-metadata-spec__val a {
-      color: var(--gaga-ink);
-      text-decoration: underline;
+      color: var(--gaga-blue);
+      text-decoration: none;
       text-decoration-color: color-mix(in srgb, var(--gaga-blue) 58%, transparent);
       text-underline-offset: 0.18em;
     }
@@ -287,12 +283,4 @@ if (rail.tags?.length && !seenIds.has('tags')) {
       }
     }
   }
-</style>
-
-<style>
-[data-gaga-knowledge-details] summary { cursor:pointer; min-block-size:44px; font-weight:600; }
-[data-gaga-knowledge-details] dl { display:grid; gap:.75rem; font-size:.85rem; }
-[data-gaga-knowledge-details] dd { margin:.25rem 0 0; overflow-wrap:anywhere; color:var(--gaga-muted); }
-[data-gaga-knowledge-details] a { color:var(--gaga-ink); text-decoration:underline; }
-[data-gaga-knowledge-details] summary:focus-visible { outline:2px solid var(--gaga-focus-ring); outline-offset:3px; }
 </style>

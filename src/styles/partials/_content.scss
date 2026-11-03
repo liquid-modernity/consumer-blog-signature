@@ -863,38 +863,6 @@ button.gaga-search-card {
 }
 
 @media (min-width: bp.$tablet-large-min) {
-  .gaga-app-frame[data-gaga-content-kind='article'] .gaga-main-region {
-    block-size: 100svh;
-    block-size: 100dvh;
-    min-block-size: 0;
-    overflow: hidden;
-  }
-
-  .gaga-app-frame[data-gaga-content-kind='article'] .gaga-main-region .main-pane {
-    block-size: 100%;
-    min-block-size: 0;
-  }
-
-  .gaga-app-frame[data-gaga-content-kind='article'] .gaga-main-region .main-pane {
-    display: grid;
-    grid-template-rows: minmax(0, 1fr);
-  }
-
-  .gaga-article-shell {
-    display: grid;
-    grid-template-rows: auto minmax(0, 1fr) auto;
-    block-size: 100%;
-    min-block-size: 0;
-    padding-block: 0;
-  }
-
-  .gaga-article-scroll {
-    min-block-size: 0;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    scrollbar-gutter: stable;
-  }
-
   .gaga-article-scroll__inner {
     padding-block: clamp(1.75rem, 4vw, 3rem) clamp(2.5rem, 6vw, 4.5rem);
   }

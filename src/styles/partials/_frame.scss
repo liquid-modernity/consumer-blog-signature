@@ -1,32 +1,21 @@
 @use 'breakpoints' as bp;
 
 .gaga-app-frame {
-  position: fixed;
-  inset: 0;
-  overflow: hidden;
+  position: relative;
   display: grid;
-  grid-template-rows: minmax(0, 1fr);
   inline-size: 100%;
   max-inline-size: 100%;
   min-height: 100svh;
   min-height: 100dvh;
-  block-size: 100svh;
-  block-size: 100dvh;
   min-width: 0;
 }
 
 html:has(.gaga-app-frame),
 body:has(.gaga-app-frame) {
-  block-size: 100%;
   max-inline-size: 100%;
-  overflow: hidden;
 }
 
 .gaga-main-region {
-  overflow-x: hidden;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  scrollbar-gutter: stable;
   min-width: 0;
   min-height: 0;
   min-height: 100svh;
@@ -110,9 +99,6 @@ body:has(.gaga-app-frame) {
   .gaga-main-region {
     padding-inline: 0;
     min-height: 0;
-    block-size: 100svh;
-    block-size: 100dvh;
-    padding-block-end: var(--gaga-compact-reading-clearance);
     scroll-padding-block-end: var(--gaga-compact-reading-clearance);
   }
 
@@ -123,12 +109,6 @@ body:has(.gaga-app-frame) {
     scroll-padding-block-end: var(--gaga-compact-reading-clearance);
   }
 
-  .gaga-app-frame[data-gaga-content-kind='article'] .gaga-main-region::after {
-    display: block;
-    block-size: var(--gaga-compact-reading-clearance);
-    content: '';
-    pointer-events: none;
-  }
 
   .gaga-app-frame[data-gaga-content-kind='article'] .gaga-main-region :target,
   .gaga-app-frame[data-gaga-content-kind='article'] .gaga-main-region :where(a, button, summary, [tabindex]):focus {
@@ -219,14 +199,4 @@ body:has(.gaga-app-frame) {
 .gaga-app-frame:not(:has([data-gaga-right-rail])) .gaga-main-region { padding-inline-end: 0; }
 .gaga-app-frame:has([data-gaga-notch-placement='bottom']) .gaga-outline-stack { bottom: var(--gaga-notch-clearance-bottom, 4.5rem); }
 
-// Reserve resting chrome outside the scroll viewport, not just above its first paragraph.
-.gaga-app-frame:has([data-gaga-notch-placement='top']) { --gaga-notch-clearance-top: calc(4.5rem + var(--gaga-safe-area-top, 0px)); }
-.gaga-app-frame:has([data-gaga-notch-placement='bottom']) { --gaga-notch-clearance-bottom: calc(4.5rem + var(--gaga-safe-area-bottom, 0px)); }
-.gaga-app-frame:has([data-gaga-action-runtime-container][data-gaga-notch-placement]) .gaga-main-region {
-  box-sizing: border-box;
-  margin-block-start: var(--gaga-notch-clearance-top, 0px);
-  min-block-size: 0;
-  block-size: calc(100dvh - var(--gaga-notch-clearance-top, 0px) - var(--gaga-notch-clearance-bottom, 0px));
-  scroll-padding-block-start: 1rem;
-}
 .gaga-app-frame:has([data-gaga-action-runtime-container]) .content-panel:not(:has([data-pakrpp-root-index])) { padding-block-start: 1.75rem; }
