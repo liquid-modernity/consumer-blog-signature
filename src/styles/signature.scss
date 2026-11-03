@@ -114,6 +114,15 @@ a:hover {
   margin-inline: 50%;
   transform: translateX(-50%);
 }
+.gaga-app-frame[data-gaga-content-kind='article'] .gaga-markdown-content :where(.gaga-media, .gaga-rich-media)[data-presentation='wide'] {
+  inline-size: min(72rem, calc(100vw - 2rem));
+  max-width: none;
+}
+.gaga-media[data-presentation='wide'] > picture img,
+.gaga-media[data-presentation='wide'] > video {
+  inline-size: 100%;
+  block-size: auto;
+}
 .gaga-app-frame[data-gaga-content-kind='article'] .gaga-markdown-content :where(.gaga-media, .gaga-rich-media)[data-presentation='bleed'] {
   inline-size: 100vw;
   max-width: none;
