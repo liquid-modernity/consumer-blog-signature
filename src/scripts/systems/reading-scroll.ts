@@ -34,18 +34,12 @@ function readingElement(): HTMLElement | null {
   );
 }
 
-/**
- * Universal Scroll Owner Detector:
- * Verifies whether the container actually has scrollable overflow (scrollHeight > clientHeight)
- * to avoid binding listeners to inert non-scrolling wrappers.
- */
 export function readingScrollOwner(): HTMLElement {
   const mode = document.documentElement.dataset.gagaLayout;
   const article = articleScrollOwner();
   const main = mainScrollOwner();
   const doc = documentScrollOwner();
 
-  // Test actual scrollability
   if (article && article.scrollHeight > article.clientHeight + 10) {
     if (!supportsGagaDock(mode)) return article;
   }
@@ -58,7 +52,6 @@ export function readingScrollOwner(): HTMLElement {
     return article;
   }
 
-  // Fallback to primary viewport scrolling element
   return doc;
 }
 
