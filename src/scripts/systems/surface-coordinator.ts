@@ -12,17 +12,9 @@ import { closeContextSurface, contextSurfaceIsOpen } from './context-surface';
 let initialized = false;
 
 export function reopenRetractedNotch() {
-  const container = document.querySelector<HTMLElement>('[data-gaga-action-runtime-container]');
-  const notch = container?.querySelector<HTMLElement>('[data-gaga-action-runtime]');
-  const outline = document.querySelector<HTMLElement>('[data-gaga-outline-stack]');
-  const toggle = notch?.querySelector<HTMLButtonElement>('[data-gaga-action-island-toggle]');
-  if (container?.dataset.gagaSignatureState !== 'retracted' || !notch ||
-      outline?.dataset.gagaSignatureState !== 'retracted' || outline.hidden || !toggle || toggle.disabled) return false;
-  const wasInert = notch.inert;
-  notch.inert = false;
-  toggle.focus({ preventScroll: true });
-  if (document.activeElement !== toggle) { notch.inert = wasInert; return false; }
-  toggle.click();
+  const handle = document.querySelector<HTMLButtonElement>('[data-gaga-notch-reentry]:not([hidden])');
+  if (!handle) return false;
+  handle.click();
   return true;
 }
 
