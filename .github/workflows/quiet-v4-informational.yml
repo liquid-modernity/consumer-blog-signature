@@ -46,6 +46,8 @@ jobs:
           path: |
             .gaga/quiet-v4-focused.json
             .gaga/quiet-v4-focused-traces
+            tools/quiet-v4/.gaga/quiet-v4-focused.json
+            tools/quiet-v4/.gaga/quiet-v4-focused-traces
             .gaga/quiet-v4-*.png
           if-no-files-found: warn
   diagnostics:

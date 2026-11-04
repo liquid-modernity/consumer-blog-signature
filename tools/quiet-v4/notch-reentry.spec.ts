@@ -30,15 +30,15 @@ for (const width of [320, 390, 768, 1024, 1440, 1920]) {
         expect(blocked).toBe(false);
         const occluded = await handle.evaluate(el => {
           const r = el.getBoundingClientRect();
-          return [...document.querySelectorAll('main a,main button,main input,main video[controls],main p,main h1,main h2,main h3')].some(target => {
+          return [...document.querySelectorAll('main a,main button,main input,main video[controls],main p,main h1,main h2,main h3')].flatMap(target => {
             const t = target.getBoundingClientRect();
-            if (t.right <= r.left || t.left >= r.right || t.bottom <= r.top || t.top >= r.bottom) return false;
+            if (t.right <= r.left || t.left >= r.right || t.bottom <= r.top || t.top >= r.bottom) return [];
             const hit = document.elementFromPoint((Math.max(t.left,r.left)+Math.min(t.right,r.right))/2, (Math.max(t.top,r.top)+Math.min(t.bottom,r.bottom))/2);
-            return hit === el || !!hit && el.contains(hit);
+            return hit === el || !!hit && el.contains(hit) ? [{tag: target.tagName, text: target.textContent?.trim().slice(0, 100), target: t.toJSON(), handle: r.toJSON()}] : [];
           });
         });
-        expect(occluded).toBe(false);
         if (width === 320 || width === 1440) await page.screenshot({ path: `.gaga/quiet-v4-${path === '/' ? 'home' : 'article'}-${width}-${motion}.png` });
+        expect(occluded).toEqual([]);
         await handle.focus();
         await expect(handle).toBeFocused();
         await page.keyboard.press('Enter');

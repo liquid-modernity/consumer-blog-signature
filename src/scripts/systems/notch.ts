@@ -122,7 +122,7 @@ import {closeContextSurface,contextSurfaceIsOpen} from './context-surface';
     });
     // Native click distinguishes an outside tap from a touch pan.
     document.addEventListener('click', event => {
-      if (event.target instanceof Node && event.target !== reentry && !island.contains(event.target)&&!contextSurfaceIsOpen()) {
+      if (event.target instanceof Node && !reentry?.contains(event.target) && !island.contains(event.target)&&!contextSurfaceIsOpen()) {
         const closedReader = readerOpen();
         setState('collapsed');
         if (closedReader) requestAnimationFrame(() => toggle.focus({ preventScroll: true }));
