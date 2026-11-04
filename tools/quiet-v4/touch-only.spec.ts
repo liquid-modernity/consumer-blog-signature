@@ -1,0 +1,34 @@
+import { test, expect } from '@playwright/test';
+
+for (const width of [320, 390, 768, 1024, 1440, 1920]) {
+  for (const path of ['/', '/publications/akal-imitasi-sebagai-pekerja-tanpa-dignity']) {
+    test(`touch-only scrolling and return ${path} ${width}`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 844 });
+      await page.goto(path, { waitUntil: 'networkidle' });
+      await expect(page.locator('html')).toHaveAttribute('data-gaga-runtime', 'ready');
+      const cdp = await page.context().newCDPSession(page);
+      const swipe = async (startY: number, endY: number) => {
+        const x = Math.min(width - 10, Math.max(10, width / 2));
+        await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y: startY }] });
+        for (let i = 1; i <= 8; i++) {
+          await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x, y: startY + (endY - startY) * i / 8 }] });
+          await page.waitForTimeout(35);
+        }
+        await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+        await page.waitForTimeout(500);
+      };
+      try {
+        await swipe(700, 300);
+        await swipe(300, 700);
+        const toggle = page.locator('[data-gaga-action-island-toggle]');
+        await expect.poll(async () => {
+          const box = await toggle.boundingBox();
+          return !!box && box.x >= 0 && box.y >= 0 && box.x + box.width <= width && box.y + box.height <= 844 && !await page.locator('[data-gaga-action-runtime]').evaluate(el => (el as HTMLElement).inert);
+        }).toBe(true);
+        const box = await toggle.boundingBox();
+        await page.touchscreen.tap(box!.x + box!.width / 2, box!.y + box!.height / 2);
+        await expect(page.locator('[data-gaga-action-runtime]')).toHaveAttribute('data-gaga-state', 'peek');
+      } finally { await cdp.detach(); }
+    });
+  }
+}
