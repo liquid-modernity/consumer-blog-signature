@@ -54,11 +54,14 @@ const presentation = resolveNotchPresentation(experienceConfig.notch);
     </div>
   </nav>
 </div>
+<button type="button" class="gaga-notch-reentry" data-gaga-notch-reentry aria-controls="gaga-action-runtime" aria-label={toggleLabel.id} data-gaga-i18n-id={toggleLabel.id} data-gaga-i18n-en={toggleLabel.en} data-gaga-i18n-target="aria" hidden><Icon name="menu" /></button>
 <script>
 import {initNotch} from '../../scripts/systems/notch';
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initNotch,{once:true});else initNotch();
 </script>
 <style is:global>
+  .gaga-notch-reentry:not([hidden]) { position:fixed; z-index:var(--gaga-z-panel); left:var(--gaga-reentry-x); top:var(--gaga-reentry-y); display:grid; place-items:center; inline-size:44px; block-size:44px; border:0; border-radius:var(--gaga-context-radius); background:var(--gaga-island-bg); color:var(--gaga-island-ink); cursor:pointer; }
+  .gaga-notch-reentry:focus-visible { outline:2px solid var(--gaga-focus-ring); outline-offset:-3px; }
   .gaga-app-frame .gaga-contextual-notch-container { inset: auto; top: calc(var(--gaga-viewport-top,0px) + var(--gaga-safe-area-top,0px)); left: calc(var(--gaga-viewport-left,0px) + var(--gaga-safe-area-left) + (var(--gaga-viewport-inline-size,100%) - var(--gaga-safe-area-left) - var(--gaga-safe-area-right)) / 2); transform: translateX(-50%); inline-size: max-content; max-inline-size: calc(var(--gaga-viewport-inline-size,100vw) - var(--gaga-safe-area-left) - var(--gaga-safe-area-right) - 2rem); padding: 0; }
   .gaga-app-frame .gaga-contextual-notch-container[data-gaga-notch-placement='bottom'] { top: auto; bottom: calc(var(--gaga-viewport-bottom,0px) + var(--gaga-safe-area-bottom,0px) + .5rem); }
   .gaga-app-frame .gaga-contextual-notch-container[data-gaga-notch-placement='left'] { top: calc(var(--gaga-viewport-top,0px) + var(--gaga-viewport-block-size,100dvh) / 2); left: calc(var(--gaga-viewport-left,0px) + var(--gaga-safe-area-left) + .5rem); transform: translateY(-50%); }

@@ -1,6 +1,7 @@
 import { createInputModeCapability } from '@gaga/engine-runtime/runtime/input-mode';
 import { requestLeftRail, requestReaderPanel, requestToast } from '@gaga/engine-runtime/runtime/events';
 import { supportsGagaDock } from '../../config/systems';
+import { reopenRetractedNotch } from './surface-coordinator';
 
 let initialized = false;
 
@@ -12,6 +13,7 @@ export function initInputMode() {
     isGestureEnabled: supportsGagaDock,
     isVerticalCloseTarget: (target) => !!target?.closest('[data-gaga-reader-panel] [data-gaga-notch-spine]'),
     onEdgeSwipe({ x, y }) {
+      if (reopenRetractedNotch()) return;
       const rail = document.querySelector('[data-gaga-left-rail]') as HTMLElement | null;
       if (!rail || !supportsGagaDock(document.documentElement.dataset.gagaLayout)) return;
       requestLeftRail({ action: 'open', source: 'edge-swipe', x, y });

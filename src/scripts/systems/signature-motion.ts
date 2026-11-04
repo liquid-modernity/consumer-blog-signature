@@ -11,6 +11,7 @@ export function initSignatureMotion() {
   const notch = container?.querySelector<HTMLElement>('[data-gaga-action-runtime]');
   if (!container || !notch) return;
   const outline = document.querySelector<HTMLElement>('[data-gaga-outline-stack]');
+  const reentry = document.querySelector<HTMLButtonElement>('[data-gaga-notch-reentry]');
   const sheet = outline?.querySelector<HTMLElement>('[data-gaga-outline-peek]');
   const reader = notch.querySelector<HTMLElement>('[data-gaga-reader-panel]');
   const search = notch.querySelector<HTMLElement>('[data-gaga-notch-search]');
@@ -29,8 +30,8 @@ export function initSignatureMotion() {
     contentTargets = Array.from(main?.querySelectorAll<HTMLElement>('a,button,summary,input,textarea,select,p,h1,h2,h3,h4,h5,h6,figcaption,img,video,audio,svg,canvas,iframe,figure,table,pre,span,label,div,[role=button]') ?? []).filter(el => !container!.contains(el) && !outline?.contains(el) && (el.tagName !== 'DIV' || Array.from(el.childNodes).some(node => node.nodeType === Node.TEXT_NODE && node.textContent?.trim())));
   };
   refreshContentTargets();
-  const intersectsContent = (box: {left:number;right:number;top:number;bottom:number}, margin: number) => contentTargets.some(el => {
-    if (!el.isConnected || !el.getClientRects().length || el.closest('[hidden], [inert], [aria-hidden="true"]')) return false;
+  const intersectsContent = (box: {left:number;right:number;top:number;bottom:number}, margin: number, allowMedia = false) => contentTargets.some(el => {
+    if (!el.isConnected || !el.getClientRects().length || el.closest('[hidden], [inert], [aria-hidden="true"]') || allowMedia && el.matches('img,figure,video:not([controls])')) return false;
     const rect = el.getBoundingClientRect();
     return rect.right > box.left-margin && rect.left < box.right+margin && rect.bottom > box.top-margin && rect.top < box.bottom+margin && rect.bottom > 0 && rect.top < innerHeight;
   });
@@ -85,6 +86,18 @@ export function initSignatureMotion() {
       if (outline.inert !== outlineUnsafe) outline.inert = outlineUnsafe;
       const nextOutline = outlineUnsafe ? 'retracted' : outlineState;
       if (outline.dataset.gagaSignatureState !== nextOutline) outline.dataset.gagaSignatureState = nextOutline;
+    }
+    if (reentry) {
+      const needed = nextNotch === 'retracted' && (!outline || outline.hidden || outline.dataset.gagaSignatureState === 'retracted');
+      reentry.hidden = !needed && document.activeElement !== reentry;
+      if (!reentry.hidden) {
+        const w = innerWidth, h = innerHeight, size = 44;
+        const candidates = [[0, 0], [w-size, 0], [0, h-size], [w-size, h-size]];
+        const clear = (point: number[], allowMedia = false) => !intersectsContent({left:point[0],right:point[0]+size,top:point[1],bottom:point[1]+size}, 0, allowMedia);
+        const safe = candidates.find(point => clear(point)) ?? candidates.find(point => clear(point, true));
+        if (safe) { reentry.style.setProperty('--gaga-reentry-x', safe[0]+'px'); reentry.style.setProperty('--gaga-reentry-y', safe[1]+'px'); }
+        else if (document.activeElement !== reentry) reentry.hidden = true;
+      }
     }
   }
   function reveal() { notchState = outlineState = 'visible'; project(); }

@@ -21,7 +21,35 @@ jobs:
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Existing preservation admission remains mandatory
         run: node tools/gaga/boundaries.mjs && node tools/gaga/preservation.mjs
+  focused-reentry:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.22.2'
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm run check && npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test --config tools/quiet-v4/playwright.config.mjs
+      - name: Existing source-budget policy
+        if: ${{ !cancelled() }}
+        run: node tools/audit-policy-source.mjs
+      - if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: quiet-v4-reentry-focused
+          path: |
+            .gaga/quiet-v4-focused.json
+            .gaga/quiet-v4-focused-traces
+            .gaga/quiet-v4-*.png
+          if-no-files-found: warn
   diagnostics:
+    needs: [focused-reentry]
     runs-on: ubuntu-24.04
     timeout-minutes: 40
     env:
