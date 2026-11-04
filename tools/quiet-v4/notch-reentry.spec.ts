@@ -11,6 +11,9 @@ for (const width of [320, 390, 768, 1024, 1440, 1920]) {
         const handle = page.locator('[data-gaga-notch-reentry]');
         const notch = page.locator('[data-gaga-action-runtime]');
         const outline = page.locator('[data-gaga-outline-stack]');
+        await page.mouse.move(5, 400);
+        await page.mouse.wheel(0, 350);
+        await page.waitForTimeout(500);
         for (const fraction of [0, .25, .5, .75, 1]) {
           if (await handle.isVisible()) break;
           await page.evaluate(f => window.scrollTo({ top: (document.documentElement.scrollHeight - innerHeight) * f, behavior: 'instant' }), fraction);
