@@ -32,3 +32,5 @@
 [data-gaga-action-runtime-container]:focus-within .gaga-contextual-notch { transform:none; opacity:1; pointer-events:auto; transition:none; }
 [data-gaga-signature-reduced='true'] :is(.gaga-contextual-notch,.gaga-contextual-notch *,.gaga-outline-stack,.gaga-outline-stack *) { transition:none!important; animation:none!important; }
 @media(prefers-reduced-motion:reduce) { .gaga-contextual-notch { transition:none; } }
+
+[data-gaga-action-runtime-container][data-gaga-content-conflict] .gaga-contextual-notch { transition: none; }

@@ -1,5 +1,6 @@
 import {
   createElementScrollContext,
+  createWindowScrollContext,
   type ScrollContext
 } from '@gaga/engine-runtime/runtime/scroll-context';
 import { supportsGagaDock } from '../../config/systems';
@@ -68,7 +69,7 @@ export function resolveReadingScrollContext(): ReadingScrollContext | null {
   return {
     owner,
     readingElement: element,
-    scrollContext: createElementScrollContext(owner)
+    scrollContext: owner === documentScrollOwner() ? createWindowScrollContext() : createElementScrollContext(owner)
   };
 }
 

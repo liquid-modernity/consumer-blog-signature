@@ -143,3 +143,5 @@
 .gaga-outline-stack:focus-within > :not(.gaga-outline-progress-trace) { transition:none; }
 .gaga-outline-stack:focus-within .gaga-outline-peek-preview { pointer-events:auto;transform:none;opacity:1; }
 @media(prefers-reduced-motion:reduce) { .gaga-outline-stack { transition:none; } }
+
+.gaga-outline-stack[data-gaga-content-conflict] > :not(.gaga-outline-progress-trace) { transition: none; }

@@ -419,7 +419,7 @@ const socialSection = sectionById.get('social');
         }
       },
       {
-        root: document.querySelector('[data-gaga-main-region]'),
+        root: null,
         threshold: [0.35, 0.6]
       }
     );
@@ -441,7 +441,7 @@ const socialSection = sectionById.get('social');
       if (!targetEl) return;
       const stage = targetEl.closest<HTMLElement>('[data-pakrpp-viewport-stage]') ?? targetEl;
       event.preventDefault();
-      stage.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+      stage.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches || document.body.dataset.gagaReaderMotion === 'reduced' ? 'auto' : 'smooth', block: 'start' });
       history.replaceState(null, '', `#${id}`);
       if (stage.hasAttribute('data-pakrpp-viewport-stage')) {
         applyStageContext(stage);
@@ -465,9 +465,11 @@ const socialSection = sectionById.get('social');
 </script>
 
 <style is:global>
-  .gaga-main-region:has([data-pakrpp-root-index]) {
-    scroll-snap-type: y mandatory;
-    scroll-behavior: smooth;
+  html:has([data-pakrpp-root-index]) {
+    scroll-snap-type: y proximity;
+  }
+  .gaga-app-frame:has([data-pakrpp-root-index]) [data-gaga-surface-reentry] {
+    scroll-snap-align: end;
   }
 
   /* Ensure full width for the 4-stage home layout inside main-pane */
@@ -492,10 +494,7 @@ const socialSection = sectionById.get('social');
   .pakrpp-viewport-stage {
     min-block-size: 100svh;
     min-block-size: 100dvh;
-    block-size: 100svh;
-    block-size: 100dvh;
     scroll-snap-align: start;
-    scroll-snap-stop: always;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -523,8 +522,6 @@ const socialSection = sectionById.get('social');
   .pakrpp-viewport-stage:has(.pakrpp-viewport-stage__inner--stage01) {
     block-size: auto;
     min-block-size: 100dvh;
-    justify-content: flex-start;
-    padding-block: clamp(6.5rem, 14vh, 9rem) 5.5rem;
   }
 
   .pakrpp-viewport-stage__inner--stage01 { margin-block: 0; }

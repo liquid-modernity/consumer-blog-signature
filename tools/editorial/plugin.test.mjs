@@ -104,3 +104,13 @@ test('native preview declares the public EmDash capability that installs exact r
  assert.equal(typeof native.getRevision,'function');
  assert.equal(typeof createContentAccess({}, {revisions:false}).getRevision,'undefined');
 });
+
+test('save hook admits only supported optional media presentation values', async () => {
+  const media = { _type: 'figure', _key: 'figure', url: '/media.png', alt: 'Example' };
+  for (const presentation of ['bleed', 'wide', 'inline']) {
+    const body = [{ ...media, presentation }];
+    assert.deepEqual((await save({ collection: 'posts', content: { body } })).body, body);
+  }
+  assert.deepEqual((await save({ collection: 'posts', content: { body: [media] } })).body, [media]);
+  await assert.rejects(() => save({ collection: 'posts', content: { body: [{ ...media, presentation: 'unsupported' }] } }));
+});

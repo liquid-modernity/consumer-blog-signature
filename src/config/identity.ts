@@ -10,3 +10,6 @@ export const identityConfig = {
   defaultSocialAlt: 'Consumer Blog Signature',
   defaultSocialDescription: 'A configurable high-end publishing bootstrap powered by Astro and Gaga Engine.'
 } as const;
+
+export const appearanceIdentities = ['editorial', 'brutalism', 'blueprintism', 'enterprise', 'minimal', 'futuristic'] as const;
+export const defaultAppearanceIdentity = 'editorial';

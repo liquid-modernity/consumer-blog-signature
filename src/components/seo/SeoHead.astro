@@ -1,9 +1,10 @@
 ---
 import type { CanonicalContentMetadata } from '@gaga/engine-capabilities/content';
-import { identityConfig } from '../../config/identity';
+import { identityConfig, appearanceIdentities, defaultAppearanceIdentity } from '../../config/identity';
 import { seoConfig } from '../../config/seo';
 import { siteConfig } from '../../config/site';
 import { storageKeys } from '../../config/systems';
+import { defaultReaderState, readerPreferences, readerPresets } from '../../config/reader';
 import { defaultTheme, themeChromeColor, themeChromeColorMap, themeColorSchemeMap, themeOptions } from '../../config/theme';
 import {
   absoluteUrl,
@@ -67,6 +68,12 @@ const searchIndexUrl = absoluteUrl('/search-index.json', seoConfig.canonical);
 const machineIndexUrl = absoluteUrl('/machine.json', seoConfig.canonical);
 const agentDescriptionUrl = absoluteUrl('/agent.json', seoConfig.canonical);
 const llmsUrl = absoluteUrl('/llms.txt', seoConfig.canonical);
+const readerInitOptions = {
+  font: readerPreferences.fontScale, density: readerPreferences.density,
+  fontFamily: readerPreferences.fontFamily, lineHeight: readerPreferences.lineHeight,
+  letterSpacing: readerPreferences.letterSpacing, measure: readerPreferences.measure,
+  contrast: readerPreferences.contrast, motion: readerPreferences.motion, links: readerPreferences.links
+};
 const themeInitScript = `(() => {
   const storageKey = ${JSON.stringify(storageKeys.theme)};
   const defaultTheme = ${JSON.stringify(defaultTheme)};
@@ -82,6 +89,27 @@ const themeInitScript = `(() => {
   const root = document.documentElement;
   root.dataset.gagaTheme = theme;
   root.dataset.theme = colorSchemes[theme] || colorSchemes[defaultTheme] || 'dark';
+  const identities = ${JSON.stringify(appearanceIdentities)};
+  let identity = ${JSON.stringify(defaultAppearanceIdentity)};
+  try {
+    const design = JSON.parse(window.localStorage.getItem(${JSON.stringify(storageKeys.designLanguage)}) || 'null');
+    const legacy = (window.localStorage.getItem(${JSON.stringify(storageKeys.identity)}) || '').replace(/^"|"$/g, '');
+    if (identities.includes(design)) identity = design;
+    else if (identities.includes(legacy)) identity = legacy;
+  } catch {}
+  root.dataset.gagaDesignLanguage = identity;
+  root.dataset.gagaIdentity = identity;
+  const defaults = ${JSON.stringify(defaultReaderState)};
+  const options = ${JSON.stringify(readerInitOptions)};
+  let reader = defaults;
+  try {
+    const saved = JSON.parse(window.localStorage.getItem(${JSON.stringify(storageKeys.reader)}) || 'null');
+    if (saved && typeof saved === 'object' && !Array.isArray(saved) && options.font.includes(saved.font) && options.density.includes(saved.density) && (saved.preset === undefined || saved.preset === 'custom' || ${JSON.stringify(readerPresets.map(preset => preset.id))}.includes(saved.preset))) reader = saved;
+  } catch {}
+  for (const [key, values] of Object.entries(options)) {
+    const value = values.includes(reader[key]) ? reader[key] : defaults[key];
+    root.dataset['gagaReader' + key[0].toUpperCase() + key.slice(1)] = value;
+  }
   const themeColor = document.querySelector('meta[name="theme-color"][data-gaga-theme-color]');
   if (themeColor) themeColor.setAttribute('content', chromeColors[theme] || chromeColors[defaultTheme]);
 })();`;

@@ -127,7 +127,7 @@
 }
 
 .gaga-author-articles li {
-  border-block-end: 1px solid var(--gaga-line);
+  border-block-end: 0;
 }
 
 .gaga-author-articles a {
@@ -238,7 +238,7 @@
   display: flex;
   gap: 0;
   overflow-x: auto;
-  border-block: 1px solid var(--gaga-line);
+  border: 0;
   scrollbar-width: thin;
 }
 
@@ -247,7 +247,7 @@
   min-height: 44px;
   align-items: center;
   padding-inline: var(--gaga-space-4);
-  border-inline-end: 1px solid var(--gaga-line);
+  border: 0;
   color: var(--gaga-muted);
   font-family: var(--gaga-font-mono);
   font-size: var(--gaga-type-label-size);
@@ -313,7 +313,7 @@
 }
 
 .gaga-entity-articles li {
-  border-block-end: 1px solid var(--gaga-line);
+  border-block-end: 0;
 }
 
 .gaga-entity-articles a {

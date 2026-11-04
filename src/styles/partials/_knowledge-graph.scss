@@ -37,7 +37,7 @@
   gap: var(--gaga-space-4);
   min-inline-size: 0;
   padding: .7rem var(--gaga-space-4);
-  border-block-end: 1px solid var(--gaga-line);
+  border: 0;
   background: color-mix(in srgb, var(--gaga-bg) 93%, transparent);
 }
 

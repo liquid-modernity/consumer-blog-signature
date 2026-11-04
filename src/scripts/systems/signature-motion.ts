@@ -1,6 +1,5 @@
 import type {Visibility} from '@gaga/arsenal/experience';
 import { contextViewport } from '../../lib/context-viewport';
-import { createWindowScrollContext } from '@gaga/engine-runtime/runtime/scroll-context';
 import { resolveReadingScrollContext } from './reading-scroll';
 import { onRuntimeEvent } from '@gaga/engine-runtime/runtime/events';
 import { signatureMotion as policy, initialScrollIntent, resolveScrollIntent, signatureVisibility, notchGeometry, signatureReducedMotion } from '../../config/signature-motion.mjs';
@@ -24,6 +23,17 @@ export function initSignatureMotion() {
   const progressLabel = notch.querySelector<HTMLElement>('[data-gaga-reading-progress-value]');
   const outlineProgress = outline?.querySelector<HTMLProgressElement>('[data-gaga-outline-progress]');
   const outlineOpener = outline?.querySelector<HTMLElement>('[data-gaga-outline-opener]');
+  const main = document.querySelector<HTMLElement>('[data-gaga-main-region]');
+  let contentTargets: HTMLElement[] = [];
+  const refreshContentTargets = () => {
+    contentTargets = Array.from(main?.querySelectorAll<HTMLElement>('a,button,summary,input,textarea,select,p,h1,h2,h3,h4,h5,h6,figcaption,img,video,audio,svg,canvas,iframe,figure,table,pre,span,label,div,[role=button]') ?? []).filter(el => !container!.contains(el) && !outline?.contains(el) && (el.tagName !== 'DIV' || Array.from(el.childNodes).some(node => node.nodeType === Node.TEXT_NODE && node.textContent?.trim())));
+  };
+  refreshContentTargets();
+  const intersectsContent = (box: {left:number;right:number;top:number;bottom:number}, margin: number) => contentTargets.some(el => {
+    if (!el.isConnected || !el.getClientRects().length || el.closest('[hidden], [inert], [aria-hidden="true"]')) return false;
+    const rect = el.getBoundingClientRect();
+    return rect.right > box.left-margin && rect.left < box.right+margin && rect.bottom > box.top-margin && rect.top < box.bottom+margin && rect.bottom > 0 && rect.top < innerHeight;
+  });
   const outlineLabel = outline?.querySelector<HTMLElement>('[data-gaga-outline-current-label]');
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   let context = resolveReadingScrollContext();
@@ -33,6 +43,13 @@ export function initSignatureMotion() {
   let unsubscribe: (() => void) | undefined;
   let pointerNotch = false, pointerOutline = false;
   let notchState:Visibility = 'visible', outlineState:Visibility = 'visible';
+  let notchConflict = true, outlineConflict = true, settle = 0;
+  const clearSince = [0, 0];
+  function unsettled(blocked: boolean, index: number) {
+    if (blocked) { clearSince[index] = 0; return true; }
+    if (!clearSince[index]) { clearSince[index] = performance.now(); clearTimeout(settle); settle = window.setTimeout(schedule, 200); }
+    return performance.now() - clearSince[index] < 200;
+  }
   const releases: (() => void)[] = [];
   const listen = (target: EventTarget, name: string, handler: EventListener, options?: AddEventListenerOptions | boolean) => {
     target.addEventListener(name, handler, options); releases.push(() => target.removeEventListener(name, handler, options));
@@ -49,16 +66,26 @@ export function initSignatureMotion() {
   const resize = new ResizeObserver(() => { geometryDirty = true; schedule(); });
   function bind() {
     unsubscribe?.(); resize.disconnect(); context = resolveReadingScrollContext();
-    if (context?.owner === document.scrollingElement) context.scrollContext = createWindowScrollContext();
     body = document.querySelector<HTMLElement>('[data-gaga-article-body], [data-gaga-document-body]') ?? context?.readingElement;
     if (context) { unsubscribe = context.scrollContext.addChangeListener(schedule); resize.observe(context.owner); }
     if (body) resize.observe(body);
     active = false; intent = initialScrollIntent(context?.scrollContext.measure().scrollTop ?? 0);
     notchState = outlineState = 'visible'; geometryDirty = true; schedule();
   }
-  function project() {
-    container!.dataset.gagaSignatureState = notchState;
-    if (outline) outline.dataset.gagaSignatureState = outlineState;
+  function project(notchBlocked = notchConflict, outlineBlocked = outlineConflict) {
+    notchConflict = notchBlocked; outlineConflict = outlineBlocked;
+    const notchUnsafe = notchBlocked && !notch!.contains(document.activeElement) && ['collapsed','micro'].includes(notch!.dataset.gagaState ?? 'collapsed');
+    const outlineUnsafe = outlineBlocked && !outline?.contains(document.activeElement) && sheet?.dataset.gagaState !== 'open';
+    container!.toggleAttribute('data-gaga-content-conflict', notchUnsafe);
+    if (notch!.inert !== notchUnsafe) notch!.inert = notchUnsafe;
+    const nextNotch = notchUnsafe ? 'retracted' : notchState;
+    if (container!.dataset.gagaSignatureState !== nextNotch) container!.dataset.gagaSignatureState = nextNotch;
+    if (outline) {
+      outline.toggleAttribute('data-gaga-content-conflict', outlineUnsafe);
+      if (outline.inert !== outlineUnsafe) outline.inert = outlineUnsafe;
+      const nextOutline = outlineUnsafe ? 'retracted' : outlineState;
+      if (outline.dataset.gagaSignatureState !== nextOutline) outline.dataset.gagaSignatureState = nextOutline;
+    }
   }
   function reveal() { notchState = outlineState = 'visible'; project(); }
   function update() {
@@ -75,14 +102,18 @@ export function initSignatureMotion() {
     intent = resolveScrollIntent(intent, { position: m.scrollTop, viewport: m.viewportHeight, contentEnd, active });
     notchState = signatureVisibility(notchState, intent.signal, pins.notch);
     outlineState = signatureVisibility(outlineState, intent.signal, pins.outline);
-    project();
+    const notchBox = container!.getBoundingClientRect();
+    const outlineBox = outline?.getBoundingClientRect();
+    const width = outlineOpener?.offsetWidth ?? 0, height = outlineOpener?.offsetHeight ?? 0;
+    const outlineRestingBox = outlineBox && width && height ? {left:outlineBox.left+(outlineBox.width-width)/2,right:outlineBox.left+(outlineBox.width+width)/2,top:outlineBox.top,bottom:outlineBox.top+height} : null;
+    project(unsettled(intersectsContent(notchBox, notchConflict ? 24 : 2), 0), unsettled(!!outlineRestingBox && intersectsContent(outlineRestingBox, outlineConflict ? 24 : 2), 1));
     const percent = Math.round(context.scrollContext.readingProgress(body ?? context.readingElement));
     progress?.setAttribute('aria-valuenow', String(percent));
     if (progressLabel) progressLabel.textContent = percent + '%';
     if(outlineProgress){outlineProgress.value=percent;outlineProgress.hidden=!body?.closest('[data-gaga-personal-readable="true"]')||!context||body.scrollHeight<context.scrollContext.measure().viewportHeight*1.25;}
     outlineOpener?.setAttribute('aria-label', `Daftar isi — ${outlineLabel?.textContent ?? ''} — ${percent}%`);
     const isReduced = signatureReducedMotion(reduced.matches, document.documentElement.dataset.gagaReaderMotion);
-    document.documentElement.dataset.gagaSignatureReduced = String(isReduced);
+    if (document.documentElement.dataset.gagaSignatureReduced !== String(isReduced)) document.documentElement.dataset.gagaSignatureReduced = String(isReduced);
     // Reparent existing delegated controls, never a focused control or an active interaction.
     if (primary && overflow && !notch!.contains(document.activeElement) && reader?.dataset.gagaState !== 'open') {
       movable.forEach((button, index) => {
@@ -110,6 +141,11 @@ export function initSignatureMotion() {
   }, true);
   listen(document, 'focusin', () => { if (notch.contains(document.activeElement)) {notchState='pinned';project();} if (outline?.contains(document.activeElement)) {outlineState='pinned';project();} schedule(); }, true);
   listen(document, 'focusout', schedule, true);
+  listen(document, 'toggle', schedule, true);
+  const contentObserver = new MutationObserver(records => {
+    if (records.some(record => record.target instanceof Node && !container!.contains(record.target) && !outline?.contains(record.target))) { refreshContentTargets(); schedule(); }
+  });
+  if (main) contentObserver.observe(main, { childList:true, subtree:true });
   for (const [surface, isNotch] of [[notch,true],[outline,false]] as const) if (surface) {
     listen(surface,'pointerenter', event => { if ((event as PointerEvent).pointerType === 'mouse') {if(isNotch)pointerNotch=true;else pointerOutline=true;schedule();} });
     listen(surface,'pointerleave', () => {if(isNotch)pointerNotch=false;else pointerOutline=false;schedule();});
@@ -124,7 +160,7 @@ export function initSignatureMotion() {
   listen(window,'hashchange',bind);
   const unlayout = onRuntimeEvent('layoutChanged',bind);
   bind(); update();
-  cleanup = () => { unsubscribe?.();unlayout();resize.disconnect();stateObserver.disconnect();if(frame)cancelAnimationFrame(frame);releases.forEach(fn=>fn());markers.forEach((marker,index)=>{marker.after(movable[index]);marker.remove();});cleanup=undefined; };
+  cleanup = () => { unsubscribe?.();unlayout();resize.disconnect();stateObserver.disconnect();contentObserver.disconnect();clearTimeout(settle);if(frame)cancelAnimationFrame(frame);releases.forEach(fn=>fn());markers.forEach((marker,index)=>{marker.after(movable[index]);marker.remove();});cleanup=undefined; };
   window.addEventListener('pagehide', () => cleanup?.(), {once:true});
 }
 window.addEventListener('pageshow',event=>{if(event.persisted)initSignatureMotion();});

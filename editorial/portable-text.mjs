@@ -1,5 +1,6 @@
 import katex from "katex";
 import GithubSlugger from "github-slugger";
+import { validateMediaPresentation } from "./media-presentation.mjs";
 import { validatePortableText, resolveSections, plainText, safeUrl } from "./content-semantics.mjs";
 export { admittedTypes, validatePortableText, resolveSections, plainText, safeUrl } from "./content-semantics.mjs";
 export const escapeHtml = (value) =>
@@ -95,10 +96,7 @@ export function renderPortableText(
 ) {
   blocks = resolveSections(blocks, { sections, trail });
   validatePortableText(blocks);
-  for (const block of blocks) {
-    if (["image", "figure", "video"].includes(block._type) && block.presentation !== undefined &&
-        !["bleed", "wide", "inline"].includes(block.presentation)) throw new TypeError("Invalid media presentation");
-  }
+  validateMediaPresentation(blocks);
   const e = escapeHtml,
     targets = new Map(blocks.filter((b) => b.id).map((b) => [b.id, b]));
   const noteUses = new Map(),

@@ -303,3 +303,15 @@ test('optional editorial media presentations round trip and reject unknown value
   const legacy = [{ _type: 'figure', _key: 'old', url: '/media.png', alt: 'Example' }];
   assert.doesNotMatch(renderPortableText(legacy), /data-presentation/);
 });
+
+test("native media editor changes preserve explicit presentation without changing other blocks", async () => {
+  const { preserveMediaPresentation } = await import("../../editorial/media-presentation.mjs");
+  const previous = [{ _type: "image", _key: "i", presentation: "wide" }, { _type: "image", _key: "legacy" }];
+  const next = [{ _type: "image", _key: "i", alt: "updated" }, { _type: "image", _key: "legacy" }, { _type: "video", _key: "v" }];
+  assert.deepEqual(preserveMediaPresentation(previous, next), [{ ...next[0], presentation: "wide" }, next[1], next[2]]);
+  assert.equal(preserveMediaPresentation(previous, [{ ...next[0], presentation: "inline" }])[0].presentation, "inline");
+  assert.deepEqual(preserveMediaPresentation(previous, []), []);
+  assert.deepEqual(preserveMediaPresentation([{ _type: "image", presentation: "wide" }], [{ _type: "image" }]), [{ _type: "image" }]);
+  assert.deepEqual(preserveMediaPresentation(previous, [{ _type: "video", _key: "i" }]), [{ _type: "video", _key: "i" }]);
+  assert.deepEqual(preserveMediaPresentation([{ _type: "video", _key: "v", presentation: "bleed" }], [next[2]]), [{ ...next[2], presentation: "bleed" }]);
+});

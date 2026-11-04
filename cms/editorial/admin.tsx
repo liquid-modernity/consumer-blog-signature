@@ -8,6 +8,7 @@ import {
   type ContentEditorPanelContext,
 } from "@emdash-cms/admin";
 import { blockRegistry } from "../../editorial/registry.mjs";
+import { preserveMediaPresentation } from "../../editorial/media-presentation.mjs";
 import {
   validatePortableText,
   analyzeEditorial,
@@ -103,6 +104,8 @@ function StudioBody({ value = [], onChange, label, id }: Props) {
     };
   }, []);
   function changed(body: Body) {
+    body = preserveMediaPresentation(draft.current, body) as Body;
+    draft.current = body;
     try {
       validatePortableText(body);
       setError("");
@@ -202,6 +205,32 @@ function StudioBody({ value = [], onChange, label, id }: Props) {
         </div>
       </details>
       {error && <p role="alert">{error}</p>}
+      {value.some(block => ["image", "video"].includes(block._type)) && (
+        <details className="studio-disclosure">
+          <summary>Media presentation</summary>
+          {value.filter(block => ["image", "video"].includes(block._type)).map((block, index) => (
+            <label key={block._key}>
+              {block._type === "image" ? "Image" : "Video"} {index + 1}{" "}
+              <select
+                className="studio-input"
+                aria-label={`${block._type === "image" ? "Image" : "Video"} ${index + 1} presentation`}
+                value={String((block as { presentation?: string }).presentation ?? "")}
+                onChange={(event) => {
+                  const presentation = event.currentTarget.value || undefined;
+                  const next = draft.current.map(item => item._key === block._key ? { ...item, presentation } : item) as Body;
+                  draft.current = next;
+                  onChange(next);
+                }}
+              >
+                <option value="">Default</option>
+                <option value="bleed">Full bleed</option>
+                <option value="wide">Wide</option>
+                <option value="inline">Inline</option>
+              </select>
+            </label>
+          ))}
+        </details>
+      )}
       <nav className="studio-utilities" aria-label="Editorial tools">
         {[
           "outline", "references", "readiness",
@@ -350,7 +379,11 @@ function StudioBody({ value = [], onChange, label, id }: Props) {
         </aside>
         <div className="studio-canvas">
           <PortableTextEditor
-            value={value}
+            value={value.map(block => {
+              if (!["image", "video"].includes(block._type)) return block;
+              const { presentation: _presentation, ...native } = block as typeof block & { presentation?: string };
+              return native;
+            }) as Body}
             onChange={changed}
             aria-labelledby={id + "-label"}
             variant="document"

@@ -1,4 +1,5 @@
 import { storageKeys } from '../../config/systems';
+import { appearanceIdentities, defaultAppearanceIdentity } from '../../config/identity';
 import {
   defaultTheme,
   isThemeId,
@@ -13,16 +14,8 @@ import { requestToast } from '@gaga/engine-runtime/runtime/events';
 const IDENTITY_STORAGE_KEY = storageKeys.identity;
 const DESIGN_LANGUAGE_KEY = storageKeys.designLanguage;
 
-const VALID_IDENTITIES = new Set([
-  'editorial',
-  'brutalism',
-  'blueprintism',
-  'enterprise',
-  'minimal',
-  'futuristic'
-]);
-
-export const defaultIdentity = 'editorial';
+const VALID_IDENTITIES = new Set<string>(appearanceIdentities);
+export const defaultIdentity = defaultAppearanceIdentity;
 
 export function isIdentityId(value: unknown): value is string {
   return typeof value === 'string' && VALID_IDENTITIES.has(value);
@@ -73,9 +66,6 @@ export function applyIdentity(identity: string) {
   document.documentElement.dataset.gagaDesignLanguage = normalized;
   document.body.dataset.gagaIdentity = normalized;
   document.documentElement.dataset.gagaIdentity = normalized;
-  for (const frame of document.querySelectorAll<HTMLElement>('.gaga-app-frame, [data-gaga-app-frame]')) {
-    frame.dataset.gagaDesignLanguage = normalized;
-  }
   for (const button of document.querySelectorAll<HTMLElement>('[data-gaga-reader-pref="identity"]')) {
     const active = button.dataset.gagaReaderValue === normalized;
     button.dataset.gagaActive = String(active);

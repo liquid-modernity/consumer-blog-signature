@@ -21,8 +21,8 @@ const islandLabel = i18nLabel('actionIsland.label');
 const toggleLabel = i18nLabel('actionIsland.toggle');
 const presentation = resolveNotchPresentation(experienceConfig.notch);
 ---
-<div class={`gaga-action-runtime-container gaga-contextual-notch-container ${className}`} data-gaga-action-runtime-container data-gaga-notch-placement={presentation.placement} data-gaga-notch-shape={presentation.shape} data-gaga-notch-config={JSON.stringify(experienceConfig.notch)}>
-  <nav class="gaga-action-runtime gaga-dynamic-island gaga-contextual-notch" data-gaga-action-runtime data-gaga-global-nav data-gaga-context={context} data-gaga-state="collapsed" data-gaga-level="0" aria-label={islandLabel.id} data-gaga-i18n-id={islandLabel.id} data-gaga-i18n-en={islandLabel.en} data-gaga-i18n-target="aria">
+<div class={`gaga-action-runtime-container gaga-contextual-notch-container ${className}`} data-gaga-action-runtime-container data-gaga-signature-state="retracted" data-gaga-notch-placement={presentation.placement} data-gaga-notch-shape={presentation.shape} data-gaga-notch-config={JSON.stringify(experienceConfig.notch)}>
+  <nav id="gaga-action-runtime" inert class="gaga-action-runtime gaga-dynamic-island gaga-contextual-notch" data-gaga-action-runtime data-gaga-global-nav data-gaga-context={context} data-gaga-state="collapsed" data-gaga-level="0" aria-label={islandLabel.id} data-gaga-i18n-id={islandLabel.id} data-gaga-i18n-en={islandLabel.en} data-gaga-i18n-target="aria">
     <div class="gaga-action-runtime__shell" data-gaga-context-surface={contextualSurfaceRoles.command}>
       <div class="gaga-island-bar" data-gaga-island-bar data-gaga-notch-spine>
         <button type="button" class="gaga-notch-button" data-gaga-action="smart-back" aria-label="Kembali" data-gaga-i18n-id="Kembali" data-gaga-i18n-en="Back" data-gaga-i18n-target="aria" disabled={path === '/'}><Icon name="arrow_back" /></button>

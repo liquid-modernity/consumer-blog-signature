@@ -46,7 +46,7 @@ export function initOutlinePeek() {
       requestReaderPanel({ action: 'close', source: 'outline-open' });
       requestLeftRail({ action: 'collapse', source: 'outline-open' });
       sheet.dataset.gagaDepth = 'expanded';
-      if (stack) stack.dataset.gagaVisibility = 'visible';
+      if (stack) { stack.inert = false; stack.dataset.gagaVisibility = 'visible'; }
       // This composition has no close button; focus its first link after native open removes inert.
       queueMicrotask(() => {
         if (sheet.dataset.gagaState === 'open') (sheet.querySelector<HTMLAnchorElement>('[data-gaga-info-field="outline"] a[href^="#"]') ?? sheet.querySelector<HTMLAnchorElement>('[data-gaga-local-navigation] a[aria-current]') ?? sheet.querySelector<HTMLAnchorElement>('[data-gaga-local-navigation] a'))?.focus({ preventScroll: true });
@@ -66,8 +66,8 @@ export function initOutlinePeek() {
     const active = document.activeElement;
     const focusLost = !(active instanceof HTMLElement) || active === document.body || active === document.documentElement || !!active.closest('[hidden], [inert], [aria-hidden="true"]');
     if (focusWasInside && ['escape', 'keyboard-down', 'swipe-down'].includes(source) && focusLost) {
-      const toggle = document.querySelector<HTMLButtonElement>('[data-gaga-action-island-toggle]');
-      if (toggle?.isConnected && !toggle.disabled && !toggle.closest('[hidden], [inert], [aria-hidden="true"]') && toggle.getClientRects().length) toggle.focus({ preventScroll: true });
+      for (const toggle of document.querySelectorAll<HTMLButtonElement>('[data-gaga-reentry-notch], [data-gaga-action-island-toggle]'))
+        if (!toggle.disabled && !toggle.closest('[hidden], [inert], [aria-hidden="true"]') && toggle.getClientRects().length) { toggle.focus({ preventScroll: true }); break; }
     }
   };
 

@@ -1,6 +1,7 @@
 import { definePlugin, ContentSaveRejectedError } from "emdash";
 import { fileURLToPath } from "node:url";
 import { blockRegistry, pluginId } from "../../editorial/registry.mjs";
+import { validateMediaPresentation } from "../../editorial/media-presentation.mjs";
 import {
   validatePortableText,
   plainText,
@@ -142,7 +143,7 @@ export function createPlugin() {
               data.body = [];
             if (event.collection === "authors" && data.content === null)
               data.content = [];
-            if (data.content !== undefined) validatePortableText(data.content);
+            if (data.content !== undefined) { validatePortableText(data.content); validateMediaPresentation(data.content); }
             if (
               data.body !== undefined &&
               !(canonicalField === "content" && data.body === null)
@@ -165,7 +166,7 @@ export function createPlugin() {
                   data.integration?.migratedFrom?.markdownSha256 !== digest
                 )
                   throw Error("Markdown archive changed");
-              } else validatePortableText(data.body);
+              } else { validatePortableText(data.body); validateMediaPresentation(data.body); }
             }
           } catch {
             throw new ContentSaveRejectedError(

@@ -163,8 +163,7 @@
   }
 }
 
-:root,
-body {
+:root {
   --gaga-article-font-size: clamp(1rem, calc(.96rem + .2vw), var(--gaga-type-body-size));
   --gaga-article-line-height: var(--gaga-type-body-line-height);
   --gaga-article-letter-spacing: 0em;
@@ -707,7 +706,7 @@ mark.gaga-highlight-mark,
   overflow-x: auto;
   padding-bottom: 0.35rem;
   margin-bottom: 1.75rem;
-  border-bottom: 1px solid var(--gaga-line, rgba(188, 215, 241, 0.2));
+  border: 0;
   scrollbar-width: none;
 
   &::-webkit-scrollbar {

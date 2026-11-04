@@ -16,8 +16,6 @@
     "transitionalAllowlist": [
       "src/components/seo/SeoHead.astro",
       "src/runtime/gaga-preference-runtime.ts",
-      "src/scripts/rail/rail-controller.ts",
-      "src/scripts/rail/rail-events.ts",
       "src/lib/personal-state.ts",
       "src/scripts/systems/theme.ts"
     ],

@@ -5,7 +5,6 @@ import ReaderPreferences from '../reader/ReaderPreferences.astro';
 import ActionRuntime from './ActionRuntime.astro';
 import SkipLink from '../ui/SkipLink.astro';
 import type { AppShellInput } from './component-inputs';
-import { designContract } from '../../config/design';
 import { documentExperience } from '../../config/document-experience';
 import { experienceSurfaceProfile, resolveExperienceContext } from '../../config/experience';
 
@@ -81,7 +80,6 @@ const showGagaDock = false;
   data-gaga-page-title={pageTitle}
   data-gaga-content-kind={contentKind}
   data-gaga-content-class={contentClass}
-  data-gaga-design-language={designContract.language}
   data-gaga-workspace={workspaceId}
   data-gaga-workspace-mode={workspaceMode}
   data-gaga-context-intent={contextIntent}
