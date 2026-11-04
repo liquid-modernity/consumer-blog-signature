@@ -38,7 +38,7 @@ export function initSignatureMotion() {
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   let context = resolveReadingScrollContext();
   let body: HTMLElement | undefined;
-  let contentEnd = 0, frame = 0, active = false, geometryDirty = true;
+  let contentEnd = 0, frame = 0, active = false, geometryDirty = true, notchShift = 0;
   let intent = initialScrollIntent(context?.scrollContext.measure().scrollTop ?? 0);
   let unsubscribe: (() => void) | undefined;
   let pointerNotch = false, pointerOutline = false;
@@ -102,10 +102,18 @@ export function initSignatureMotion() {
     notchState = signatureVisibility(notchState, intent.signal, pins.notch);
     outlineState = signatureVisibility(outlineState, intent.signal, pins.outline);
     const notchBox = container!.getBoundingClientRect();
+    let notchBlocked = intersectsContent(notchBox, 2);
+    if (['collapsed','micro'].includes(notch!.dataset.gagaState ?? 'collapsed') && !notch!.contains(document.activeElement) && ['top','bottom'].includes(container!.dataset.gagaNotchPlacement ?? 'top')) {
+      const viewport = contextViewport(), left = notchBox.left - notchShift, right = notchBox.right - notchShift;
+      const offsets = [0, viewport.left + viewport.width - right, viewport.left - left];
+      const shift = offsets.find(offset => !intersectsContent({left:left+offset,right:right+offset,top:notchBox.top,bottom:notchBox.bottom}, 2)) ?? 0;
+      if (shift !== notchShift) { notchShift = shift; container!.style.translate = shift ? `${shift}px` : ''; }
+      notchBlocked = intersectsContent({left:left+shift,right:right+shift,top:notchBox.top,bottom:notchBox.bottom}, 2);
+    }
     const outlineBox = outline?.getBoundingClientRect();
     const width = outlineOpener?.offsetWidth ?? 0, height = outlineOpener?.offsetHeight ?? 0;
     const outlineRestingBox = outlineBox && width && height ? {left:outlineBox.left+(outlineBox.width-width)/2,right:outlineBox.left+(outlineBox.width+width)/2,top:outlineBox.top,bottom:outlineBox.top+height} : null;
-    project(unsettled(intersectsContent(notchBox, 2), 0), unsettled(!!outlineRestingBox && intersectsContent(outlineRestingBox, 2), 1));
+    project(unsettled(notchBlocked, 0), unsettled(!!outlineRestingBox && intersectsContent(outlineRestingBox, 2), 1));
     const percent = Math.round(context.scrollContext.readingProgress(body ?? context.readingElement));
     progress?.setAttribute('aria-valuenow', String(percent));
     if (progressLabel) progressLabel.textContent = percent + '%';
@@ -159,7 +167,7 @@ export function initSignatureMotion() {
   listen(window,'hashchange',bind);
   const unlayout = onRuntimeEvent('layoutChanged',bind);
   bind(); update();
-  cleanup = () => { unsubscribe?.();unlayout();resize.disconnect();stateObserver.disconnect();contentObserver.disconnect();clearTimeout(settle);if(frame)cancelAnimationFrame(frame);releases.forEach(fn=>fn());markers.forEach((marker,index)=>{marker.after(movable[index]);marker.remove();});cleanup=undefined; };
+  cleanup = () => { container.style.translate = ''; unsubscribe?.();unlayout();resize.disconnect();stateObserver.disconnect();contentObserver.disconnect();clearTimeout(settle);if(frame)cancelAnimationFrame(frame);releases.forEach(fn=>fn());markers.forEach((marker,index)=>{marker.after(movable[index]);marker.remove();});cleanup=undefined; };
   window.addEventListener('pagehide', () => cleanup?.(), {once:true});
 }
 window.addEventListener('pageshow',event=>{if(event.persisted)initSignatureMotion();});
