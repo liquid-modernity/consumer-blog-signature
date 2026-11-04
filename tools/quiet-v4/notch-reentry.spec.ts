@@ -112,3 +112,25 @@ test('Notch projects Outline and restores a usable focus target', async ({ page 
   });
   expect(focus).toBe(true);
 });
+
+test('full-viewport video retains both native controls and Notch access', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/publications/akal-imitasi-sebagai-pekerja-tanpa-dignity', { waitUntil: 'networkidle' });
+  await page.evaluate(() => {
+    const video = document.createElement('video');
+    video.id = 'quiet-v4-video-fixture';
+    video.controls = true;
+    video.style.cssText = 'display:block;width:100vw;height:200vh;object-fit:contain';
+    document.querySelector('main')!.prepend(video);
+    window.scrollTo({ top: video.offsetTop + innerHeight / 2, behavior: 'instant' });
+  });
+  await page.waitForTimeout(800);
+  const video = page.locator('#quiet-v4-video-fixture');
+  await expect(video).toHaveAttribute('controls', '');
+  const handle = page.locator('[data-gaga-notch-reentry]');
+  await expect(handle).toBeVisible();
+  await handle.click();
+  await expect(page.locator('[data-gaga-action-runtime]')).toHaveAttribute('data-gaga-state', 'peek');
+  await page.keyboard.press('Escape');
+  await expect(handle).toBeFocused();
+});
