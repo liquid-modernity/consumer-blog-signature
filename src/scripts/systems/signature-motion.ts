@@ -27,7 +27,7 @@ export function initSignatureMotion() {
   const main = document.querySelector<HTMLElement>('[data-gaga-main-region]');
   let contentTargets: HTMLElement[] = [];
   const refreshContentTargets = () => {
-    contentTargets = Array.from(main?.querySelectorAll<HTMLElement>('a,button,summary,input,textarea,select,p,h1,h2,h3,h4,h5,h6,figcaption,img,video,audio,svg,canvas,iframe,figure,table,pre,span,label,div,[role=button]') ?? []).filter(el => !container!.contains(el) && !outline?.contains(el) && (el.tagName !== 'DIV' || Array.from(el.childNodes).some(node => node.nodeType === Node.TEXT_NODE && node.textContent?.trim())));
+    contentTargets = Array.from(main?.querySelectorAll<HTMLElement>('a,button,summary,input,textarea,select,p,h1,h2,h3,h4,h5,h6,figcaption,img,video,audio,svg,canvas,iframe,figure,table,pre,span,label,div,[role=button]') ?? []).filter(el => el !== reentry && !container!.contains(el) && !outline?.contains(el) && (el.tagName !== 'DIV' || Array.from(el.childNodes).some(node => node.nodeType === Node.TEXT_NODE && node.textContent?.trim())));
   };
   refreshContentTargets();
   const intersectsContent = (box: {left:number;right:number;top:number;bottom:number}, margin: number, allowMedia = false) => contentTargets.some(el => {

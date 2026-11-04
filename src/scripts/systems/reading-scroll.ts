@@ -73,20 +73,6 @@ export function resolveReadingScrollContext(): ReadingScrollContext | null {
   };
 }
 
-export function articleReadingScopeIsActive(): boolean {
-  const readingScope = document.querySelector<HTMLElement>(
-    '[data-gaga-article-scroll], [data-gaga-article-shell], .gaga-flagship-article, [data-gaga-main-region], .main-pane'
-  );
-  if (!readingScope) return false;
-  const owner = readingScrollOwner();
-  if (!owner) return false;
-  const scopeRect = readingScope.getBoundingClientRect();
-  const ownerRect = owner === documentScrollOwner()
-    ? { top: 0, bottom: window.innerHeight }
-    : owner.getBoundingClientRect();
-  return scopeRect.bottom > ownerRect.top + 1 && scopeRect.top < ownerRect.bottom - 1;
-}
-
 export function getUnifiedScrollMetrics() {
   const owner = readingScrollOwner();
   const isDoc = owner === documentScrollOwner();
