@@ -27,12 +27,6 @@ import { getReadingBehaviorMetrics } from './reading-behaviour';
 let initialized = false;
 let lastProgressWrite = 0;
 let latestHeading: Pick<ContinuityItem, 'lastHeadingId' | 'lastHeadingText' | 'progress'> | null = null;
-let currentLibraryTab = 'saved';
-
-export function getActiveLibraryTab(): string {
-  return currentLibraryTab;
-}
-
 const statusMessageKeys = {
   'read-next': 'reading.statusReadNext',
   'in-progress': 'reading.statusInProgress',
@@ -380,7 +374,6 @@ function renderContinue(state: ContinuityState) {
 }
 
 function switchLibraryTab(tabId: string) {
-  currentLibraryTab = tabId;
   const tabs = document.querySelectorAll<HTMLElement>('[data-gaga-library-tab]');
   const sections = document.querySelectorAll<HTMLElement>('[data-gaga-library-section]');
 

@@ -1,7 +1,6 @@
 ---
 import AppFrameBase from '../frame/AppFrameBase.astro';
 import ArticleOutlinePeek from '../frame/ArticleOutlinePeek.astro';
-import { i18nLabel } from '../../config/i18n';
 import RightInfoRail from '../frame/RightInfoRail.astro';
 import LeftRail from '../frame/LeftRail.astro';
 import { contentDefaults } from '../../config/content';
@@ -97,8 +96,6 @@ const resolvedOutlineItems = currentPath === '/'
     : [{ slug: '_top', text: pageTitle, depth: 2, children: [] }];
 const outlineRail = { ...rightRail, outlineItems: resolvedOutlineItems };
 const articleOutline = resolvedOutlineItems.length > 0;
-const primaryNavigationLabel = i18nLabel('navigation.primary');
-const outlineLabel = i18nLabel('outline.title');
 const coveragePromotion = selectCoveragePromotion(articles);
 const showCoveragePromotion = !documentProfile && coveragePromotion
   && normalizeCurrentPath(coveragePromotion.article.href) !== currentPath;
@@ -140,10 +137,6 @@ const showCoveragePromotion = !documentProfile && coveragePromotion
     ? <CoverageStrip promotion={coveragePromotion} />
     : null}
   {documentProfile?.readable ? <div data-gaga-personal-readable="true" data-gaga-personal-kind="document"><slot /></div> : <slot />}
-  <nav class="gaga-surface-reentry" aria-label={primaryNavigationLabel.id} data-gaga-surface-reentry hidden>
-    <button type="button" data-gaga-reentry-notch aria-controls="gaga-action-runtime" aria-expanded="false" data-gaga-i18n-id={primaryNavigationLabel.id} data-gaga-i18n-en={primaryNavigationLabel.en} hidden>{primaryNavigationLabel.id}</button>
-    <button type="button" data-gaga-outline-opener data-gaga-action="toggle-outline" data-gaga-i18n-id={outlineLabel.id} data-gaga-i18n-en={outlineLabel.en} hidden>{outlineLabel.id}</button>
-  </nav>
   <Fragment slot="after-content">
     <RightInfoRail
       rail={rightRail}
@@ -156,58 +149,3 @@ const showCoveragePromotion = !documentProfile && coveragePromotion
     {articleOutline ? <ArticleOutlinePeek rail={outlineRail} documentOutline={documentProfile?.outline ?? false} localContext={local} /> : null}
   </Fragment>
 </AppFrameBase>
-
-<script>
-  const reentry = document.querySelector<HTMLElement>('[data-gaga-surface-reentry]');
-  const notchContainer = document.querySelector<HTMLElement>('[data-gaga-action-runtime-container]');
-  const notchSurface = document.querySelector<HTMLElement>('[data-gaga-action-runtime]');
-  const outlineStack = document.querySelector<HTMLElement>('[data-gaga-outline-stack]');
-  const outlineSheet = document.querySelector<HTMLElement>('[data-gaga-outline-peek]');
-  const notchEntry = reentry?.querySelector<HTMLButtonElement>('[data-gaga-reentry-notch]');
-  const outlineEntry = reentry?.querySelector<HTMLButtonElement>('[data-gaga-outline-opener]');
-  let actionOrigin: HTMLElement | null = null;
-  let outlineOrigin = false;
-  function syncReentry() {
-    if (!reentry || !notchEntry || !outlineEntry) return;
-    notchEntry.hidden = !notchSurface || !(notchContainer?.dataset.gagaSignatureState === 'retracted' || notchSurface.dataset.gagaState !== 'collapsed' || notchSurface.contains(document.activeElement) || document.activeElement === notchEntry || actionOrigin === notchEntry);
-    outlineEntry.hidden = !outlineStack || outlineStack.hidden || !(outlineStack.dataset.gagaSignatureState === 'retracted' || outlineSheet?.dataset.gagaState === 'open' || outlineSheet?.contains(document.activeElement) || document.activeElement === outlineEntry || outlineOrigin);
-    notchEntry.setAttribute('aria-expanded', String(['peek', 'expanded'].includes(notchSurface?.dataset.gagaState ?? '')));
-    reentry.hidden = notchEntry.hidden && outlineEntry.hidden;
-  }
-  const reentryObserver = new MutationObserver(syncReentry);
-  for (const surface of [notchContainer, notchSurface, outlineStack, outlineSheet]) if (surface) reentryObserver.observe(surface, { attributes: true, attributeFilter: ['data-gaga-signature-state', 'data-gaga-state', 'hidden'] });
-  function focusReentry(event: FocusEvent) {
-    const target = event.target;
-    if (target instanceof Node) {
-      if (target !== actionOrigin && !notchSurface?.contains(target)) actionOrigin = null;
-      if (target !== outlineEntry && !outlineSheet?.contains(target)) outlineOrigin = false;
-      if (target === outlineEntry && outlineSheet?.dataset.gagaState !== 'open') outlineOrigin = false;
-    }
-    syncReentry();
-  }
-  document.addEventListener('focusin', focusReentry);
-  outlineEntry?.addEventListener('click', () => { outlineOrigin = true; syncReentry(); });
-  syncReentry();
-  window.addEventListener('pagehide', event => { if (!event.persisted) { reentryObserver.disconnect(); document.removeEventListener('focusin', focusReentry); } }, { once: true });
-  document.addEventListener('click', event => {
-    const button = event.target instanceof Element ? event.target.closest<HTMLElement>('[data-gaga-reentry-notch]') : null;
-    if (!button) return;
-    const notch = document.querySelector<HTMLElement>('[data-gaga-action-runtime]');
-    const toggle = notch?.querySelector<HTMLButtonElement>('[data-gaga-action-island-toggle]');
-    if (!notch || !toggle) return;
-    actionOrigin = button; notch.inert = false; toggle.focus({ preventScroll: true }); toggle.click();
-  });
-  document.addEventListener('keydown', event => {
-    if (event.key === 'Escape' && actionOrigin && event.target instanceof Element && event.target.closest('[data-gaga-action-runtime]')) {
-      requestAnimationFrame(() => {
-        const notch = document.querySelector<HTMLElement>('[data-gaga-action-runtime]');
-        if (notch?.dataset.gagaState === 'collapsed' && actionOrigin?.isConnected) { const origin = actionOrigin; actionOrigin = null; origin.focus(); }
-      });
-    }
-  }, true);
-</script>
-<style>
-  .gaga-surface-reentry:not([hidden]) { display: flex; flex-wrap: wrap; gap: .5rem 1rem; width: min(100%, var(--gaga-content-width)); margin: 1rem auto; padding-inline: max(1rem, env(safe-area-inset-left)) max(1rem, env(safe-area-inset-right)); box-sizing: border-box; }
-  .gaga-surface-reentry button { min-height: 2.75rem; padding: .5rem .75rem; border: 0; border-radius: .5rem; color: var(--gaga-island-ink); background: var(--gaga-island-bg); font: inherit; cursor: pointer; }
-  .gaga-surface-reentry button:focus-visible { outline: 2px solid var(--gaga-focus-ring); outline-offset: 2px; }
-</style>

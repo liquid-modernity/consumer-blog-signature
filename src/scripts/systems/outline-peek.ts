@@ -66,7 +66,7 @@ export function initOutlinePeek() {
     const active = document.activeElement;
     const focusLost = !(active instanceof HTMLElement) || active === document.body || active === document.documentElement || !!active.closest('[hidden], [inert], [aria-hidden="true"]');
     if (focusWasInside && ['escape', 'keyboard-down', 'swipe-down'].includes(source) && focusLost) {
-      for (const toggle of document.querySelectorAll<HTMLButtonElement>('[data-gaga-reentry-notch], [data-gaga-action-island-toggle]'))
+      for (const toggle of document.querySelectorAll<HTMLButtonElement>('[data-gaga-notch-reentry], [data-gaga-action-island-toggle]'))
         if (!toggle.disabled && !toggle.closest('[hidden], [inert], [aria-hidden="true"]') && toggle.getClientRects().length) { toggle.focus({ preventScroll: true }); break; }
     }
   };

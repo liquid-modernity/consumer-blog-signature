@@ -90,3 +90,25 @@ test('full-viewport media keeps the Notch handle available without covering medi
   await page.keyboard.press('Escape');
   await expect(handle).toBeFocused();
 });
+
+test('Notch projects Outline and restores a usable focus target', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/publications/akal-imitasi-sebagai-pekerja-tanpa-dignity', { waitUntil: 'networkidle' });
+  await page.mouse.move(5, 400);
+  await page.mouse.wheel(0, 350);
+  await page.waitForTimeout(500);
+  const handle = page.locator('[data-gaga-notch-reentry]');
+  if (await handle.isVisible()) await handle.click();
+  else await page.locator('[data-gaga-action-island-toggle]').click();
+  const action = page.locator('[data-gaga-document-outline-action]');
+  await expect(action).toBeVisible();
+  await action.click();
+  await expect(page.locator('[data-gaga-outline-peek]')).toHaveAttribute('data-gaga-state', 'open');
+  await page.keyboard.press('Escape');
+  await expect(page.locator('[data-gaga-outline-peek]')).toHaveAttribute('data-gaga-state', 'closed');
+  const focus = await page.evaluate(() => {
+    const el = document.activeElement as HTMLElement | null;
+    return !!el && el !== document.body && el.isConnected && !el.closest('[hidden],[inert],[aria-hidden="true"]') && el.getClientRects().length > 0;
+  });
+  expect(focus).toBe(true);
+});

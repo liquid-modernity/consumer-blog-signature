@@ -204,10 +204,6 @@ export function notifySectionChanged(sectionId: string) {
   notifyListeners();
 }
 
-export function isValidCognitiveReading(): boolean {
-  return currentState === 'DEEP_READING' && smoothedVelocity < SKIMMING_VELOCITY_THRESHOLD;
-}
-
 export function initReadingBehavior() {
   if (isTracking || typeof window === 'undefined') return;
   isTracking = true;

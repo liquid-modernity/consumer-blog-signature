@@ -47,10 +47,6 @@ function canUseTarget(element: HTMLElement | null): element is HTMLElement {
   return true;
 }
 
-export function activeCommandTarget(command: GagaActionCommand) {
-  return activeSelectorTarget(`[data-gaga-action="${command}"]`);
-}
-
 export function activeSelectorTarget(selector: string) {
   return [...document.querySelectorAll<HTMLElement>(selector)].find(canUseTarget) ?? null;
 }
