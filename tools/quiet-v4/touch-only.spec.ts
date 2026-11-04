@@ -21,10 +21,23 @@ for (const width of [320, 390, 768, 1024, 1440, 1920]) {
         await swipe(700, 300);
         await swipe(300, 700);
         const toggle = page.locator('[data-gaga-action-island-toggle]');
-        await expect.poll(async () => {
-          const box = await toggle.boundingBox();
-          return !!box && box.x >= 0 && box.y >= 0 && box.x + box.width <= width && box.y + box.height <= 844 && !await page.locator('[data-gaga-action-runtime]').evaluate(el => (el as HTMLElement).inert);
-        }).toBe(true);
+        try {
+          await expect.poll(async () => {
+            const box = await toggle.boundingBox();
+            return !!box && box.x >= 0 && box.y >= 0 && box.x + box.width <= width && box.y + box.height <= 844 && !await page.locator('[data-gaga-action-runtime]').evaluate(el => (el as HTMLElement).inert);
+          }).toBe(true);
+        } catch (error) {
+          console.log('TOUCH_VISIBILITY_DIAGNOSTIC', JSON.stringify(await page.evaluate(() => {
+            const container = document.querySelector<HTMLElement>('[data-gaga-action-runtime-container]')!;
+            const rect = container.getBoundingClientRect();
+            const overlaps = Array.from(document.querySelectorAll<HTMLElement>('main a,main button,main p,main h1,main h2,main img,main video,main span')).flatMap(el => {
+              const r = el.getBoundingClientRect();
+              return r.right > rect.left - 24 && r.left < rect.right + 24 && r.bottom > rect.top - 24 && r.top < rect.bottom + 24 && r.bottom > 0 && r.top < innerHeight ? [{tag:el.tagName, text:el.textContent?.trim().slice(0,60), rect:r.toJSON()}] : [];
+            });
+            return {scrollY, state:container.dataset.gagaSignatureState, conflict:container.hasAttribute('data-gaga-content-conflict'), rect:rect.toJSON(), toggle:document.querySelector('[data-gaga-action-island-toggle]')?.getBoundingClientRect().toJSON(), overlaps:overlaps.slice(0,20)};
+          })));
+          throw error;
+        }
         const box = await toggle.boundingBox();
         await page.touchscreen.tap(box!.x + box!.width / 2, box!.y + box!.height / 2);
         await expect(page.locator('[data-gaga-action-runtime]')).toHaveAttribute('data-gaga-state', 'peek');
