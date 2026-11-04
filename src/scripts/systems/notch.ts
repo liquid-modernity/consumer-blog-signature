@@ -22,8 +22,6 @@ import {closeContextSurface,contextSurfaceIsOpen} from './context-surface';
     if (!currentShareContext()) island.querySelectorAll<HTMLElement>('[data-gaga-action="share-page"]').forEach(button => button.hidden = true);
     const container = island.closest<HTMLElement>('[data-gaga-action-runtime-container]')!;
     const toggle = island.querySelector<HTMLButtonElement>('[data-gaga-action-island-toggle]')!;
-    const reentry = document.querySelector<HTMLButtonElement>('[data-gaga-notch-reentry]');
-    let reentryOrigin = false;
     const context = island.querySelector<HTMLElement>('[data-gaga-notch-context]')!;
     const system = island.querySelector<HTMLElement>('[data-gaga-notch-system]')!;
     const more = island.querySelector<HTMLButtonElement>('[data-gaga-notch-more]')!;
@@ -76,12 +74,6 @@ import {closeContextSurface,contextSurfaceIsOpen} from './context-surface';
       const preset = resolveNotchPresentation(JSON.parse(container.dataset.gagaNotchConfig!), contextViewport().width);
       container.dataset.gagaNotchPlacement = preset.placement; container.dataset.gagaNotchShape = preset.shape;
     }
-    reentry?.addEventListener('click', () => {
-      reentryOrigin = true;
-      island.inert = false;
-      setState('peek');
-      toggle.focus({ preventScroll: true });
-    });
     island.addEventListener('pointerenter', event => { clearTimeout(hoverTimer); if (event.pointerType === 'mouse' && island.dataset.gagaState === 'collapsed') hoverTimer = window.setTimeout(() => setState('peek'), signatureMotion.hoverMs); });
     island.addEventListener('pointerleave', event => { clearTimeout(hoverTimer); if (event.pointerType === 'mouse') hoverTimer = window.setTimeout(() => { if (island.dataset.gagaState === 'peek' && !island.matches(':focus-within')) setState('collapsed'); }, signatureMotion.leaveMs); });
     island.addEventListener('touchstart', () => { if (island.dataset.gagaState === 'collapsed') touchTimer = window.setTimeout(() => setState('peek'), signatureMotion.holdMs); }, { passive: true });
@@ -116,13 +108,11 @@ import {closeContextSurface,contextSurfaceIsOpen} from './context-surface';
       if (event.key !== 'Escape') return;
       event.preventDefault(); event.stopPropagation();
       if(closeActive())return;
-      const state = island.dataset.gagaState === 'expanded' ? 'peek' : 'collapsed';
-      setState(state, !reentryOrigin || state !== 'collapsed');
-      if (state === 'collapsed' && reentryOrigin && reentry) { reentry.hidden = false; reentry.focus({ preventScroll: true }); reentryOrigin = false; }
+      setState(island.dataset.gagaState === 'expanded' ? 'peek' : 'collapsed', true);
     });
     // Native click distinguishes an outside tap from a touch pan.
     document.addEventListener('click', event => {
-      if (event.target instanceof Node && !reentry?.contains(event.target) && !island.contains(event.target)&&!contextSurfaceIsOpen()) {
+      if (event.target instanceof Node && !island.contains(event.target)&&!contextSurfaceIsOpen()) {
         const closedReader = readerOpen();
         setState('collapsed');
         if (closedReader) requestAnimationFrame(() => toggle.focus({ preventScroll: true }));

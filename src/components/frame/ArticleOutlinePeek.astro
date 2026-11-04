@@ -28,7 +28,7 @@ const active = (href: string) => href === localContext?.position.path ? 'page' :
 const allLocal = (localContext?.localNavigation ?? []).flatMap(i => [i,...(i.children ?? [])]);
 ---
 {hasOutlinePeek ? (
-  <div inert class="gaga-outline-stack" data-gaga-signature-state="retracted" data-gaga-outline-stack data-gaga-surface="dynamic-outline-peek" data-gaga-visibility="visible" data-gaga-outline-local={localContext?.family} data-gaga-outline-toc-eligible={tocEligible ? "true" : undefined} data-gaga-document-outline={documentOutline ? 'true' : undefined} data-gaga-outline-pending={pendingOutline ? 'true' : undefined} hidden={pendingOutline && !local}>
+  <div class="gaga-outline-stack" data-gaga-outline-stack data-gaga-surface="dynamic-outline-peek" data-gaga-visibility="visible" data-gaga-outline-local={localContext?.family} data-gaga-outline-toc-eligible={tocEligible ? "true" : undefined} data-gaga-document-outline={documentOutline ? 'true' : undefined} data-gaga-outline-pending={pendingOutline ? 'true' : undefined} hidden={pendingOutline && !local}>
     <button
       type="button"
       class="gaga-outline-peek-preview"

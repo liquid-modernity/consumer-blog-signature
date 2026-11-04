@@ -53,13 +53,8 @@ const { chromium } = require('playwright');
             await page.evaluate(() => scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' }));
             await page.waitForTimeout(400);
             const preview = page.locator('[data-gaga-outline-peek-preview]');
-            if (await preview.isVisible() && await preview.evaluate(el => { const r = el.getBoundingClientRect(); return r.top >= 0 && r.bottom <= innerHeight; })) await preview.click();
-            else {
-              const handle = page.locator('[data-gaga-notch-reentry]');
-              if (await handle.isVisible()) await handle.click();
-              else await page.locator('[data-gaga-action-island-toggle]').click();
-              await page.locator('[data-gaga-document-outline-action]').click();
-            }
+            await preview.focus();
+            await preview.click();
             await page.locator('[data-gaga-outline-peek] [data-gaga-local-navigation] a[href="/#topics"]').first().click();
             assert.deepEqual(await page.evaluate(() => window.__rootScrollBehaviors), ['auto']);
           }
