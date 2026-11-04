@@ -105,7 +105,7 @@ export function initSignatureMotion() {
     const outlineBox = outline?.getBoundingClientRect();
     const width = outlineOpener?.offsetWidth ?? 0, height = outlineOpener?.offsetHeight ?? 0;
     const outlineRestingBox = outlineBox && width && height ? {left:outlineBox.left+(outlineBox.width-width)/2,right:outlineBox.left+(outlineBox.width+width)/2,top:outlineBox.top,bottom:outlineBox.top+height} : null;
-    project(unsettled(intersectsContent(notchBox, notchConflict ? 24 : 2), 0), unsettled(!!outlineRestingBox && intersectsContent(outlineRestingBox, outlineConflict ? 24 : 2), 1));
+    project(unsettled(intersectsContent(notchBox, 2), 0), unsettled(!!outlineRestingBox && intersectsContent(outlineRestingBox, 2), 1));
     const percent = Math.round(context.scrollContext.readingProgress(body ?? context.readingElement));
     progress?.setAttribute('aria-valuenow', String(percent));
     if (progressLabel) progressLabel.textContent = percent + '%';
