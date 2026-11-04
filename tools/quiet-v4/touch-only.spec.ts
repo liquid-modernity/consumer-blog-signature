@@ -41,6 +41,7 @@ for (const width of [320, 390, 768, 1024, 1440, 1920]) {
         const box = await toggle.boundingBox();
         await page.touchscreen.tap(box!.x + box!.width / 2, box!.y + box!.height / 2);
         await expect(page.locator('[data-gaga-action-runtime]')).toHaveAttribute('data-gaga-state', 'peek');
+        await expect.poll(async () => { const box = await page.locator('[data-gaga-action-runtime]').boundingBox(); return !!box && box.x >= -1 && box.x + box.width <= width + 1; }).toBe(true);
       } finally { await cdp.detach(); }
     });
   }

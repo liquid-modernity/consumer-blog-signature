@@ -101,6 +101,7 @@ export function initSignatureMotion() {
     intent = resolveScrollIntent(intent, { position: m.scrollTop, viewport: m.viewportHeight, contentEnd, active });
     notchState = signatureVisibility(notchState, intent.signal, pins.notch);
     outlineState = signatureVisibility(outlineState, intent.signal, pins.outline);
+    if (notchShift && !['collapsed','micro'].includes(notch!.dataset.gagaState ?? 'collapsed')) { notchShift = 0; container!.style.translate = ''; }
     const notchBox = container!.getBoundingClientRect();
     let notchBlocked = intersectsContent(notchBox, 2);
     if (['collapsed','micro'].includes(notch!.dataset.gagaState ?? 'collapsed') && !notch!.contains(document.activeElement) && ['top','bottom'].includes(container!.dataset.gagaNotchPlacement ?? 'top')) {
