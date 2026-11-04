@@ -11,13 +11,6 @@ import { closeContextSurface, contextSurfaceIsOpen } from './context-surface';
 
 let initialized = false;
 
-export function reopenRetractedNotch() {
-  const handle = document.querySelector<HTMLButtonElement>('[data-gaga-notch-reentry]:not([hidden])');
-  if (!handle) return false;
-  handle.click();
-  return true;
-}
-
 function outlineIsOpen() {
   return document.querySelector<HTMLElement>('[data-gaga-outline-peek]')?.dataset.gagaState === 'open';
 }

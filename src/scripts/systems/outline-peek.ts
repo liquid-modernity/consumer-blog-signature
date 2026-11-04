@@ -66,8 +66,11 @@ export function initOutlinePeek() {
     const active = document.activeElement;
     const focusLost = !(active instanceof HTMLElement) || active === document.body || active === document.documentElement || !!active.closest('[hidden], [inert], [aria-hidden="true"]');
     if (focusWasInside && ['escape', 'keyboard-down', 'swipe-down'].includes(source) && focusLost) {
-      for (const toggle of document.querySelectorAll<HTMLButtonElement>('[data-gaga-notch-reentry], [data-gaga-action-island-toggle]'))
-        if (!toggle.disabled && !toggle.closest('[hidden], [inert], [aria-hidden="true"]') && toggle.getClientRects().length) { toggle.focus({ preventScroll: true }); break; }
+      for (const selector of ['[data-gaga-notch-reentry]', '[data-gaga-action-island-toggle]', '[data-gaga-main-region]']) {
+        const target = document.querySelector<HTMLElement>(selector);
+        const rect = target?.getBoundingClientRect();
+        if (target && rect && rect.right > 0 && rect.left < innerWidth && rect.bottom > 0 && rect.top < innerHeight && !target.hasAttribute('disabled') && !target.closest('[hidden], [inert], [aria-hidden="true"]')) { target.focus({ preventScroll: true }); break; }
+      }
     }
   };
 
