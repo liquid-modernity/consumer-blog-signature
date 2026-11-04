@@ -5,10 +5,6 @@ export interface RailPreviewOptions {
   closeDelayMs?: number;
 }
 
-function precisePointer() {
-  return window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-}
-
 function reducedMotion() {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }

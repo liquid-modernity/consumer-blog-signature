@@ -8,8 +8,7 @@ import {
 import {
   defaultRailPreference,
   getConfiguredLeftRailState,
-  storageKeys,
-  supportsGagaDock
+  storageKeys
 } from '../../config/systems';
 import { activateModalIsolation, clearModalIsolation } from './modal-isolation';
 import { attachRailPreview } from './rail-preview';

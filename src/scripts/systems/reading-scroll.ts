@@ -75,28 +75,8 @@ export function resolveReadingScrollContext(): ReadingScrollContext | null {
 
 export function getUnifiedScrollMetrics() {
   const owner = readingScrollOwner();
-  const isDoc = owner === documentScrollOwner();
-
-  const scrollTop = isDoc
-    ? window.scrollY || document.documentElement.scrollTop || 0
-    : owner.scrollTop;
-
-  const scrollHeight = isDoc
-    ? Math.max(document.documentElement.scrollHeight, document.body.scrollHeight)
-    : owner.scrollHeight;
-
-  const clientHeight = isDoc
-    ? window.innerHeight
-    : owner.clientHeight;
-
-  const maxScroll = Math.max(1, scrollHeight - clientHeight);
-  const percentage = Math.min(100, Math.max(0, (scrollTop / maxScroll) * 100));
-
-  return {
-    scrollTop,
-    scrollHeight,
-    clientHeight,
-    maxScroll,
-    percentage: Math.round(percentage * 10) / 10
-  };
+  const context = owner === documentScrollOwner() ? createWindowScrollContext() : createElementScrollContext(owner);
+  const m = context.measure();
+  return { scrollTop: m.scrollTop, scrollHeight: m.scrollHeight, clientHeight: m.viewportHeight,
+    maxScroll: m.maxScrollTop, percentage: Math.round(m.progress * 10) / 10 };
 }

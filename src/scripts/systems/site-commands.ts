@@ -8,9 +8,8 @@ import {
   requestReaderPanel,
   requestToast
 } from '@gaga/engine-runtime/runtime/events';
-import { actionForCommand, type GagaActionCommand } from '../../config/actions';
+import type { GagaActionCommand } from '../../config/actions';
 import { supportsGagaDock } from '../../config/systems';
-import { isSameSitePath } from '../../lib/url-semantics';
 
 type SiteCommandHandler = (detail: SiteCommandDetail) => boolean | void | Promise<boolean | void>;
 

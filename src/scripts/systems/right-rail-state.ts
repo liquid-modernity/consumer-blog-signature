@@ -4,7 +4,6 @@ import {
   requestQuickActionsSync
 } from '@gaga/engine-runtime/runtime/events';
 import {
-  defaultRailPreference,
   getConfiguredLeftRailState,
   getConfiguredRightRailState,
   storageKeys,
