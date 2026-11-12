@@ -31,7 +31,7 @@ jobs:
       - name: Qualified Garrison controller
         uses: actions/checkout@v4
         with:
-          repository: liquid-modernity/gaga-garrison
+          repository: liquid-modernity/gaga
           ref: ed93b5b9611ce97f33d138e945bdd7bb563750c2
           token: ${{ secrets.GAGA_CONTROLLER_READ_TOKEN }}
           path: controller
@@ -149,7 +149,7 @@ jobs:
       - name: Qualified Garrison controller
         uses: actions/checkout@v4
         with:
-          repository: liquid-modernity/gaga-garrison
+          repository: liquid-modernity/gaga
           ref: ed93b5b9611ce97f33d138e945bdd7bb563750c2
           token: ${{ secrets.GAGA_CONTROLLER_READ_TOKEN }}
           path: controller
